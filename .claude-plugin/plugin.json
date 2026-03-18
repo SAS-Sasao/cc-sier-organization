@@ -1,0 +1,16 @@
+{
+  "name": "cc-sier",
+  "version": "0.1.0",
+  "description": "Claude Code 仮想組織プラグイン — SIer業務特化版",
+  "skills": [
+    {
+      "name": "company",
+      "path": "skills/company/SKILL.md"
+    },
+    {
+      "name": "company-admin",
+      "path": "skills/company-admin/SKILL.md"
+    }
+  ],
+  "agents": "agents/"
+}

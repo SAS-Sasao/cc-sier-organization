@@ -1,0 +1,16 @@
+{
+  "name": "cc-sier",
+  "display_name": "CC-SIer",
+  "description": "SIer業務の仮想組織プラグイン — Claude Code上に専門エージェントチームを動的に編成・運用",
+  "author": "SAS-Sasao",
+  "version": "0.1.0",
+  "license": "MIT",
+  "keywords": [
+    "sier",
+    "virtual-organization",
+    "agent-teams",
+    "project-management",
+    "system-architecture"
+  ],
+  "repository": "https://github.com/SAS-Sasao/cc-sier-organization"
+}
