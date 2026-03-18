@@ -1,0 +1,270 @@
+# =============================================================================
+# Gold 層テスト定義
+# =============================================================================
+# データ品質ルール定義書（GLD-001 ~ GLD-028）に基づくテスト定義。
+# 参照整合性、一意性、ビジネスルールの各チェックを実施。
+# =============================================================================
+
+version: 2
+
+models:
+  # ===========================================================================
+  # fct_estimates - 見積ファクトテーブル
+  # ===========================================================================
+  - name: fct_estimates
+    description: >
+      見積ファクトテーブル（Gold層）。スタースキーマのファクトとして、
+      見積データとディメンションを結合した分析用テーブル。
+      Power BI から DirectQuery / Import で参照する。
+    columns:
+      - name: estimate_fact_key
+        description: "ファクトサロゲートキー（PK）"
+        tests:
+          - unique:
+              severity: error  # GLD-010
+          - not_null:
+              severity: error
+
+      - name: estimate_number
+        description: "見積番号（退化ディメンション）"
+        tests:
+          - unique:
+              severity: error  # GLD-012
+          - not_null:
+              severity: error
+
+      - name: customer_key
+        description: "顧客キー（FK -> dim_customers）"
+        tests:
+          - not_null:
+              severity: error
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+              config:
+                where: "customer_key != -1"
+              severity: error  # GLD-001
+
+      - name: employee_key
+        description: "担当者キー（FK -> dim_employees。未割当時 NULL）"
+        tests:
+          - relationships:
+              to: ref('dim_employees')
+              field: employee_sk
+              config:
+                where: "employee_key IS NOT NULL"
+              severity: error  # GLD-002
+
+      - name: status_key
+        description: "ステータスキー（FK -> status_master）"
+        tests:
+          - not_null:
+              severity: error
+          - relationships:
+              to: ref('status_master')
+              field: status_key
+              severity: error  # GLD-004
+
+      - name: created_date_key
+        description: "作成日キー（FK -> dim_date 相当。YYYYMMDD形式 INT）"
+
+      - name: amount
+        description: "見積金額（メジャー）"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              severity: warn
+
+      - name: is_won
+        description: "受注フラグ"
+        tests:
+          - not_null
+
+      - name: is_lost
+        description: "失注フラグ"
+        tests:
+          - not_null
+
+      - name: is_open
+        description: "オープンフラグ"
+        tests:
+          - not_null
+
+    # テーブルレベルテスト
+    tests:
+      # GLD-020: 受注と失注は排他（同時に true にならない）
+      - dbt_utils.expression_is_true:
+          expression: "NOT (is_won = 1 AND is_lost = 1)"
+          name: "mutually_exclusive_won_lost"
+          severity: error
+
+      # GLD-022: オープンと終端ステータスは排他
+      - dbt_utils.expression_is_true:
+          expression: "NOT (is_open = 1 AND (is_won = 1 OR is_lost = 1))"
+          name: "open_excludes_terminal"
+          severity: error
+
+  # ===========================================================================
+  # fct_projects - 案件ファクトテーブル
+  # ===========================================================================
+  - name: fct_projects
+    description: >
+      案件ファクトテーブル（Gold層）。案件データとディメンションを結合した分析用テーブル。
+    columns:
+      - name: project_fact_key
+        description: "ファクトサロゲートキー（PK）"
+        tests:
+          - unique:
+              severity: error  # GLD-011
+          - not_null:
+              severity: error
+
+      - name: project_number
+        description: "案件番号（退化ディメンション）"
+        tests:
+          - unique:
+              severity: error  # GLD-013
+          - not_null:
+              severity: error
+
+      - name: customer_key
+        description: "顧客キー（FK -> dim_customers）"
+        tests:
+          - not_null:
+              severity: error
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_sk
+              config:
+                where: "customer_key != -1"
+              severity: error  # GLD-005
+
+      - name: status_key
+        description: "フェーズ/ステータスキー（FK -> status_master）"
+        tests:
+          - not_null:
+              severity: error
+          - relationships:
+              to: ref('status_master')
+              field: status_key
+              severity: error  # GLD-007
+
+      - name: contract_amount
+        description: "受注金額（メジャー）"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              severity: warn
+
+      - name: is_active
+        description: "アクティブフラグ"
+        tests:
+          - not_null
+
+      - name: is_completed
+        description: "完了フラグ"
+        tests:
+          - not_null
+
+    # テーブルレベルテスト
+    tests:
+      # GLD-028: アクティブと完了は排他
+      - dbt_utils.expression_is_true:
+          expression: "NOT (is_active = 1 AND is_completed = 1)"
+          name: "active_excludes_completed"
+          severity: error
+
+  # ===========================================================================
+  # mart_sales_summary - 月別売上サマリ
+  # ===========================================================================
+  - name: mart_sales_summary
+    description: >
+      月別・顧客別の売上KPIサマリテーブル。
+      見積件数、受注率、平均見積金額等を集計。
+    columns:
+      - name: year_month
+        description: "年月（YYYY-MM形式）"
+        tests:
+          - not_null
+
+      - name: total_estimates
+        description: "見積件数"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+      - name: win_rate
+        description: "受注率（%）"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+              severity: error  # GLD-023
+              config:
+                where: "win_rate IS NOT NULL"
+
+    tests:
+      # GLD-024: 件数整合性
+      - dbt_utils.expression_is_true:
+          expression: "total_estimates >= 0"
+          severity: warn
+
+  # ===========================================================================
+  # mart_conversion_funnel - コンバージョンファネル
+  # ===========================================================================
+  - name: mart_conversion_funnel
+    description: >
+      見積ステータス別のコンバージョンファネル分析テーブル。
+      各ステータスの件数・金額・転換率を月次で集計。
+    columns:
+      - name: year_month
+        description: "年月（YYYY-MM形式）"
+        tests:
+          - not_null
+
+      - name: status_code
+        description: "ステータスコード"
+        tests:
+          - not_null
+
+      - name: conversion_rate
+        description: "前ステージからの転換率（%）"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 100
+              severity: error  # GLD-026
+              config:
+                where: "conversion_rate IS NOT NULL"
+
+  # ===========================================================================
+  # mart_phase_analysis - フェーズ別滞留分析
+  # ===========================================================================
+  - name: mart_phase_analysis
+    description: >
+      案件フェーズ別の滞留状況分析テーブル。
+      平均滞留日数、中央値、P90等の統計量を算出。
+    columns:
+      - name: phase_code
+        description: "フェーズコード"
+        tests:
+          - unique
+          - not_null
+
+      - name: avg_duration_days
+        description: "平均滞留日数"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 365
+              severity: warn  # GLD-027
+              config:
+                where: "avg_duration_days IS NOT NULL"
+
+      - name: project_count
+        description: "案件数"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0

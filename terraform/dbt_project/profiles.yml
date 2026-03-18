@@ -1,0 +1,52 @@
+# =============================================================================
+# profiles.yml - Azure Synapse Analytics Serverless SQL Pool 接続設定
+# =============================================================================
+# dbt-synapse アダプタを使用し、サービスプリンシパル認証で接続
+# 全てのクレデンシャルは環境変数経由で注入（Azure Key Vault -> CI/CD -> env var）
+#
+# 利用方法:
+#   dev 環境: dbt run --target dev
+#   prod 環境: dbt run --target prod  （デフォルト）
+# =============================================================================
+
+a_company_dwh:
+  target: dev
+  outputs:
+    # =========================================================================
+    # 開発環境（Synapse Serverless SQL Pool）
+    # =========================================================================
+    dev:
+      type: synapse
+      driver: 'ODBC Driver 18 for SQL Server'
+      server: "{{ env_var('SYNAPSE_SERVER_DEV', 'acompany-synapse-dev-ondemand.sql.azuresynapse.net') }}"
+      port: 1433
+      database: "{{ env_var('SYNAPSE_DATABASE_DEV', 'a_company_dwh_dev') }}"
+      schema: dbt_dev
+      authentication: ServicePrincipal
+      tenant_id: "{{ env_var('AZURE_TENANT_ID') }}"
+      client_id: "{{ env_var('AZURE_CLIENT_ID') }}"
+      client_secret: "{{ env_var('AZURE_CLIENT_SECRET') }}"
+      # Synapse Serverless 固有設定
+      # CETAS (CREATE EXTERNAL TABLE AS SELECT) を使用して
+      # 変換結果を ADLS Gen2 に書き戻す
+      login_timeout: 30
+      query_timeout: 300
+      threads: 4
+
+    # =========================================================================
+    # 本番環境（Synapse Serverless SQL Pool）
+    # =========================================================================
+    prod:
+      type: synapse
+      driver: 'ODBC Driver 18 for SQL Server'
+      server: "{{ env_var('SYNAPSE_SERVER_PROD', 'acompany-synapse-prod-ondemand.sql.azuresynapse.net') }}"
+      port: 1433
+      database: "{{ env_var('SYNAPSE_DATABASE_PROD', 'a_company_dwh_prod') }}"
+      schema: dbt_prod
+      authentication: ServicePrincipal
+      tenant_id: "{{ env_var('AZURE_TENANT_ID') }}"
+      client_id: "{{ env_var('AZURE_CLIENT_ID_PROD') }}"
+      client_secret: "{{ env_var('AZURE_CLIENT_SECRET_PROD') }}"
+      login_timeout: 30
+      query_timeout: 600
+      threads: 4

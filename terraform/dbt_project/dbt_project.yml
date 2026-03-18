@@ -1,0 +1,97 @@
+# =============================================================================
+# dbt_project.yml - A社基幹システムDWH dbt プロジェクト定義
+# =============================================================================
+# メダリオンアーキテクチャ（Bronze / Silver / Gold）に基づく
+# Azure Synapse Analytics Serverless SQL Pool 上の DWH 構築プロジェクト
+# =============================================================================
+
+name: 'a_company_dwh'
+version: '1.0.0'
+config-version: 2
+
+# プロファイル（profiles.yml の定義名と一致させる）
+profile: 'a_company_dwh'
+
+# ディレクトリ構成
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+seed-paths: ["seeds"]
+analysis-paths: ["analyses"]
+snapshot-paths: ["snapshots"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# =============================================================================
+# 変数定義
+# =============================================================================
+vars:
+  # PII匿名化フラグ（デフォルト: 無効）
+  # 有効化: dbt run --vars '{"anonymize_pii": true}'
+  anonymize_pii: false
+
+  # 匿名化ソルト（Azure Key Vault から環境変数経由で取得）
+  anonymization_salt: "{{ env_var('ANONYMIZATION_SALT', 'default-dev-salt-change-in-prod') }}"
+
+  # ADLS Gen2 ストレージアカウント情報
+  adls_account_name: "{{ env_var('ADLS_ACCOUNT_NAME', 'acompanydwhlake') }}"
+  adls_container_name: "{{ env_var('ADLS_CONTAINER_NAME', 'datalake') }}"
+
+  # Bronze データベース名（外部テーブル参照用）
+  bronze_database: "{{ env_var('BRONZE_DATABASE', 'bronze_db') }}"
+
+# =============================================================================
+# モデル マテリアライゼーション設定
+# =============================================================================
+models:
+  a_company_dwh:
+    # --- Bronze 層 ---
+    # 外部テーブル参照のため view で定義
+    # OPENROWSET を使用して ADLS Gen2 の Parquet を直接参照
+    bronze:
+      +materialized: view
+      +schema: bronze
+      +tags: ["bronze", "ingestion"]
+
+    # --- Silver 層 ---
+    # incremental（merge 戦略）で差分更新
+    # クレンジング・型変換・正規化を実施
+    silver:
+      +materialized: incremental
+      +incremental_strategy: merge
+      +schema: silver
+      +tags: ["silver", "cleansing"]
+
+    # --- Gold 層 ---
+    # BI 用の最終テーブルとして table で実体化
+    # Power BI から DirectQuery / Import で参照
+    gold:
+      +materialized: table
+      +schema: gold
+      +tags: ["gold", "analytics"]
+
+# =============================================================================
+# テスト設定
+# =============================================================================
+tests:
+  +severity: warn
+  +error_if: ">= 100"
+  +warn_if: ">= 1"
+
+# =============================================================================
+# Seed 設定
+# =============================================================================
+seeds:
+  a_company_dwh:
+    +schema: master
+    status_master:
+      +column_types:
+        status_key: integer
+        status_category: varchar(20)
+        status_code: integer
+        status_name: varchar(50)
+        status_name_ja: nvarchar(20)
+        sort_order: integer
+        is_terminal: bit

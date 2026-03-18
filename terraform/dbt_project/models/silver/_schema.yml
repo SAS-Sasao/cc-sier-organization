@@ -1,0 +1,277 @@
+# =============================================================================
+# Silver 層テスト定義
+# =============================================================================
+# データ品質ルール定義書（SLV-001 ~ SLV-043）に基づくテスト定義。
+# 一意性、NOT NULL、妥当性（値の範囲・許容値）、一貫性の各チェックを実施。
+# =============================================================================
+
+version: 2
+
+models:
+  # ===========================================================================
+  # stg_estimates - 見積管理（クレンジング済み）
+  # ===========================================================================
+  - name: stg_estimates
+    description: >
+      見積管理テーブル（Silver層）。Bronze 層の brz_estimates から
+      型変換・ステータス正規化・重複排除を実施したクレンジング済みデータ。
+    columns:
+      - name: estimate_number
+        description: "見積番号（ビジネスキー）"
+        tests:
+          - unique:
+              severity: error  # SLV-001
+          - not_null:
+              severity: error  # SLV-010
+
+      - name: amount
+        description: "見積金額（DECIMAL(18,2)）"
+        tests:
+          - not_null:
+              severity: error  # SLV-011
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1000000000
+              severity: warn  # SLV-020, SLV-021
+
+      - name: status_code
+        description: "ステータスコード（正規化済み）"
+        tests:
+          - not_null:
+              severity: error  # SLV-012
+          - accepted_values:
+              values: [10, 20, 30, 40, 50, 90]
+              severity: error  # SLV-022
+
+      - name: status_name
+        description: "ステータス名（英語）"
+        tests:
+          - not_null:
+              severity: error  # SLV-012
+
+      - name: created_at
+        description: "作成日時（DATETIME2）"
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "<= GETUTCDATE()"
+              severity: warn  # SLV-025
+
+      - name: customer_name
+        description: "顧客名（トリム済み）"
+        tests:
+          - not_null
+
+      - name: _loaded_at
+        description: "Silver層ロード日時（UTC）"
+        tests:
+          - not_null
+
+      - name: _source_record_hash
+        description: "ソースレコードのSHA-256ハッシュ"
+        tests:
+          - not_null
+
+    # テーブルレベルテスト
+    tests:
+      # SLV-040: 見積-顧客参照整合性（WARNING レベル）
+      - dbt_utils.expression_is_true:
+          expression: >
+            customer_name IN (
+              SELECT customer_name FROM {{ ref('dim_customers') }}
+              WHERE _is_current = 1
+            )
+            OR customer_name = N'不明'
+          severity: warn
+
+  # ===========================================================================
+  # stg_projects - 案件管理（クレンジング済み）
+  # ===========================================================================
+  - name: stg_projects
+    description: >
+      案件管理テーブル（Silver層）。Bronze 層の brz_projects から
+      型変換・フェーズ正規化・重複排除を実施したクレンジング済みデータ。
+    columns:
+      - name: project_number
+        description: "案件番号（ビジネスキー）"
+        tests:
+          - unique:
+              severity: error  # SLV-002
+          - not_null:
+              severity: error  # SLV-013
+
+      - name: phase_code
+        description: "フェーズコード（正規化済み）"
+        tests:
+          - not_null:
+              severity: error  # SLV-014
+          - accepted_values:
+              values: [10, 20, 30, 40, 50, 60, 70, 80, 90]
+              severity: error  # SLV-023
+
+      - name: phase_name
+        description: "フェーズ名（英語）"
+        tests:
+          - not_null:
+              severity: error  # SLV-014
+
+      - name: contract_amount
+        description: "受注金額（DECIMAL(18,2)）"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              severity: warn  # SLV-024
+
+      - name: duration_days
+        description: "案件期間（日数）"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 1825
+              severity: warn  # SLV-027
+              config:
+                where: "duration_days IS NOT NULL"
+
+    # テーブルレベルテスト
+    tests:
+      # SLV-026: 開始日が終了日より後でないこと
+      - dbt_utils.expression_is_true:
+          expression: "start_date <= end_date OR start_date IS NULL OR end_date IS NULL"
+          severity: warn
+
+  # ===========================================================================
+  # dim_customers - 顧客マスタ（SCD Type 2）
+  # ===========================================================================
+  - name: dim_customers
+    description: >
+      顧客マスタテーブル（Silver層・SCD Type 2）。
+      顧客コードをビジネスキーとして履歴管理する。
+      業種コード・契約ステータスを標準化済み。
+    columns:
+      - name: customer_sk
+        description: "サロゲートキー"
+        tests:
+          - unique:
+              severity: error
+          - not_null:
+              severity: error
+
+      - name: customer_code
+        description: "顧客コード（ビジネスキー）"
+        tests:
+          - not_null:
+              severity: error  # SLV-015
+
+      - name: industry_code
+        description: "業種コード（標準化済み）"
+        tests:
+          - accepted_values:
+              values: ['MFG', 'WHL', 'RTL', 'ICT', 'CNS', 'SVC', 'OTH', 'UNK']
+              severity: error  # SLV-028
+
+      - name: contract_status
+        description: "契約ステータス（正規化済み）"
+        tests:
+          - accepted_values:
+              values: ['ACTIVE', 'INACTIVE', 'SUSPENDED']
+              severity: error  # SLV-029
+
+      - name: _valid_from
+        description: "有効開始日時"
+        tests:
+          - not_null:
+              severity: error  # SLV-017
+
+      - name: _valid_to
+        description: "有効終了日時"
+        tests:
+          - not_null:
+              severity: error  # SLV-017
+
+      - name: _is_current
+        description: "現行フラグ"
+        tests:
+          - not_null:
+              severity: error  # SLV-017
+
+      - name: _hash_diff
+        description: "変更検知用ハッシュ"
+        tests:
+          - not_null
+
+    # テーブルレベルテスト
+    tests:
+      # SLV-003: 顧客コードの現行一意性
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - customer_code
+            - _valid_from
+      # SLV-043: SCD有効期間整合性（同一ビジネスキーの有効期間重複チェック）
+
+  # ===========================================================================
+  # dim_employees - 担当者マスタ（SCD Type 2 + 匿名化）
+  # ===========================================================================
+  - name: dim_employees
+    description: >
+      担当者マスタテーブル（Silver層・SCD Type 2）。
+      社員番号をビジネスキーとして履歴管理。
+      匿名化用の employee_name_hash（SHA-256）を保持。
+    columns:
+      - name: employee_sk
+        description: "サロゲートキー"
+        tests:
+          - unique:
+              severity: error
+          - not_null:
+              severity: error
+
+      - name: employee_number
+        description: "社員番号（ビジネスキー）"
+        tests:
+          - not_null:
+              severity: error  # SLV-016
+
+      - name: employee_name
+        description: "氏名（トリム済み）"
+        tests:
+          - not_null
+
+      - name: employee_name_hash
+        description: "氏名のSHA-256ハッシュ（匿名化用・64文字hex）"
+        tests:
+          - not_null:
+              severity: error  # SLV-030
+          - dbt_utils.expression_is_true:
+              expression: "LEN(employee_name_hash) = 64"
+              severity: error  # SLV-030
+
+      - name: _valid_from
+        description: "有効開始日時"
+        tests:
+          - not_null:
+              severity: error  # SLV-017
+
+      - name: _valid_to
+        description: "有効終了日時"
+        tests:
+          - not_null:
+              severity: error  # SLV-017
+
+      - name: _is_current
+        description: "現行フラグ"
+        tests:
+          - not_null:
+              severity: error  # SLV-017
+
+      - name: _hash_diff
+        description: "変更検知用ハッシュ"
+        tests:
+          - not_null
+
+    # テーブルレベルテスト
+    tests:
+      # SLV-004: 社員番号の現行一意性
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - employee_number
+            - _valid_from

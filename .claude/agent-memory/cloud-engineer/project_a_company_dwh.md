@@ -23,3 +23,10 @@ Azure Synapse Analytics を推奨DWHプラットフォームとして採択。
 - `.company/data/pipelines/a-company-dwh/platform-comparison.md`
 - `.company/data/pipelines/a-company-dwh/pipeline-design.md`
 - `.company/data/pipelines/a-company-dwh/terraform-design.md`
+- `terraform/` — Terraform モジュール実装（azurerm ~> 3.90）
+
+Terraform 実装上の重要設計判断:
+- 循環参照回避: Key Vault と ADF/Synapse の依存は「Key Vault 先行作成 → 2回目 apply でアクセスポリシー追加」の2フェーズデプロイで解消
+- Synapse SQL パスワード: random_password リソースでランダム生成し Key Vault に格納（循環参照なし）
+- ADF パイプライン失敗アラートは prod/main.tf に直接定義（monitoring ↔ data_factory の循環を回避）
+- 環境 IP アドレス空間: dev=10.0.0.0/16、stg=10.1.0.0/16、prod=10.2.0.0/16（環境分離）

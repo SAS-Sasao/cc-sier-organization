@@ -1,0 +1,745 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "metadata": {
+        "description": "ADF パイプライン: SharePoint Online -> Bronze 層 取り込み",
+        "author": "data-engineering",
+        "created": "2026-03-18",
+        "project": "A社基幹システムDWH構築"
+    },
+    "parameters": {
+        "factoryName": {
+            "type": "string",
+            "defaultValue": "adf-acompany-dwh",
+            "metadata": {
+                "description": "Azure Data Factory の名前"
+            }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "defaultValue": "kv-acompany-dwh",
+            "metadata": {
+                "description": "Azure Key Vault の名前（サービスプリンシパル認証情報格納先）"
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "defaultValue": "acompanydwhlake",
+            "metadata": {
+                "description": "ADLS Gen2 ストレージアカウント名"
+            }
+        },
+        "containerName": {
+            "type": "string",
+            "defaultValue": "datalake",
+            "metadata": {
+                "description": "ADLS Gen2 コンテナ名"
+            }
+        },
+        "tenantId": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD テナントID"
+            }
+        },
+        "sharepointSiteId": {
+            "type": "string",
+            "metadata": {
+                "description": "SharePoint Online サイトID"
+            }
+        },
+        "teamsWebhookUrl": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Teams 通知用 Webhook URL"
+            }
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]",
+        "keyVaultLinkedServiceName": "ls_keyvault",
+        "adlsLinkedServiceName": "ls_adls_gen2",
+        "graphApiBaseUrl": "https://graph.microsoft.com/v1.0",
+        "sharePointListConfig": [
+            {
+                "listName": "estimates",
+                "listDisplayName": "見積管理リスト",
+                "listId": "__ESTIMATES_LIST_ID__",
+                "sourceSystem": "sharepoint_online",
+                "sourceList": "見積管理リスト"
+            },
+            {
+                "listName": "projects",
+                "listDisplayName": "案件管理リスト",
+                "listId": "__PROJECTS_LIST_ID__",
+                "sourceSystem": "sharepoint_online",
+                "sourceList": "案件管理リスト"
+            },
+            {
+                "listName": "customers",
+                "listDisplayName": "顧客マスタリスト",
+                "listId": "__CUSTOMERS_LIST_ID__",
+                "sourceSystem": "sharepoint_online",
+                "sourceList": "顧客マスタリスト"
+            },
+            {
+                "listName": "employees",
+                "listDisplayName": "担当者マスタリスト",
+                "listId": "__EMPLOYEES_LIST_ID__",
+                "sourceSystem": "sharepoint_online",
+                "sourceList": "担当者マスタリスト"
+            }
+        ]
+    },
+    "resources": [
+        {
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "name": "[concat(parameters('factoryName'), '/', variables('keyVaultLinkedServiceName'))]",
+            "properties": {
+                "description": "Azure Key Vault リンクサービス（サービスプリンシパル認証情報格納先）",
+                "type": "AzureKeyVault",
+                "typeProperties": {
+                    "baseUrl": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "name": "[concat(parameters('factoryName'), '/', variables('adlsLinkedServiceName'))]",
+            "properties": {
+                "description": "ADLS Gen2 リンクサービス（Bronze/Silver/Gold データストア）",
+                "type": "AzureBlobFS",
+                "typeProperties": {
+                    "url": "[concat('https://', parameters('storageAccountName'), '.dfs.core.windows.net')]",
+                    "accountKey": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "[variables('keyVaultLinkedServiceName')]",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "adls-storage-account-key"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/', variables('keyVaultLinkedServiceName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.DataFactory/factories/datasets",
+            "apiVersion": "2018-06-01",
+            "name": "[concat(parameters('factoryName'), '/ds_adls_bronze_parquet')]",
+            "properties": {
+                "description": "ADLS Gen2 Bronze 層 Parquet 出力先データセット",
+                "type": "Parquet",
+                "typeProperties": {
+                    "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileSystem": "[parameters('containerName')]",
+                        "folderPath": {
+                            "value": "@concat('bronze/', dataset().listName, '/year=', formatDateTime(utcnow(), 'yyyy'), '/month=', formatDateTime(utcnow(), 'MM'), '/day=', formatDateTime(utcnow(), 'dd'))",
+                            "type": "Expression"
+                        },
+                        "fileName": {
+                            "value": "@concat(dataset().listName, '_', formatDateTime(utcnow(), 'yyyyMMdd'), '_', dataset().loadType, '.parquet')",
+                            "type": "Expression"
+                        }
+                    },
+                    "compressionCodec": "snappy"
+                },
+                "linkedServiceName": {
+                    "referenceName": "[variables('adlsLinkedServiceName')]",
+                    "type": "LinkedServiceReference"
+                },
+                "parameters": {
+                    "listName": {
+                        "type": "string"
+                    },
+                    "loadType": {
+                        "type": "string",
+                        "defaultValue": "delta"
+                    }
+                },
+                "schema": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/', variables('adlsLinkedServiceName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "name": "[concat(parameters('factoryName'), '/spo_to_bronze')]",
+            "properties": {
+                "description": "SharePoint Online の4リストから Graph API 経由でデータを取得し、Parquet 形式で ADLS Gen2 Bronze 層に書き込む。差分取得（delta クエリ）と月次フル取得に対応。",
+                "activities": [
+                    {
+                        "name": "GetAccessToken",
+                        "description": "Azure AD からサービスプリンシパルのアクセストークンを取得する。クライアントシークレットは Key Vault から参照。",
+                        "type": "WebActivity",
+                        "typeProperties": {
+                            "url": "[concat('https://login.microsoftonline.com/', parameters('tenantId'), '/oauth2/v2.0/token')]",
+                            "method": "POST",
+                            "headers": {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            "body": {
+                                "value": "@concat('grant_type=client_credentials&client_id=', activity('GetClientId').output.value, '&client_secret=', activity('GetClientSecret').output.value, '&scope=https://graph.microsoft.com/.default')",
+                                "type": "Expression"
+                            }
+                        },
+                        "dependsOn": [
+                            {
+                                "activity": "GetClientId",
+                                "dependencyConditions": ["Succeeded"]
+                            },
+                            {
+                                "activity": "GetClientSecret",
+                                "dependencyConditions": ["Succeeded"]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.00:05:00",
+                            "retry": 3,
+                            "retryIntervalInSeconds": 60,
+                            "secureOutput": true,
+                            "secureInput": true
+                        }
+                    },
+                    {
+                        "name": "GetClientId",
+                        "description": "Key Vault からサービスプリンシパルのクライアントIDを取得",
+                        "type": "WebActivity",
+                        "typeProperties": {
+                            "url": {
+                                "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/secrets/sp-client-id?api-version=7.0')]",
+                                "type": "Expression"
+                            },
+                            "method": "GET",
+                            "authentication": {
+                                "type": "MSI",
+                                "resource": "https://vault.azure.net"
+                            }
+                        },
+                        "policy": {
+                            "timeout": "0.00:02:00",
+                            "retry": 2,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": true
+                        }
+                    },
+                    {
+                        "name": "GetClientSecret",
+                        "description": "Key Vault からサービスプリンシパルのクライアントシークレットを取得",
+                        "type": "WebActivity",
+                        "typeProperties": {
+                            "url": {
+                                "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/secrets/sp-client-secret?api-version=7.0')]",
+                                "type": "Expression"
+                            },
+                            "method": "GET",
+                            "authentication": {
+                                "type": "MSI",
+                                "resource": "https://vault.azure.net"
+                            }
+                        },
+                        "policy": {
+                            "timeout": "0.00:02:00",
+                            "retry": 2,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": true
+                        }
+                    },
+                    {
+                        "name": "DetermineLoadType",
+                        "description": "月初（1日）はフル取り込み、それ以外は差分取り込みを判定",
+                        "type": "IfCondition",
+                        "typeProperties": {
+                            "expression": {
+                                "value": "@or(equals(pipeline().parameters.forceFullLoad, true), equals(formatDateTime(utcnow(), 'dd'), '01'))",
+                                "type": "Expression"
+                            },
+                            "ifTrueActivities": [
+                                {
+                                    "name": "SetLoadTypeFull",
+                                    "type": "SetVariable",
+                                    "typeProperties": {
+                                        "variableName": "loadType",
+                                        "value": "full"
+                                    }
+                                }
+                            ],
+                            "ifFalseActivities": [
+                                {
+                                    "name": "SetLoadTypeDelta",
+                                    "type": "SetVariable",
+                                    "typeProperties": {
+                                        "variableName": "loadType",
+                                        "value": "delta"
+                                    }
+                                }
+                            ]
+                        },
+                        "dependsOn": [
+                            {
+                                "activity": "GetAccessToken",
+                                "dependencyConditions": ["Succeeded"]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "ForEachSharePointList",
+                        "description": "4リスト（見積管理・案件管理・顧客マスタ・担当者マスタ）を並列で処理",
+                        "type": "ForEach",
+                        "typeProperties": {
+                            "isSequential": false,
+                            "batchCount": 4,
+                            "items": {
+                                "value": "@pipeline().parameters.listConfig",
+                                "type": "Expression"
+                            },
+                            "activities": [
+                                {
+                                    "name": "CheckDeltaToken",
+                                    "description": "差分取り込みの場合、前回の deltaToken を ADLS から取得する",
+                                    "type": "IfCondition",
+                                    "typeProperties": {
+                                        "expression": {
+                                            "value": "@equals(variables('loadType'), 'delta')",
+                                            "type": "Expression"
+                                        },
+                                        "ifTrueActivities": [
+                                            {
+                                                "name": "GetDeltaToken",
+                                                "description": "ADLS から前回の delta token を読み取る",
+                                                "type": "Lookup",
+                                                "typeProperties": {
+                                                    "source": {
+                                                        "type": "DelimitedTextSource",
+                                                        "storeSettings": {
+                                                            "type": "AzureBlobFSReadSettings"
+                                                        }
+                                                    },
+                                                    "dataset": {
+                                                        "referenceName": "ds_adls_delta_token",
+                                                        "type": "DatasetReference",
+                                                        "parameters": {
+                                                            "listName": "@item().listName"
+                                                        }
+                                                    },
+                                                    "firstRowOnly": true
+                                                },
+                                                "policy": {
+                                                    "timeout": "0.00:02:00",
+                                                    "retry": 1,
+                                                    "retryIntervalInSeconds": 30
+                                                }
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "name": "FetchGraphApiData",
+                                    "description": "Graph API v1.0 を使用して SharePoint リストデータを取得。差分取り込み時は delta クエリ、フル取り込み時は全件取得。ページネーション対応。",
+                                    "type": "Copy",
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "RestSource",
+                                            "httpRequestTimeout": "0.00:10:00",
+                                            "requestInterval": "00.00:00:01.000",
+                                            "requestMethod": "GET",
+                                            "additionalHeaders": {
+                                                "Authorization": {
+                                                    "value": "@concat('Bearer ', activity('GetAccessToken').output.access_token)",
+                                                    "type": "Expression"
+                                                },
+                                                "Prefer": "odata.maxpagesize=5000"
+                                            },
+                                            "paginationRules": {
+                                                "AbsoluteUrl": "$['@odata.nextLink']"
+                                            }
+                                        },
+                                        "sink": {
+                                            "type": "ParquetSink",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSWriteSettings"
+                                            },
+                                            "formatSettings": {
+                                                "type": "ParquetWriteSettings"
+                                            }
+                                        },
+                                        "enableStaging": false,
+                                        "translator": {
+                                            "type": "TabularTranslator",
+                                            "mappings": [
+                                                {
+                                                    "source": { "path": "$.value" },
+                                                    "sink": { "type": "ParquetSink" }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "inputs": [
+                                        {
+                                            "referenceName": "ds_rest_graph_api",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "relativeUrl": {
+                                                    "value": "@if(equals(variables('loadType'), 'full'), concat('/v1.0/sites/', pipeline().parameters.siteId, '/lists/', item().listId, '/items?expand=fields'), activity('GetDeltaToken').output.firstRow.deltaLink)",
+                                                    "type": "Expression"
+                                                }
+                                            }
+                                        }
+                                    ],
+                                    "outputs": [
+                                        {
+                                            "referenceName": "ds_adls_bronze_parquet",
+                                            "type": "DatasetReference",
+                                            "parameters": {
+                                                "listName": "@item().listName",
+                                                "loadType": "@variables('loadType')"
+                                            }
+                                        }
+                                    ],
+                                    "dependsOn": [
+                                        {
+                                            "activity": "CheckDeltaToken",
+                                            "dependencyConditions": ["Succeeded"]
+                                        }
+                                    ],
+                                    "policy": {
+                                        "timeout": "0.01:00:00",
+                                        "retry": 3,
+                                        "retryIntervalInSeconds": 300,
+                                        "secureInput": true
+                                    }
+                                },
+                                {
+                                    "name": "SaveDeltaToken",
+                                    "description": "Graph API から返された新しい deltaLink を ADLS に保存（次回の差分取り込みで使用）",
+                                    "type": "Copy",
+                                    "typeProperties": {
+                                        "source": {
+                                            "type": "RestSource",
+                                            "httpRequestTimeout": "0.00:05:00",
+                                            "requestMethod": "GET",
+                                            "additionalHeaders": {
+                                                "Authorization": {
+                                                    "value": "@concat('Bearer ', activity('GetAccessToken').output.access_token)",
+                                                    "type": "Expression"
+                                                },
+                                                "Prefer": "odata.maxpagesize=1"
+                                            }
+                                        },
+                                        "sink": {
+                                            "type": "DelimitedTextSink",
+                                            "storeSettings": {
+                                                "type": "AzureBlobFSWriteSettings"
+                                            }
+                                        }
+                                    },
+                                    "dependsOn": [
+                                        {
+                                            "activity": "FetchGraphApiData",
+                                            "dependencyConditions": ["Succeeded"]
+                                        }
+                                    ],
+                                    "policy": {
+                                        "timeout": "0.00:05:00",
+                                        "retry": 2,
+                                        "retryIntervalInSeconds": 60
+                                    }
+                                },
+                                {
+                                    "name": "LogIngestionCount",
+                                    "description": "取り込み件数をパイプライン変数に記録",
+                                    "type": "SetVariable",
+                                    "typeProperties": {
+                                        "variableName": "ingestionLog",
+                                        "value": {
+                                            "value": "@concat(item().listName, ':', string(activity('FetchGraphApiData').output.rowsCopied))",
+                                            "type": "Expression"
+                                        }
+                                    },
+                                    "dependsOn": [
+                                        {
+                                            "activity": "SaveDeltaToken",
+                                            "dependencyConditions": ["Succeeded"]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "dependsOn": [
+                            {
+                                "activity": "DetermineLoadType",
+                                "dependencyConditions": ["Succeeded"]
+                            }
+                        ]
+                    },
+                    {
+                        "name": "WriteRunLog",
+                        "description": "パイプライン実行ログを ADLS /logs/pipeline-runs/ に書き込む",
+                        "type": "Copy",
+                        "typeProperties": {
+                            "source": {
+                                "type": "RestSource",
+                                "additionalColumns": [
+                                    {
+                                        "name": "run_id",
+                                        "value": {
+                                            "value": "@pipeline().RunId",
+                                            "type": "Expression"
+                                        }
+                                    },
+                                    {
+                                        "name": "pipeline_name",
+                                        "value": "spo_to_bronze"
+                                    },
+                                    {
+                                        "name": "start_time",
+                                        "value": {
+                                            "value": "@pipeline().TriggerTime",
+                                            "type": "Expression"
+                                        }
+                                    },
+                                    {
+                                        "name": "status",
+                                        "value": "Succeeded"
+                                    },
+                                    {
+                                        "name": "load_type",
+                                        "value": {
+                                            "value": "@variables('loadType')",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                ]
+                            },
+                            "sink": {
+                                "type": "JsonSink",
+                                "storeSettings": {
+                                    "type": "AzureBlobFSWriteSettings"
+                                },
+                                "formatSettings": {
+                                    "type": "JsonWriteSettings"
+                                }
+                            }
+                        },
+                        "dependsOn": [
+                            {
+                                "activity": "ForEachSharePointList",
+                                "dependencyConditions": ["Succeeded"]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.00:05:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 30
+                        }
+                    },
+                    {
+                        "name": "NotifySuccess",
+                        "description": "パイプライン成功時に Teams Webhook で通知する",
+                        "type": "WebActivity",
+                        "typeProperties": {
+                            "url": {
+                                "value": "@pipeline().parameters.teamsWebhookUrl",
+                                "type": "Expression"
+                            },
+                            "method": "POST",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "body": {
+                                "value": "@json(concat('{\"@type\": \"MessageCard\", \"@context\": \"http://schema.org/extensions\", \"themeColor\": \"00FF00\", \"summary\": \"Pipeline Succeeded\", \"sections\": [{\"activityTitle\": \"SPO to Bronze - 成功\", \"facts\": [{\"name\": \"パイプライン\", \"value\": \"spo_to_bronze\"}, {\"name\": \"実行ID\", \"value\": \"', pipeline().RunId, '\"}, {\"name\": \"取り込み方式\", \"value\": \"', variables('loadType'), '\"}, {\"name\": \"完了時刻\", \"value\": \"', utcnow(), '\"}], \"markdown\": true}]}'))",
+                                "type": "Expression"
+                            }
+                        },
+                        "dependsOn": [
+                            {
+                                "activity": "WriteRunLog",
+                                "dependencyConditions": ["Succeeded"]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.00:02:00",
+                            "retry": 2,
+                            "retryIntervalInSeconds": 30
+                        }
+                    },
+                    {
+                        "name": "NotifyFailure",
+                        "description": "パイプライン失敗時に Teams Webhook でエラー通知する",
+                        "type": "WebActivity",
+                        "typeProperties": {
+                            "url": {
+                                "value": "@pipeline().parameters.teamsWebhookUrl",
+                                "type": "Expression"
+                            },
+                            "method": "POST",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "body": {
+                                "value": "@json(concat('{\"@type\": \"MessageCard\", \"@context\": \"http://schema.org/extensions\", \"themeColor\": \"FF0000\", \"summary\": \"Pipeline Failed\", \"sections\": [{\"activityTitle\": \"SPO to Bronze - 失敗\", \"facts\": [{\"name\": \"パイプライン\", \"value\": \"spo_to_bronze\"}, {\"name\": \"実行ID\", \"value\": \"', pipeline().RunId, '\"}, {\"name\": \"エラー\", \"value\": \"ForEach アクティビティで失敗が発生しました。Azure Portal で詳細を確認してください。\"}, {\"name\": \"失敗時刻\", \"value\": \"', utcnow(), '\"}], \"markdown\": true}]}'))",
+                                "type": "Expression"
+                            }
+                        },
+                        "dependsOn": [
+                            {
+                                "activity": "ForEachSharePointList",
+                                "dependencyConditions": ["Failed"]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "0.00:02:00",
+                            "retry": 2,
+                            "retryIntervalInSeconds": 30
+                        }
+                    }
+                ],
+                "parameters": {
+                    "siteId": {
+                        "type": "string",
+                        "defaultValue": "[parameters('sharepointSiteId')]"
+                    },
+                    "listConfig": {
+                        "type": "array",
+                        "defaultValue": "[variables('sharePointListConfig')]"
+                    },
+                    "forceFullLoad": {
+                        "type": "bool",
+                        "defaultValue": false
+                    },
+                    "teamsWebhookUrl": {
+                        "type": "string",
+                        "defaultValue": "[parameters('teamsWebhookUrl')]"
+                    }
+                },
+                "variables": {
+                    "loadType": {
+                        "type": "String",
+                        "defaultValue": "delta"
+                    },
+                    "ingestionLog": {
+                        "type": "String",
+                        "defaultValue": ""
+                    },
+                    "accessToken": {
+                        "type": "String",
+                        "defaultValue": ""
+                    }
+                },
+                "annotations": [
+                    "bronze",
+                    "ingestion",
+                    "sharepoint",
+                    "graph-api"
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/', variables('keyVaultLinkedServiceName'))]",
+                "[concat(variables('factoryId'), '/linkedServices/', variables('adlsLinkedServiceName'))]",
+                "[concat(variables('factoryId'), '/datasets/ds_adls_bronze_parquet')]"
+            ]
+        },
+        {
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "name": "[concat(parameters('factoryName'), '/trg_daily_spo_to_bronze')]",
+            "properties": {
+                "description": "日次 02:00 JST に spo_to_bronze パイプラインを起動するスケジュールトリガー",
+                "type": "ScheduleTrigger",
+                "typeProperties": {
+                    "recurrence": {
+                        "frequency": "Day",
+                        "interval": 1,
+                        "startTime": "2026-03-19T17:00:00Z",
+                        "timeZone": "Tokyo Standard Time",
+                        "schedule": {
+                            "hours": [2],
+                            "minutes": [0]
+                        }
+                    }
+                },
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "spo_to_bronze",
+                            "type": "PipelineReference"
+                        },
+                        "parameters": {
+                            "forceFullLoad": false
+                        }
+                    }
+                ],
+                "annotations": [
+                    "daily",
+                    "scheduled",
+                    "bronze"
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/pipelines/spo_to_bronze')]"
+            ]
+        },
+        {
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "name": "[concat(parameters('factoryName'), '/trg_monthly_full_load')]",
+            "properties": {
+                "description": "月初 01:00 JST にフル取り込みを実行するスケジュールトリガー。月次の整合性担保用。",
+                "type": "ScheduleTrigger",
+                "typeProperties": {
+                    "recurrence": {
+                        "frequency": "Month",
+                        "interval": 1,
+                        "startTime": "2026-04-01T16:00:00Z",
+                        "timeZone": "Tokyo Standard Time",
+                        "schedule": {
+                            "hours": [1],
+                            "minutes": [0],
+                            "monthDays": [1]
+                        }
+                    }
+                },
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "spo_to_bronze",
+                            "type": "PipelineReference"
+                        },
+                        "parameters": {
+                            "forceFullLoad": true
+                        }
+                    }
+                ],
+                "annotations": [
+                    "monthly",
+                    "full-load",
+                    "bronze"
+                ]
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/pipelines/spo_to_bronze')]"
+            ]
+        }
+    ],
+    "outputs": {
+        "pipelineName": {
+            "type": "string",
+            "value": "[concat(parameters('factoryName'), '/spo_to_bronze')]"
+        },
+        "dailyTriggerName": {
+            "type": "string",
+            "value": "[concat(parameters('factoryName'), '/trg_daily_spo_to_bronze')]"
+        },
+        "monthlyTriggerName": {
+            "type": "string",
+            "value": "[concat(parameters('factoryName'), '/trg_monthly_full_load')]"
+        }
+    }
+}
