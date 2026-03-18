@@ -51,16 +51,12 @@
 
 - **名称**: DWH/データレイク設計
 - **トリガー**: 「DWH設計」「データレイク」「メダリオン」
-- **実行方式**: agent-teams
-- **チーム構成**:
-  - team-lead: secretary
-  - teammate: data-architect（全体設計）
-  - teammate: data-engineer（パイプライン設計）
-  - teammate: analytics-engineer（消費レイヤー設計）
+- **実行方式**: subagent（data-architect を名前指定で呼び出し）
+- **呼び出し例**: 「data-architect エージェントを使って、DWH/データレイクの設計を行って」
 - **ステップ**:
   1. データアーキテクトが全体設計（メダリオンアーキテクチャ）
-  2. データエンジニアがパイプライン設計（ETL/ELT）
-  3. アナリティクスエンジニアが消費レイヤー設計（セマンティックレイヤー）
+  2. パイプライン設計（ETL/ELT）
+  3. 消費レイヤー設計（セマンティックレイヤー）
   4. 統合レビュー
 - **成果物**:
   - `.company/data/models/{model-id}/architecture.md`

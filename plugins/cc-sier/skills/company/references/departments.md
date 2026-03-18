@@ -72,7 +72,7 @@
 - **ステータス**: standby
 - **役割**: 受託案件のプロジェクト管理
 - **フォルダ**: .company/pm/
-- **対応Subagent**: [project-manager, scrum-master]
+- **対応Subagent**: [project-manager]
 - **トリガーワード**: [プロジェクト, 案件, WBS, マイルストーン, 進捗, チケット]
 - **Agent Teams適性**: high
 
@@ -110,7 +110,7 @@
 - **ステータス**: standby
 - **役割**: システム設計、技術選定、ADR
 - **フォルダ**: .company/architecture/
-- **対応Subagent**: [system-architect, solution-architect, data-architect]
+- **対応Subagent**: [system-architect, data-architect]
 - **トリガーワード**: [設計, アーキテクチャ, 非機能, 技術選定, ADR, 構成図]
 - **Agent Teams適性**: high
 
@@ -231,7 +231,7 @@
 - **ステータス**: standby
 - **役割**: データアーキテクチャ、DWH、ETL/ELT
 - **フォルダ**: .company/data/
-- **対応Subagent**: [data-architect, data-engineer, analytics-engineer]
+- **対応Subagent**: [data-architect]
 - **トリガーワード**: [データ, DWH, データレイク, ETL, dbt, メダリオン, Snowflake]
 - **Agent Teams適性**: medium
 
