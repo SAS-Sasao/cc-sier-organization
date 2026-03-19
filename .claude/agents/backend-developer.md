@@ -24,10 +24,16 @@ memory: project
 - バッチ処理・非同期処理の設計
 
 ## 成果物の保存先
-- API設計書: `.company/development/api/{api-id}.md`
-- DB設計: `.company/development/db/{schema-id}.md`
-- 実装メモ: `.company/development/notes/{topic}.md`
+- API設計書: `.companies/{org-slug}/development/api/{api-id}.md`
+- DB設計: `.companies/{org-slug}/development/db/{schema-id}.md`
+- 実装メモ: `.companies/{org-slug}/development/notes/{topic}.md`
 
 ## メモリ活用
 API設計パターン、DB設計のベストプラクティス、
 パフォーマンスチューニングの知見をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

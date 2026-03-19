@@ -24,10 +24,16 @@ memory: project
 - フロントエンドパフォーマンス最適化
 
 ## 成果物の保存先
-- UI設計メモ: `.company/development/ui/{feature-id}.md`
-- コンポーネント仕様: `.company/development/components/{component-id}.md`
-- UX改善提案: `.company/development/ux/{proposal-id}.md`
+- UI設計メモ: `.companies/{org-slug}/development/ui/{feature-id}.md`
+- コンポーネント仕様: `.companies/{org-slug}/development/components/{component-id}.md`
+- UX改善提案: `.companies/{org-slug}/development/ux/{proposal-id}.md`
 
 ## メモリ活用
 UIパターン、コンポーネント設計の知見、
 UX改善の効果測定結果をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

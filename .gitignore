@@ -3,3 +3,6 @@ dist/
 docs/.vitepress/cache/
 docs/.vitepress/dist/
 bk/
+
+# .companies/ は業務データだがGit管理対象（PRフローで管理）
+# .companies/ は .gitignore に含めない

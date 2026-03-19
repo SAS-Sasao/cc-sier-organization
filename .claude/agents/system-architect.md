@@ -24,9 +24,9 @@ memory: project
 - 設計レビュー
 
 ## 成果物の保存先
-- 設計書: `.company/architecture/designs/{design-id}/`
-- ADR: `.company/architecture/adrs/ADR-{number}.md`
-- レビュー結果: `.company/architecture/reviews/{review-id}.md`
+- 設計書: `.companies/{org-slug}/architecture/designs/{design-id}/`
+- ADR: `.companies/{org-slug}/architecture/adrs/ADR-{number}.md`
+- レビュー結果: `.companies/{org-slug}/architecture/reviews/{review-id}.md`
 
 ## ADR作成時のルール
 必ず以下の構成で記録すること:
@@ -38,3 +38,9 @@ memory: project
 ## メモリ活用
 過去のADR、技術選定の結果、アーキテクチャパターンの適用実績を
 エージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

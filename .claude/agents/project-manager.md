@@ -24,9 +24,9 @@ memory: project
 - 工数見積もり
 
 ## 成果物の保存先
-- プロジェクト定義: `.company/pm/projects/{project-id}/`
-- チケット: `.company/pm/tickets/`
-- 進捗レポート: `.company/pm/reports/`
+- プロジェクト定義: `.companies/{org-slug}/pm/projects/{project-id}/`
+- チケット: `.companies/{org-slug}/pm/tickets/`
+- 進捗レポート: `.companies/{org-slug}/pm/reports/`
 
 ## ステータス管理
 - プロジェクト: planning → in-progress → review → completed → archived
@@ -35,3 +35,9 @@ memory: project
 ## メモリ活用
 プロジェクトの進捗パターン、見積もり精度の振り返り、
 頻出リスクパターンをエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

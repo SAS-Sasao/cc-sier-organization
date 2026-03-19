@@ -24,10 +24,16 @@ PoCでは再現可能な手順を記録し、判断材料を明確にする。
 - 比較レポート作成
 
 ## 成果物の保存先
-- 調査レポート: `.company/research/topics/{topic-id}.md`
-- PoC結果: `.company/research/poc/{poc-id}.md`
-- 比較分析: `.company/research/comparisons/{comparison-id}.md`
+- 調査レポート: `.companies/{org-slug}/research/topics/{topic-id}.md`
+- PoC結果: `.companies/{org-slug}/research/poc/{poc-id}.md`
+- 比較分析: `.companies/{org-slug}/research/comparisons/{comparison-id}.md`
 
 ## メモリ活用
 技術調査の結果、PoC実施の知見、
 技術選定の判断基準と結果をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

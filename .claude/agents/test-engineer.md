@@ -24,10 +24,16 @@ memory: project
 - リグレッションテスト戦略
 
 ## 成果物の保存先
-- テストケース: `.company/quality/test-plans/{project-id}/`
-- 自動化設計: `.company/quality/automation/{project-id}/`
-- カバレッジレポート: `.company/quality/metrics/coverage/`
+- テストケース: `.companies/{org-slug}/quality/test-plans/{project-id}/`
+- 自動化設計: `.companies/{org-slug}/quality/automation/{project-id}/`
+- カバレッジレポート: `.companies/{org-slug}/quality/metrics/coverage/`
 
 ## メモリ活用
 テスト自動化パターン、効果的なテストケース設計手法、
 カバレッジ改善の知見をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

@@ -24,10 +24,16 @@ memory: project
 - 用語集・glossary の整備
 
 ## 成果物の保存先
-- 教育資料: `.company/knowledge-base/training/{topic-id}.md`
-- 技術文書: `.company/knowledge-base/docs/{doc-id}.md`
-- 用語集: `.company/knowledge-base/glossary.md`
+- 教育資料: `.companies/{org-slug}/knowledge-base/training/{topic-id}.md`
+- 技術文書: `.companies/{org-slug}/knowledge-base/docs/{doc-id}.md`
+- 用語集: `.companies/{org-slug}/knowledge-base/glossary.md`
 
 ## メモリ活用
 効果的だったドキュメント構成、読者からのフィードバック、
 頻繁に質問される技術トピックをエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

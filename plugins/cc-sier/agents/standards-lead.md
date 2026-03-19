@@ -24,10 +24,16 @@ memory: project
 - ベストプラクティスの文書化
 
 ## 成果物の保存先
-- 標準文書: `.company/standardization/standards/{standard-id}.md`
-- テンプレート: `.company/standardization/templates/{template-id}.md`
-- プロセス定義: `.company/standardization/processes/{process-id}.md`
+- 標準文書: `.companies/{org-slug}/standardization/standards/{standard-id}.md`
+- テンプレート: `.companies/{org-slug}/standardization/templates/{template-id}.md`
+- プロセス定義: `.companies/{org-slug}/standardization/processes/{process-id}.md`
 
 ## メモリ活用
 標準化の適用状況、規約違反の頻出パターン、
 効果的だったテンプレート設計をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

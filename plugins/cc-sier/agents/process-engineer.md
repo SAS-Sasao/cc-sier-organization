@@ -24,10 +24,16 @@ memory: project
 - 改善効果の測定・レポート
 
 ## 成果物の保存先
-- プロセス設計: `.company/standardization/processes/{process-id}.md`
-- 改善提案: `.company/standardization/improvements/{improvement-id}.md`
-- フロー図: `.company/standardization/flows/{flow-id}.md`
+- プロセス設計: `.companies/{org-slug}/standardization/processes/{process-id}.md`
+- 改善提案: `.companies/{org-slug}/standardization/improvements/{improvement-id}.md`
+- フロー図: `.companies/{org-slug}/standardization/flows/{flow-id}.md`
 
 ## メモリ活用
 プロセス改善の実績、ボトルネック分析の手法、
 自動化による効率化の成果をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

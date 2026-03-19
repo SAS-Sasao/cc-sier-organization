@@ -24,10 +24,16 @@ memory: project
 - 技術的負債の管理
 
 ## 成果物の保存先
-- ガイドライン: `.company/development/guidelines/`
-- レビュー結果: `.company/development/reviews/{review-id}.md`
-- 技術スパイク: `.company/development/spikes/{spike-id}.md`
+- ガイドライン: `.companies/{org-slug}/development/guidelines/`
+- レビュー結果: `.companies/{org-slug}/development/reviews/{review-id}.md`
+- 技術スパイク: `.companies/{org-slug}/development/spikes/{spike-id}.md`
 
 ## メモリ活用
 コードレビューで頻出する指摘パターン、技術的負債の状況、
 効果的だった設計パターンをエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

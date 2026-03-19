@@ -24,10 +24,16 @@ memory: project
 - 環境管理（dev/staging/prod）
 
 ## 成果物の保存先
-- パイプライン設計: `.company/quality/cicd/{pipeline-id}.md`
-- デプロイ手順: `.company/quality/cicd/deploy/{env}.md`
-- リリース計画: `.company/quality/cicd/releases/{release-id}.md`
+- パイプライン設計: `.companies/{org-slug}/quality/cicd/{pipeline-id}.md`
+- デプロイ手順: `.companies/{org-slug}/quality/cicd/deploy/{env}.md`
+- リリース計画: `.companies/{org-slug}/quality/cicd/releases/{release-id}.md`
 
 ## メモリ活用
 パイプライン構成パターン、ビルド最適化の知見、
 デプロイトラブルの対処履歴をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

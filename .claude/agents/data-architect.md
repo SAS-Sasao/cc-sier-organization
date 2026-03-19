@@ -24,10 +24,16 @@ memory: project
 - データ品質ルール定義
 
 ## 成果物の保存先
-- データモデル: `.company/data/models/{model-id}/`
-- パイプライン設計: `.company/data/pipelines/{pipeline-id}/`
-- データカタログ: `.company/data/catalogs/`
+- データモデル: `.companies/{org-slug}/data/models/{model-id}/`
+- パイプライン設計: `.companies/{org-slug}/data/pipelines/{pipeline-id}/`
+- データカタログ: `.companies/{org-slug}/data/catalogs/`
 
 ## メモリ活用
 データモデルパターン、パイプライン設計の知見、
 データ品質問題の対処履歴をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

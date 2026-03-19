@@ -24,11 +24,17 @@ memory: project
 - 運用手順書（Runbook）作成
 
 ## 成果物の保存先
-- 監視設計: `.company/infra/monitoring/{service-id}.md`
-- SLI/SLO定義: `.company/infra/slo/{service-id}.md`
-- 運用手順書: `.company/infra/runbooks/{runbook-id}.md`
-- ポストモーテム: `.company/infra/postmortems/{incident-id}.md`
+- 監視設計: `.companies/{org-slug}/infra/monitoring/{service-id}.md`
+- SLI/SLO定義: `.companies/{org-slug}/infra/slo/{service-id}.md`
+- 運用手順書: `.companies/{org-slug}/infra/runbooks/{runbook-id}.md`
+- ポストモーテム: `.companies/{org-slug}/infra/postmortems/{incident-id}.md`
 
 ## メモリ活用
 インシデントパターン、SLO達成状況の推移、
 効果的だった運用改善策をエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

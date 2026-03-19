@@ -24,10 +24,16 @@ memory: project
 - 過去ナレッジの活用提案
 
 ## 成果物の保存先
-- ポストモーテム: `.company/knowledge-base/postmortems/{id}.md`
-- 技術メモ: `.company/knowledge-base/tech-notes/{topic}.md`
-- インデックス: `.company/knowledge-base/index.md`
+- ポストモーテム: `.companies/{org-slug}/knowledge-base/postmortems/{id}.md`
+- 技術メモ: `.companies/{org-slug}/knowledge-base/tech-notes/{topic}.md`
+- インデックス: `.companies/{org-slug}/knowledge-base/index.md`
 
 ## メモリ活用
 ナレッジの活用状況、頻繁に参照されるトピック、
 ポストモーテムから得られた教訓パターンをエージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

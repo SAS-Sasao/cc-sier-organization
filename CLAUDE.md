@@ -7,6 +7,9 @@
 ```
 cc-sier-organization/
 ├── .claude-plugin/           ← プラグインメタデータ（marketplace.json, plugin.json）
+├── .companies/               ← 組織データ（マルチ組織対応）
+│   ├── .active               ← アクティブ組織のslug
+│   └── {org-slug}/           ← 組織ごとのディレクトリ
 ├── plugins/cc-sier/
 │   ├── skills/
 │   │   ├── company/          ← メインSkill（/company コマンド）
@@ -37,6 +40,87 @@ cc-sier-organization/
 - セクション 7: Agent Teams 統合設計
 - セクション 8: SIer特化テンプレート（ADR、ポストモーテム等）
 
+## マルチ組織構造
+
+### .companies/ ディレクトリ
+
+複数の仮想組織を並列管理するためのルートディレクトリ。各組織のマスタデータ・成果物はすべてこのディレクトリ配下の組織ディレクトリに格納される。
+
+```
+.companies/
+├── .active                  ← 現在操作対象のorg-slugを1行で記載
+├── a-sha-dwh-project/       ← 組織ディレクトリの例
+│   ├── masters/             ← マスタデータ
+│   ├── CLAUDE.md            ← 組織の文脈情報
+│   └── {dept}/              ← 部署ごとの成果物
+└── standardization-initiative/
+    └── ...
+```
+
+### org-slug 命名ルール
+
+- kebab-case（小文字英数字とハイフンのみ）
+- 日本語はローマ字または英訳に変換
+- 例: 「A社DWH構築プロジェクト」→ `a-sha-dwh-project`
+- 例: 「社内標準化推進」→ `standardization-initiative`
+- `.companies/` 直下のディレクトリ名として一意であること
+- 既存と重複する場合はサフィックス（-2, -3等）を付与
+
+### .active ファイル
+
+`.companies/.active` にアクティブ組織の org-slug を1行で記載する。
+Skillはこのファイルを起動時に読み取り、操作対象組織を特定する。
+
+```
+# .companies/.active の例
+a-sha-dwh-project
+```
+
+---
+
+## 成果物格納ルール
+
+- **全成果物は `.companies/{org-slug}/` 配下に作成すること**
+- リポジトリルートや `.claude/` 配下に業務成果物ファイルを作成してはならない
+- Subagentへの委譲時も、組織パス（`.companies/{org-slug}/`）を明示して指示すること
+- Subagentファイル（`.claude/agents/`）はグローバルリソースのため例外とする
+
+---
+
+## Gitワークフロー
+
+ファイル生成を伴うすべての業務作業はブランチを作成してPRで管理する。
+
+### ブランチ命名規則
+
+```
+{org-slug}/{type}/{YYYY-MM-DD}-{summary}
+```
+
+- `{type}`: 作業種別（`feat`, `fix`, `docs`, `admin` 等）
+- `{summary}`: 作業概要をkebab-caseで記述
+- 例: `a-sha-dwh-project/feat/2026-03-19-add-security-dept`
+- 例: `a-sha-dwh-project/admin/2026-03-19-update-roles`
+
+### コミットメッセージ
+
+```
+{type}: {概要} [{org-slug}]
+```
+
+- 例: `feat: セキュリティ部門を追加 [a-sha-dwh-project]`
+- 例: `docs: 要件定義書を更新 [standardization-initiative]`
+
+### フロー
+
+1. mainから作業ブランチを作成
+2. 成果物を `.companies/{org-slug}/` 配下に生成
+3. コミット（メッセージは上記規則に従う）
+4. PR作成（変更サマリーをPR本文に記載）
+5. mainブランチに戻る
+
+---
+
 ## 開発ルール
 
 ### コミットメッセージ
@@ -63,4 +147,4 @@ Conventional Commits に従うこと:
 
 - `plugins/cc-sier/skills/` 配下が **Skill ファイル**（プラグインインストール時に `.claude/skills/` に配置される）
 - `plugins/cc-sier/agents/` 配下が **Subagent ファイル**（プラグインインストール時に `.claude/agents/` に配置される）
-- プロジェクトルートの `CLAUDE.md`（このファイル）は開発用。ユーザー環境に生成される `.company/CLAUDE.md` とは別物
+- プロジェクトルートの `CLAUDE.md`（このファイル）は開発用。ユーザー環境に生成される `.companies/{org-slug}/CLAUDE.md` とは別物

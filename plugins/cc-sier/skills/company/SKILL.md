@@ -3,7 +3,7 @@ name: company
 description: >
   SIer業務の仮想組織スキル。/company で秘書に話しかける。
   マスタ駆動で部署・ロールを動的に編成。Agent Teamsで並列作業を実行。
-  「秘書」「TODO」「管理」「壁打ち」「相談」「組織」と言われたとき、
+  「秘書」「TODO」「管理」「壁打ち」「相談」「組織」「組織切替」「別の組織」と言われたとき、
   または /company を実行したときに使用する。
 ---
 
@@ -16,14 +16,11 @@ description: >
 
 ## 1. 検出とモード判定
 
-起動時に以下を順に確認し、モードを決定します。
-
 ### 1.1 組織の存在チェック
 
 ```
-IF .company/ が存在しない → オンボーディングモード（セクション2へ）
-IF .company/masters/ が存在しない → オンボーディングモード（セクション2へ）
-IF .company/masters/organization.md が存在する → 運営モード（セクション3へ）
+IF .companies/ が存在しない         → 組織選択UI（セクション1.3へ）
+IF .companies/ が存在する           → 組織選択UI（セクション1.3へ）
 ```
 
 ### 1.2 ユーザー意図の判定
@@ -36,17 +33,50 @@ IF .company/masters/organization.md が存在する → 運営モード（セク
 | 特定部署への依頼 | マスタのトリガーワードと照合 | 運営モード → 該当部署 |
 | 部署追加 | 「〜室を作って」「部署を追加」 | 部署追加フロー（セクション4） |
 | マスタ管理 | 「マスタ管理」「ロール追加」「組織変更」 | `/company-admin` Skill への誘導 |
-| 状態確認 | 「組織の状態」「ダッシュボード」 | ダッシュボード表示 |
+| 組織切替 | 「組織切替」「別の組織」「組織を変える」 | 組織選択UI（セクション1.3へ） |
+| 状態確認 | 「組織の状態」「ダッシュボード」 | ダッシュボード表示（3.5） |
+
+### 1.3 組織選択UI
+
+`/company` 起動時に以下の分岐で表示します:
+
+**ケース A: `.companies/.active` が存在する**
+```
+現在のアクティブ組織: {active_org}
+
+どうしますか？
+A) {active_org} で作業を続ける  → 運営モード（セクション3へ）
+B) 別の組織で作業する           → 組織一覧を表示 → 選択 → .active 更新 → 運営モード
+C) 新しい組織を作成する         → オンボーディング（セクション2へ）
+```
+
+**ケース B: `.companies/` に組織ディレクトリはあるが `.active` がない**
+```
+既存の組織が見つかりました。
+
+{組織一覧を表示}
+
+どの組織で作業しますか？ → 選択 → .companies/.active に書き込み → 運営モード
+```
+
+**ケース C: `.companies/` が存在しない、または組織ディレクトリが 0 件**
+```
+組織がまだありません。新しく作成します。
+→ オンボーディング（セクション2へ）
+```
 
 ---
 
 ## 2. オンボーディング（初回セットアップ）
 
-`.company/` が存在しない場合に実行します。3問のヒアリングで組織を初期化します。
+組織が存在しない場合、または新規作成を選んだ場合に実行します。4問のヒアリングで組織を初期化します。
 
 ### 2.1 ヒアリング
 
-以下の3問をユーザーに順に質問します:
+**Q0: 組織名（プロジェクト名）を教えてください。**
+> 例: A社DWH構築プロジェクト、社内標準化推進
+> 入力をもとに org-slug を自動生成（kebab-case）し、ユーザーに確認します。
+> 例: "A社DWH構築" → `a-sha-dwh`
 
 **Q1: あなたのお名前（ニックネーム）を教えてください。**
 > 秘書がオーナーを呼ぶときの名前に使います。
@@ -60,37 +90,40 @@ IF .company/masters/organization.md が存在する → 運営モード（セク
 
 ### 2.2 マスタファイル生成
 
-ヒアリング結果を元に以下を生成します:
+ヒアリング結果をもとに以下を生成します:
 
 1. **ディレクトリ作成**:
-   - `.company/masters/`
-   - `.company/secretary/inbox/`
-   - `.company/secretary/todos/`
-   - `.company/secretary/notes/`
+   - `.companies/{org-slug}/masters/`
+   - `.companies/{org-slug}/secretary/inbox/`
+   - `.companies/{org-slug}/secretary/todos/`
+   - `.companies/{org-slug}/secretary/notes/`
    - Q3 で選択された追加部署のフォルダ
 
 2. **マスタファイル生成**（テンプレートは `references/departments.md` を参照）:
-   - `.company/masters/organization.md` — オーナー名、事業内容、コスト設定（デフォルト: balanced）
-   - `.company/masters/departments.md` — 秘書室（active）+ 選択された追加部署
-   - `.company/masters/roles.md` — secretary + 追加部署に対応するロール
-   - `.company/masters/workflows.md` — 空（後から `/company-admin` で追加）
-   - `.company/masters/projects.md` — 空
-   - `.company/masters/mcp-services.md` — 空
+   - `.companies/{org-slug}/masters/organization.md` — 組織名、org-slug、オーナー名、事業内容、コスト設定
+   - `.companies/{org-slug}/masters/departments.md` — 秘書室（active）+ 選択された追加部署
+   - `.companies/{org-slug}/masters/roles.md` — secretary + 追加部署に対応するロール
+   - `.companies/{org-slug}/masters/workflows.md` — 空（後から `/company-admin` で追加）
+   - `.companies/{org-slug}/masters/projects.md` — 空
+   - `.companies/{org-slug}/masters/mcp-services.md` — 空
 
 3. **CLAUDE.md 生成**（テンプレートは `references/claude-md-template.md` を参照）:
-   - `.company/CLAUDE.md` — 組織ルール
-   - `.company/secretary/CLAUDE.md` — 秘書室ルール
+   - `.companies/{org-slug}/CLAUDE.md` — 組織ルール
+   - `.companies/{org-slug}/secretary/CLAUDE.md` — 秘書室ルール
    - 追加部署がある場合、各部署の CLAUDE.md
 
-4. **完了メッセージ**:
+4. **`.companies/.active` に org-slug を書き込む**
+
+5. **完了メッセージ**:
    ```
-   組織のセットアップが完了しました！
+   組織「{org_name}」のセットアップが完了しました！
+   組織ID: {org-slug}
 
    オーナー: {owner_name}
    事業: {business}
    アクティブ部署: 秘書室{, 追加部署名}
 
-   「/company」または直接話しかけてください。秘書がお待ちしています。
+   「/company」で秘書がお待ちしています。
    部署やロールの追加は「/company-admin」で行えます。
    ```
 
@@ -99,33 +132,32 @@ IF .company/masters/organization.md が存在する → 運営モード（セク
 ## 3. 運営モード
 
 マスタが存在する場合の通常運用フローです。
+アクティブ組織のパスは常に `.companies/{org-slug}/` を基点とします。
 
 ### 3.1 状態読み込み
 
 起動時に以下のマスタを読み込みます:
 
-1. `.company/masters/organization.md` — コスト設定、組織ポリシー
-2. `.company/masters/departments.md` — 部署一覧とトリガーワード
-3. `.company/masters/workflows.md` — 定義済みワークフロー
+1. `.companies/{org-slug}/masters/organization.md` — コスト設定、組織ポリシー
+2. `.companies/{org-slug}/masters/departments.md` — 部署一覧とトリガーワード
+3. `.companies/{org-slug}/masters/workflows.md` — 定義済みワークフロー
 
 ### 3.2 依頼内容の分析とルーティング
-
-ユーザーの依頼を以下のステップで処理します:
 
 **Step 1: ワークフロー照合**
 - `masters/workflows.md` のトリガーと依頼を照合
 - 一致するワークフローがあれば、そのワークフローの実行方式に従う
 
 **Step 2: 部署照合**（ワークフロー不一致の場合）
-- `masters/departments.md` のトリガーワードと依頼を照合
+- `masters/departments.md` のトリガーワードと照合
 - 一致する部署が見つかったら、その部署の対応 Subagent を確認
 
 **Step 3: 実行モード判定**
 
 | 条件 | 実行モード | アクション |
 |------|-----------|-----------|
-| ワークフロー一致 + 実行方式 = subagent | Subagent委譲 | 該当 Subagent を名前指定で起動 |
-| ワークフロー一致 + 実行方式 = agent-teams | Agent Teams | チーム編成して並列実行 |
+| ワークフロー一致 + subagent | Subagent委譲 | 該当 Subagent を名前指定で起動 |
+| ワークフロー一致 + agent-teams | Agent Teams | チーム編成して並列実行 |
 | 部署一致 + 小規模作業 | 秘書が直接対応 | secretary Subagent で処理 |
 | 部署一致 + 専門作業 | Subagent委譲 | 部署の対応 Subagent を起動 |
 | 部署一致 + 大規模並列 | Agent Teams | Agent Teams適性を確認して編成 |
@@ -133,11 +165,9 @@ IF .company/masters/organization.md が存在する → 運営モード（セク
 
 ### 3.3 Subagent 呼び出し
 
-Subagent を呼び出す際は、名前指定で起動します:
-
 ```
 「{agent-name}エージェントを使って、{依頼内容}を実行してください。
-成果物は {output_path} に保存してください。」
+ 成果物は .companies/{org-slug}/{dept}/{path} に保存してください。」
 ```
 
 対応する Subagent ファイルは `.claude/agents/{agent-name}.md` にあります。
@@ -148,9 +178,10 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 
 1. ワークフローのチーム構成を確認
 2. `masters/roles.md` から各ロールのテイメイト指示テンプレートを取得
-3. チームリード（通常は secretary）を指定
-4. 各テイメイトに具体的な指示を与えて並列実行
-5. 結果を統合して `.company/` 配下に保存
+3. チームリード（通常は secretary）を指定し、**ブランチ名を生成**（詳細は 3.6 参照）
+4. 各テイメイトに「ブランチ `{branch-name}` 上で作業すること」を明示して並列実行
+5. 結果を統合して `.companies/{org-slug}/` 配下に保存
+6. チームリードがまとめてコミット → PR 作成（3.6 を参照）
 
 **コスト管理**: `masters/organization.md` の `COST_AWARENESS` 設定に従う:
 - `conservative`: Agent Teams は明示指示時のみ。デフォルトは Subagent
@@ -165,6 +196,8 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 ## CC-SIer ダッシュボード
 
 ### 組織情報
+- 組織名: {org_name}
+- 組織ID: {org-slug}
 - オーナー: {owner_name}
 - 事業: {business}
 - コスト設定: {cost_awareness}
@@ -175,11 +208,31 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 | {各部署の情報} |
 
 ### 今日のTODO
-{.company/secretary/todos/YYYY-MM-DD.md の内容}
+{.companies/{org-slug}/secretary/todos/YYYY-MM-DD.md の内容}
 
 ### 最近の活動
 {直近の成果物やメモ}
 ```
+
+### 3.6 Gitワークフロー
+
+ファイル生成を伴う作業の前後で実行します。詳細は `references/git-workflow.md` を参照。
+
+**ファイル生成を伴わない作業（壁打ち、ダッシュボード表示、口頭相談等）では実行しません。**
+
+**作業前:**
+1. 現在のブランチを確認（main でない場合は警告）
+2. 未コミットの変更がないか確認（あれば stash するか警告）
+3. ブランチ作成: `{org-slug}/{type}/{YYYY-MM-DD}-{summary}`
+4. ブランチに切り替え
+
+**作業後:**
+1. `git add .companies/{org-slug}/`（組織ディレクトリのみ）
+2. `git commit -m "{type}: {概要} [{org-slug}]"`
+3. `git push origin {branch-name}`
+4. PR 作成（gh CLI）: タイトルと本文に組織名・変更概要を含める
+5. PR の URL をユーザーに報告
+6. `git checkout main` で元のブランチに戻る
 
 ---
 
@@ -195,14 +248,14 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 3. 以下を実行:
    - `masters/departments.md` にエントリ追加
    - `masters/roles.md` に対応ロール追加
-   - `.company/{dept}/` フォルダ作成
-   - `.company/{dept}/CLAUDE.md` 生成（`references/departments.md` のテンプレートから）
-   - `.company/CLAUDE.md` の部署一覧を更新
+   - `.companies/{org-slug}/{dept}/` フォルダ作成
+   - `.companies/{org-slug}/{dept}/CLAUDE.md` 生成
+   - `.companies/{org-slug}/CLAUDE.md` の部署一覧を更新
    - `.claude/agents/{role}.md` を生成（`references/agent-templates.md` のテンプレートから）
 
 ### 4.2 高度な管理操作への誘導
 
-以下の操作はより詳細なヒアリングが必要なため、`/company-admin` を案内します:
+以下の操作は `/company-admin` を案内します:
 
 - ロールの変更・削除
 - ワークフローの追加・変更
@@ -211,19 +264,50 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 
 ```
 この操作には詳細な設定が必要です。
-「/company-admin」で マスタ管理モードを起動してください。
+「/company-admin」でマスタ管理モードを起動してください。
 ```
+
+---
+
+## 5. 組織管理
+
+### 5.1 組織一覧の表示
+
+`.companies/` 直下のディレクトリを列挙し、各組織の `organization.md` からオーナー名・事業を読み取って表示します:
+
+```
+利用可能な組織:
+1. {org-slug-1}  オーナー: {name}  事業: {business}
+2. {org-slug-2}  オーナー: {name}  事業: {business}
+...
+```
+
+### 5.2 組織の切り替え
+
+1. ユーザーが番号または org-slug を選択
+2. `.companies/.active` を選択した org-slug で上書き
+3. 切り替え先の組織のマスタを読み込み直して運営モードへ
+
+### 5.3 マイグレーション（既存 `.company/` からの移行）
+
+`.company/` が存在する場合:
+
+1. `organization.md` のオーナー名から org-slug を推定し、ユーザーに確認
+2. `.company/` を `.companies/{org-slug}/` に移動
+3. `.companies/.active` を作成して org-slug を書き込む
+4. 完了を報告
+
+詳細な移行手順は `references/git-workflow.md` のマイグレーションセクションを参照。
 
 ---
 
 ## 参照ファイル一覧
 
-詳細な定義は以下の references/ ファイルに外出ししています:
-
 | ファイル | 用途 | 参照タイミング |
 |---------|------|-------------|
 | `references/departments.md` | 部署テンプレート集 | 部署追加時 |
 | `references/claude-md-template.md` | CLAUDE.md 生成テンプレート | オンボーディング時 |
+| `references/git-workflow.md` | Gitワークフロー詳細定義 | ファイル生成を伴う作業の前後 |
 | `references/workflow-definitions.md` | ワークフロー定義集 | 作業依頼受付時 |
 | `references/agent-templates.md` | Subagent 生成テンプレート | Subagent/Agent Teams 編成時 |
 | `references/sier-templates.md` | SIer業務特化テンプレート | ドキュメント生成時 |

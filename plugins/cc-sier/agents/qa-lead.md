@@ -24,10 +24,16 @@ memory: project
 - 品質ゲート基準の策定
 
 ## 成果物の保存先
-- テスト戦略: `.company/quality/strategies/{project-id}/`
-- テスト計画: `.company/quality/test-plans/{project-id}/`
-- メトリクス: `.company/quality/metrics/`
+- テスト戦略: `.companies/{org-slug}/quality/strategies/{project-id}/`
+- テスト計画: `.companies/{org-slug}/quality/test-plans/{project-id}/`
+- メトリクス: `.companies/{org-slug}/quality/metrics/`
 
 ## メモリ活用
 テスト戦略のパターン、バグ傾向、品質メトリクスの推移を
 エージェントメモリに蓄積すること。
+
+## 成果物格納ルール
+- **すべての成果物は `.companies/{org-slug}/` 配下に保存すること**
+- org-slug は秘書からの委譲時に指定されるパスに従う
+- リポジトリルートや `.claude/` 配下へのファイル作成は禁止
+- 保存先が指示されていない場合は、秘書に確認すること

@@ -18,16 +18,19 @@ description: >
 
 ## 1. 操作対象の判定
 
+起動時に `.companies/.active` を読み取り、`{org-slug}` を特定する。
+以降、すべてのマスタ参照先は `.companies/{org-slug}/masters/` となる。
+
 ユーザーの依頼から対象マスタと操作種別を特定します。
 
 | キーワード | 対象マスタ | ファイル |
 |-----------|-----------|---------|
-| 部署, 室, チーム | departments.md | `.company/masters/departments.md` |
-| ロール, エージェント, Subagent | roles.md | `.company/masters/roles.md` |
-| ワークフロー, フロー, 手順 | workflows.md | `.company/masters/workflows.md` |
-| プロジェクト, 案件, PJ | projects.md | `.company/masters/projects.md` |
-| 組織, ポリシー, コスト設定 | organization.md | `.company/masters/organization.md` |
-| MCP, 連携, サービス | mcp-services.md | `.company/masters/mcp-services.md` |
+| 部署, 室, チーム | departments.md | `.companies/{org-slug}/masters/departments.md` |
+| ロール, エージェント, Subagent | roles.md | `.companies/{org-slug}/masters/roles.md` |
+| ワークフロー, フロー, 手順 | workflows.md | `.companies/{org-slug}/masters/workflows.md` |
+| プロジェクト, 案件, PJ | projects.md | `.companies/{org-slug}/masters/projects.md` |
+| 組織, ポリシー, コスト設定 | organization.md | `.companies/{org-slug}/masters/organization.md` |
+| MCP, 連携, サービス | mcp-services.md | `.companies/{org-slug}/masters/mcp-services.md` |
 
 操作種別: **追加** / **変更** / **削除** を文脈から判定。不明な場合は「何を行いますか？」とヒアリングする。
 
@@ -38,7 +41,7 @@ description: >
 操作対象が特定できたら、該当マスタファイルを読み込みます。
 
 ```
-1. .company/masters/{対象マスタ}.md を読み込み
+1. .companies/{org-slug}/masters/{対象マスタ}.md を読み込み
 2. 関連マスタも確認:
    - 部署操作時 → roles.md, workflows.md も確認
    - ロール操作時 → departments.md, workflows.md も確認
@@ -127,7 +130,7 @@ Q3: 想定操作は？
 | ワークフローID | `wf-` プレフィックス + kebab-case + 一意 |
 | プロジェクトID | `proj-` プレフィックス + 一意 |
 | ステータス | 定義された enum 値のいずれか |
-| フォルダパス | `.company/` プレフィックス + 他部署と非重複 |
+| フォルダパス | `.companies/{org-slug}/` プレフィックス + 他部署と非重複 |
 
 ### 4.2 整合性検証
 
@@ -151,6 +154,9 @@ Q3: 想定操作は？
 - 変更時は該当セクションのみ書き換え
 - 削除時はセクション6の安全策を先に実行
 
+マスタ更新後、Gitワークフローに従いコミット・PR作成を行う。
+詳細は `/company` Skill の `references/git-workflow.md` を参照。
+
 ---
 
 ## 6. 連鎖更新の実行
@@ -161,11 +167,11 @@ Q3: 想定操作は？
 
 ```
 1. masters/departments.md にエントリ追加
-2. .company/{folder}/ フォルダ作成（サブフォルダ含む）
+2. .companies/{org-slug}/{folder}/ フォルダ作成（サブフォルダ含む）
    → references/departments.md のテンプレートを参照
-3. .company/{folder}/CLAUDE.md 生成
+3. .companies/{org-slug}/{folder}/CLAUDE.md 生成
    → references/departments.md の CLAUDE.md テンプレートから生成
-4. .company/CLAUDE.md の組織構成ツリー・部署一覧テーブルに追記
+4. .companies/{org-slug}/CLAUDE.md の組織構成ツリー・部署一覧テーブルに追記
 5. 新規ロールがある場合 → ロール追加の連鎖更新も実行
 ```
 
@@ -176,6 +182,7 @@ Q3: 想定操作は？
 2. .claude/agents/{name}.md を新規作成
    → references/agent-templates.md の基本テンプレートで生成
    → ヒアリングで得たペルソナ・責務・モデルを埋め込み
+   ※ Subagentはグローバルリソースのため .claude/agents/ 配下に作成
 3. masters/departments.md の所属部署の対応Subagentリストに追記
 ```
 
@@ -196,7 +203,7 @@ Q3: 想定操作は？
 ### 6.4 部署削除時の連鎖更新（安全策付き）
 
 ```
-1. .company/{folder}/ 配下のファイル存在チェック
+1. .companies/{org-slug}/{folder}/ 配下のファイル存在チェック
    → ファイルがある場合: 物理削除不可。以下を提案:
      「この部署にはデータが残っています。削除ではなくアーカイブ（archived ステータス）
       にすることをお勧めします。アーカイブしますか？」
@@ -207,7 +214,7 @@ Q3: 想定操作は？
 3. masters/workflows.md で該当部署のロールを使うワークフローに警告表示
 4. ユーザー承認後:
    - masters/departments.md からエントリ削除（or archived に変更）
-   - .company/CLAUDE.md の組織構成から除去
+   - .companies/{org-slug}/CLAUDE.md の組織構成から除去
    - 承認されたロールの削除・移動を実行
 ```
 
@@ -234,8 +241,23 @@ Q3: 想定操作は？
 
 ```
 1. masters/organization.md を更新
-2. .company/CLAUDE.md をテンプレートから再生成
+2. .companies/{org-slug}/CLAUDE.md をテンプレートから再生成
 ```
+
+### 6.8 Gitワークフロー
+
+マスタ変更はすべてGitワークフローで管理します。
+
+```
+1. ブランチ作成: {org-slug}/admin/{YYYY-MM-DD}-{操作概要}
+   例: a-sha-dwh-project/admin/2026-03-19-add-dept-security
+2. マスタ更新 + 連鎖更新を実行（セクション5・6の処理）
+3. コミット: feat: {操作概要} [{org-slug}]
+4. PR作成（変更サマリーをPR本文に記載）
+5. mainブランチに戻る
+```
+
+詳細は `/company` Skill の `references/git-workflow.md` を参照。
 
 ---
 
@@ -251,6 +273,10 @@ Q3: 想定操作は？
 
 【連鎖更新】
 - {自動更新されたファイルの一覧}
+
+【Git】
+- ブランチ: {branch-name}
+- PR: {PR URL}
 
 他に変更したいことはありますか？
 ```
@@ -271,7 +297,7 @@ Q3: 想定操作は？
 
 | 対象 | 安全策 |
 |------|--------|
-| **部署** | `.company/{dept}/` にファイルがある → 削除不可、アーカイブ提案 |
+| **部署** | `.companies/{org-slug}/{dept}/` にファイルがある → 削除不可、アーカイブ提案 |
 | **ロール** | workflows.md で参照中 → 警告 + 代替ロール要求 |
 | **ワークフロー** | そのまま削除可能（他マスタへの影響なし） |
 | **プロジェクト** | archived への変更を推奨。物理削除は関連フォルダが空の場合のみ |
@@ -287,3 +313,4 @@ Q3: 想定操作は？
 | `../company/references/departments.md` | 部署テンプレート集 | 部署追加時 |
 | `../company/references/agent-templates.md` | Subagent生成テンプレート | ロール追加時 |
 | `../company/references/claude-md-template.md` | CLAUDE.md生成テンプレート | 部署追加・組織変更時 |
+| `../company/references/git-workflow.md` | Gitワークフロー定義 | マスタ変更時 |

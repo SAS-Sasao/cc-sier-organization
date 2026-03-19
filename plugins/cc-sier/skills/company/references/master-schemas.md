@@ -4,6 +4,27 @@
 
 ---
 
+## org-slug（組織識別子）スキーマ
+
+### バリデーションルール
+
+| フィールド | 型 | バリデーション |
+|-----------|-----|-------------|
+| org-slug | string | kebab-case（小文字英数字とハイフンのみ）、一意、空文字不可 |
+
+### 命名ルール
+- 組織名をkebab-caseに変換
+- 日本語はローマ字または英訳に変換
+- 例: 「A社DWH構築プロジェクト」→ `a-sha-dwh-project`
+- 例: 「社内標準化推進」→ `standardization-initiative`
+- ユーザーが直接slugを指定することも可能
+
+### 一意性
+- `.companies/` 直下のディレクトリ名として一意であること
+- 既存と重複する場合はサフィックス（-2, -3等）を付与
+
+---
+
 ## departments.md エントリスキーマ
 
 ### 必須フィールド
@@ -14,7 +35,7 @@
 | 名称 | string | 空文字不可 |
 | ステータス | enum | active / standby / archived のいずれか |
 | 役割 | string | 空文字不可 |
-| フォルダ | string | `.company/` プレフィックス |
+| フォルダ | string | `.companies/{org-slug}/` プレフィックス |
 | 対応Subagent | string[] | roles.md に存在するロールID |
 | トリガーワード | string[] | 1つ以上 |
 
@@ -147,12 +168,12 @@
 
 | 操作 | 連鎖更新対象 | 更新内容 |
 |------|------------|---------|
-| **部署追加** | `.company/{dept}/` | フォルダ＋サブフォルダ作成 |
-| | `.company/{dept}/CLAUDE.md` | `references/departments.md` から部署CLAUDE.mdを生成 |
-| | `.company/CLAUDE.md` | 組織構成ツリー・部署一覧テーブルに追記 |
-| **部署変更** | `.company/{dept}/CLAUDE.md` | 変更内容を反映して再生成 |
-| **部署削除** | `.company/{dept}/` | 削除確認（データがある場合はアーカイブ提案） |
-| | `.company/CLAUDE.md` | 組織構成から除去 |
+| **部署追加** | `.companies/{org-slug}/{dept}/` | フォルダ＋サブフォルダ作成 |
+| | `.companies/{org-slug}/{dept}/CLAUDE.md` | `references/departments.md` から部署CLAUDE.mdを生成 |
+| | `.companies/{org-slug}/CLAUDE.md` | 組織構成ツリー・部署一覧テーブルに追記 |
+| **部署変更** | `.companies/{org-slug}/{dept}/CLAUDE.md` | 変更内容を反映して再生成 |
+| **部署削除** | `.companies/{org-slug}/{dept}/` | 削除確認（データがある場合はアーカイブ提案） |
+| | `.companies/{org-slug}/CLAUDE.md` | 組織構成から除去 |
 | | `roles.md` | 該当部署所属のロールに警告表示 |
 | | `workflows.md` | 該当部署のロールを使うワークフローに警告表示 |
 
@@ -166,6 +187,8 @@
 | **ロール削除** | `.claude/agents/{name}.md` | Subagentファイル削除（確認付き） |
 | | `departments.md` | 所属部署の対応Subagentリストから除去 |
 | | `workflows.md` | 該当ロールを含むワークフローに警告表示＋代替提案 |
+
+※ Subagentはグローバルリソースのため `.claude/agents/` 配下に格納する（組織ディレクトリ配下ではない）。
 
 ### workflows.md 変更時
 
@@ -186,7 +209,7 @@
 
 | 操作 | 連鎖更新対象 | 更新内容 |
 |------|------------|---------|
-| **組織情報変更** | `.company/CLAUDE.md` | テンプレートから再生成 |
+| **組織情報変更** | `.companies/{org-slug}/CLAUDE.md` | テンプレートから再生成 |
 
 ---
 
@@ -194,8 +217,8 @@
 
 | 対象 | 安全策 |
 |------|--------|
-| **部署削除** | `.company/{dept}/` 配下にファイルがある場合は削除不可。アーカイブ（`archived` ステータス）を提案 |
+| **部署削除** | `.companies/{org-slug}/{dept}/` 配下にファイルがある場合は削除不可。アーカイブ（`archived` ステータス）を提案 |
 | **ロール削除** | workflows.md で参照されている場合は警告。代替ロールの指定を求める |
 | **ワークフロー削除** | 削除のみ。他マスタへの影響なし |
-| **プロジェクト削除** | `archived` ステータスへの変更を推奨。物理削除は `.company/pm/projects/` 配下が空の場合のみ |
+| **プロジェクト削除** | `archived` ステータスへの変更を推奨。物理削除は `.companies/{org-slug}/pm/projects/` 配下が空の場合のみ |
 | **全操作共通** | 実行前に変更内容のサマリーを表示し、ユーザーの明示的な承認を必ず取得する |
