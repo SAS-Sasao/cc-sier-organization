@@ -6,8 +6,8 @@ mode: "direct"
 started: "2026-03-19T13:00:00"
 completed: "2026-03-19T13:05:00"
 request: "AI駆動開発の標準化試作について、壁打ち内容をもとにWBSとタスク管理表を作成してほしい"
-issue_number: null
-pr_number: null
+issue_number: 9
+pr_number: 8
 ---
 
 ## 実行計画
