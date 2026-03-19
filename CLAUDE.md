@@ -121,6 +121,32 @@ a-sha-dwh-project
 4. PR作成（変更サマリーをPR本文に記載）
 5. mainブランチに戻る
 
+## タスクログと Issue 自動作成
+
+ファイル生成を伴うタスクの実行過程を `.companies/{org-slug}/.task-log/` に記録し、完了時に GitHub Issue として自動作成する。
+
+### .task-log/ ディレクトリ
+
+```
+.companies/{org-slug}/
+├── CLAUDE.md
+├── masters/
+├── docs/
+└── .task-log/                        ← タスク実行ログ（Git管理対象）
+    └── {task-id}.md                  ← 1タスク1ファイル
+```
+
+- task-id: `YYYYMMDD-HHMMSS-{概要slug}`
+- ログファイルは成果物（docs/）とは分離して配置
+- タスク完了時のコミットに含める（PRの一部になる）
+
+### Issue 作成
+
+- タスク完了時に `gh issue create` で自動作成
+- ラベル: `org:{org-slug}`, `mode:{mode}`, `dept:{dept}`, `type:{type}`
+- テンプレート: `.claude/skills/company/references/task-log-template.md`
+- ファイル生成を伴わない作業（壁打ち、ダッシュボード等）ではスキップ
+
 ---
 
 ## 開発ルール

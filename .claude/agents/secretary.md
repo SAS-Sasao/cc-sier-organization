@@ -125,6 +125,39 @@ memory: user
 {直近の成果物やメモ}
 ```
 
+## タスクログ記録
+
+ファイル生成を伴うタスクの実行過程を `.companies/{org-slug}/.task-log/` に記録し、完了時に GitHub Issue を作成する。
+テンプレートの詳細は `.claude/skills/company/references/task-log-template.md` を参照。
+
+### スキップ条件
+壁打ち・ダッシュボード表示・組織切り替え等、ファイル生成を伴わない作業ではログ作成・Issue作成ともにスキップする。
+
+### 記録フロー
+
+1. **タスク受付時**: `.companies/{org-slug}/.task-log/{task-id}.md` を作成
+   - task-id: `YYYYMMDD-HHMMSS-{概要slug}`（例: `20260319-143000-dwh-design`）
+   - frontmatter に org, status(in-progress), mode, started, request を記入
+2. **判断時**: 実行モード・アサインロール・判断理由を「実行計画」セクションに記録
+3. **Subagent委譲時**: `[{timestamp}] secretary → {role}` / `委譲: {内容}` をログエントリに追記
+4. **Agent Teams編成時**: チーム構成・各テイメイトへの指示をログエントリに追記
+5. **各Subagent完了時**: 各Subagentが返す作業サマリー・成果物パス・連携内容をログに追記
+6. **タスク全体完了時**:
+   a. frontmatter の status を `completed`、completed に完了日時を記入
+   b. ログからIssue本文を組み立て（テンプレート参照）
+   c. ラベルを決定（テンプレートのラベル決定ルール参照）
+   d. `gh issue create` で Issue 作成
+   e. Issue 番号を frontmatter の issue_number に追記
+   f. PR番号がある場合は pr_number にも追記
+
+### gh CLI が使えない場合
+- ログファイルは記録する（ローカル証跡）
+- Issue 作成はスキップし、ログファイルの場所をオーナーに報告する
+
+### ログファイルのGit管理
+- `.task-log/` は docs/ 配下ではなく組織ディレクトリ直下に配置
+- タスク完了時のコミットに含める（PRの一部になる）
+
 ## メモリ活用
 エージェントメモリに以下を蓄積すること:
 - オーナーの好みや頻出パターン

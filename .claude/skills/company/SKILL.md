@@ -234,6 +234,31 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 5. PR の URL をユーザーに報告
 6. `git checkout main` で元のブランチに戻る
 
+### 3.7 タスクログと Issue 作成
+
+ファイル生成を伴うタスクの実行過程を記録し、完了時に GitHub Issue として可視化する。
+詳細なテンプレートは `references/task-log-template.md` を参照。
+
+**スキップ条件**: Gitワークフロー（3.6）と同じ。ファイル生成を伴わない作業（壁打ち、ダッシュボード等）ではログ作成・Issue作成ともにスキップ。
+
+**タスクログの記録フロー**:
+
+1. **タスク受付時**: `.companies/{org-slug}/.task-log/{task-id}.md` を作成（task-id: `YYYYMMDD-HHMMSS-{概要slug}`）
+2. **秘書の判断時**: 実行モード・アサインロール・判断理由をログに記録
+3. **Subagent委譲 / Agent Teams編成時**: 委譲先・指示内容をログに記録
+4. **エージェント作業完了時**: 各Subagentの作業サマリー・成果物パスをログに追記
+5. **タスク全体完了時**: ステータスを completed に更新
+
+**Issue 作成フロー**（タスク完了時に実行）:
+
+1. `.task-log/{task-id}.md` を読み込む
+2. `references/task-log-template.md` の Issue テンプレートに従い本文を組み立てる
+3. ラベルを決定（`references/task-log-template.md` のラベル決定ルール参照）
+4. `gh issue create` で Issue 作成（gh CLI が使えない場合はスキップ）
+5. `.task-log/{task-id}.md` に issue_number を追記
+
+**.task-log/ の配置**: `.companies/{org-slug}/.task-log/` に配置。Git管理対象としてPRに含める。docs/ 配下には置かない（成果物の可読性を保つ）。
+
 ---
 
 ## 4. 部署の動的追加
@@ -312,3 +337,4 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 | `references/agent-templates.md` | Subagent 生成テンプレート | Subagent/Agent Teams 編成時 |
 | `references/sier-templates.md` | SIer業務特化テンプレート | ドキュメント生成時 |
 | `references/master-schemas.md` | マスタスキーマ・バリデーション | マスタCRUD操作時 |
+| `references/task-log-template.md` | タスクログ・Issueテンプレート | タスク実行時・完了時 |
