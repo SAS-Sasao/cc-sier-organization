@@ -1,187 +1,228 @@
-# CC-SIer
+# cc-sier
 
-**Claude Code 仮想組織プラグイン — SIer業務特化版**
+**Claude Code で SIer業務の仮想組織を構築・運営するプラグイン**
 
-## 概要
-
-SIer業務は多領域にまたがります。プロジェクト管理、システム設計、受託開発、標準化、AI駆動開発、テスト自動化、CI/CD、IaC、データアーキテクチャ（DWH構築）—— これらが同時並行で走る環境において、Claude Code 上に**仮想組織**を構築し、業務ごとに専門化されたエージェントチームを動的に編成・運用する仕組みを提供します。
-
-[cc-company v2.0.0](https://github.com/Shin-sibainu/cc-company) の「秘書 → 部署」モデルを踏襲しつつ、以下の進化を加えています:
-
-1. **マスタ駆動の動的組織編成** — 組織・部署・メンバー（エージェントロール）をmdファイルでマスタ管理し、Skillが作業依頼に応じて最適な構成を提案
-2. **Claude Code 公式機能への正確なマッピング** — Skills、Subagents、Agent Teams、CLAUDE.md をそれぞれの正規ディレクトリに配置
-3. **SIer業務ドメインの深い対応** — 受託開発ライフサイクル、標準化活動、ナレッジ蓄積に特化したテンプレートとワークフロー
-4. **Skill経由のマスタ管理** — `/company-admin` で部署・ロール・ワークフローを対話的にCRUD。変更時にはSubagentファイルやCLAUDE.mdへの整合性連鎖更新が自動で実行
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ---
 
-## クイックスタート
+## できること
 
-### 開発モード（このリポジトリで直接使う）
+### ① 秘書に話しかけるだけで業務が回る
+
+`/company` で秘書が起動。依頼内容に応じて自動で専門エージェントに振り分ける。
+
+- TODO管理、壁打ち、メモ、ダッシュボードを秘書が一手に対応
+- マスタのトリガーワードと照合し、最適な部署・Subagent に自動ルーティング
+- 判断に迷う依頼も秘書が受け止めて対応方針を提案
+
+```
+あなた: 「今日のTODOに設計レビューの準備を追加して」
+秘書:   TODOに追加 → .companies/{org}/docs/secretary/todos/2026-03-19.md
+
+あなた: 「A社のインフラ構成を設計して」
+秘書:   トリガーワード「インフラ」→ cloud-engineer Subagent に委譲
+```
+
+### ② 専門エージェントが並列で動く（Agent Teams）
+
+18種の Subagent を同梱。ワークフロー定義に従い、Claude Code が自動でチームを編成する。
+
+- **設計レビュー** → SA + リードデベロッパー + QAリードが同時レビュー
+- **受託案件キックオフ** → PM + SA + QAリードが並列でドキュメント作成
+- **技術比較** → 複数のリサーチャーが同時調査して比較表を統合
+
+```
+あなた: 「A社のDWH設計をやって」
+  ↓
+秘書: チーム編成
+  ├── データアーキテクト → メダリオン全体設計
+  ├── システムアーキテクト → 非機能要件・インフラ選定
+  └── QAリード           → データ品質テスト戦略
+  ↓
+統合レポートを .companies/{org}/docs/data/ に保存
+PRを自動作成してURLを報告
+```
+
+### ③ マスタ駆動で組織が育つ
+
+部署・ロール・ワークフローは md ファイルのマスタで管理。対話的に追加・変更・削除できる。
+
+- `/company-admin` でロール追加 → Subagent ファイル自動生成 → マスタ整合性チェックまで一気通貫
+- 部署削除時はデータ有無を確認し、アーカイブを提案（安全策付き）
+- 最初は秘書室だけでスタート。使うほど部署が増えて組織が成長する
+
+```
+/company-admin
+「セキュリティ室を追加して。脆弱性診断と設計レビューを担当」
+  ↓
+1. masters/departments.md にエントリ追加
+2. masters/roles.md に security-engineer ロール追加
+3. .claude/agents/security-engineer.md を自動生成
+4. docs/security/ フォルダ + CLAUDE.md を作成
+5. 組織CLAUDE.md の部署一覧を更新
+```
+
+### ④ マルチ組織 + Git PR ワークフロー
+
+案件ごとに独立した組織を作成・切り替え。成果物は自動で PR 管理される。
+
+- `/company` 起動時に組織選択 UI を表示。複数案件を並行運用可能
+- ファイル生成時: 自動ブランチ作成 → 作業 → コミット → PR作成 → main 復帰
+- 成果物はすべて `.companies/{org}/docs/` に集約。リポジトリルートは汚さない
+- CLAUDE.md と masters/ は組織ルート直下に配置（Claude Code の遅延ロード対応）
+
+---
+
+## 導入メリット
+
+| 観点 | Before（従来） | After（CC-SIer） |
+|------|---------------|-----------------|
+| 作業の振り分け | 自分でプロンプトを毎回考える | 秘書がマスタ参照で自動振り分け |
+| 専門知識の適用 | 1つのセッションで全領域カバー | 専門 Subagent が独立コンテキストで対応 |
+| 並列作業 | 逐次処理のみ | Agent Teams で 3〜5名が同時並行 |
+| ナレッジ蓄積 | チャット履歴に埋もれる | 組織ディレクトリに md 形式で永続化 |
+| 案件の分離 | 全案件が同じコンテキスト | マルチ組織で案件ごとに独立管理 |
+| 成果物の管理 | ルートに散乱 | `docs/` 配下に集約 + PR で変更追跡 |
+| 組織の拡張 | 最初から全構成を定義 | `/company-admin` で使いながら動的追加 |
+
+---
+
+## 導入方法
+
+### 前提条件
+
+- Claude Code がインストール済み
+- Agent Teams を有効化（推奨）:
+  ```json
+  // ~/.claude/settings.json
+  {"env":{"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS":"1"}}
+  ```
+- GitHub CLI（`gh`）推奨（PR 自動作成に使用）
+
+### ステップ1: リポジトリをクローン
 
 ```bash
 git clone https://github.com/SAS-Sasao/cc-sier-organization.git
 cd cc-sier-organization
+```
+
+### ステップ2: Claude Code を起動
+
+```bash
 claude
 ```
 
-`.claude/` 配下の Skill と Subagent が即座に認識されます。追加設定は不要です。
+`.claude/skills/` と `.claude/agents/` が自動認識される。インストール作業不要。
 
-### 配布モード（プラグインとして配布）
+### ステップ3: 組織を作成
 
-```bash
-# dist/ に配布用パッケージを生成
-./scripts/sync-to-dist.sh
-
-# dist/cc-sier/ をプラグインとして配布
-# （プラグインインストール手順は今後公開予定）
+```
+/company
 ```
 
----
+秘書が起動し、3問のヒアリングで組織を初期化:
+1. 組織名（プロジェクト名）
+2. オーナー名
+3. 事業内容
+4. 起動する部署の選択
 
-## 利用可能なコマンド
+### ステップ4: 仕事を始める
 
-| コマンド | 説明 |
-|---------|------|
-| `/company` | メインSkill。秘書に話しかける。TODO管理、壁打ち、作業依頼の受付・振り分け |
-| `/company-admin` | マスタ管理Skill。部署・ロール・ワークフローの追加・変更・削除を対話的に実行 |
-
-### /company でできること
-
-- **初回**: オンボーディング（3問のヒアリングで組織を初期化）
-- **日常**: TODO管理、壁打ち、メモ、ダッシュボード表示
-- **作業依頼**: マスタのトリガーワードに基づいて最適な部署・Subagentに自動振り分け
-- **並列作業**: Agent Teams を使った設計レビュー、フルスタック開発等
-
-### /company-admin でできること
-
-- 部署の追加・変更・削除（連鎖更新: フォルダ作成、CLAUDE.md生成）
-- ロールの追加・変更・削除（連鎖更新: Subagentファイル自動生成）
-- ワークフローの追加・変更・削除
-- プロジェクトの追加・更新
-- 組織情報・MCPサービスの管理
+```
+/company
+今日のTODOを教えて
+```
 
 ---
 
 ## 同梱 Subagent 一覧（18種）
 
-### opus モデル（複雑な判断・設計タスク）
-
-| 名前 | ファイル | 担当領域 |
-|------|---------|---------|
-| 秘書 | `secretary.md` | TODO管理、壁打ち、メモ、作業振り分け |
-| システムアーキテクト | `system-architect.md` | 全体設計、技術選定、ADR、設計レビュー |
-| データアーキテクト | `data-architect.md` | データモデル設計、DWH、メダリオンアーキテクチャ |
-| AI駆動開発エンジニア | `ai-developer.md` | プロンプト設計、RAGパイプライン、LLMアプリ |
-
-### sonnet モデル（標準的な実装・文書作成）
-
-| 名前 | ファイル | 担当領域 |
-|------|---------|---------|
-| プロジェクトマネージャー | `project-manager.md` | WBS、マイルストーン、進捗・リスク管理 |
-| リードデベロッパー | `lead-developer.md` | コードレビュー、技術方針、実装ガイドライン |
-| バックエンドデベロッパー | `backend-developer.md` | API設計・実装、DB設計 |
-| フロントエンドデベロッパー | `frontend-developer.md` | UI実装、UX改善、コンポーネント設計 |
-| QAリード | `qa-lead.md` | テスト戦略策定、テスト計画、品質メトリクス |
-| テストエンジニア | `test-engineer.md` | テスト自動化、テストケース設計、カバレッジ |
-| CI/CDエンジニア | `ci-cd-engineer.md` | パイプライン設計・構築、デプロイ自動化 |
-| クラウドエンジニア | `cloud-engineer.md` | IaC実装、クラウドアーキテクチャ、セキュリティ |
-| SREエンジニア | `sre-engineer.md` | 監視設計、SLI/SLO、インシデント対応 |
-| 標準化リード | `standards-lead.md` | 開発標準、規約管理、テンプレート整備 |
-| プロセスエンジニア | `process-engineer.md` | ワークフロー最適化、業務プロセス改善 |
-| ナレッジマネージャー | `knowledge-manager.md` | ポストモーテム管理、ナレッジ蓄積 |
-| テクニカルライター | `technical-writer.md` | 技術文書、教育資料、オンボーディング |
-| テクニカルリサーチャー | `tech-researcher.md` | 技術調査、競合分析、PoC |
+| Subagent | モデル | 担当領域 |
+|----------|--------|---------|
+| secretary | opus | 窓口・TODO・壁打ち・メモ・振り分け |
+| project-manager | sonnet | WBS・マイルストーン・進捗・リスク管理 |
+| system-architect | opus | 全体設計・技術選定・ADR・設計レビュー |
+| data-architect | opus | データモデル・DWH・メダリオンアーキテクチャ |
+| ai-developer | opus | プロンプト設計・RAG・LLMアプリ開発 |
+| lead-developer | sonnet | コードレビュー・技術方針・実装ガイドライン |
+| backend-developer | sonnet | API設計・DB設計・サーバーサイド実装 |
+| frontend-developer | sonnet | UI実装・UX改善・コンポーネント設計 |
+| qa-lead | sonnet | テスト戦略・テスト計画・品質メトリクス |
+| test-engineer | sonnet | テスト自動化・テストケース設計・カバレッジ |
+| ci-cd-engineer | sonnet | パイプライン設計・デプロイ自動化・リリース |
+| cloud-engineer | sonnet | IaC実装・クラウド設計・セキュリティ |
+| sre-engineer | sonnet | 監視設計・SLI/SLO・インシデント対応 |
+| standards-lead | sonnet | 開発標準・規約管理・テンプレート整備 |
+| process-engineer | sonnet | ワークフロー最適化・業務プロセス改善 |
+| knowledge-manager | sonnet | ポストモーテム・ナレッジ蓄積・知見構造化 |
+| technical-writer | sonnet | 技術文書・教育資料・オンボーディング |
+| tech-researcher | sonnet | 技術調査・競合分析・PoC実施 |
 
 ---
 
-## ファイル構成
+## コマンド一覧
 
-本リポジトリは **開発用（.claude/）** と **配布用（dist/）** のデュアル構造です。
+| コマンド | 概要 |
+|---------|------|
+| `/company` | 組織の作成・選択・秘書との対話・作業依頼 |
+| `/company-admin` | マスタ管理（部署・ロール・ワークフローの CRUD） |
+
+---
+
+## ディレクトリ構成
 
 ```
 cc-sier-organization/
 │
-├── .claude/                          ← 開発モード: Claude Code が直接認識
+├── .claude/                          ← Claude Code が認識する実行ファイル
 │   ├── skills/
-│   │   ├── company/                  ← /company コマンド
+│   │   ├── company/                  ← /company（メイン Skill）
 │   │   │   ├── SKILL.md
 │   │   │   └── references/           ← 部署テンプレート、ワークフロー定義等
-│   │   └── company-admin/            ← /company-admin コマンド
+│   │   └── company-admin/            ← /company-admin（マスタ管理 Skill）
 │   │       ├── SKILL.md
 │   │       └── references/
-│   └── agents/                       ← 18種の Subagent
+│   └── agents/                       ← 18種の Subagent 定義
 │       ├── secretary.md
 │       ├── system-architect.md
-│       ├── ... (全18ファイル)
-│       └── tech-researcher.md
+│       └── ...
 │
-├── plugins/cc-sier/                  ← 開発ソース（.claude/ の原本）
-│   ├── skills/                       ← Skill ソース
-│   │   ├── company/
-│   │   └── company-admin/
-│   └── agents/                       ← Subagent ソース
+├── .companies/                       ← 組織データ（マルチ組織対応）
+│   ├── .active                       ← アクティブ組織の org-slug
+│   └── {org-slug}/                   ← 組織ごとのディレクトリ
+│       ├── CLAUDE.md                 ← 組織ルール（ルート直下）
+│       ├── masters/                  ← マスタデータ（ルート直下）
+│       │   ├── organization.md
+│       │   ├── departments.md
+│       │   ├── roles.md
+│       │   └── workflows.md
+│       └── docs/                     ← 全成果物はここに集約
+│           ├── secretary/            ← 秘書室（TODO・メモ・壁打ち）
+│           ├── pm/                   ← プロジェクト管理室
+│           ├── architecture/         ← アーキテクチャ室
+│           ├── development/          ← 開発室
+│           ├── quality/              ← 品質管理室
+│           ├── infra/                ← インフラ・IaC室
+│           └── ...
 │
-├── .claude-plugin/                   ← プラグインメタデータ
-│   ├── marketplace.json
-│   └── plugin.json
-│
-├── dist/cc-sier/                     ← 配布モード: sync-to-dist.sh で生成
-│   ├── .claude-plugin/
+├── dist/cc-sier/                     ← 配布用プラグインパッケージ
+│   ├── .claude-plugin/               ← sync-to-dist.sh で生成
 │   ├── skills/
 │   └── agents/
 │
-├── scripts/
-│   └── sync-to-dist.sh              ← 配布用パッケージ生成スクリプト
-│
 ├── docs/
-│   ├── requirements.md               ← 要件定義書 v0.3
-│   └── testing-guide.md              ← テスト手順書
-│
-├── CLAUDE.md                         ← 開発用の指示ファイル
-├── README.md                         ← このファイル
+│   └── requirements.md               ← 要件定義書
+├── CLAUDE.md                         ← 開発用指示ファイル
+├── README.md
 └── LICENSE
 ```
 
-### 開発フロー
-
-1. `plugins/cc-sier/` 配下を編集（ソース原本）
-2. `.claude/` にコピーして動作確認（`cp -r plugins/cc-sier/skills/* .claude/skills/` 等）
-3. 確認後、`scripts/sync-to-dist.sh` で配布用パッケージを生成
-
----
-
-## コンセプト
-
-```
-[CC-SIer 機能マッピング]
-
-Claude Code 機能         本プラグインでの用途
-─────────────────────    ──────────────────────────────────
-CLAUDE.md                組織ルール、部署ルール、運営ポリシーの永続的な指示
-Skills (.claude/skills/) /company コマンド、マスタ参照ロジック、ワークフロー実行
-Subagents (.claude/agents/) 部署ロールの実体（SA、PM、QA等の専門エージェント）
-Agent Teams              大規模並列作業（設計レビュー、フルスタック開発等）
-Plugins (.claude-plugin/)  CC-SIer全体のパッケージング・配布
-
-[実行フロー]
-
-/company 実行
-  │
-  ▼
-Skill (SKILL.md) が起動
-  │
-  ├─ masters/ を参照して実行方式を判定
-  │
-  ├─ [subagent の場合]
-  │   └─ 名前指定で Subagent を呼び出し
-  │      → 独立コンテキストで専門作業を実行
-  │
-  └─ [agent-teams の場合]
-      └─ チームリード（秘書）が Agent Teams を編成
-         → 複数テイメイトが並列作業
-         → 共有タスクリスト + メールボックスで自律連携
-```
+| 層 | パス | 役割 |
+|----|------|------|
+| Skills / Subagent | `.claude/` | Claude Code が認識する Skill と Subagent の実体 |
+| 組織データ | `.companies/` | マスタ定義 + `docs/` 配下の成果物（案件ごとに独立） |
+| 配布パッケージ | `dist/` | `sync-to-dist.sh` で生成するプラグイン配布用ファイル |
 
 ---
 
