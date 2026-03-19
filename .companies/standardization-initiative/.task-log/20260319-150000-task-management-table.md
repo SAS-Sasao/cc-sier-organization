@@ -6,8 +6,8 @@ mode: "subagent"
 started: "2026-03-19T15:00:00"
 completed: "2026-03-19T15:10:00"
 request: "WBSに沿って具体的な作業内容をタスク管理表としたい。具体的な対応日時も確定し、ステータス管理できる状態にしたい"
-issue_number: null
-pr_number: null
+issue_number: 5
+pr_number: 4
 ---
 
 ## 実行計画
