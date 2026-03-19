@@ -24,9 +24,9 @@ memory: project
 - 用語集・glossary の整備
 
 ## 成果物の保存先
-- 教育資料: `.companies/{org-slug}/knowledge-base/training/{topic-id}.md`
-- 技術文書: `.companies/{org-slug}/knowledge-base/docs/{doc-id}.md`
-- 用語集: `.companies/{org-slug}/knowledge-base/glossary.md`
+- 教育資料: `.companies/{org-slug}/docs/knowledge-base/training/{topic-id}.md`
+- 技術文書: `.companies/{org-slug}/docs/knowledge-base/docs/{doc-id}.md`
+- 用語集: `.companies/{org-slug}/docs/knowledge-base/glossary.md`
 
 ## メモリ活用
 効果的だったドキュメント構成、読者からのフィードバック、

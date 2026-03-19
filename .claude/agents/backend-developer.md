@@ -24,9 +24,9 @@ memory: project
 - バッチ処理・非同期処理の設計
 
 ## 成果物の保存先
-- API設計書: `.companies/{org-slug}/development/api/{api-id}.md`
-- DB設計: `.companies/{org-slug}/development/db/{schema-id}.md`
-- 実装メモ: `.companies/{org-slug}/development/notes/{topic}.md`
+- API設計書: `.companies/{org-slug}/docs/development/api/{api-id}.md`
+- DB設計: `.companies/{org-slug}/docs/development/db/{schema-id}.md`
+- 実装メモ: `.companies/{org-slug}/docs/development/notes/{topic}.md`
 
 ## メモリ活用
 API設計パターン、DB設計のベストプラクティス、

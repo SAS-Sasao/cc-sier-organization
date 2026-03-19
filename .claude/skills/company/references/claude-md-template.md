@@ -22,8 +22,9 @@
 ```
 .companies/{{ORG_SLUG}}/
 ├── masters/            ← マスタデータ
-├── secretary/          ← 秘書室（常設）
-{{DEPARTMENT_TREE}}
+└── docs/                ← 全成果物はここに集約
+    ├── secretary/       ← 秘書室（常設）
+    {{DEPARTMENT_TREE}}
 ```
 
 ## 部署一覧
@@ -44,7 +45,7 @@
 1. ユーザーが `/company` または直接話しかける
 2. 秘書がマスタを参照して最適な対応を判定
 3. Subagent または Agent Teams で実行
-4. 成果物を `.companies/{{ORG_SLUG}}/` 配下に保存
+4. 成果物を `.companies/{{ORG_SLUG}}/docs/` 配下に保存
 
 ### Agent Teams ポリシー
 - **コスト設定**: {{COST_AWARENESS}}
@@ -66,7 +67,7 @@
 
 - ファイル生成を伴う作業は必ず専用ブランチで実施
 - ブランチ命名: `{{ORG_SLUG}}/{type}/{YYYY-MM-DD}-{summary}`
-- コミット対象: `.companies/{{ORG_SLUG}}/` 配下のみ
+- コミット対象: `.companies/{{ORG_SLUG}}/docs/` と `masters/` 配下
 - 作業完了後は PR を作成し、URL をユーザーに報告
 - 詳細は `.claude/skills/company/references/git-workflow.md` を参照
 ```

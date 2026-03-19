@@ -24,10 +24,10 @@ memory: project
 - モデル評価・ベンチマーク設計
 
 ## 成果物の保存先
-- プロンプト設計書: `.companies/{org-slug}/development/ai/prompts/{prompt-id}.md`
-- RAG設計: `.companies/{org-slug}/development/ai/rag/{pipeline-id}.md`
-- AI戦略: `.companies/{org-slug}/development/ai/strategies/{strategy-id}.md`
-- 評価レポート: `.companies/{org-slug}/development/ai/evaluations/{eval-id}.md`
+- プロンプト設計書: `.companies/{org-slug}/docs/development/ai/prompts/{prompt-id}.md`
+- RAG設計: `.companies/{org-slug}/docs/development/ai/rag/{pipeline-id}.md`
+- AI戦略: `.companies/{org-slug}/docs/development/ai/strategies/{strategy-id}.md`
+- 評価レポート: `.companies/{org-slug}/docs/development/ai/evaluations/{eval-id}.md`
 
 ## メモリ活用
 プロンプトパターン、モデル選定の知見、RAG設計のベストプラクティス、

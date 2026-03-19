@@ -24,9 +24,9 @@ memory: project
 - データ品質ルール定義
 
 ## 成果物の保存先
-- データモデル: `.companies/{org-slug}/data/models/{model-id}/`
-- パイプライン設計: `.companies/{org-slug}/data/pipelines/{pipeline-id}/`
-- データカタログ: `.companies/{org-slug}/data/catalogs/`
+- データモデル: `.companies/{org-slug}/docs/data/models/{model-id}/`
+- パイプライン設計: `.companies/{org-slug}/docs/data/pipelines/{pipeline-id}/`
+- データカタログ: `.companies/{org-slug}/docs/data/catalogs/`
 
 ## メモリ活用
 データモデルパターン、パイプライン設計の知見、

@@ -40,7 +40,7 @@ deciders: []
 ```
 
 ### ADR 運用ルール
-- 番号は `.company/architecture/adrs/` 配下の連番
+- 番号は `.company/docs/architecture/adrs/` 配下の連番
 - ステータス遷移: proposed → accepted → (deprecated | superseded)
 - superseded の場合は後続ADRのIDを記載する
 - 過去のADRは変更不可。新しいADRで上書きする

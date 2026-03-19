@@ -24,7 +24,7 @@ memory: user
 1. `.companies/.active` を読み取り、アクティブ組織の org-slug を特定
 2. `.companies/{org-slug}/masters/` 配下のマスタファイルを確認
 3. `.companies/{org-slug}/CLAUDE.md` を読み込み組織状態を把握
-4. `.companies/{org-slug}/secretary/todos/` で今日のTODO状況を確認
+4. `.companies/{org-slug}/docs/secretary/todos/` で今日のTODO状況を確認
 5. オーナーの依頼に応じて対応
 
 ## マスタ参照による作業振り分け
@@ -53,7 +53,7 @@ memory: user
 ### Subagent呼び出し時の指示形式
 ```
 「{agent-name}エージェントを使って、{依頼内容}を実行してください。
- 成果物は .companies/{org-slug}/{dept}/{path} に保存してください。
+ 成果物は .companies/{org-slug}/docs/{dept}/{path} に保存してください。
  現在のブランチ: {branch-name}（ブランチ上で作業すること）」
 ```
 
@@ -69,9 +69,9 @@ memory: user
 ## ファイル操作ルール
 - **すべてのファイル操作は `.companies/{org-slug}/` 配下で行うこと**
 - **リポジトリルートや `.claude/` 配下にファイルを作成してはならない**
-- TODOは `.companies/{org-slug}/secretary/todos/YYYY-MM-DD.md` に記録
-- メモは `.companies/{org-slug}/secretary/inbox/YYYY-MM-DD.md` に記録
-- 壁打ちは `.companies/{org-slug}/secretary/notes/` に保存
+- TODOは `.companies/{org-slug}/docs/secretary/todos/YYYY-MM-DD.md` に記録
+- メモは `.companies/{org-slug}/docs/secretary/inbox/YYYY-MM-DD.md` に記録
+- 壁打ちは `.companies/{org-slug}/docs/secretary/notes/` に保存
 - 同日ファイルが存在する場合は追記。新規作成しない
 - ファイル操作前に必ず今日の日付を確認
 
@@ -119,7 +119,7 @@ memory: user
 | {各部署の情報} |
 
 ### 今日のTODO
-{.companies/{org-slug}/secretary/todos/YYYY-MM-DD.md の内容}
+{.companies/{org-slug}/docs/secretary/todos/YYYY-MM-DD.md の内容}
 
 ### 最近の活動
 {直近の成果物やメモ}

@@ -24,9 +24,9 @@ PoCでは再現可能な手順を記録し、判断材料を明確にする。
 - 比較レポート作成
 
 ## 成果物の保存先
-- 調査レポート: `.companies/{org-slug}/research/topics/{topic-id}.md`
-- PoC結果: `.companies/{org-slug}/research/poc/{poc-id}.md`
-- 比較分析: `.companies/{org-slug}/research/comparisons/{comparison-id}.md`
+- 調査レポート: `.companies/{org-slug}/docs/research/topics/{topic-id}.md`
+- PoC結果: `.companies/{org-slug}/docs/research/poc/{poc-id}.md`
+- 比較分析: `.companies/{org-slug}/docs/research/comparisons/{comparison-id}.md`
 
 ## メモリ活用
 技術調査の結果、PoC実施の知見、

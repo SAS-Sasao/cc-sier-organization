@@ -24,9 +24,9 @@ memory: project
 - 改善効果の測定・レポート
 
 ## 成果物の保存先
-- プロセス設計: `.companies/{org-slug}/standardization/processes/{process-id}.md`
-- 改善提案: `.companies/{org-slug}/standardization/improvements/{improvement-id}.md`
-- フロー図: `.companies/{org-slug}/standardization/flows/{flow-id}.md`
+- プロセス設計: `.companies/{org-slug}/docs/standardization/processes/{process-id}.md`
+- 改善提案: `.companies/{org-slug}/docs/standardization/improvements/{improvement-id}.md`
+- フロー図: `.companies/{org-slug}/docs/standardization/flows/{flow-id}.md`
 
 ## メモリ活用
 プロセス改善の実績、ボトルネック分析の手法、

@@ -15,7 +15,7 @@
 - **名称**: {部署名}
 - **ステータス**: {active / standby / archived}
 - **役割**: {部署の役割説明}
-- **フォルダ**: .company/{folder}/
+- **フォルダ**: .company/docs/{folder}/
 - **対応Subagent**: [{role-id, ...}]
 - **トリガーワード**: [{ワード1, ワード2, ...}]
 - **Agent Teams適性**: {high / medium / low}
@@ -30,13 +30,13 @@
 - **名称**: 秘書室
 - **ステータス**: active
 - **役割**: オーナーの窓口。TODO管理、壁打ち、メモ、作業振り分け
-- **フォルダ**: .company/secretary/
+- **フォルダ**: .company/docs/secretary/
 - **対応Subagent**: [secretary]
 - **トリガーワード**: [TODO, タスク, 壁打ち, 相談, メモ, ダッシュボード]
 
 **フォルダ構成**:
 ```
-.company/secretary/
+.company/docs/secretary/
 ├── CLAUDE.md
 ├── inbox/          ← 受信メモ
 ├── todos/          ← TODO管理（YYYY-MM-DD.md）
@@ -71,14 +71,14 @@
 - **名称**: プロジェクト管理室
 - **ステータス**: standby
 - **役割**: 受託案件のプロジェクト管理
-- **フォルダ**: .company/pm/
+- **フォルダ**: .company/docs/pm/
 - **対応Subagent**: [project-manager]
 - **トリガーワード**: [プロジェクト, 案件, WBS, マイルストーン, 進捗, チケット]
 - **Agent Teams適性**: high
 
 **フォルダ構成**:
 ```
-.company/pm/
+.company/docs/pm/
 ├── CLAUDE.md
 ├── projects/       ← プロジェクト定義（{project-id}/）
 ├── tickets/        ← チケット管理
@@ -109,14 +109,14 @@
 - **名称**: アーキテクチャ室
 - **ステータス**: standby
 - **役割**: システム設計、技術選定、ADR
-- **フォルダ**: .company/architecture/
+- **フォルダ**: .company/docs/architecture/
 - **対応Subagent**: [system-architect, data-architect]
 - **トリガーワード**: [設計, アーキテクチャ, 非機能, 技術選定, ADR, 構成図]
 - **Agent Teams適性**: high
 
 **フォルダ構成**:
 ```
-.company/architecture/
+.company/docs/architecture/
 ├── CLAUDE.md
 ├── designs/        ← 設計書（{design-id}/）
 ├── adrs/           ← ADR（ADR-{number}.md）
@@ -150,14 +150,14 @@
 - **名称**: 開発室
 - **ステータス**: standby
 - **役割**: 実装、コードレビュー、AI駆動開発
-- **フォルダ**: .company/development/
+- **フォルダ**: .company/docs/development/
 - **対応Subagent**: [lead-developer, backend-developer, frontend-developer, ai-developer]
 - **トリガーワード**: [実装, コーディング, コードレビュー, リファクタリング, 開発]
 - **Agent Teams適性**: high
 
 **フォルダ構成**:
 ```
-.company/development/
+.company/docs/development/
 ├── CLAUDE.md
 ├── guidelines/     ← 開発ガイドライン
 ├── reviews/        ← コードレビュー結果
@@ -189,14 +189,14 @@
 - **名称**: 品質管理室
 - **ステータス**: standby
 - **役割**: テスト戦略、テスト自動化、CI/CD
-- **フォルダ**: .company/quality/
+- **フォルダ**: .company/docs/quality/
 - **対応Subagent**: [qa-lead, test-engineer, ci-cd-engineer]
 - **トリガーワード**: [テスト, 品質, QA, CI/CD, パイプライン, 自動化]
 - **Agent Teams適性**: medium
 
 **フォルダ構成**:
 ```
-.company/quality/
+.company/docs/quality/
 ├── CLAUDE.md
 ├── strategies/     ← テスト戦略（{project-id}/）
 ├── test-plans/     ← テスト計画（{project-id}/）
@@ -230,14 +230,14 @@
 - **名称**: データエンジニアリング室
 - **ステータス**: standby
 - **役割**: データアーキテクチャ、DWH、ETL/ELT
-- **フォルダ**: .company/data/
+- **フォルダ**: .company/docs/data/
 - **対応Subagent**: [data-architect]
 - **トリガーワード**: [データ, DWH, データレイク, ETL, dbt, メダリオン, Snowflake]
 - **Agent Teams適性**: medium
 
 **フォルダ構成**:
 ```
-.company/data/
+.company/docs/data/
 ├── CLAUDE.md
 ├── models/         ← データモデル（{model-id}/）
 ├── pipelines/      ← パイプライン設計（{pipeline-id}/）
@@ -269,14 +269,14 @@
 - **名称**: インフラ・IaC室
 - **ステータス**: standby
 - **役割**: クラウドインフラ、IaC、運用設計
-- **フォルダ**: .company/infra/
+- **フォルダ**: .company/docs/infra/
 - **対応Subagent**: [cloud-engineer, sre-engineer]
 - **トリガーワード**: [インフラ, IaC, Terraform, AWS, Azure, 運用, 監視, SRE]
 - **Agent Teams適性**: medium
 
 **フォルダ構成**:
 ```
-.company/infra/
+.company/docs/infra/
 ├── CLAUDE.md
 ├── designs/        ← インフラ設計
 ├── iac/            ← IaCコード・設計
@@ -310,14 +310,14 @@
 - **名称**: 標準化推進室
 - **ステータス**: standby
 - **役割**: 開発標準、規約、テンプレート整備
-- **フォルダ**: .company/standardization/
+- **フォルダ**: .company/docs/standardization/
 - **対応Subagent**: [standards-lead, process-engineer]
 - **トリガーワード**: [標準化, 規約, テンプレート, ガイドライン, プロセス]
 - **Agent Teams適性**: low
 
 **フォルダ構成**:
 ```
-.company/standardization/
+.company/docs/standardization/
 ├── CLAUDE.md
 ├── standards/      ← 標準文書（{standard-id}.md）
 ├── templates/      ← テンプレート（{template-id}.md）
@@ -349,14 +349,14 @@
 - **名称**: ナレッジ管理室
 - **ステータス**: standby
 - **役割**: ポストモーテム、ナレッジ蓄積、教育資料
-- **フォルダ**: .company/knowledge-base/
+- **フォルダ**: .company/docs/knowledge-base/
 - **対応Subagent**: [knowledge-manager, technical-writer]
 - **トリガーワード**: [ナレッジ, ポストモーテム, 振り返り, 教育, 研修, ドキュメント]
 - **Agent Teams適性**: medium
 
 **フォルダ構成**:
 ```
-.company/knowledge-base/
+.company/docs/knowledge-base/
 ├── CLAUDE.md
 ├── postmortems/    ← ポストモーテム
 ├── training/       ← 教育資料
@@ -390,14 +390,14 @@
 - **名称**: リサーチ室
 - **ステータス**: standby
 - **役割**: 技術調査、競合分析、PoC
-- **フォルダ**: .company/research/
+- **フォルダ**: .company/docs/research/
 - **対応Subagent**: [tech-researcher]
 - **トリガーワード**: [調査, リサーチ, PoC, 検証, トレンド, 比較]
 - **Agent Teams適性**: high
 
 **フォルダ構成**:
 ```
-.company/research/
+.company/docs/research/
 ├── CLAUDE.md
 └── topics/         ← 調査レポート（{topic-id}.md）
 ```
@@ -432,7 +432,7 @@
 - **名称**: {部署名}
 - **ステータス**: active
 - **役割**: {役割の説明}
-- **フォルダ**: .company/{folder-name}/
+- **フォルダ**: .company/docs/{folder-name}/
 - **対応Subagent**: [{role-id}]
 - **トリガーワード**: [{ワード1, ワード2, ...}]
 - **Agent Teams適性**: {high / medium / low}
@@ -440,7 +440,7 @@
 
 ### フォルダ構成
 ```
-.company/{folder-name}/
+.company/docs/{folder-name}/
 ├── CLAUDE.md
 └── (部署の責務に応じたサブフォルダ)
 ```

@@ -24,9 +24,9 @@ memory: project
 - 過去ナレッジの活用提案
 
 ## 成果物の保存先
-- ポストモーテム: `.companies/{org-slug}/knowledge-base/postmortems/{id}.md`
-- 技術メモ: `.companies/{org-slug}/knowledge-base/tech-notes/{topic}.md`
-- インデックス: `.companies/{org-slug}/knowledge-base/index.md`
+- ポストモーテム: `.companies/{org-slug}/docs/knowledge-base/postmortems/{id}.md`
+- 技術メモ: `.companies/{org-slug}/docs/knowledge-base/tech-notes/{topic}.md`
+- インデックス: `.companies/{org-slug}/docs/knowledge-base/index.md`
 
 ## メモリ活用
 ナレッジの活用状況、頻繁に参照されるトピック、

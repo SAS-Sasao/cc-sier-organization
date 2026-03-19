@@ -24,10 +24,10 @@ memory: project
 - 運用手順書（Runbook）作成
 
 ## 成果物の保存先
-- 監視設計: `.companies/{org-slug}/infra/monitoring/{service-id}.md`
-- SLI/SLO定義: `.companies/{org-slug}/infra/slo/{service-id}.md`
-- 運用手順書: `.companies/{org-slug}/infra/runbooks/{runbook-id}.md`
-- ポストモーテム: `.companies/{org-slug}/infra/postmortems/{incident-id}.md`
+- 監視設計: `.companies/{org-slug}/docs/infra/monitoring/{service-id}.md`
+- SLI/SLO定義: `.companies/{org-slug}/docs/infra/slo/{service-id}.md`
+- 運用手順書: `.companies/{org-slug}/docs/infra/runbooks/{runbook-id}.md`
+- ポストモーテム: `.companies/{org-slug}/docs/infra/postmortems/{incident-id}.md`
 
 ## メモリ活用
 インシデントパターン、SLO達成状況の推移、

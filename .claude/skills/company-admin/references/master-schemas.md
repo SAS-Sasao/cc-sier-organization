@@ -14,7 +14,7 @@
 | 名称 | string | 空文字不可 |
 | ステータス | enum | active / standby / archived のいずれか |
 | 役割 | string | 空文字不可 |
-| フォルダ | string | `.company/` プレフィックス |
+| フォルダ | string | `.company/docs/` プレフィックス |
 | 対応Subagent | string[] | roles.md に存在するロールID |
 | トリガーワード | string[] | 1つ以上 |
 
@@ -147,11 +147,11 @@
 
 | 操作 | 連鎖更新対象 | 更新内容 |
 |------|------------|---------|
-| **部署追加** | `.company/{dept}/` | フォルダ＋サブフォルダ作成 |
-| | `.company/{dept}/CLAUDE.md` | `references/departments.md` から部署CLAUDE.mdを生成 |
+| **部署追加** | `.company/docs/{dept}/` | フォルダ＋サブフォルダ作成 |
+| | `.company/docs/{dept}/CLAUDE.md` | `references/departments.md` から部署CLAUDE.mdを生成 |
 | | `.company/CLAUDE.md` | 組織構成ツリー・部署一覧テーブルに追記 |
-| **部署変更** | `.company/{dept}/CLAUDE.md` | 変更内容を反映して再生成 |
-| **部署削除** | `.company/{dept}/` | 削除確認（データがある場合はアーカイブ提案） |
+| **部署変更** | `.company/docs/{dept}/CLAUDE.md` | 変更内容を反映して再生成 |
+| **部署削除** | `.company/docs/{dept}/` | 削除確認（データがある場合はアーカイブ提案） |
 | | `.company/CLAUDE.md` | 組織構成から除去 |
 | | `roles.md` | 該当部署所属のロールに警告表示 |
 | | `workflows.md` | 該当部署のロールを使うワークフローに警告表示 |
@@ -194,8 +194,8 @@
 
 | 対象 | 安全策 |
 |------|--------|
-| **部署削除** | `.company/{dept}/` 配下にファイルがある場合は削除不可。アーカイブ（`archived` ステータス）を提案 |
+| **部署削除** | `.company/docs/{dept}/` 配下にファイルがある場合は削除不可。アーカイブ（`archived` ステータス）を提案 |
 | **ロール削除** | workflows.md で参照されている場合は警告。代替ロールの指定を求める |
 | **ワークフロー削除** | 削除のみ。他マスタへの影響なし |
-| **プロジェクト削除** | `archived` ステータスへの変更を推奨。物理削除は `.company/pm/projects/` 配下が空の場合のみ |
+| **プロジェクト削除** | `archived` ステータスへの変更を推奨。物理削除は `.company/docs/pm/projects/` 配下が空の場合のみ |
 | **全操作共通** | 実行前に変更内容のサマリーを表示し、ユーザーの明示的な承認を必ず取得する |

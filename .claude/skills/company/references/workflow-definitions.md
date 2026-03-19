@@ -21,7 +21,7 @@
   2. メールボックスで指摘事項を相互共有
   3. チームリード（秘書）が統合レビューレポートを作成
 - **成果物**:
-  - `.company/architecture/reviews/{review-id}.md`
+  - `.company/docs/architecture/reviews/{review-id}.md`
 
 ---
 
@@ -41,9 +41,9 @@
   3. QA がテスト戦略概要を作成
   4. 全員が合流して統合レビュー
 - **成果物**:
-  - `.company/pm/projects/{project-id}/project-definition.md`
-  - `.company/architecture/designs/{project-id}/scope.md`
-  - `.company/quality/strategies/{project-id}/overview.md`
+  - `.company/docs/pm/projects/{project-id}/project-definition.md`
+  - `.company/docs/architecture/designs/{project-id}/scope.md`
+  - `.company/docs/quality/strategies/{project-id}/overview.md`
 
 ---
 
@@ -59,9 +59,9 @@
   3. 消費レイヤー設計（セマンティックレイヤー）
   4. 統合レビュー
 - **成果物**:
-  - `.company/data/models/{model-id}/architecture.md`
-  - `.company/data/models/{model-id}/pipeline-design.md`
-  - `.company/data/models/{model-id}/semantic-layer.md`
+  - `.company/docs/data/models/{model-id}/architecture.md`
+  - `.company/docs/data/models/{model-id}/pipeline-design.md`
+  - `.company/docs/data/models/{model-id}/semantic-layer.md`
 
 ---
 
@@ -80,7 +80,7 @@
   2. メールボックスで指摘事項を相互共有
   3. チームリード（秘書）が統合レビューレポートを作成
 - **成果物**:
-  - `.company/development/reviews/{review-id}.md`
+  - `.company/docs/development/reviews/{review-id}.md`
 
 ---
 
@@ -95,7 +95,7 @@
   2. テスト戦略書をドラフト
   3. レビュー結果を反映
 - **成果物**:
-  - `.company/quality/strategies/{project-id}/test-strategy.md`
+  - `.company/docs/quality/strategies/{project-id}/test-strategy.md`
 
 ---
 
@@ -111,7 +111,7 @@
   3. 根本原因分析（5 Whys）
   4. 再発防止策の策定
 - **成果物**:
-  - `.company/knowledge-base/postmortems/{id}.md`
+  - `.company/docs/knowledge-base/postmortems/{id}.md`
 
 ---
 
@@ -131,7 +131,7 @@
   3. 比較表作成（複数技術の場合）
   4. 推奨事項と根拠を整理
 - **成果物**:
-  - `.company/research/topics/{topic-id}.md`
+  - `.company/docs/research/topics/{topic-id}.md`
 
 ---
 
@@ -147,8 +147,8 @@
   3. ドラフト作成
   4. レビュー・承認
 - **成果物**:
-  - `.company/standardization/standards/{standard-id}.md`
-  - `.company/standardization/templates/{template-id}.md`
+  - `.company/docs/standardization/standards/{standard-id}.md`
+  - `.company/docs/standardization/templates/{template-id}.md`
 
 ---
 
@@ -167,7 +167,7 @@
   3. technical-writer がコンテンツを作成
   4. 統合レビュー
 - **成果物**:
-  - `.company/knowledge-base/training/{topic-id}.md`
+  - `.company/docs/knowledge-base/training/{topic-id}.md`
 
 ---
 

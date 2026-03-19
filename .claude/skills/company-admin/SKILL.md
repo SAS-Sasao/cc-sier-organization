@@ -130,7 +130,7 @@ Q3: 想定操作は？
 | ワークフローID | `wf-` プレフィックス + kebab-case + 一意 |
 | プロジェクトID | `proj-` プレフィックス + 一意 |
 | ステータス | 定義された enum 値のいずれか |
-| フォルダパス | `.companies/{org-slug}/` プレフィックス + 他部署と非重複 |
+| フォルダパス | `.companies/{org-slug}/docs/` プレフィックス + 他部署と非重複 |
 
 ### 4.2 整合性検証
 
@@ -167,9 +167,9 @@ Q3: 想定操作は？
 
 ```
 1. masters/departments.md にエントリ追加
-2. .companies/{org-slug}/{folder}/ フォルダ作成（サブフォルダ含む）
+2. .companies/{org-slug}/docs/{folder}/ フォルダ作成（サブフォルダ含む）
    → references/departments.md のテンプレートを参照
-3. .companies/{org-slug}/{folder}/CLAUDE.md 生成
+3. .companies/{org-slug}/docs/{folder}/CLAUDE.md 生成
    → references/departments.md の CLAUDE.md テンプレートから生成
 4. .companies/{org-slug}/CLAUDE.md の組織構成ツリー・部署一覧テーブルに追記
 5. 新規ロールがある場合 → ロール追加の連鎖更新も実行
@@ -203,7 +203,7 @@ Q3: 想定操作は？
 ### 6.4 部署削除時の連鎖更新（安全策付き）
 
 ```
-1. .companies/{org-slug}/{folder}/ 配下のファイル存在チェック
+1. .companies/{org-slug}/docs/{folder}/ 配下のファイル存在チェック
    → ファイルがある場合: 物理削除不可。以下を提案:
      「この部署にはデータが残っています。削除ではなくアーカイブ（archived ステータス）
       にすることをお勧めします。アーカイブしますか？」
@@ -297,7 +297,7 @@ Q3: 想定操作は？
 
 | 対象 | 安全策 |
 |------|--------|
-| **部署** | `.companies/{org-slug}/{dept}/` にファイルがある → 削除不可、アーカイブ提案 |
+| **部署** | `.companies/{org-slug}/docs/{dept}/` にファイルがある → 削除不可、アーカイブ提案 |
 | **ロール** | workflows.md で参照中 → 警告 + 代替ロール要求 |
 | **ワークフロー** | そのまま削除可能（他マスタへの影響なし） |
 | **プロジェクト** | archived への変更を推奨。物理削除は関連フォルダが空の場合のみ |

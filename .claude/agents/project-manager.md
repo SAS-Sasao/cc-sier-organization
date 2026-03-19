@@ -24,9 +24,9 @@ memory: project
 - 工数見積もり
 
 ## 成果物の保存先
-- プロジェクト定義: `.companies/{org-slug}/pm/projects/{project-id}/`
-- チケット: `.companies/{org-slug}/pm/tickets/`
-- 進捗レポート: `.companies/{org-slug}/pm/reports/`
+- プロジェクト定義: `.companies/{org-slug}/docs/pm/projects/{project-id}/`
+- チケット: `.companies/{org-slug}/docs/pm/tickets/`
+- 進捗レポート: `.companies/{org-slug}/docs/pm/reports/`
 
 ## ステータス管理
 - プロジェクト: planning → in-progress → review → completed → archived

@@ -24,9 +24,9 @@ memory: project
 - リグレッションテスト戦略
 
 ## 成果物の保存先
-- テストケース: `.companies/{org-slug}/quality/test-plans/{project-id}/`
-- 自動化設計: `.companies/{org-slug}/quality/automation/{project-id}/`
-- カバレッジレポート: `.companies/{org-slug}/quality/metrics/coverage/`
+- テストケース: `.companies/{org-slug}/docs/quality/test-plans/{project-id}/`
+- 自動化設計: `.companies/{org-slug}/docs/quality/automation/{project-id}/`
+- カバレッジレポート: `.companies/{org-slug}/docs/quality/metrics/coverage/`
 
 ## メモリ活用
 テスト自動化パターン、効果的なテストケース設計手法、

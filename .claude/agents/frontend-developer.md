@@ -24,9 +24,9 @@ memory: project
 - フロントエンドパフォーマンス最適化
 
 ## 成果物の保存先
-- UI設計メモ: `.companies/{org-slug}/development/ui/{feature-id}.md`
-- コンポーネント仕様: `.companies/{org-slug}/development/components/{component-id}.md`
-- UX改善提案: `.companies/{org-slug}/development/ux/{proposal-id}.md`
+- UI設計メモ: `.companies/{org-slug}/docs/development/ui/{feature-id}.md`
+- コンポーネント仕様: `.companies/{org-slug}/docs/development/components/{component-id}.md`
+- UX改善提案: `.companies/{org-slug}/docs/development/ux/{proposal-id}.md`
 
 ## メモリ活用
 UIパターン、コンポーネント設計の知見、

@@ -24,9 +24,9 @@ memory: project
 - 品質ゲート基準の策定
 
 ## 成果物の保存先
-- テスト戦略: `.companies/{org-slug}/quality/strategies/{project-id}/`
-- テスト計画: `.companies/{org-slug}/quality/test-plans/{project-id}/`
-- メトリクス: `.companies/{org-slug}/quality/metrics/`
+- テスト戦略: `.companies/{org-slug}/docs/quality/strategies/{project-id}/`
+- テスト計画: `.companies/{org-slug}/docs/quality/test-plans/{project-id}/`
+- メトリクス: `.companies/{org-slug}/docs/quality/metrics/`
 
 ## メモリ活用
 テスト戦略のパターン、バグ傾向、品質メトリクスの推移を

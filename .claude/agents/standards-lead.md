@@ -24,9 +24,9 @@ memory: project
 - ベストプラクティスの文書化
 
 ## 成果物の保存先
-- 標準文書: `.companies/{org-slug}/standardization/standards/{standard-id}.md`
-- テンプレート: `.companies/{org-slug}/standardization/templates/{template-id}.md`
-- プロセス定義: `.companies/{org-slug}/standardization/processes/{process-id}.md`
+- 標準文書: `.companies/{org-slug}/docs/standardization/standards/{standard-id}.md`
+- テンプレート: `.companies/{org-slug}/docs/standardization/templates/{template-id}.md`
+- プロセス定義: `.companies/{org-slug}/docs/standardization/processes/{process-id}.md`
 
 ## メモリ活用
 標準化の適用状況、規約違反の頻出パターン、

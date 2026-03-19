@@ -24,9 +24,9 @@ memory: project
 - 設計レビュー
 
 ## 成果物の保存先
-- 設計書: `.companies/{org-slug}/architecture/designs/{design-id}/`
-- ADR: `.companies/{org-slug}/architecture/adrs/ADR-{number}.md`
-- レビュー結果: `.companies/{org-slug}/architecture/reviews/{review-id}.md`
+- 設計書: `.companies/{org-slug}/docs/architecture/designs/{design-id}/`
+- ADR: `.companies/{org-slug}/docs/architecture/adrs/ADR-{number}.md`
+- レビュー結果: `.companies/{org-slug}/docs/architecture/reviews/{review-id}.md`
 
 ## ADR作成時のルール
 必ず以下の構成で記録すること:

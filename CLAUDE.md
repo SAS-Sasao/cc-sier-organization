@@ -52,7 +52,8 @@ cc-sier-organization/
 ├── a-sha-dwh-project/       ← 組織ディレクトリの例
 │   ├── masters/             ← マスタデータ
 │   ├── CLAUDE.md            ← 組織の文脈情報
-│   └── {dept}/              ← 部署ごとの成果物
+│   └── docs/                ← 全成果物はここに集約
+│       └── {dept}/          ← 部署ごとの成果物
 └── standardization-initiative/
     └── ...
 ```
@@ -80,9 +81,10 @@ a-sha-dwh-project
 
 ## 成果物格納ルール
 
-- **全成果物は `.companies/{org-slug}/` 配下に作成すること**
+- **全成果物は `.companies/{org-slug}/docs/` 配下に作成すること**
+- CLAUDE.md（組織ルール）と masters/（マスタデータ）は組織ルート直下に配置
 - リポジトリルートや `.claude/` 配下に業務成果物ファイルを作成してはならない
-- Subagentへの委譲時も、組織パス（`.companies/{org-slug}/`）を明示して指示すること
+- Subagentへの委譲時も、組織パス（`.companies/{org-slug}/docs/`）を明示して指示すること
 - Subagentファイル（`.claude/agents/`）はグローバルリソースのため例外とする
 
 ---
@@ -114,7 +116,7 @@ a-sha-dwh-project
 ### フロー
 
 1. mainから作業ブランチを作成
-2. 成果物を `.companies/{org-slug}/` 配下に生成
+2. 成果物を `.companies/{org-slug}/docs/` 配下に生成
 3. コミット（メッセージは上記規則に従う）
 4. PR作成（変更サマリーをPR本文に記載）
 5. mainブランチに戻る

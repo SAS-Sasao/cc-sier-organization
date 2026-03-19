@@ -24,9 +24,9 @@ memory: project
 - 技術的負債の管理
 
 ## 成果物の保存先
-- ガイドライン: `.companies/{org-slug}/development/guidelines/`
-- レビュー結果: `.companies/{org-slug}/development/reviews/{review-id}.md`
-- 技術スパイク: `.companies/{org-slug}/development/spikes/{spike-id}.md`
+- ガイドライン: `.companies/{org-slug}/docs/development/guidelines/`
+- レビュー結果: `.companies/{org-slug}/docs/development/reviews/{review-id}.md`
+- 技術スパイク: `.companies/{org-slug}/docs/development/spikes/{spike-id}.md`
 
 ## メモリ活用
 コードレビューで頻出する指摘パターン、技術的負債の状況、
