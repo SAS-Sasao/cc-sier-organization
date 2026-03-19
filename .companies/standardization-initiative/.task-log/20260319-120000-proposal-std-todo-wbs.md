@@ -6,8 +6,8 @@ mode: direct
 started: "2026-03-19T12:00:00"
 completed: "2026-03-19T12:05:00"
 request: "作業TODOとWBSを作成して欲しい（提案書・見積標準化プロジェクト）"
-issue_number: null
-pr_number: null
+issue_number: 3
+pr_number: 2
 ---
 
 ## 実行計画
