@@ -6,8 +6,8 @@ mode: "direct"
 started: "2026-03-19T12:00:00"
 completed: "2026-03-19T12:05:00"
 request: "見積基準の明確化とフォーマットについての壁打ち内容をドキュメントにまとめてほしい"
-issue_number: null
-pr_number: null
+issue_number: 7
+pr_number: 6
 ---
 
 ## 実行計画
