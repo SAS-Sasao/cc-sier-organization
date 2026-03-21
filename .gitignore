@@ -15,3 +15,6 @@ bk/
 
 # セッション統計JSON（Hooks自動生成、Git管理外）
 .companies/*/.session-summaries/
+
+# エージェントメモリ（ローカル学習データ・Git管理外）
+.claude/agent-memory/

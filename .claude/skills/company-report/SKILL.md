@@ -199,3 +199,13 @@ Issue: {Issue URL}
 ブランチ: {org-slug}/docs/{TODAY}-report-{period}
 コミット: docs: {period}レポートを生成 [{org-slug}] by {operator}
 ```
+
+---
+
+## 6. 継続学習の自動実行（レポート生成後）
+
+レポートの生成・Issue投稿・Gitワークフローがすべて完了したら、
+自動的に `/company-evolve` Skill を起動して継続学習を実行する。
+
+レポートの対象期間（today / week / month）を引き継いで学習する。
+学習完了後、学習結果のサマリーをレポートのGitHub Issueにコメントとして追記する。
