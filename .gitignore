@@ -9,3 +9,6 @@ bk/
 
 # .companies/.active はローカル設定（各ユーザーが独立して組織切替するため）
 .companies/.active
+
+# インタラクションログ（Hooks自動生成、Git管理外）
+.companies/*/.interaction-log/
