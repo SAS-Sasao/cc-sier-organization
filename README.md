@@ -26,7 +26,7 @@
 
 ### ② 専門エージェントが並列で動く（Agent Teams）
 
-18種の Subagent を同梱。ワークフロー定義に従い、Claude Code が自動でチームを編成する。
+19種の Subagent を同梱。ワークフロー定義に従い、Claude Code が自動でチームを編成する。
 
 - **設計レビュー** → SA + リードデベロッパー + QAリードが同時レビュー
 - **受託案件キックオフ** → PM + SA + QAリードが並列でドキュメント作成
@@ -188,6 +188,7 @@ claude
 | knowledge-manager | sonnet | ポストモーテム・ナレッジ蓄積・知見構造化 |
 | technical-writer | sonnet | 技術文書・教育資料・オンボーディング |
 | tech-researcher | sonnet | 技術調査・競合分析・PoC実施 |
+| devops-coordinator | sonnet | リポジトリ初期構成・アプリ切り出し・CI/CD |
 
 ---
 
