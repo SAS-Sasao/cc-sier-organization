@@ -116,6 +116,6 @@ gh issue create \
 {注目トピックの概要}
 
 ### ファイル
-\`.companies/{org-slug}/docs/daily-digest/YYYY-MM-DD.md\`
+[daily-digest/YYYY-MM-DD.md](https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/{org-slug}/docs/daily-digest/YYYY-MM-DD.md)
 "
 ```
