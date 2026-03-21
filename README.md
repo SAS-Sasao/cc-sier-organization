@@ -131,7 +131,31 @@ cc-sier側: projects.md にリポジトリURLを記録 → PR作成
  Subagentがそのまま使えます。」
 ```
 
-### ⑦ 複数人で同じリポジトリを共有できる
+### ⑦ インタラクションログが自動記録される（Hooks）
+
+Claude Code のツール実行を自動でログに記録し、セッション終了時に GitHub Issue へ投稿する。
+
+- **PostToolUse hook**: ツール実行のたびにログファイルへ1行追記（ツール名・パス・コマンド等）
+- **Stop hook**: セッション終了時に GitHub Issue を自動作成（同日2回目以降はコメント追記）
+- `.companies/{org}/.interaction-log/YYYY-MM-DD.md` にローカルログを保存
+- `.active` を読み取って動作するため、新規・既存どの組織でも設定不要で自動記録
+- `gh` 未インストール or 未認証の場合はローカルログだけ残してスキップ
+- ツール実行が0回のセッションは Issue を作らない（空打ちノイズ防止）
+
+```
+セッション中（PostToolUse hook が毎回追記）:
+  14:30:05 — Read     path: `.companies/a-sha-dwh/masters/departments.md`
+  14:30:12 — Edit     path: `.companies/a-sha-dwh/masters/departments.md`
+  14:30:18 — Bash     cmd: `git add ...`
+
+セッション終了（Stop hook が Issue 作成）:
+  → GitHub Issue: [a-sha-dwh] インタラクションログ 2026-03-21
+    ├── ツール実行数: 15 回
+    ├── セッションID: abc12345
+    └── ログ全文（折りたたみ表示）
+```
+
+### ⑧ 複数人で同じリポジトリを共有できる
 
 チーム全員が cc-sier-organization をクローンし、PRベースで協働する。
 
@@ -165,6 +189,7 @@ todo: Sprint1 タスクを追加 [jutaku-dev-team] by tanaka
 | 成果物の管理 | ルートに散乱 | `docs/` 配下に集約 + PR で変更追跡 |
 | 組織の拡張 | 最初から全構成を定義 | `/company-admin` で使いながら動的追加 |
 | 作業の追跡 | 「何をやったか」が不明 | タスク完了時に GitHub Issue で自動可視化 |
+| 操作ログ | ツール実行が見えない | Hooks で全操作を自動記録 → Issue に投稿 |
 | 設計→実装 | 手動コピー | `/company-spawn` で設計＋Subagentごと切り出し |
 | チーム運用 | 1人前提 | 全員がクローンして独立作業、PRで共有 |
 
@@ -288,11 +313,14 @@ cc-sier-organization/
 │   │   └── company-spawn/            ← /company-spawn（アプリリポ切り出し Skill）
 │   │       ├── SKILL.md
 │   │       └── references/
-│   └── agents/                       ← 20種の Subagent 定義
-│       ├── secretary.md
-│       ├── system-architect.md
-│       ├── devops-coordinator.md
-│       └── ...
+│   ├── agents/                       ← 20種の Subagent 定義
+│   │   ├── secretary.md
+│   │   ├── system-architect.md
+│   │   ├── devops-coordinator.md
+│   │   └── ...
+│   └── hooks/                        ← インタラクションログ Hooks
+│       ├── capture-interaction.sh    ← PostToolUse: ツール実行ログ追記
+│       └── session-boundary.sh       ← Stop: Issue 作成 / コメント追記
 │
 ├── .companies/                       ← 組織データ（マルチ組織対応）
 │   ├── .active                       ← アクティブ組織（ローカル管理・Git管理外）
@@ -305,6 +333,7 @@ cc-sier-organization/
 │       │   ├── workflows.md
 │       │   └── projects.md          ← 実装リポジトリURLも記録
 │       ├── .task-log/                ← タスク実行ログ
+│       ├── .interaction-log/         ← Hooks自動生成ログ（Git管理外）
 │       └── docs/                     ← 全成果物はここに集約
 │           ├── secretary/
 │           ├── architecture/
@@ -325,7 +354,7 @@ cc-sier-organization/
 
 | 層 | パス | 役割 |
 |----|------|------|
-| Skills / Subagent | `.claude/` | Claude Code が認識する Skill と Subagent の実体 |
+| Skills / Subagent / Hooks | `.claude/` | Skill、Subagent、インタラクションログ Hooks の実体 |
 | 組織データ | `.companies/` | マスタ定義 + `docs/` 配下の成果物（案件ごとに独立） |
 | 配布パッケージ | `dist/` | `sync-to-dist.sh` で生成するプラグイン配布用ファイル |
 
