@@ -19,6 +19,7 @@ description: >
 ## 1. 操作対象の判定
 
 起動時に `.companies/.active` を読み取り、`{org-slug}` を特定する。
+また `git config user.name` を実行してユーザー名を取得し、`{operator}` として保持する（取得できない場合は `anonymous`）。
 以降、すべてのマスタ参照先は `.companies/{org-slug}/masters/` となる。
 
 ユーザーの依頼から対象マスタと操作種別を特定します。
@@ -252,7 +253,7 @@ Q3: 想定操作は？
 1. ブランチ作成: {org-slug}/admin/{YYYY-MM-DD}-{操作概要}
    例: a-sha-dwh-project/admin/2026-03-19-add-dept-security
 2. マスタ更新 + 連鎖更新を実行（セクション5・6の処理）
-3. コミット: feat: {操作概要} [{org-slug}]
+3. コミット: feat: {操作概要} [{org-slug}] by {operator}
 4. PR作成（変更サマリーをPR本文に記載）
 5. mainブランチに戻る
 ```

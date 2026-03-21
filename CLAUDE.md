@@ -69,8 +69,8 @@ cc-sier-organization/
 
 ### .active ファイル
 
-`.companies/.active` にアクティブ組織の org-slug を1行で記載する。
-Skillはこのファイルを起動時に読み取り、操作対象組織を特定する。
+`.companies/.active` はローカル設定ファイル（`.gitignore` で除外）。各ユーザーが独立して組織を切り替え可能。
+アクティブ組織の org-slug を1行で記載する。Skillはこのファイルを起動時に読み取り、操作対象組織を特定する。
 
 ```
 # .companies/.active の例
@@ -107,7 +107,7 @@ a-sha-dwh-project
 ### コミットメッセージ
 
 ```
-{type}: {概要} [{org-slug}]
+{type}: {概要} [{org-slug}] by {operator}
 ```
 
 - 例: `feat: セキュリティ部門を追加 [a-sha-dwh-project]`

@@ -20,6 +20,7 @@
 ---
 task_id: "{task-id}"
 org: "{org-slug}"
+operator: "{operator}"
 status: in-progress
 mode: "{agent-teams / subagent / direct}"
 started: "{YYYY-MM-DDTHH:MM:SS}"
@@ -66,6 +67,7 @@ pr_number: null
 ```markdown
 ## タスク概要
 - **依頼者**: {owner_name}
+- **作業者**: {operator}
 - **組織**: {org-slug}
 - **依頼日時**: {started}
 - **完了日時**: {completed}

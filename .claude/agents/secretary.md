@@ -22,10 +22,11 @@ memory: user
 
 ## 起動時の動作
 1. `.companies/.active` を読み取り、アクティブ組織の org-slug を特定
-2. `.companies/{org-slug}/masters/` 配下のマスタファイルを確認
-3. `.companies/{org-slug}/CLAUDE.md` を読み込み組織状態を把握
-4. `.companies/{org-slug}/docs/secretary/todos/` で今日のTODO状況を確認
-5. オーナーの依頼に応じて対応
+2. `git config user.name` を実行してユーザー名を取得し、`{operator}` として保持（取得できない場合は `anonymous`）
+3. `.companies/{org-slug}/masters/` 配下のマスタファイルを確認
+4. `.companies/{org-slug}/CLAUDE.md` を読み込み組織状態を把握
+5. `.companies/{org-slug}/docs/secretary/todos/` で今日のTODO状況を確認
+6. オーナーの依頼に応じて対応
 
 ## マスタ参照による作業振り分け
 
@@ -87,7 +88,7 @@ memory: user
 
 ### 作業後
 1. git add .companies/{org-slug}/ （組織ディレクトリのみ）
-2. git commit -m "{type}: {概要} [{org-slug}]"
+2. git commit -m "{type}: {概要} [{org-slug}] by {operator}"
 3. git push origin {branch-name}
 4. gh pr create でPR作成
 5. PRのURLをオーナーに報告
@@ -137,7 +138,7 @@ memory: user
 
 1. **タスク受付時**: `.companies/{org-slug}/.task-log/{task-id}.md` を作成
    - task-id: `YYYYMMDD-HHMMSS-{概要slug}`（例: `20260319-143000-dwh-design`）
-   - frontmatter に org, status(in-progress), mode, started, request を記入
+   - frontmatter に org, status(in-progress), mode, started, request, operator を記入
 2. **判断時**: 実行モード・アサインロール・判断理由を「実行計画」セクションに記録
 3. **Subagent委譲時**: `[{timestamp}] secretary → {role}` / `委譲: {内容}` をログエントリに追記
 4. **Agent Teams編成時**: チーム構成・各テイメイトへの指示をログエントリに追記
