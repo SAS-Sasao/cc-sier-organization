@@ -12,3 +12,6 @@ bk/
 
 # インタラクションログ（Hooks自動生成、Git管理外）
 .companies/*/.interaction-log/
+
+# セッション統計JSON（Hooks自動生成、Git管理外）
+.companies/*/.session-summaries/
