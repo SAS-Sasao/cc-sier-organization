@@ -10,6 +10,10 @@
     {
       "name": "company-admin",
       "path": "skills/company-admin/SKILL.md"
+    },
+    {
+      "name": "company-spawn",
+      "path": "skills/company-spawn/SKILL.md"
     }
   ],
   "agents": "agents/"

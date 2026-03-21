@@ -114,6 +114,11 @@
 | 関連ワークフロー | string[] | workflows.md に存在するワークフローID |
 | 開始日 | string | YYYY-MM-DD 形式 |
 | 終了予定日 | string | YYYY-MM-DD 形式 |
+| 実装リポジトリ | string | GitHub URLフォーマット |
+| スポーン日 | string | YYYY-MM-DD 形式 |
+| スポーン作業者 | string | git user name |
+| コピーした成果物 | string[] | ファイルパスの配列 |
+| コピーしたSubagent | string[] | Subagent名の配列 |
 
 ### 整合性ルール
 - 関連部署のIDがすべて departments.md に存在すること

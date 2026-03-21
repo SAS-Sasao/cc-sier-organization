@@ -15,7 +15,10 @@ cc-sier-organization/
 │   │   ├── company/          ← メインSkill（/company コマンド）
 │   │   │   ├── SKILL.md
 │   │   │   └── references/   ← 部署テンプレート、ワークフロー定義等
-│   │   └── company-admin/    ← マスタ管理Skill（/company-admin コマンド）
+│   │   ├── company-admin/    ← マスタ管理Skill（/company-admin コマンド）
+│   │   │   ├── SKILL.md
+│   │   │   └── references/
+│   │   └── company-spawn/    ← アプリリポジトリ切り出しSkill
 │   │       ├── SKILL.md
 │   │       └── references/
 │   └── agents/               ← Subagent定義（secretary.md, project-manager.md 等）
@@ -176,3 +179,6 @@ Conventional Commits に従うこと:
 - `plugins/cc-sier/skills/` 配下が **Skill ファイル**（プラグインインストール時に `.claude/skills/` に配置される）
 - `plugins/cc-sier/agents/` 配下が **Subagent ファイル**（プラグインインストール時に `.claude/agents/` に配置される）
 - プロジェクトルートの `CLAUDE.md`（このファイル）は開発用。ユーザー環境に生成される `.companies/{org-slug}/CLAUDE.md` とは別物
+- `/company-spawn` でアプリケーションリポジトリを新規作成できる
+- 設計成果物とSubagentを新リポにコピーし、パスを自動書き換えする
+- コピー元の追跡情報は新リポの `docs/design/origin.md` に記録される

@@ -22,6 +22,7 @@ echo "[1/4] Skills をコピー..."
 mkdir -p "$DIST_DIR/skills"
 cp -r "$SRC_DIR/skills/company" "$DIST_DIR/skills/"
 cp -r "$SRC_DIR/skills/company-admin" "$DIST_DIR/skills/"
+cp -r "$SRC_DIR/skills/company-spawn" "$DIST_DIR/skills/"
 
 # Agents をコピー（plugins/cc-sier/agents/ の初期同梱ファイルのみ）
 echo "[2/4] Agents をコピー..."

@@ -73,6 +73,27 @@ PRを自動作成してURLを報告
 - CLAUDE.md と masters/ は組織ルート直下に配置（Claude Code の遅延ロード対応）
 - `.active` はGit管理しないため、各メンバーが独立して作業組織を選択できます
 
+### ⑥ 設計からアプリリポジトリを切り出す
+
+`/company-spawn` で、cc-sierの設計成果物をもとに実装用のリポジトリを自動生成。
+
+- 設計書・ADRを `docs/design/` に自動コピー
+- 使いたいSubagentを選んで新リポにエクスポート（パス自動書き換え付き）
+- 技術スタックに応じたスキャフォールド（dbt, Terraform, React等）を生成
+- 設計の出自情報（origin.md）で cc-sier との紐づけを維持
+
+```
+/company-spawn
+「A社DWHのdbtリポジトリを作りたい」
+  ↓
+1. リポジトリ名・技術スタック・コピーする成果物をヒアリング
+2. devops-coordinator が gh repo create で新リポ作成
+3. 設計書を docs/design/ にコピー + origin.md で出自を記録
+4. Subagentをコピー（パスを新リポ用に自動書き換え）
+5. dbt用スキャフォールド生成 + 初期コミット
+6. cc-sier側の projects.md にリポ情報を追記 → PR作成
+```
+
 ### ⑤ タスクの実行過程が GitHub Issue で可視化される
 
 ファイル生成を伴うタスクの完了時に、実行過程を GitHub Issue として自動作成する。
@@ -166,7 +187,7 @@ claude
 
 ---
 
-## 同梱 Subagent 一覧（18種）
+## 同梱 Subagent 一覧（19種）
 
 | Subagent | モデル | 担当領域 |
 |----------|--------|---------|
@@ -198,6 +219,7 @@ claude
 |---------|------|
 | `/company` | 組織の作成・選択・秘書との対話・作業依頼 |
 | `/company-admin` | マスタ管理（部署・ロール・ワークフローの CRUD） |
+| `/company-spawn` | 設計成果物をもとにアプリケーションリポジトリを新規作成 |
 
 ---
 
@@ -211,10 +233,13 @@ cc-sier-organization/
 │   │   ├── company/                  ← /company（メイン Skill）
 │   │   │   ├── SKILL.md
 │   │   │   └── references/           ← 部署テンプレート、ワークフロー定義等
-│   │   └── company-admin/            ← /company-admin（マスタ管理 Skill）
+│   │   ├── company-admin/            ← /company-admin（マスタ管理 Skill）
+│   │   │   ├── SKILL.md
+│   │   │   └── references/
+│   │   └── company-spawn/            ← /company-spawn（アプリ切り出し Skill）
 │   │       ├── SKILL.md
 │   │       └── references/
-│   └── agents/                       ← 18種の Subagent 定義
+│   └── agents/                       ← 19種の Subagent 定義
 │       ├── secretary.md
 │       ├── system-architect.md
 │       └── ...
