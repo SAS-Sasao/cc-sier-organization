@@ -30,15 +30,19 @@ gh auth login
 
 ---
 
-## Step 2: 組織に入る
+## Step 2: 組織を作る・入る
 
-Claude Code を起動し、使用する組織を選択します。
+**存在しない org-slug を指定すると新規作成、存在する場合は切り替えになります。**
 
 ```
+# 初期同梱の組織に入る
 /company jutaku-dev-team
+
+# 新規組織を作る（指定した org-slug が存在しなければ自動生成）
+/company a-corp-ordering-system
 ```
 
-**利用可能な組織（初期）:**
+**初期同梱の3組織（すぐに使い始められます）:**
 
 | org-slug | 用途 |
 |---|---|
@@ -46,7 +50,8 @@ Claude Code を起動し、使用する組織を選択します。
 | `standardization-initiative` | 社内標準化 |
 | `domain-tech-collection` | 技術調査・知識収集 |
 
-新しい組織を作るには → [06 マルチ組織運用](06-multi-org.md)
+新規作成時は `CLAUDE.md`・`masters/`・`docs/secretary/` が自動生成されます。
+その後 `/company-admin` でマスタ（顧客情報・役割など）を追加してください。
 
 ---
 

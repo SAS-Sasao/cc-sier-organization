@@ -17,18 +17,27 @@
 
 ---
 
-## 新しい組織を作る
+## 新しい組織を作る・切り替える
+
+**どちらも `/company {org-slug}` 1つで完結します。**
+
+| 動作 | 条件 |
+|---|---|
+| 新規組織を作成 | `.companies/{org-slug}/` が存在しない場合 |
+| 既存組織に切り替え | `.companies/{org-slug}/` が既に存在する場合 |
 
 ```
-/company-admin
-→「新しい組織を作りたい。org-slug は b-corp-renewal-project。
-  B社の既存システム刷新プロジェクト用。AWSメイン。」
+# 新規作成（存在しない org-slug を指定するだけ）
+/company a-corp-renewal-project
+
+# 切り替え（既存組織）
+/company jutaku-dev-team
 ```
 
-自動作成されるもの:
+新規作成時に自動生成されるもの:
 
 ```
-.companies/b-corp-renewal-project/
+.companies/a-corp-renewal-project/
 ├── CLAUDE.md
 ├── masters/
 │   ├── customers/
@@ -36,15 +45,11 @@
 │   └── workflows.md
 └── docs/
     └── secretary/
+        ├── todos/
+        └── reports/
 ```
 
----
-
-## 組織を切り替える
-
-```
-/company b-corp-renewal-project
-```
+作成後、`/company-admin` でマスタ（顧客情報・役割定義など）を追加していきます。
 
 ---
 
