@@ -4,27 +4,35 @@
 
 ## /company
 
-組織を作成、または切り替えます。
+組織を作成、または切り替えます。引数なしで実行します。
 
 ```
-/company {org-slug}
-/company              ← 既存組織の一覧を表示
+/company
 ```
 
-**ポイント: 存在しない org-slug を指定すると新規作成になります。**
+実行するとメニューが表示されます。
 
-| 動作 | 条件 |
-|---|---|
-| 新規組織を作成 | `.companies/{org-slug}/` が存在しない場合 |
-| 既存組織に切り替え | `.companies/{org-slug}/` が既に存在する場合 |
+**メニューの選択肢:**
+- 既存組織の一覧 → 選択すると切り替え
+- 新規組織を作成 → 4問の対話フローで新規作成
+
+**新規組織作成時の4問対話:**
+
+| # | 質問 | 例 |
+|---|---|---|
+| Q0 | 組織名（プロジェクト名） | A社DWH構築プロジェクト → org-slug `a-sha-dwh` が自動生成 |
+| Q1 | あなたのお名前（ニックネーム） | 秘書がオーナーを呼ぶ名前に使用 |
+| Q2 | どんな事業・業務をしているか | SIer、受託開発、データ基盤構築 等 |
+| Q3 | 最初に立ち上げたい部署 | 秘書室のみ（推奨）/ 秘書室+PM室 / 秘書室+アーキテクチャ室 / カスタム |
 
 **新規作成時の動作:**
-1. `.companies/{org-slug}/` ディレクトリを生成
-2. `CLAUDE.md`（空テンプレート）を作成
-3. `masters/`（roles.md / workflows.md / customers/）を作成
-4. `docs/secretary/`（todos/ / reports/）を作成
-5. `.companies/.active` に org-slug を書き込む
-6. 新規作成完了を報告
+1. 4問の回答内容をもとに org-slug と初期設定を決定
+2. `.companies/{org-slug}/` ディレクトリを生成
+3. `CLAUDE.md` を作成
+4. `masters/`（organization.md / departments.md / roles.md / workflows.md）を作成
+5. `docs/secretary/`（inbox/ / todos/ / notes/）を作成
+6. `.companies/.active` に org-slug を書き込む
+7. 新規作成完了を報告
 
 **切り替え時の動作:**
 1. `.companies/.active` に org-slug を書き込む
@@ -33,14 +41,12 @@
 
 **使い方例:**
 ```
-# 新規: 顧客案件ごとに組織を作る
-/company a-corp-ordering-system   ← 存在しなければ自動作成
-
-# 切り替え: 既存組織に移動
-/company jutaku-dev-team
-
-# 一覧表示
+# 起動してメニューを表示
 /company
+
+# → 「既存組織に切り替え」を選んで jutaku-dev-team を選択
+# または
+# → 「新規組織を作成」を選んで4問に回答
 ```
 
 ---

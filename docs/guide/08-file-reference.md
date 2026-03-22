@@ -212,7 +212,7 @@ Skill 定義ファイル群。`/command` として呼び出される手順書で
 
 | Skill ディレクトリ | コマンド | SKILL.md の役割 |
 |---|---|---|
-| `company/` | `/company` | 組織の新規作成・切り替え・秘書起動の手順 |
+| `company/` | `/company` | 引数なしで起動→メニューから新規作成（4問対話）または切り替え・秘書起動の手順 |
 | `company-admin/` | `/company-admin` | マスタデータCRUDの手順 |
 | `company-spawn/` | `/company-spawn` | アプリリポジトリ切り出しの手順 |
 | `company-report/` | `/company-report` | 活動レポート生成の手順 |

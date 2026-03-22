@@ -32,15 +32,19 @@ gh auth login
 
 ## Step 2: 組織を作る・入る
 
-**存在しない org-slug を指定すると新規作成、存在する場合は切り替えになります。**
+`/company` を引数なしで実行するとメニューが表示されます。
 
 ```
-# 初期同梱の組織に入る
-/company jutaku-dev-team
-
-# 新規組織を作る（指定した org-slug が存在しなければ自動生成）
-/company a-corp-ordering-system
+/company
 ```
+
+**表示されるメニュー:**
+- 既存組織の一覧（選択すると切り替え）
+- 新規組織を作成
+
+**新規組織を作成する場合:**
+「新規組織を作成」を選択すると4問の対話フローが始まります。
+回答すると `.companies/{org-slug}/` 配下のディレクトリが自動生成されます。
 
 **初期同梱の3組織（すぐに使い始められます）:**
 
@@ -50,8 +54,7 @@ gh auth login
 | `standardization-initiative` | 社内標準化 |
 | `domain-tech-collection` | 技術調査・知識収集 |
 
-新規作成時は `CLAUDE.md`・`masters/`・`docs/secretary/` が自動生成されます。
-その後 `/company-admin` でマスタ（顧客情報・役割など）を追加してください。
+作成後は `/company-admin` でマスタ（顧客情報・役割など）を追加してください。
 
 ---
 
