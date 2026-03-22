@@ -23,5 +23,9 @@ description: >
 
 GitHub Pages で公開する場合:
   リポジトリ設定 → Pages → Source: main ブランチ / docs フォルダ
-  URL: https://{user}.github.io/{repo}/secretary/dashboard.html
+  トップURL:       https://{user}.github.io/{repo}/
+  ダッシュボード:  https://{user}.github.io/{repo}/secretary/dashboard.html
+
+  ※ トップURLにアクセスすると自動でダッシュボードにリダイレクトされます
+  ※ docs/index.html は /company-dashboard 実行時に自動更新されます
 ```

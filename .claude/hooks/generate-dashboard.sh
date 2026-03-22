@@ -279,3 +279,25 @@ output.write_text(html, encoding="utf-8")
 size_kb = round(output.stat().st_size / 1024, 1)
 print(f"✅ ダッシュボード生成完了: {output} ({size_kb} KB)")
 PYEOF
+
+# ================================================================
+# GitHub Pages 用 index.html を自動生成・更新
+# ================================================================
+PAGES_INDEX="docs/index.html"
+DASHBOARD_URL="./secretary/dashboard.html"
+
+cat > "$PAGES_INDEX" <<HTMLEOF
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url=${DASHBOARD_URL}">
+<title>${ORG_SLUG} ダッシュボード</title>
+</head>
+<body>
+<p><a href="${DASHBOARD_URL}">ダッシュボードへ移動</a></p>
+</body>
+</html>
+HTMLEOF
+
+echo "✅ docs/index.html を更新しました（GitHub Pages リダイレクト）"
