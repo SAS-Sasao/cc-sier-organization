@@ -1,381 +1,125 @@
-# cc-sier
+# cc-sier-organization
 
-**Claude Code で SIer業務の仮想組織を構築・運営するプラグイン**
+**Claude Code で SIer の仕事を仮想組織として動かすプラグイン**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+```
+あなた ──依頼──▶ 秘書エージェント ──振り分け──▶ 専門Subagent ──成果物──▶ Git PR
+                      ↑                                              ↓
+              Case Bank 参照                             自動ログ・学習
+```
+
+Claude Code に「組織」の概念を持ち込み、秘書エージェントが依頼を受け取り、専門Subagentに委譲し、成果物をGit経由で管理します。使うほど賢くなる継続学習機能を内蔵しています。
+
+---
+
+## なぜ cc-sier-organization を使うのか
+
+### 普通の Claude Code との違い
+
+| | 普通の Claude Code | cc-sier-organization |
+|---|---|---|
+| 依頼の振り分け | 毎回手動でコンテキスト説明 | 秘書が自動でSubagentに委譲 |
+| 成果物の管理 | フォルダが散乱しがち | `.companies/{org}/docs/` に自動整理 |
+| 作業履歴 | セッションをまたいで消える | `.task-log/` + GitHub Issues に永続化 |
+| 組織のルール | プロンプトで毎回説明 | `masters/` に一度書けばずっと参照 |
+| 複数プロジェクト | ディレクトリを手動で切り替え | `/company {org}` で一発切り替え |
+| 品質の向上 | 指示を繰り返すしかない | 継続学習で自動的に精度が上がる |
+
+### 具体的なメリット
+
+**① 認知負荷ゼロの委譲**
+「A社のDWH設計をやって」と言うだけで、秘書が data-architect Subagentに委譲し、設計書を `docs/data/` に配置してPRを作ります。何を誰に頼むかを考えなくていい。
+
+**② ルールの一元管理**
+顧客ごとの制約、部署ごとの文書フォーマット、使用技術スタックを `masters/` に記述すれば、全Subagentが自動参照します。「前も言ったのに」がなくなります。
+
+**③ 作業履歴が自動で残る**
+ツール実行のたびに `.interaction-log/` に記録され、セッション終了時に GitHub Issues に自動投稿されます。振り返りや引き継ぎが楽になります。
+
+**④ 組織がだんだん賢くなる**（継続学習 / Memento-Skills）
+使えば使うほど、高品質だった作業パターンが自動でワークフロー化されます。Subagentの説明文が実績データで更新されます。新しいSkillやSubagentが必要になったら自動生成を提案します。
+
+**⑤ 複数組織・複数プロジェクトを一つのリポジトリで**
+`/company-spawn` で新しいアプリリポジトリを切り出しながら、元の組織の知識は共有し続けられます。
 
 ---
 
 ## できること
 
-### ① 秘書に話しかけるだけで業務が回る
-
-`/company` で秘書が起動。依頼内容に応じて自動で専門エージェントに振り分ける。
-
-- TODO管理、壁打ち、メモ、ダッシュボードを秘書が一手に対応
-- マスタのトリガーワードと照合し、最適な部署・Subagent に自動ルーティング
-- 判断に迷う依頼も秘書が受け止めて対応方針を提案
-
-```
-あなた: 「今日のTODOに設計レビューの準備を追加して」
-秘書:   TODOに追加 → .companies/{org}/docs/secretary/todos/2026-03-19.md
-
-あなた: 「A社のインフラ構成を設計して」
-秘書:   トリガーワード「インフラ」→ cloud-engineer Subagent に委譲
-```
-
-### ② 専門エージェントが並列で動く（Agent Teams）
-
-20種の Subagent を同梱。ワークフロー定義に従い、Claude Code が自動でチームを編成する。
-
-- **設計レビュー** → SA + リードデベロッパー + QAリードが同時レビュー
-- **受託案件キックオフ** → PM + SA + QAリードが並列でドキュメント作成
-- **技術比較** → 複数のリサーチャーが同時調査して比較表を統合
-
-```
-あなた: 「A社のDWH設計をやって」
-  ↓
-秘書: チーム編成
-  ├── データアーキテクト → メダリオン全体設計
-  ├── システムアーキテクト → 非機能要件・インフラ選定
-  └── QAリード           → データ品質テスト戦略
-  ↓
-統合レポートを .companies/{org}/docs/data/ に保存
-PRを自動作成してURLを報告
-```
-
-### ③ マスタ駆動で組織が育つ
-
-部署・ロール・ワークフローは md ファイルのマスタで管理。対話的に追加・変更・削除できる。
-
-- `/company-admin` でロール追加 → Subagent ファイル自動生成 → マスタ整合性チェックまで一気通貫
-- 部署削除時はデータ有無を確認し、アーカイブを提案（安全策付き）
-- 最初は秘書室だけでスタート。使うほど部署が増えて組織が成長する
-
-```
-/company-admin
-「セキュリティ室を追加して。脆弱性診断と設計レビューを担当」
-  ↓
-1. masters/departments.md にエントリ追加
-2. masters/roles.md に security-engineer ロール追加
-3. .claude/agents/security-engineer.md を自動生成
-4. docs/security/ フォルダ + CLAUDE.md を作成
-5. 組織CLAUDE.md の部署一覧を更新
-```
-
-### ④ マルチ組織 + Git PR ワークフロー
-
-案件ごとに独立した組織を作成・切り替え。成果物は自動で PR 管理される。
-
-- `/company` 起動時に組織選択 UI を表示。複数案件を並行運用可能
-- ファイル生成時: 自動ブランチ作成 → 作業 → コミット → PR作成 → main 復帰
-- 成果物はすべて `.companies/{org}/docs/` に集約。リポジトリルートは汚さない
-- `.active` はGit管理しないため、各メンバーが独立して作業組織を選択できる
-
-### ⑤ タスクの実行過程が GitHub Issue で可視化される
-
-ファイル生成を伴うタスクの完了時に、実行過程を GitHub Issue として自動作成する。
-
-- 秘書の判断（なぜその実行モード・ロールを選んだか）
-- 各 Subagent の作業サマリーと成果物
-- エージェント間の連携内容（誰が誰に何を渡したか）
-- 作業者（operator）の記録
-- ラベルで組織・実行モード・部署・タスク種別をフィルタ可能
-
-```
-[a-sha-dwh] DWH メダリオンアーキテクチャ設計     mode:agent-teams  dept:data
-
-## 実行計画（秘書の判断）
-- 実行モード: Agent Teams
-- アサイン: data-architect, system-architect, qa-lead
-- 作業者: sasao
-- 判断理由: データソース4種 + 分析要件5種 → 並列設計が効率的
-
-## エージェント作業ログ
-### data-architect → メダリオン3層設計を完了
-### system-architect → Azure Synapse を推奨
-### qa-lead → データ品質テスト戦略を策定
-
-## 成果物一覧
-| ファイル | 作成者 | パス |
-|---------|--------|------|
-| メダリオン全体設計 | data-architect | docs/data/models/.../architecture.md |
-```
-
-### ⑥ 設計からアプリリポジトリを切り出す
-
-`/company-spawn` で、cc-sierの設計成果物をもとに実装用のリポジトリを自動生成する。
-
-- 設計書・ADRを `docs/design/` に自動コピー
-- 使いたいSubagentを選んで新リポにエクスポート（パス自動書き換え付き）
-- 技術スタックに応じたスキャフォールド（dbt, Terraform, React等）を生成
-- 設計の出自情報（`origin.md`）で cc-sier との紐づけを維持
-
-```
-/company-spawn
-「A社DWHの実装リポを作りたい。dbt + Terraformで」
-  ↓
-秘書: ヒアリング → 実行計画の提示 → 承認
-  ↓
-devops-coordinator:
-  1. gh repo create a-sha-dwh-app --private
-  2. メダリオン設計書・ADRを docs/design/ にコピー
-  3. data-architect, cloud-engineer を .claude/agents/ にエクスポート
-  4. dbt + Terraform のスキャフォールドを生成
-  5. CLAUDE.md, origin.md, README.md を生成
-  6. 初期コミット＋push
-  ↓
-cc-sier側: projects.md にリポジトリURLを記録 → PR作成
-  ↓
-「cd ../a-sha-dwh-app && claude で新リポに移動してください。
- Subagentがそのまま使えます。」
-```
-
-### ⑦ インタラクションログが自動記録される（Hooks）
-
-Claude Code のツール実行を自動でログに記録し、セッション終了時に GitHub Issue へ投稿する。
-
-- **PostToolUse hook**: ツール実行のたびにログファイルへ1行追記（ツール名・パス・コマンド等）
-- **Stop hook**: セッション終了時に GitHub Issue を自動作成（同日2回目以降はコメント追記）
-- `.companies/{org}/.interaction-log/YYYY-MM-DD.md` にローカルログを保存
-- `.active` を読み取って動作するため、新規・既存どの組織でも設定不要で自動記録
-- `gh` 未インストール or 未認証の場合はローカルログだけ残してスキップ
-- ツール実行が0回のセッションは Issue を作らない（空打ちノイズ防止）
-
-```
-セッション中（PostToolUse hook が毎回追記）:
-  14:30:05 — Read     path: `.companies/a-sha-dwh/masters/departments.md`
-  14:30:12 — Edit     path: `.companies/a-sha-dwh/masters/departments.md`
-  14:30:18 — Bash     cmd: `git add ...`
-
-セッション終了（Stop hook が Issue 作成）:
-  → GitHub Issue: [a-sha-dwh] インタラクションログ 2026-03-21
-    ├── ツール実行数: 15 回
-    ├── セッションID: abc12345
-    └── ログ全文（折りたたみ表示）
-```
-
-### ⑧ セッション統計が自動で残る
-
-セッション終了時に、ツール実行の統計情報を JSON ファイルとして自動保存する。AIを使わず bash だけで軽量に生成される。
-
-- `.companies/{org}/.session-summaries/YYYYMMDD-HHMMSS-{id}.json` に保存
-- ツール種別ごとの実行回数（Write / Read / Bash / その他）を集計
-- 書き込みが発生したファイルパスを一覧で記録
-- GitHub Issue のコメントにも統計テーブルと書き込みファイル一覧を掲載
-
-```json
-{
-  "session_id": "a3f9b2c1...",
-  "org_slug": "jutaku-dev-team",
-  "date": "2026-03-21",
-  "tool_count": 12,
-  "by_type": { "write": 3, "read": 4, "bash": 5, "other": 0 },
-  "files_written": [".companies/jutaku-dev-team/docs/architecture/adrs/ADR-001.md"]
-}
-```
-
-### ⑨ 活動サマリーレポートを自動生成（/company-report）
-
-`/company-report` で、指定期間の活動をまとめたレポートを自動生成する。4つの情報源を統合し、AIが要約する。
-
-- **期間指定**: 当日（デフォルト）/ 週次（過去7日）/ 月次（当月）/ カスタム日付範囲
-- **4つの情報源**: セッション統計JSON + タスクログ + docs/ の変更履歴 + GitHub Issues
-- **出力**: mdファイル保存 + GitHub Issue 投稿 + Git PR 作成まで自動実行
-- **継続学習**: レポート完了後、自動的に `/company-evolve` を起動してログから学習を実行
-
-```
-/company-report          # 当日のレポート
-今週のレポートを作って    # 過去7日
-月次振り返り              # 当月1日〜今日
-```
-
-レポートの構成:
-```
-# {org-slug} 活動レポート — 2026-03-21
-
-## エグゼクティブサマリー   ← AIが3〜5文で要約
-## 活動統計                  ← セッション数・ツール実行数など数値まとめ
-## 完了タスク                ← .task-log の completed 一覧
-## 進行中タスク              ← .task-log の in-progress 一覧
-## 作成・更新された成果物    ← 部署別にグルーピング
-## Issue 動向                ← 期間内のクローズ/オープン
-## 次のアクション候補        ← AIが優先度順に3〜5件を推定
-```
-
-### ⑩ 使うほど進化する継続学習（/company-evolve）
-
-過去のログからユーザーの好みとパターンを自動抽出し、エージェントメモリを更新する。
-`/company-report` 完了後に自動起動するため、意識せず学習が進む。
-
-- **出力スタイルの好み**: 「ASCII図」「比較表」「簡潔に」等のリクエスト傾向を検出
-- **Subagentの先読み**: よく使うSubagentをランキング化し、次回から先読み提案
-- **ワークフロー自動登録**: 同じ操作が3回以上繰り返されたら `workflows.md` に自動追加
-- MEMORY.md はセクション単位で上書き（200行制限に引っかからない設計）
-- `workflows.md` への書き込みのみ Git 管理（ブランチ → PR）、MEMORY.md はローカル管理
-
-```
-/company-evolve            # 手動実行（直近30日分を学習）
-/company-report week       # レポート生成後に自動起動
-
-学習結果 → .claude/agent-memory/secretary/MEMORY.md に書き込み
-  → 次のセッションで秘書が先読み提案
-  → 「今日もDWH設計ですか？data-architectに直接繋ぎましょうか？」
-```
-
-### ⑪ 複数人で同じリポジトリを共有できる
-
-チーム全員が cc-sier-organization をクローンし、PRベースで協働する。
-
-- 組織の切り替え（`.active`）は各メンバーのローカルで独立管理
-- コミットメッセージ・タスクログ・PRに作業者（operator）が自動記録される
-- `git config user.name` から自動取得。設定不要
-
-```
-# Aさん: standardization-initiative で作業
-/company → A) standardization-initiative で作業を続ける
-
-# Bさん（同時に）: jutaku-dev-team で作業
-/company → B) jutaku-dev-team で作業を続ける
-
-# コミットメッセージに作業者が記録される
-design: メダリオン設計書を作成 [a-sha-dwh] by sasao
-todo: Sprint1 タスクを追加 [jutaku-dev-team] by tanaka
-```
+| 機能 | コマンド / Skill | 説明 |
+|---|---|---|
+| ① 組織に入る | `/company {org-slug}` | アクティブ組織を切り替え |
+| ② タスクを依頼 | 自然言語で話しかける | 秘書が自動でSubagentに振り分け |
+| ③ マスタ管理 | `/company-admin` | 顧客・役割・ワークフローのCRUD |
+| ④ アプリ切り出し | `/company-spawn` | 新規Gitリポジトリを生成 |
+| ⑤ 定期レポート | `/company-report` | 週次・月次サマリーをGitへ |
+| ⑥ 継続学習 | `/company-evolve` | 組織の知識と手順を自動更新 |
+| ⑦ ログ自動記録 | Stop hook | セッション終了時にIssueへ自動投稿 |
+| ⑧ Skill 自動生成 | Skill Synthesizer | 繰り返しパターンからSkillを生成 |
+| ⑨ Agent 精緻化 | Subagent Refiner | 実績データでAgentを自動更新 |
+| ⑩ Agent 自動生成 | Subagent Spawner | 対応Agentがない作業に新規生成 |
 
 ---
 
-## 導入メリット
+## 同梱の組織・Subagent
 
-| 観点 | Before（従来） | After（CC-SIer） |
-|------|---------------|-----------------|
-| 作業の振り分け | 自分でプロンプトを毎回考える | 秘書がマスタ参照で自動振り分け |
-| 専門知識の適用 | 1つのセッションで全領域カバー | 専門 Subagent が独立コンテキストで対応 |
-| 並列作業 | 逐次処理のみ | Agent Teams で 3〜5名が同時並行 |
-| ナレッジ蓄積 | チャット履歴に埋もれる | 組織ディレクトリに md 形式で永続化 |
-| 案件の分離 | 全案件が同じコンテキスト | マルチ組織で案件ごとに独立管理 |
-| 成果物の管理 | ルートに散乱 | `docs/` 配下に集約 + PR で変更追跡 |
-| 組織の拡張 | 最初から全構成を定義 | `/company-admin` で使いながら動的追加 |
-| 作業の追跡 | 「何をやったか」が不明 | タスク完了時に GitHub Issue で自動可視化 |
-| 操作ログ | ツール実行が見えない | Hooks で全操作を自動記録 → Issue に投稿 |
-| やり取りの記録 | ログが散らばるか記録されない | Hooksで全ツール実行を自動記録、GitHub Issueに自動集約 |
-| 活動の振り返り | 手動でチャット履歴を遡る | `/company-report` で期間指定・AI要約レポートをワンコマンドで生成 |
-| 継続的な改善 | 毎回同じ設定を繰り返す | `/company-evolve` でログから好みを学習、使うほど先読み精度が上がる |
-| 設計→実装 | 手動コピー | `/company-spawn` で設計＋Subagentごと切り出し |
-| チーム運用 | 1人前提 | 全員がクローンして独立作業、PRで共有 |
+### 組織（初期3種）
 
----
+| org-slug | 用途 |
+|---|---|
+| `standardization-initiative` | 社内標準化・ガイドライン策定 |
+| `jutaku-dev-team` | 受注開発プロジェクト管理 |
+| `domain-tech-collection` | 技術調査・ドメイン知識蓄積 |
 
-## 導入方法
+### Subagent（20種）
 
-### 前提条件
+秘書（secretary）が依頼内容に応じて以下のSubagentに委譲します。
 
-- Claude Code がインストール済み
-- Agent Teams を有効化（推奨）:
-  ```json
-  // ~/.claude/settings.json
-  {"env":{"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS":"1"}}
-  ```
-- GitHub CLI（`gh`）推奨（PR自動作成・リポジトリ作成に使用）
-- tmux 推奨（Agent Teams のパネル分割表示に必要）
-
-### ステップ1: リポジトリをクローン
-
-```bash
-git clone https://github.com/SAS-Sasao/cc-sier-organization.git
-cd cc-sier-organization
-```
-
-### ステップ2: Claude Code を起動
-
-```bash
-# tmux内で起動するとAgent Teamsのパネル分割が有効になる
-tmux
-claude
-```
-
-`.claude/skills/` と `.claude/agents/` が自動認識される。インストール作業不要。
-
-### ステップ2.5: Hooks に実行権限を付与（初回のみ）
-
-```bash
-chmod +x .claude/hooks/capture-interaction.sh
-chmod +x .claude/hooks/session-boundary.sh
-```
-
-`gh auth login` で GitHub CLI を認証しておくと、セッション終了時に自動で GitHub Issue が作成されます。
-
-### ステップ3: 組織を作成
-
-```
-/company
-```
-
-秘書が起動し、4問のヒアリングで組織を初期化:
-1. 組織名（プロジェクト名）
-2. オーナー名
-3. 事業内容
-4. 起動する部署の選択
-
-### ステップ4: 仕事を始める
-
-```
-/company
-今日のTODOを教えて
-```
-
-### チームメンバーの参加方法
-
-```bash
-# メンバーがクローンしてClaude Codeを起動するだけ
-git clone https://github.com/SAS-Sasao/cc-sier-organization.git
-cd cc-sier-organization
-claude
-
-# /company で組織を選択して作業開始
-/company
-```
-
-各メンバーの `.active` はローカル管理のため、他のメンバーに影響なく組織を切り替えられる。
+| カテゴリ | Subagent |
+|---|---|
+| 設計 | system-architect, data-architect, infra-engineer |
+| 開発 | backend-engineer, frontend-engineer, devops-engineer |
+| 文書 | technical-writer, proposal-writer, report-writer |
+| PM | project-manager, scrum-master |
+| 分析 | business-analyst, data-analyst, cost-optimizer |
+| 知識管理 | knowledge-manager, domain-researcher |
+| 品質 | code-reviewer, qa-engineer |
+| その他 | security-engineer, integration-specialist |
 
 ---
 
-## コマンド一覧
+## 継続学習（Memento-Skills ベース）
 
-| コマンド | 概要 |
-|---------|------|
-| `/company` | 組織の作成・選択・秘書との対話・作業依頼 |
-| `/company-admin` | マスタ管理（部署・ロール・ワークフローの CRUD） |
-| `/company-spawn` | 設計成果物をもとにアプリケーションリポジトリを新規作成 |
-| `/company-report` | 活動サマリーレポートの生成（today / week / month） |
-| `/company-evolve` | ログからの継続学習・エージェントメモリ自動更新 |
+cc-sier-organization は論文「Memento-Skills: Let Agents Design Agents」の設計思想を実装しています。
 
----
+### 仕組みの概要
 
-## 同梱 Subagent 一覧（20種）
+```
+Write フェーズ（セッション終了・/company-evolve 起動時）
+  ├── Skill Evaluator    : タスクの成否を報酬スコアで評価
+  ├── Case Bank 再構築   : 全タスクを構造化インデックスに保存
+  ├── MEMORY.md 更新     : 出力スタイル・ルーティング先読みを学習
+  ├── ワークフロー生成   : 高品質パターンを手順書として登録
+  ├── Skill Synthesizer  : 未対応パターンに新規Skillを提案（PR）
+  └── Subagent Refiner   : 実績でAgentの説明・制約を精緻化（PR）
+       └── Subagent Spawner: 対応Agentがない作業に新規Agentを生成（PR）
 
-| Subagent | モデル | 担当領域 |
-|----------|--------|---------|
-| secretary | opus | 窓口・TODO・壁打ち・メモ・振り分け |
-| project-manager | sonnet | WBS・マイルストーン・進捗・リスク管理 |
-| system-architect | opus | 全体設計・技術選定・ADR・設計レビュー |
-| data-architect | opus | データモデル・DWH・メダリオンアーキテクチャ |
-| ai-developer | opus | プロンプト設計・RAG・LLMアプリ開発 |
-| lead-developer | sonnet | コードレビュー・技術方針・実装ガイドライン |
-| backend-developer | sonnet | API設計・DB設計・サーバーサイド実装 |
-| frontend-developer | sonnet | UI実装・UX改善・コンポーネント設計 |
-| qa-lead | sonnet | テスト戦略・テスト計画・品質メトリクス |
-| test-engineer | sonnet | テスト自動化・テストケース設計・カバレッジ |
-| ci-cd-engineer | sonnet | パイプライン設計・デプロイ自動化・リリース |
-| cloud-engineer | sonnet | IaC実装・クラウド設計・セキュリティ |
-| sre-engineer | sonnet | 監視設計・SLI/SLO・インシデント対応 |
-| standards-lead | sonnet | 開発標準・規約管理・テンプレート整備 |
-| process-engineer | sonnet | ワークフロー最適化・業務プロセス改善 |
-| knowledge-manager | sonnet | ポストモーテム・ナレッジ蓄積・知見構造化 |
-| technical-writer | sonnet | 技術文書・教育資料・オンボーディング |
-| tech-researcher | sonnet | 技術調査・競合分析・PoC実施 |
-| retail-domain-researcher | sonnet | 小売ドメイン知識・業界用語体系化・業務プロセス分析 |
-| devops-coordinator | sonnet | リポジトリ初期構成・アプリ切り出し・CI/CD |
+Read フェーズ（次のセッション起動時）
+  └── 秘書が Case Bank を参照 → 類似タスクの高品質パターンをルーティングに反映
+```
+
+### 評価指標（報酬スコア）
+
+タスクを以下の4シグナルで自動評価し、0.0〜1.0のスコアを付与します。
+
+| シグナル | 内容 |
+|---|---|
+| completed | status が completed であるか |
+| artifacts_exist | 成果物ファイルが実際に存在するか |
+| no_excessive_edits | 同一ファイルへの修正が5回以下か |
+| no_retry | 「やり直し」などの否定的フィードバックがないか |
+
+詳細は [`docs/guide/05-learning-system.md`](docs/guide/05-learning-system.md) を参照。
 
 ---
 
@@ -384,270 +128,100 @@ claude
 ```
 cc-sier-organization/
 │
-├── .claude/                          ← Claude Code が認識する実行ファイル
+├── .claude/
+│   ├── settings.json              # Hooks設定（自動ログ・学習）
+│   ├── agents/
+│   │   ├── secretary.md           # 秘書（メインエージェント）
+│   │   └── {subagent}.md × 20    # 専門Subagent
 │   ├── skills/
-│   │   ├── company/                  ← /company（メイン Skill）
-│   │   │   ├── SKILL.md
-│   │   │   └── references/           ← 部署テンプレート、ワークフロー定義等
-│   │   ├── company-admin/            ← /company-admin（マスタ管理 Skill）
-│   │   │   ├── SKILL.md
-│   │   │   └── references/
-│   │   ├── company-spawn/            ← /company-spawn（アプリリポ切り出し Skill）
-│   │   │   ├── SKILL.md
-│   │   │   └── references/
-│   │   ├── company-report/           ← /company-report（活動レポート Skill）
-│   │   │   └── SKILL.md
-│   │   └── company-evolve/           ← /company-evolve（継続学習 Skill）
-│   │       └── SKILL.md
-│   ├── agents/                       ← 20種の Subagent 定義
-│   │   ├── secretary.md
-│   │   ├── system-architect.md
-│   │   ├── devops-coordinator.md
-│   │   └── ...
-│   ├── hooks/                        ← インタラクションログ Hooks
-│   │   ├── capture-interaction.sh    ← PostToolUse: ツール実行ログ追記
-│   │   └── session-boundary.sh       ← Stop: 統計JSON生成 + Issue投稿
-│   └── agent-memory/                 ← エージェント学習データ（Git管理外）
-│       └── secretary/
-│           └── MEMORY.md             ← /company-evolve が自動更新
+│   │   ├── company/               # /company Skill
+│   │   ├── company-admin/         # /company-admin Skill
+│   │   ├── company-spawn/         # /company-spawn Skill
+│   │   ├── company-report/        # /company-report Skill
+│   │   └── company-evolve/        # /company-evolve Skill（継続学習）
+│   └── hooks/
+│       ├── capture-interaction.sh # PostToolUse: ツール実行ログ
+│       ├── session-boundary.sh    # Stop: セッション集計・GitHub Issue
+│       ├── skill-evaluator.sh     # 報酬スコア付与
+│       ├── rebuild-case-bank.sh   # Case Bank 再構築
+│       ├── skill-synthesizer.sh   # 新規Skill自動生成
+│       └── subagent-refiner.sh    # Agent精緻化・新規生成
 │
-├── .companies/                       ← 組織データ（マルチ組織対応）
-│   ├── .active                       ← アクティブ組織（ローカル管理・Git管理外）
-│   └── {org-slug}/                   ← 組織ごとのディレクトリ
-│       ├── CLAUDE.md                 ← 組織ルール（ルート直下）
-│       ├── masters/                  ← マスタデータ（ルート直下）
-│       │   ├── organization.md
-│       │   ├── departments.md
-│       │   ├── roles.md
-│       │   ├── workflows.md
-│       │   └── projects.md          ← 実装リポジトリURLも記録
-│       ├── .task-log/                ← タスク実行ログ
-│       ├── .interaction-log/         ← Hooks自動生成ログ（Git管理外）
-│       ├── .session-summaries/       ← セッション統計JSON（Hooks自動生成・Git管理外）
-│       └── docs/                     ← 全成果物はここに集約
-│           ├── secretary/
-│           │   └── reports/          ← /company-report が生成するレポート
-│           ├── architecture/
-│           ├── data/
-│           └── ...
+├── .companies/
+│   ├── .active                    # 現在のアクティブ組織
+│   └── {org-slug}/
+│       ├── CLAUDE.md              # 組織状態サマリー
+│       ├── masters/               # 組織マスタ（顧客・役割・ワークフロー）
+│       ├── docs/                  # 成果物（Git管理）
+│       ├── .task-log/             # タスク実行ログ（Git管理）
+│       ├── .interaction-log/      # ツール実行ログ（Git管理外）
+│       ├── .session-summaries/    # セッション統計（Git管理外）
+│       └── .case-bank/            # 継続学習インデックス（Git管理外）
 │
-├── dist/cc-sier/                     ← 配布用プラグインパッケージ
-│   ├── .claude-plugin/
-│   ├── skills/
-│   └── agents/
-│
-├── docs/
-│   └── requirements.md               ← 要件定義書
-├── CLAUDE.md                         ← 開発用指示ファイル
-├── README.md
-└── LICENSE
+└── docs/
+    └── guide/                     # 詳細ガイド
 ```
-
-| 層 | パス | 役割 |
-|----|------|------|
-| Skills / Subagent / Hooks | `.claude/` | Skill、Subagent、インタラクションログ Hooks の実体 |
-| 組織データ | `.companies/` | マスタ定義 + `docs/` 配下の成果物（案件ごとに独立） |
-| 配布パッケージ | `dist/` | `sync-to-dist.sh` で生成するプラグイン配布用ファイル |
 
 ---
 
-## /company-spawn によるアプリリポジトリ切り出し
+## クイックスタート
 
-cc-sier で設計した成果物をもとに、実装用の独立リポジトリを作成できる。
-
-### 切り出しの流れ
-
-```
-cc-sier-organization/          a-sha-dwh-app/（新リポ）
-
-.companies/a-sha-dwh/          ┌─ CLAUDE.md（設計参照情報付き）
-├── docs/                      ├─ .claude/agents/
-│   ├── data/models/ ─────────→│   ├─ data-architect.md（パス書換済）
-│   │   └── architecture.md    │   └─ cloud-engineer.md（パス書換済）
-│   └── architecture/          ├─ docs/design/
-│       └── adrs/ ────────────→│   ├─ architecture.md
-│                              │   ├─ ADR-001.md
-.claude/agents/                │   └─ origin.md（出自追跡情報）
-├── data-architect.md ────────→├─ src/
-└── cloud-engineer.md ────────→│   ├─ dbt/（スキャフォールド）
-                               │   └─ terraform/
-                               └─ README.md
-```
-
-### 新リポでのSubagent利用
-
-エクスポートされたSubagentは新リポ用にパスが自動書き換えされるため、そのまま使える。
+### 1. セットアップ
 
 ```bash
-cd ../a-sha-dwh-app
-claude
+git clone https://github.com/SAS-Sasao/cc-sier-organization
+cd cc-sier-organization
 
-# data-architectがdocs/配下に成果物を保存する
-# （.companies/{org}/docs/ ではなく docs/ に書き換え済み）
+# Hooksの実行権限を付与
+chmod +x .claude/hooks/*.sh
+
+# GitHub CLI（自動Issue投稿に必要）
+gh auth login
 ```
 
-### 設計トレーサビリティ
+### 2. 組織に入る
 
-新リポの `docs/design/origin.md` に、どのcc-sier組織のどの設計に基づいているかが記録される。cc-sier側の `masters/projects.md` にも新リポのURLが記録され、双方向のトレーサビリティが維持される。
-
----
-
-## ログと自動記録
-
-cc-sier は Hooks と Skill を組み合わせて、操作ログの自動記録からレポート生成までを一気通貫で行う。
-
-### 動作フロー
-
-```
-セッション中                          セッション終了
-─────────────                        ──────────────
-PostToolUse hook                     Stop hook
-  │                                    │
-  ├─ ツール実行を検知                    ├─ ログに区切り線を追記
-  ├─ .interaction-log/YYYY-MM-DD.md    ├─ .session-summaries/ にJSON保存
-  │  に1行追記                          └─ GitHub Issue にミニサマリー投稿
-  └─ ツール名・パス・コマンドを記録
-                                     ─────────────
-                                     /company-report（任意実行）
-                                       │
-                                       ├─ 4ソースを統合して収集
-                                       ├─ AIが要約してレポート生成
-                                       ├─ md保存 + Issue投稿 + PR作成
-                                       └─ /company-evolve を自動起動
-                                            │
-                                            ├─ パターン抽出（好み・ルーティング・ワークフロー）
-                                            ├─ MEMORY.md に学習結果を書き込み
-                                            └─ 次のセッションから先読み提案が有効に
+```bash
+/company jutaku-dev-team
 ```
 
-### `.interaction-log/` と `.session-summaries/` の違い
-
-| 項目 | `.interaction-log/` | `.session-summaries/` |
-|------|--------------------|-----------------------|
-| 生成タイミング | ツール実行のたび（PostToolUse） | セッション終了時（Stop） |
-| ファイル形式 | Markdown（日別1ファイル） | JSON（セッション別1ファイル） |
-| 内容 | ツール実行の詳細ログ（全行） | ツール種別ごとの集計・書き込みファイル一覧 |
-| 用途 | 詳細な操作履歴の確認 | `/company-report` の統計データソース |
-| AI依存 | なし（bash のみ） | なし（bash のみ） |
-
-### GitHub Issue の仕組み
-
-- **1日1件ルール**: 同日の最初のセッションで Issue を新規作成。2回目以降のセッションは既存 Issue にコメントを追記
-- **ラベル**: `interaction-log` + `org:{slug}` で自動分類
-- **各コメントの内容**: ツール種別ごとの統計テーブル + 書き込みファイル一覧 + 全ログ（折りたたみ）
-- **前提条件**: `gh` CLI がインストール済み＆認証済みの場合のみ投稿（未認証ならローカルログのみ）
-
-### `/company-report` の使い方
-
-期間を指定して活動レポートを生成する。
+### 3. 依頼する
 
 ```
-/company-report          # 当日のレポート（デフォルト）
-今週のレポートを作って    # 過去7日
-月次振り返り              # 当月1日〜今日
-3/19〜3/21のレポート      # カスタム日付範囲
+A社の要件定義書を作成してほしい。
+クラウドネイティブなWebシステムで、ユーザー管理・在庫管理・発注管理が必要。
 ```
 
-4つの情報源を統合:
-
-| 情報源 | 収集内容 |
-|--------|---------|
-| `.session-summaries/*.json` | セッション数・ツール実行数・書き込みファイル一覧 |
-| `.task-log/*.md` | 完了タスク・進行中タスクの一覧 |
-| `docs/` 配下の成果物 | `git log` で期間内の変更ファイルを部署別に整理 |
-| GitHub Issues | クローズ・オープンのIssue一覧（`org:{slug}` ラベルで絞り込み） |
-
-出力先:
-- `docs/secretary/reports/YYYY-MM-DD-{period}.md` にmdファイル保存
-- GitHub Issue に投稿（ラベル: `company-report`, `org:{slug}`）
-- Git ブランチ作成 → コミット → PR作成まで自動実行
-- レポート完了後、自動的に `/company-evolve` を起動して継続学習を実行
-
----
-
-## 継続学習（/company-evolve）
-
-cc-sier は使うほど賢くなる。過去のログからパターンを抽出し、エージェントメモリを自動更新する。
-
-### フライホイール
+### 4. 学習を走らせる
 
 ```
-   セッション実行
-        │
-        ▼
-   Hooks がログ・統計を自動蓄積
-   (.interaction-log/ + .session-summaries/)
-        │
-        ▼
-   /company-report でレポート生成
-        │
-        ▼
-   /company-evolve が自動起動
-        │
-        ▼
-   パターン抽出 → MEMORY.md 更新
-        │
-        ▼
-   次のセッションで秘書が先読み提案
-        │
-        ▼
-   より効率的な作業 → より多くの蓄積 ─── (ループ)
-```
-
-### 3つの学習ドメイン
-
-| 学習内容 | 検出条件 | 書き込み先 |
-|---------|---------|-----------|
-| 出力スタイルの好み | requestに「ASCII図」「比較表」「簡潔に」が3回以上等 | `.claude/agent-memory/secretary/MEMORY.md` |
-| よく使うSubagentの先読み | task-log の委譲先を集計してランキング化 | `.claude/agent-memory/secretary/MEMORY.md` |
-| 繰り返しパターンのワークフロー登録 | 同じ操作が3回以上繰り返されたら自動登録 | `.companies/{org}/masters/workflows.md` |
-
-### MEMORY.md の仕組み
-
-- セクション単位で上書き（追記しないため200行制限に引っかからない）
-- 上位5件のみ残し、古いエントリは新しいものに置き換え
-- `workflows.md` への書き込みのみ Git 管理（ブランチ → PR）
-- MEMORY.md はローカル管理（`.gitignore` で除外）
-- パターン検出はコストゼロの bash 集計ベース（API 呼び出しなし）
-
-### 効果のイメージ
-
-```
-初回セッション:
-  あなた: 「A社のインフラ構成を設計して」
-  秘書:   トリガーワード「インフラ」→ cloud-engineer に委譲
-
-5回目のセッション（学習後）:
-  あなた: 「A社の」
-  秘書:   「今日もDWH設計ですか？data-architectに直接繋ぎましょうか？
-           前回と同じくASCII図付きで出力します。」
+/company-evolve
 ```
 
 ---
 
-## マルチユーザー運用
+## インストール要件
 
-### 仕組み
+- Claude Code（最新版）
+- Git
+- GitHub CLI（`gh`）: Issue/PR の自動作成に必要
+- Python 3（継続学習の Case Bank 構築に必要）
+- bash
 
-- `.companies/.active` はGit管理外（`.gitignore` で除外）
-- 各メンバーが `/company` 実行時にローカルの `.active` を設定
-- コミットメッセージ・タスクログに `by {operator}` が自動記録（`git config user.name` から取得）
-- PRに作業者情報が含まれるため、誰がどの作業をしたか追跡可能
+---
 
-### 運用パターン
+## 詳細ガイド
 
-```
-リポジトリ: cc-sier-organization（全員がクローン）
-  │
-  ├── Aさん: .active = standardization-initiative
-  │   └── 標準化の壁打ち・WBS作成 → PRで共有
-  │
-  ├── Bさん: .active = jutaku-dev-team
-  │   └── 受託案件の設計レビュー → PRで共有
-  │
-  └── Cさん: .active = a-sha-dwh
-      └── DWH設計 → /company-spawn で実装リポ作成
-```
+| ドキュメント | 内容 |
+|---|---|
+| [00 全体概要](docs/guide/00-overview.md) | 設計思想・アーキテクチャ |
+| [01 クイックスタート](docs/guide/01-quickstart.md) | 初期設定から最初の依頼まで |
+| [02 Skills リファレンス](docs/guide/02-skills.md) | 全Skillの使い方と引数 |
+| [03 Subagent 一覧](docs/guide/03-subagents.md) | 各Subagentの役割と得意領域 |
+| [04 Hooks 設定](docs/guide/04-hooks.md) | 自動ログ・カスタマイズ |
+| [05 継続学習システム](docs/guide/05-learning-system.md) | Phase 1〜3の詳細仕様 |
+| [06 マルチ組織運用](docs/guide/06-multi-org.md) | 複数組織の管理方法 |
+| [07 company-spawn](docs/guide/07-company-spawn.md) | アプリリポジトリの切り出し方 |
 
 ---
 
