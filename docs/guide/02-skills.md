@@ -4,14 +4,44 @@
 
 ## /company
 
-組織を選択・切り替えます。
+組織を作成、または切り替えます。
 
 ```
 /company {org-slug}
-/company              ← 一覧表示
+/company              ← 既存組織の一覧を表示
 ```
 
-**動作:** `.companies/{org-slug}/` を確認 → `.companies/.active` を更新 → `CLAUDE.md` と `masters/` を読み込み
+**ポイント: 存在しない org-slug を指定すると新規作成になります。**
+
+| 動作 | 条件 |
+|---|---|
+| 新規組織を作成 | `.companies/{org-slug}/` が存在しない場合 |
+| 既存組織に切り替え | `.companies/{org-slug}/` が既に存在する場合 |
+
+**新規作成時の動作:**
+1. `.companies/{org-slug}/` ディレクトリを生成
+2. `CLAUDE.md`（空テンプレート）を作成
+3. `masters/`（roles.md / workflows.md / customers/）を作成
+4. `docs/secretary/`（todos/ / reports/）を作成
+5. `.companies/.active` に org-slug を書き込む
+6. 新規作成完了を報告
+
+**切り替え時の動作:**
+1. `.companies/.active` に org-slug を書き込む
+2. `CLAUDE.md` と `masters/` を読み込み
+3. 現在の組織状態を報告
+
+**使い方例:**
+```
+# 新規: 顧客案件ごとに組織を作る
+/company a-corp-ordering-system   ← 存在しなければ自動作成
+
+# 切り替え: 既存組織に移動
+/company jutaku-dev-team
+
+# 一覧表示
+/company
+```
 
 ---
 
