@@ -22,5 +22,8 @@ bk/
 # Case Bank（ローカル学習データ）
 .companies/*/.case-bank/
 
+# Quality Gate ログ
+.companies/*/.quality-gate-log/
+
 # ロックファイル
 .claude/scheduled_tasks.lock
