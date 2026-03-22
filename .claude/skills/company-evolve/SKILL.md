@@ -152,6 +152,17 @@ MEMORY.md: 更新済み
 次のセッションから Read フェーズが有効になります。
 ```
 
+## 5.5 Case Bank への会話コンテキスト付加（会話ログ強化）
+
+```bash
+# Step 6: Case Bank への会話コンテキスト付加（会話ログ強化）
+source .claude/hooks/enrich-case-bank.sh
+enrich_case_bank "{org-slug}"
+```
+
+会話ログ（`.conversation-log/*.md`）を走査し、Case Bank エントリに `conversation_context` を付加する。
+また、頻出フレーズ（`frequent_phrases`）と意図パターン（`intent_patterns`）を Case Bank メタデータに追記する。
+
 ## 6. 注意事項
 
 - SKILL.md への書き込みは追記のみ（既存記述の削除は禁止）

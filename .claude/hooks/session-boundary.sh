@@ -138,6 +138,21 @@ gh auth status &>/dev/null 2>&1 || exit 0
 
 [[ "$ENTRY_COUNT" -eq 0 ]] && exit 0
 
+# ================================================================
+# 5.5 会話ログのキャプチャ
+# ================================================================
+if [[ -f ".claude/hooks/capture-conversation.sh" ]]; then
+  bash .claude/hooks/capture-conversation.sh <<< "$INPUT" 2>/dev/null || true
+fi
+
+# 会話サマリーを読み込む（capture-conversation.sh が生成）
+CONV_SUMMARY=""
+CONV_SUMMARY_FILE="/tmp/conv-summary-${SESSION_SHORT}.txt"
+if [[ -f "$CONV_SUMMARY_FILE" ]]; then
+  CONV_SUMMARY=$(cat "$CONV_SUMMARY_FILE")
+  rm -f "$CONV_SUMMARY_FILE"
+fi
+
 ensure_label() {
   gh label create "$1" --color "$2" --description "$3" --force 2>/dev/null || true
 }
@@ -184,6 +199,12 @@ ${WRITTEN_SECTION}
 ${LOG_CONTENT}
 
 </details>
+${CONV_SUMMARY:+
+
+---
+
+${CONV_SUMMARY}
+}
 EOF
 )
 

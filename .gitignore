@@ -19,6 +19,9 @@ bk/
 # エージェントメモリ（ローカル学習データ・Git管理外）
 .claude/agent-memory/
 
+# 会話ログ（ローカルのみ・プライバシー保護）
+.companies/*/.conversation-log/
+
 # Case Bank（ローカル学習データ）
 .companies/*/.case-bank/
 
