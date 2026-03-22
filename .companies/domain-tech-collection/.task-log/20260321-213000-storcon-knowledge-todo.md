@@ -41,3 +41,14 @@ pr_number: null
 |---------|--------|------|
 | ストコン最新動向レポート | retail-domain-researcher | `.companies/domain-tech-collection/docs/retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md` |
 | 学習TODO | secretary | `.companies/domain-tech-collection/docs/secretary/todos/2026-03-21.md` |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-22T14:49:17"
+```

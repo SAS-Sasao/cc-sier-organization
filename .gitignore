@@ -21,3 +21,6 @@ bk/
 
 # Case Bank（ローカル学習データ）
 .companies/*/.case-bank/
+
+# ロックファイル
+.claude/scheduled_tasks.lock
