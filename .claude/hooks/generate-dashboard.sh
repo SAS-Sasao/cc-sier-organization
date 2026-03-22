@@ -281,28 +281,82 @@ print(f"✅ ダッシュボード生成完了: {output} ({size_kb} KB)")
 PYEOF
 
 # ================================================================
-# GitHub Pages 用にリポジトリルートの docs/ にもコピー
+# GitHub Pages 用にリポジトリルートの docs/ にもコピー（組織ごとのサブディレクトリ）
 # ================================================================
-PAGES_DIR="docs/secretary"
+PAGES_DIR="docs/secretary/${ORG_SLUG}"
 mkdir -p "$PAGES_DIR"
 cp "${OUTPUT_DIR}/dashboard.html" "${PAGES_DIR}/dashboard.html"
 
-# index.html も更新
-cat > "docs/index.html" <<HTMLEOF
-<!DOCTYPE html>
+# 既存の組織ダッシュボードをスキャンして一覧 HTML を生成
+python3 - "docs/secretary" "$ORG_SLUG" <<'PYEOF'
+import sys, os
+from pathlib import Path
+from datetime import datetime
+
+secretary_dir = Path(sys.argv[1])
+current_org = sys.argv[2]
+
+# ダッシュボードが存在する組織を収集
+orgs = sorted([
+    d.name for d in secretary_dir.iterdir()
+    if d.is_dir() and (d / 'dashboard.html').exists()
+]) if secretary_dir.exists() else []
+
+# 現在の組織が未追加なら追加（生成直後は存在するはず）
+if current_org not in orgs:
+    orgs.append(current_org)
+    orgs.sort()
+
+cards = ""
+for org in orgs:
+    active = ' style="border:2px solid #4361ee;"' if org == current_org else ''
+    cards += f'''
+    <a href="./secretary/{org}/dashboard.html" class="card"{active}>
+      <div class="org-name">{org}</div>
+      <div class="org-label">ダッシュボードを開く →</div>
+    </a>'''
+
+html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=./secretary/dashboard.html">
-<title>${ORG_SLUG} ダッシュボード</title>
+<meta http-equiv="refresh" content="300">
+<title>cc-sier-organization</title>
+<style>
+:root {{ --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); }}
+@media (prefers-color-scheme: dark) {{
+  :root {{ --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); }}
+}}
+* {{ box-sizing:border-box; margin:0; padding:0; }}
+body {{ background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:40px 32px; }}
+h1 {{ font-size:1.5rem; margin-bottom:8px; }}
+p  {{ color:#6c757d; font-size:.88rem; margin-bottom:32px; }}
+.grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }}
+.card {{ background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+         padding:20px 24px; text-decoration:none; color:var(--text);
+         transition:box-shadow .2s; display:block; }}
+.card:hover {{ box-shadow:0 4px 16px rgba(0,0,0,.12); }}
+.org-name {{ font-size:1rem; font-weight:600; margin-bottom:6px; }}
+.org-label {{ font-size:.8rem; color:#6c757d; }}
+.updated {{ margin-top:40px; font-size:.78rem; color:#6c757d; }}
+</style>
 </head>
-<body><a href="./secretary/dashboard.html">ダッシュボードへ移動</a></body>
-</html>
-HTMLEOF
+<body>
+<h1>cc-sier-organization</h1>
+<p>組織を選択してダッシュボードを表示します</p>
+<div class="grid">{cards}
+</div>
+<p class="updated">最終更新: {datetime.now().strftime('%Y-%m-%d %H:%M')} ／ 5分ごと自動リフレッシュ</p>
+</body>
+</html>"""
+
+Path("docs/index.html").write_text(html, encoding="utf-8")
+print("docs/index.html を更新しました")
+PYEOF
 
 # コミット＆プッシュ
-git add docs/secretary/dashboard.html docs/index.html
+git add "docs/secretary/${ORG_SLUG}/dashboard.html" docs/index.html
 git commit -m "chore: ダッシュボード更新 [${ORG_SLUG}] $(date '+%Y-%m-%d %H:%M')"
 git push origin main
 
-echo "✅ docs/index.html を更新しました（GitHub Pages リダイレクト）"
+echo "✅ docs/ を更新しました（GitHub Pages 組織別ダッシュボード）"
