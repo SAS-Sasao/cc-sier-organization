@@ -116,6 +116,120 @@
 
 ---
 
+## /company-quality-setup
+
+アクティブな組織に品質チェックリストを配置します。
+
+```
+/company-quality-setup
+```
+
+**動作:**
+1. `.companies/{org-slug}/masters/quality-gates/` の存在を確認
+2. **既にファイルがある場合** → 以下の3択を提示
+   - `1. 上書きする`（テンプレートで全て置き換え）
+   - `2. 存在しないファイルだけ追加する`（既存カスタマイズを維持）
+   - `3. キャンセル`
+3. **ファイルがない場合** → 確認なしにそのまま配置
+4. `.claude/skills/company-quality-setup/templates/` からコピー
+
+**配置されるファイル:**
+
+```
+masters/quality-gates/
+├── _default.md             # 全成果物共通チェック
+├── by-type/
+│   ├── requirements.md     # 要件定義書
+│   ├── design.md           # 設計書
+│   ├── proposal.md         # 提案書
+│   ├── report.md           # 報告書
+│   └── adr.md              # ADR
+└── by-customer/
+    └── _template.md        # 顧客別チェックリストの雛形
+```
+
+**顧客別チェックリストの自動生成:**
+`/company-admin` で顧客を新規登録すると `by-customer/{slug}.md` が `_template.md` から自動生成されます。
+
+**テンプレートのカスタマイズ:**
+- 全組織共通の変更 → `.claude/skills/company-quality-setup/templates/` を編集
+- 組織固有の変更 → `masters/quality-gates/` を直接編集
+
+---
+
+## /company-review
+
+成果物の品質チェックを手動で実行します。
+
+```
+/company-review                    ← 直近24時間の変更ファイルを対象
+/company-review {ファイルパス}      ← 特定ファイルを対象
+/company-review {ディレクトリ}      ← 配下の全 .md を対象
+```
+
+**チェックの仕組み:**
+`masters/quality-gates/` のチェックリストをファイルパスに応じて自動適用します。
+
+| ファイルパス | 適用されるチェックリスト |
+|---|---|
+| `docs/system/requirements/...` | `_default.md` + `by-type/requirements.md` |
+| `docs/proposals/...` | `_default.md` + `by-type/proposal.md` |
+| パスに顧客slugが含まれる | 上記 + `by-customer/{slug}.md` |
+
+**結果:**
+
+```
+✅ Pass の場合:
+  品質チェック: {ファイル名} — 合格
+  警告（任意対応）: {warning一覧}
+
+❌ Fail の場合:
+  品質チェック: {ファイル名} — 不合格（N件）
+  不合格項目: {エラー一覧}
+  GitHub Issue を作成しました: {URL}
+```
+
+> 自動チェックについて: `docs/` 配下の `.md` ファイルを保存するたびに PostToolUse Hook が自動で `/company-review` 相当の処理を実行します。手動実行は任意タイミングでの確認用です。
+
+---
+
+## /company-dashboard
+
+組織の活動状況をHTMLダッシュボードとして生成します。
+
+```
+/company-dashboard
+```
+
+**生成されるもの:**
+`docs/secretary/dashboard.html` — スタンドアロンHTML（外部依存なし）
+
+**ウィジェット:**
+- タスクボードの状況（Todo / 進行中 / 要修正 / 完了）
+- 品質ゲート合格率（ドーナツゲージ・合格率で色変化）
+- Subagent使用頻度ランキング（横棒グラフ）
+- タスク品質スコア推移（折れ線グラフ）
+- 最近の成果物タイムライン
+
+**アニメーション:** 数値カウントアップ・棒グラフのスライドイン・折れ線の描画アニメーション
+
+**自動更新:** ブラウザで開いた状態で5分ごとに自動リフレッシュします。
+
+**ローカルで確認:**
+```bash
+open .companies/{org-slug}/docs/secretary/dashboard.html   # Mac
+```
+
+**チームと共有（GitHub Pages）:**
+Settings → Pages → Source: main / docs フォルダ に設定後:
+```
+https://{user}.github.io/{repo}/secretary/dashboard.html
+```
+
+> `/company-report` 実行後にも自動でダッシュボードが再生成されます。
+
+---
+
 ## Tips
 
 **Skill とSubagent の使い分け:**
