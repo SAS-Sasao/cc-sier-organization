@@ -281,23 +281,28 @@ print(f"✅ ダッシュボード生成完了: {output} ({size_kb} KB)")
 PYEOF
 
 # ================================================================
-# GitHub Pages 用 index.html を自動生成・更新
+# GitHub Pages 用にリポジトリルートの docs/ にもコピー
 # ================================================================
-PAGES_INDEX="docs/index.html"
-DASHBOARD_URL="./secretary/dashboard.html"
+PAGES_DIR="docs/secretary"
+mkdir -p "$PAGES_DIR"
+cp "${OUTPUT_DIR}/dashboard.html" "${PAGES_DIR}/dashboard.html"
 
-cat > "$PAGES_INDEX" <<HTMLEOF
+# index.html も更新
+cat > "docs/index.html" <<HTMLEOF
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=${DASHBOARD_URL}">
+<meta http-equiv="refresh" content="0; url=./secretary/dashboard.html">
 <title>${ORG_SLUG} ダッシュボード</title>
 </head>
-<body>
-<p><a href="${DASHBOARD_URL}">ダッシュボードへ移動</a></p>
-</body>
+<body><a href="./secretary/dashboard.html">ダッシュボードへ移動</a></body>
 </html>
 HTMLEOF
+
+# コミット＆プッシュ
+git add docs/secretary/dashboard.html docs/index.html
+git commit -m "chore: ダッシュボード更新 [${ORG_SLUG}] $(date '+%Y-%m-%d %H:%M')"
+git push origin main
 
 echo "✅ docs/index.html を更新しました（GitHub Pages リダイレクト）"
