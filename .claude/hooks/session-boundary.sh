@@ -218,4 +218,17 @@ fi
 
 [[ -n "${ISSUE_URL:-}" ]] && printf '\n> GitHub Issue: %s\n' "$ISSUE_URL" >> "$LOG_FILE"
 
+# ================================================================
+# 6. Skill Evaluator + Case Bank 再構築（Memento-Skills Write フェーズ）
+# ================================================================
+EVALUATOR=".claude/hooks/skill-evaluator.sh"
+REBUILDER=".claude/hooks/rebuild-case-bank.sh"
+
+if [[ -f "$EVALUATOR" ]] && [[ -f "$REBUILDER" ]]; then
+  source "$EVALUATOR"
+  source "$REBUILDER"
+  evaluate_session "$ORG_SLUG" "$TODAY"
+  rebuild_case_bank "$ORG_SLUG"
+fi
+
 exit 0

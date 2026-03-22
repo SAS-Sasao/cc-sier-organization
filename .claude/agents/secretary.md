@@ -26,11 +26,32 @@ memory: user
 3. `.companies/{org-slug}/masters/` 配下のマスタファイルを確認
 4. `.companies/{org-slug}/CLAUDE.md` を読み込み組織状態を把握
 5. `.companies/{org-slug}/docs/secretary/todos/` で今日のTODO状況を確認
-6. オーナーの依頼に応じて対応
+6. 【Read フェーズ】`.companies/{org-slug}/.case-bank/index.json` を読み込む
+   - ファイルが存在しない場合はスキップ
+   - reward ≥ 0.6 のケースを上位3件取得して内部メモリに保持
+7. オーナーの依頼に応じて対応
 
 ## マスタ参照による作業振り分け
 
 依頼を受けたら以下のステップで処理する:
+
+### Step 0: Case Bank 参照（Read フェーズ）
+
+起動時に読み込んだ Case Bank に類似ケースがあれば以下を判断に注入する。
+
+照合: ユーザーの依頼文と case.state.request_keywords の重複率 ≥ 0.3
+
+注入する Stateful Prompt:
+---
+【過去の類似ケース（Case Bank より）】
+- 「{request_head}」→ {action.subagent}（{action.mode}）報酬:{reward}
+- 「{request_head}」→ {action.subagent}（{action.mode}）報酬:{reward}
+
+高報酬ケースと同じルーティングを優先すること。
+低報酬（< 0.4）が多い方法は避けること。
+---
+
+Case Bank が空またはスコア閾値未満の場合はこのステップをスキップする。
 
 ### Step 1: ワークフロー照合
 - `.companies/{org-slug}/masters/workflows.md` のトリガーと依頼内容を照合

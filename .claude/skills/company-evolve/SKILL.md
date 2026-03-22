@@ -1,170 +1,120 @@
 ---
 name: company-evolve
 description: >
-  過去のやり取りログからユーザーの好みとパターンを抽出し、
-  エージェントメモリ（MEMORY.md）とワークフローを自動更新する継続学習Skill。
-  「学習して」「好みを覚えて」「進化させて」「/company-evolve」と言われたとき、
+  Memento-Skills の Read-Write Reflective Learning を cc-sier に実装する継続学習Skill。
+  過去のログから報酬スコアを付与し Case Bank を構築（Write フェーズ）、
+  次のセッションで秘書が類似ケースを参照して判断する（Read フェーズ）。
+  SKILL.md 自体のトリガーワード拡張とワークフロー自動生成も行う。
+  「学習して」「進化させて」「/company-evolve」と言われたとき、
   または /company-report の完了後に自動起動したときに使用する。
 ---
 
-# CC-SIer 継続学習Skill
-
-過去のログを解析して3種類のパターンを抽出し、確認なしで各メモリファイルに自動書き込みします。
-
----
+# CC-SIer 継続学習Skill（Memento-Skills ベース）
 
 ## 1. 起動時の準備
 
 1. `.companies/.active` から org-slug を取得
-2. `git config user.name` でオペレーター名を取得（取得できなければ `anonymous`）
-3. 今日の日付を取得
-4. 学習対象期間を決定（デフォルト: 直近30日）
-   - `/company-report` からの自動呼び出し時はそのレポート期間を引き継ぐ
-   - 手動実行時は直近30日を使う
+2. `git config user.name` でオペレーター名を取得
+3. 学習対象期間を決定（デフォルト: 直近30日）
 
----
+## 2. Write フェーズ（ポリシー評価）
 
-## 2. データ収集
+### 2.1 Skill Evaluator
 
-以下のファイルをすべて読み込む。
-
-```
-A) .companies/{org-slug}/.session-summaries/*.json
-   → セッション単位のtool実行数・種別・書き込みファイル一覧
-
-B) .companies/{org-slug}/.task-log/*.md
-   → タスクのrequest原文・実行モード・使用Subagent・成果物パス・status
-
-C) .companies/{org-slug}/.interaction-log/*.md
-   → tool実行の生ログ（Bashコマンド・ファイルパス・検索クエリ）
+```bash
+source .claude/hooks/skill-evaluator.sh
+evaluate_session "{org-slug}" "{TODAY}"
 ```
 
----
+シグナル（各20点、合計100点→0.0〜1.0）:
+- completed: status が completed
+- artifacts_exist: 成果物ファイルが実在
+- no_excessive_edits: 同一ファイルへの Write が5回以下
+- no_retry: interaction-log に「やり直し」等がない
 
-## 3. パターン抽出と学習（3ドメイン）
+### 2.2 Case Bank 再構築
 
-### 3.1 出力スタイルの好み抽出
-
-task-log の `request` フィールドと interaction-log を照合し、以下を検出する。
-
-| 検出条件 | 抽出する好み |
-|---------|------------|
-| requestに「ASCII」「図」「ダイアグラム」が3回以上 | `ASCII図を必ず添付する` |
-| requestに「比較」「テーブル」「表で」が3回以上 | `比較表をセットで出力する` |
-| requestに「短く」「簡潔に」が3回以上 | `簡潔な出力を好む` |
-| requestがほぼ日本語のみ | `日本語で出力する` |
-| Write後にEditが連続するパターンが多い | `一発で正確な出力を求める傾向` |
-
-**書き込み先:** `.claude/agent-memory/secretary/MEMORY.md`
-
-書き込むセクション:
-```markdown
-## 出力スタイルの好み（{TODAY} 学習・{N}セッション分析）
-
-- {抽出した好み}（根拠: {検出回数}回のパターン）
+```bash
+source .claude/hooks/rebuild-case-bank.sh
+rebuild_case_bank "{org-slug}"
 ```
 
-### 3.2 よく使うSubagentのルーティング先読み
+task-log 全件を `.case-bank/index.json` にインデックス化する。
 
-task-log の全件から以下を集計する。
+### 2.3 Skill Writer（SKILL.md 自体の改善）
 
-1. **Subagent使用頻度ランキング（上位3件）**
-2. **キーワード→委譲先の対応表**
-   - request 冒頭キーワードと実際に使われたSubagentの対応
+#### 2.3.1 トリガーワード拡張
 
-**書き込み先:** `.claude/agent-memory/secretary/MEMORY.md`
+低報酬ケース（reward < 0.4）で mode が `direct` なのに artifact が多いパターンを検出。
+同じ keywords の高報酬ケース（reward ≥ 0.7）の Subagent の description に
+不足していたキーワードを追記する。
 
-書き込むセクション:
-```markdown
-## よく使うSubagentと先読みパターン（{TODAY} 学習）
+対象ファイル: `.claude/agents/{subagent-name}.md`
+追記: description フィールド末尾に「「{キーワード}」と言われたときも使用する。」
 
-### 頻度ランキング
-1. {agent-name}（{N}回使用、{主な用途}）
-2. {agent-name}（{N}回使用、{主な用途}）
-3. {agent-name}（{N}回使用、{主な用途}）
+#### 2.3.2 高報酬パターンからワークフロー自動生成
 
-### キーワード→委譲先の対応
-- 「{キーワード}」→ {agent-name}（{N}/{M}回）
-```
+検出条件: request_head の先頭15文字が一致するケースが3件以上 かつ 平均 reward ≥ 0.7
 
-### 3.3 繰り返しパターンのワークフロー自動登録
-
-task-log の request を比較し、**類似したリクエストが3回以上** 繰り返されているパターンを検出する。
-
-類似判定の基準:
-- request の冒頭15文字が一致する
-- 同じSubagentへの委譲を含む
-- 同じ成果物ディレクトリへの書き込みを含む
-
-検出したパターンを `.companies/{org-slug}/masters/workflows.md` に自動追記する。
-
-追記形式:
+生成形式:
 ```markdown
 ## wf-{slug}
 
-- **名称**: {パターン名}（自動検出）
-- **トリガー**: [{検出したキーワード}]
+- **名称**: {パターン名}（高報酬パターンから自動生成）
+- **トリガー**: [{抽出したキーワード}]
 - **実行方式**: subagent
-- **ロール**: {使われたSubagent}
+- **ロール**: {最頻使用Subagent}
+- **ステップ**: {task-log の実行計画から抽出}
+- **成果物**: `{最頻の書き込みディレクトリ}`
+- **平均報酬**: {avg_reward}
 - **検出日**: {TODAY}
-- **検出根拠**: {N}回の繰り返しパターン
-- **成果物**: `.companies/{org-slug}/{書き込み先ディレクトリ}`
 ```
 
-ワークフロー追記後、Gitワークフローを実行する。
-詳細は `.claude/skills/company/references/git-workflow.md` を参照。
-
+Gitワークフロー:
 ```
 ブランチ: {org-slug}/admin/{TODAY}-auto-workflow-{slug}
-コミット: feat: {パターン名}ワークフローを自動登録 [{org-slug}] by {operator}
+コミット: feat: {パターン名}を高報酬ケースから自動生成 [{org-slug}] by {operator}
 ```
 
----
+#### 2.3.3 MEMORY.md の更新（既存機能）
 
-## 4. MEMORY.md の更新ルール
+secretary/MEMORY.md を出力スタイル・ルーティング先読みで更新する。
 
-- MEMORY.md が存在しない場合は新規作成する
-- 既存の同セクションは**上書き**する（追記ではなく置換）
-- 各セクションは最大20行以内に収める（200行制限への対応）
-- 上位5件のみ残し、古いエントリは新しいものに置き換える
+## 3. Read フェーズ（ポリシー改善）
 
-ファイルパス:
+このフェーズは secretary.md の起動時動作に統合する。
+
+追加する動作（既存の 5. の後に挿入）:
 ```
-secretary（ユーザー固有・全組織で永続）:
-  .claude/agent-memory/secretary/MEMORY.md
+6. .case-bank/index.json を読み込む（なければスキップ）
+7. ユーザーの依頼と request_keywords を照合
+8. reward ≥ 0.6 のケースを上位3件取得
+9. 以下の Stateful Prompt を判断に注入する:
 
-各Subagent（プロジェクト固有）:
-  .claude/agent-memory/{agent-name}/MEMORY.md
-```
-
----
-
-## 5. ユーザーへの報告
-
-```
-学習が完了しました！
-
-## 今回の学習結果
-
-### 出力スタイル（{N}パターン検出）
-- {適用した好み1}
-- {適用した好み2}
-
-### ルーティング（{N}件更新）
-- よく使うSubagent上位3件を先読みリストに登録
-
-### ワークフロー（{N}件自動登録）
-- {ワークフロー名}（{N}回の繰り返しを検出）
-  PR: {PR URL}
-
-次回のセッションから自動的に適用されます。
+【過去の類似ケース（Case Bank より）】
+- 「{request_head}」→ {subagent}（{mode}）報酬:{reward}
+高報酬ケースと同じルーティングを優先すること。
 ```
 
----
+照合ロジック: request_keywords の重複率 ≥ 0.3 で「類似」と判定。
 
-## 6. 注意事項
+## 4. ユーザーへの報告
 
-- `masters/workflows.md` への書き込みは必ず Gitワークフロー（ブランチ→PR）を通す
-- MEMORY.md への書き込みは Git 管理しない
-- session-summaries が0件の場合はスキップしてユーザーに通知する
-- 検出パターンが1件もない場合は「学習対象なし」と報告して終了する
+```
+学習完了（Memento-Skills Write フェーズ）
+
+評価タスク: {N}件 / 平均報酬: {avg}
+Case Bank: {total}件インデックス
+トリガーワード追加: {N}件
+ワークフロー自動生成: {N}件（PR: {URL}）
+MEMORY.md: 更新済み
+
+次のセッションから Read フェーズが有効になります。
+```
+
+## 5. 注意事項
+
+- SKILL.md への書き込みは追記のみ（既存記述の削除は禁止）
+- `.case-bank/` は .gitignore に追加してローカル管理
+- reward の追記はべき等（2回実行しても重複しない）
+- Case Bank が空の場合は Read フェーズをスキップして通常ルーティング
