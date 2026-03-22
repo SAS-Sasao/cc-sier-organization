@@ -231,4 +231,18 @@ if [[ -f "$EVALUATOR" ]] && [[ -f "$REBUILDER" ]]; then
   rebuild_case_bank "$ORG_SLUG"
 fi
 
+# ================================================================
+# 7. Phase 3: Skill Synthesizer + Subagent Refiner（自律進化）
+# ================================================================
+SYNTHESIZER=".claude/hooks/skill-synthesizer.sh"
+REFINER=".claude/hooks/subagent-refiner.sh"
+OPERATOR=$(git config user.name 2>/dev/null || echo "anonymous")
+
+if [[ -f "$SYNTHESIZER" ]] && [[ -f "$REFINER" ]]; then
+  source "$SYNTHESIZER"
+  source "$REFINER"
+  synthesize_skills "$ORG_SLUG" "$OPERATOR"
+  refine_subagents  "$ORG_SLUG" "$OPERATOR"
+fi
+
 exit 0

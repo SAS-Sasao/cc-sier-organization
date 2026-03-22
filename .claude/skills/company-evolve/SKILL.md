@@ -80,7 +80,45 @@ Gitワークフロー:
 
 secretary/MEMORY.md を出力スタイル・ルーティング先読みで更新する。
 
-## 3. Read フェーズ（ポリシー改善）
+## 3. Write フェーズ（Phase 3: 自律進化）
+
+### 3.1 Skill Synthesizer
+
+```bash
+source .claude/hooks/skill-synthesizer.sh
+synthesize_skills "{org-slug}" "{operator}"
+```
+
+Case Bank から既存 Skill にマッチしないパターンを検出し、新規 SKILL.md を動的生成する。
+
+検出条件:
+- mode が `direct` かつ artifact_count ≥ 2 かつ reward ≥ 0.5
+- request_head 先頭15文字が一致するケースが3件以上
+- 既存 SKILL.md のトリガーワードと重複率 ≤ 0.5（既存でカバーされていない）
+- `synthesizer-log.json` に未記録（べき等）
+
+生成物: `.claude/skills/{slug}/SKILL.md`
+Git: ブランチ → コミット → PR（ラベル: `skill-synthesizer`, `org:{slug}`）
+
+### 3.2 Subagent Refiner & Spawner
+
+```bash
+source .claude/hooks/subagent-refiner.sh
+refine_subagents "{org-slug}" "{operator}"
+```
+
+**Refiner**: 既存 Subagent（secretary.md 除外）の末尾に以下を追記/上書き:
+- `refined_capabilities`: 高報酬ケースから導出した得意領域
+- `output_format`: 成果物出力先の実績
+- `constraints`: 低報酬ケースから導出した注意事項
+
+べき等: 前回精緻化時の case_count との差が3未満の場合はスキップ。
+
+**Spawner**: 対応 Subagent がないパターン（mode=direct, 3件以上, avg_reward≥0.5）に新規 `.md` を生成。
+
+Git: ブランチ → コミット → PR（ラベル: `subagent-refiner`, `org:{slug}`）
+
+## 4. Read フェーズ（ポリシー改善）
 
 このフェーズは secretary.md の起動時動作に統合する。
 
@@ -98,7 +136,7 @@ secretary/MEMORY.md を出力スタイル・ルーティング先読みで更新
 
 照合ロジック: request_keywords の重複率 ≥ 0.3 で「類似」と判定。
 
-## 4. ユーザーへの報告
+## 5. ユーザーへの報告
 
 ```
 学習完了（Memento-Skills Write フェーズ）
@@ -107,12 +145,14 @@ secretary/MEMORY.md を出力スタイル・ルーティング先読みで更新
 Case Bank: {total}件インデックス
 トリガーワード追加: {N}件
 ワークフロー自動生成: {N}件（PR: {URL}）
+Skill Synthesizer: {N}件生成（PR: {URL}）
+Subagent Refiner: 精緻化{N}件 / 新規生成{N}件（PR: {URL}）
 MEMORY.md: 更新済み
 
 次のセッションから Read フェーズが有効になります。
 ```
 
-## 5. 注意事項
+## 6. 注意事項
 
 - SKILL.md への書き込みは追記のみ（既存記述の削除は禁止）
 - `.case-bank/` は .gitignore に追加してローカル管理
