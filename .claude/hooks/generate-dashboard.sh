@@ -355,7 +355,7 @@ print("docs/index.html を更新しました")
 PYEOF
 
 # コミット＆プッシュ
-git add "docs/secretary/${ORG_SLUG}/dashboard.html" docs/index.html
+git add "docs/secretary/${ORG_SLUG}/dashboard.html" docs/index.html "${OUTPUT}"
 git commit -m "chore: ダッシュボード更新 [${ORG_SLUG}] $(date '+%Y-%m-%d %H:%M')"
 git push origin main
 
