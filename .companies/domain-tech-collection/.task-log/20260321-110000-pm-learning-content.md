@@ -34,3 +34,15 @@
 | ファイル | 作成者 | パス |
 |---------|--------|------|
 | 学習スケジュール（PM追記） | project-manager | docs/secretary/store-computer-learning-schedule.md |
+
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-23T19:35:00"
+```

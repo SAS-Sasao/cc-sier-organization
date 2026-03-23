@@ -31,3 +31,15 @@
 ## ステータス
 
 完了
+
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-23T19:35:00"
+```

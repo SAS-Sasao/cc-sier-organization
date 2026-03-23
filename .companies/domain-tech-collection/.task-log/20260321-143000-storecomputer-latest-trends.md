@@ -28,3 +28,15 @@
 - 既存の `store-computer-domain-knowledge.md`（基礎知識）を補完する形で最新動向を整理
 - 各トピックにPM視点の学習ポイントを付加
 - 総括テーブルにSIerとして狙える案件タイプを整理
+
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-23T19:35:00"
+```
