@@ -16,7 +16,7 @@
   3. チームリード（秘書）がカテゴリ別に統合ダイジェストを生成
 - **成果物**:
   - `.companies/domain-tech-collection/docs/daily-digest/YYYY-MM-DD.md`
-- **Git運用**: main直接コミット（PRなし）
+- **Git運用**: ブランチ＋PR
 - **Issue作成**: あり（ラベル: `org:domain-tech-collection`, `type:daily-digest`）
 - **スケジュール**: Cron 毎日 10:00
 
