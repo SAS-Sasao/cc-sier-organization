@@ -119,6 +119,153 @@ if conv_topics:
     items = "".join(f"<li>{t}</li>" for t in conv_topics[-10:])
     conv_topics_html = f'<div class="conv-topics"><h3>最近の会話トピック</h3><ul>{items}</ul></div>'
 
+# ================================================================
+# 6. TODO progress — docs/secretary/todos/*.md or docs/**/todos/*.md
+# ================================================================
+todo_checked = 0
+todo_unchecked = 0
+todo_items_upcoming = []  # unchecked items (first 5)
+todo_source = ""
+
+# Search for todo files in any dept's todos/ directory
+todo_dirs = list(org_dir.glob("docs/**/todos"))
+for td in todo_dirs:
+    for tf in sorted(td.glob("*.md"), reverse=True):
+        text = tf.read_text(encoding="utf-8", errors="ignore")
+        checked = re.findall(r'^- \[x\]', text, re.MULTILINE)
+        unchecked = re.findall(r'^- \[ \]', text, re.MULTILINE)
+        todo_checked += len(checked)
+        todo_unchecked += len(unchecked)
+        if not todo_source:
+            todo_source = str(tf.relative_to(org_dir))
+        # Extract unchecked items text (first 5 across all files)
+        if len(todo_items_upcoming) < 5:
+            for m in re.finditer(r'^- \[ \] (.+)$', text, re.MULTILINE):
+                item_text = m.group(1).strip()[:80]
+                if item_text and len(todo_items_upcoming) < 5:
+                    todo_items_upcoming.append(item_text)
+
+todo_total = todo_checked + todo_unchecked
+todo_pct = round(todo_checked / todo_total * 100) if todo_total > 0 else 0
+
+# ================================================================
+# 7. WBS milestones — docs/secretary/*wbs*.md or docs/**/*wbs*.md
+# ================================================================
+milestones = []  # [{name, target_date, status}]
+wbs_checked = 0
+wbs_in_progress = 0
+wbs_unchecked = 0
+wbs_source = ""
+
+wbs_files = list(org_dir.glob("docs/**/*wbs*.md")) + list(org_dir.glob("docs/**/*schedule*.md"))
+# Deduplicate
+wbs_files = list(dict.fromkeys(wbs_files))
+
+for wf in wbs_files[:3]:  # max 3 files
+    text = wf.read_text(encoding="utf-8", errors="ignore")
+    if not wbs_source:
+        wbs_source = str(wf.relative_to(org_dir))
+
+    # Parse milestone table: | M{n} | name | date | criteria |
+    for m in re.finditer(
+        r'\|\s*M(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|',
+        text
+    ):
+        ms_num = m.group(1)
+        ms_name = m.group(2).strip()
+        ms_date = m.group(3).strip()
+        if ms_name and not ms_name.startswith('マイルストーン') and not ms_name.startswith('---'):
+            milestones.append({
+                "num": ms_num,
+                "name": ms_name,
+                "date": ms_date,
+            })
+
+    # Count WBS task statuses
+    wbs_checked += len(re.findall(r'\[x\]', text))
+    wbs_in_progress += len(re.findall(r'\[~\]', text))
+    wbs_unchecked += len(re.findall(r'\[ \]', text))
+
+wbs_total = wbs_checked + wbs_in_progress + wbs_unchecked
+wbs_pct = round(wbs_checked / wbs_total * 100) if wbs_total > 0 else 0
+
+# ================================================================
+# 8. Next Actions — aggregate from TODO + WBS + open Issues
+# ================================================================
+next_actions = []
+
+# From unchecked TODOs
+for item in todo_items_upcoming[:3]:
+    next_actions.append({"source": "TODO", "text": item})
+
+# From WBS: in-progress items
+for wf in wbs_files[:1]:
+    text = wf.read_text(encoding="utf-8", errors="ignore")
+    for m in re.finditer(r'\[~\]\s*(.+?)(?:\s*\||\s*$)', text, re.MULTILINE):
+        t = m.group(1).strip().rstrip('|').strip()
+        if t and len(next_actions) < 8:
+            next_actions.append({"source": "WBS", "text": t[:60]})
+
+# Build HTML fragments
+# --- TODO card ---
+todo_html = ""
+if todo_total > 0:
+    items_html = "".join(
+        f'<li><span class="check-box">&#9744;</span> {i}</li>'
+        for i in todo_items_upcoming
+    )
+    todo_html = f'''<div class="plan-card">
+  <h3>TODO 進捗</h3>
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill" style="width:{todo_pct}%"></div></div>
+    <span class="progress-text">{todo_checked}/{todo_total} ({todo_pct}%)</span>
+  </div>
+  <ul class="action-list">{items_html}</ul>
+  <div class="source-hint">{todo_source}</div>
+</div>'''
+
+# --- WBS / Milestone card ---
+wbs_html = ""
+if milestones or wbs_total > 0:
+    ms_items = ""
+    today_str = datetime.now().strftime("%m/%d")
+    for ms in milestones:
+        ms_items += f'<div class="ms-item"><span class="ms-badge">M{ms["num"]}</span><span class="ms-name">{ms["name"]}</span><span class="ms-date">{ms["date"]}</span></div>'
+
+    wbs_progress = ""
+    if wbs_total > 0:
+        wbs_progress = f'''<div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill green" style="width:{wbs_pct}%"></div></div>
+    <span class="progress-text">完了{wbs_checked} / 進行中{wbs_in_progress} / 未着手{wbs_unchecked}</span>
+  </div>'''
+
+    wbs_html = f'''<div class="plan-card">
+  <h3>WBS / マイルストーン</h3>
+  {wbs_progress}
+  <div class="ms-timeline">{ms_items}</div>
+  <div class="source-hint">{wbs_source}</div>
+</div>'''
+
+# --- Next Actions card ---
+actions_html = ""
+if next_actions:
+    items_html = "".join(
+        f'<li><span class="action-badge {a["source"].lower()}">{a["source"]}</span> {a["text"]}</li>'
+        for a in next_actions[:5]
+    )
+    actions_html = f'''<div class="plan-card full-width">
+  <h3>直近アクション</h3>
+  <ul class="action-list">{items_html}</ul>
+</div>'''
+
+plan_section_html = ""
+if todo_html or wbs_html or actions_html:
+    plan_section_html = f'''<div class="plan-grid">
+{todo_html}
+{wbs_html}
+</div>
+{actions_html}'''
+
 # --- HTML generation ---
 html = f"""<!DOCTYPE html>
 <html lang="ja">
@@ -167,6 +314,32 @@ html = f"""<!DOCTYPE html>
   .conv-topics ul {{ list-style: none; padding: 0; }}
   .conv-topics li {{ padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }}
   .conv-topics li:last-child {{ border-bottom: none; }}
+  .plan-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }}
+  .plan-card {{ background: var(--card-bg); border: 1px solid var(--border);
+               border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
+  .plan-card.full-width {{ margin-bottom: 24px; }}
+  .plan-card h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+  .progress-row {{ display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }}
+  .progress-bar {{ flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }}
+  .progress-fill {{ height: 100%; background: var(--blue); border-radius: 5px; transition: width 1s ease; }}
+  .progress-fill.green {{ background: var(--green); }}
+  .progress-text {{ font-size: 0.8rem; color: var(--muted); white-space: nowrap; }}
+  .ms-timeline {{ display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }}
+  .ms-item {{ display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }}
+  .ms-badge {{ background: var(--blue); color: #fff; border-radius: 4px; padding: 2px 8px;
+              font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }}
+  .ms-name {{ flex: 1; }}
+  .ms-date {{ color: var(--muted); font-size: 0.8rem; flex-shrink: 0; }}
+  .action-list {{ list-style: none; padding: 0; }}
+  .action-list li {{ padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+                    display: flex; align-items: center; gap: 8px; }}
+  .action-list li:last-child {{ border-bottom: none; }}
+  .action-badge {{ font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }}
+  .action-badge.todo {{ background: var(--blue); color: #fff; }}
+  .action-badge.wbs {{ background: var(--yellow); color: #000; }}
+  .action-badge.issue {{ background: var(--green); color: #fff; }}
+  .check-box {{ color: var(--muted); }}
+  .source-hint {{ font-size: 0.7rem; color: var(--muted); margin-top: 8px; font-style: italic; }}
   .charts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }}
   .chart-box {{ background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
@@ -218,6 +391,8 @@ html = f"""<!DOCTYPE html>
 </div>
 
 {conv_topics_html}
+
+{plan_section_html}
 
 <div class="charts">
   <div class="chart-box">
