@@ -42,9 +42,12 @@
                   border-radius: 12px; padding: 20px; margin-bottom: 24px;
                   box-shadow: 0 2px 8px var(--shadow); }
   .conv-topics h3 { font-size: 0.95rem; margin-bottom: 12px; }
-  .conv-topics ul { list-style: none; padding: 0; }
-  .conv-topics li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-  .conv-topics li:last-child { border-bottom: none; }
+  .rally { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .rally:last-child { border-bottom: none; }
+  .rally-human, .rally-claude { font-size: 0.85rem; padding: 4px 0; }
+  .rally-human { color: var(--text); }
+  .rally-claude { color: var(--muted); margin-left: 16px; }
+  .rally-label { font-size: 0.8rem; margin-right: 4px; }
   .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .plan-card { background: var(--card-bg); border: 1px solid var(--border);
                border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
@@ -87,7 +90,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 standardization-initiative</h1>
-<p class="subtitle">最終更新: 2026-03-23 18:48:37 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-23 18:54:18 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -111,11 +114,11 @@
 <div class="stats-row">
   <div class="stat-card">
     <div class="stat-label">セッション数</div>
-    <div class="stat-value">14</div>
+    <div class="stat-value">17</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">541</div>
+    <div class="stat-value">843</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -123,11 +126,11 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">123</div>
+    <div class="stat-value">136</div>
   </div>
 </div>
 
-<div class="conv-topics"><h3>最近の会話トピック</h3><ul><li><command-message>company</command-message></li><li>Base directory for this skill: /home/sasao020211/cc-sier-org</li></ul></div>
+<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OK起動して。</div><div class="rally-claude"><span class="rally-label">🤖</span> **社内標準化推進** — 秘書室が待機しています。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ごめんダッシュボード機能のスコア推移はどのダッシュボードも共通で0.0～1.0のグラフで表現してほしい</div><div class="rally-claude"><span class="rally-label">🤖</span> TODOファイルは 2026-03-19 作成の1件のみです。今日は **3/23（月）** なので、状況を整理します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ごめんもう1点生成するダッシュボードにhttps://sas-sasao.github.io/cc-sier-organization/へ戻るボタンを配置するよ...</div><div class="rally-claude"><span class="rally-label">🤖</span> TODOを更新します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OK！hoooks add出来ていないファイルがあるaddして　コミット・プッシュして</div><div class="rally-claude"><span class="rally-label">🤖</span> 更新しました。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ごめんダッシュボードの会話ログって最新の会話内容取得してる？</div><div class="rally-claude"><span class="rally-label">🤖</span> 了解です。mainで直接編集してしまったので、戻してからブランチで正しくやり直します。</div></div></div>
 
 <div class="plan-grid">
 <div class="plan-card">
