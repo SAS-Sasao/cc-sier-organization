@@ -40,3 +40,21 @@
 - **Git運用**: ブランチ＋PR
 - **Issue作成**: あり
 - **スケジュール**: 毎月1日に手動実行推奨
+
+## wf-storcon-research
+
+- **名称**: ストアコンピューター調査・知識収集（高報酬パターンから自動生成）
+- **トリガー**: 「ストアコンピューター」「ストコン」「コンビニ」「store computer」「POS」
+- **実行方式**: subagent
+- **ロール**: retail-domain-researcher（最頻使用Subagent）
+- **ステップ**:
+  1. ストアコンピューター関連のドメイン知識を調査
+  2. 最新トレンド・業界動向を収集
+  3. 調査結果をドキュメント化して成果物ディレクトリに保存
+- **成果物**:
+  - `.companies/domain-tech-collection/docs/retail-domain/`
+  - `.companies/domain-tech-collection/docs/retail-domain/industry-reports/`
+- **Git運用**: ブランチ＋PR
+- **Issue作成**: あり
+- **平均報酬**: 1.00
+- **検出日**: 2026-03-23
