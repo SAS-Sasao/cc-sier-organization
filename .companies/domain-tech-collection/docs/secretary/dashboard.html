@@ -33,6 +33,18 @@
   .card-value.yellow { color: var(--yellow); }
   .card-value.red { color: var(--red); }
   .card-value.green { color: var(--green); }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--card-bg); border: 1px solid var(--border);
+               border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }
+  .stat-label { font-size: 0.75rem; color: var(--muted); }
+  .stat-value { font-size: 1.5rem; font-weight: 600; margin-top: 2px; }
+  .conv-topics { background: var(--card-bg); border: 1px solid var(--border);
+                  border-radius: 12px; padding: 20px; margin-bottom: 24px;
+                  box-shadow: 0 2px 8px var(--shadow); }
+  .conv-topics h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .conv-topics ul { list-style: none; padding: 0; }
+  .conv-topics li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .conv-topics li:last-child { border-bottom: none; }
   .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
   .chart-box { background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
@@ -43,7 +55,7 @@
 </head>
 <body>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-22 21:04:08 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-23 10:56:01 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -63,6 +75,27 @@
     <div class="card-value green" data-count="1">0</div>
   </div>
 </div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">セッション数</div>
+    <div class="stat-value">110</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">ツール実行数</div>
+    <div class="stat-value">23039</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">会話セッション</div>
+    <div class="stat-value">3</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Human 発言数</div>
+    <div class="stat-value">113</div>
+  </div>
+</div>
+
+<div class="conv-topics"><h3>最近の会話トピック</h3><ul><li>会話ログについて、現状issueには前半3行だけを表示しているが、出来れば全量表示してほしい。修正可能？</li><li>会話ログ取得機能およびissueの転記機能がうまく動作していなさそう。※機能追加後に/companyで処理を行ったが会話</li></ul></div>
 
 <div class="charts">
   <div class="chart-box">
@@ -105,7 +138,7 @@ new Chart(document.getElementById('qgChart'), {
   type: 'doughnut',
   data: {
     labels: ['合格', '不合格'],
-    datasets: [{ data: [1, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
+    datasets: [{ data: [5, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
   },
   options: {
     cutout: '70%',
@@ -157,10 +190,10 @@ new Chart(document.getElementById('agentChart'), {
 new Chart(document.getElementById('scoreChart'), {
   type: 'line',
   data: {
-    labels: [],
+    labels: ["2026-03-21", "2026-03-21"],
     datasets: [{
       label: '報酬スコア',
-      data: [],
+      data: [1.0, 1.0],
       borderColor: '#ffc107',
       backgroundColor: 'rgba(255,193,7,0.1)',
       fill: true,
