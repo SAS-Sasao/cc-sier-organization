@@ -363,9 +363,15 @@ html = f"""<!DOCTYPE html>
   .chart-box h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
   canvas {{ max-height: 280px; }}
   .footer {{ margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; }}
+  .back-btn {{ display: inline-block; margin-bottom: 16px; padding: 6px 16px;
+               background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+               color: var(--text); text-decoration: none; font-size: 0.85rem;
+               box-shadow: 0 1px 4px var(--shadow); transition: background 0.2s; }}
+  .back-btn:hover {{ background: var(--border); }}
 </style>
 </head>
 <body>
+<a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 {org_slug}</h1>
 <p class="subtitle">最終更新: {now} ｜ 5分ごとに自動リフレッシュ</p>
 
@@ -519,7 +525,7 @@ new Chart(document.getElementById('scoreChart'), {{
     plugins: {{ legend: {{ display: false }} }},
     scales: {{
       x: {{ grid: {{ color: gridColor }} }},
-      y: {{ grid: {{ color: gridColor }}, beginAtZero: true }}
+      y: {{ grid: {{ color: gridColor }}, min: 0, max: 1, ticks: {{ stepSize: 0.2 }} }}
     }},
     animation: {{ duration: 1200 }}
   }}
