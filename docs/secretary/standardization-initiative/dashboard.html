@@ -81,7 +81,7 @@
 </head>
 <body>
 <h1>📊 standardization-initiative</h1>
-<p class="subtitle">最終更新: 2026-03-23 18:43:31 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-23 18:46:45 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -105,11 +105,11 @@
 <div class="stats-row">
   <div class="stat-card">
     <div class="stat-label">セッション数</div>
-    <div class="stat-value">12</div>
+    <div class="stat-value">13</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">359</div>
+    <div class="stat-value">448</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -117,7 +117,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">114</div>
+    <div class="stat-value">118</div>
   </div>
 </div>
 
@@ -253,7 +253,7 @@ new Chart(document.getElementById('scoreChart'), {
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { color: gridColor } },
-      y: { grid: { color: gridColor }, beginAtZero: true }
+      y: { grid: { color: gridColor }, min: 0, max: 1, ticks: { stepSize: 0.2 } }
     },
     animation: { duration: 1200 }
   }
