@@ -55,14 +55,31 @@ if qg_dir.exists():
 qg_total = qg_pass + qg_fail
 qg_rate = round(qg_pass / qg_total * 100) if qg_total > 0 else 100
 
-# 3. Subagent usage from task-log
-tl_dir = org_dir / ".task-log"
+# 3. Subagent usage — Case Bank (primary) + task-log (fallback)
 agent_counts = {}
-if tl_dir.exists():
-    for f in tl_dir.glob("*.md"):
-        text = f.read_text(encoding="utf-8", errors="ignore")
-        for m in re.findall(r'(?:subagent|agent|担当)[：:]\s*(\S+)', text, re.IGNORECASE):
-            agent_counts[m] = agent_counts.get(m, 0) + 1
+
+# Primary: Case Bank action.subagent
+cb_agent_path = org_dir / ".case-bank" / "index.json"
+if cb_agent_path.exists():
+    try:
+        cb_agent_data = json.loads(cb_agent_path.read_text(encoding="utf-8", errors="ignore"))
+        for c in cb_agent_data.get("cases", []):
+            agent_str = c.get("action", {}).get("subagent", "")
+            if agent_str:
+                for name in agent_str.split(","):
+                    name = name.strip()
+                    if name:
+                        agent_counts[name] = agent_counts.get(name, 0) + 1
+    except: pass
+
+# Fallback: task-log free text (if Case Bank is empty)
+if not agent_counts:
+    tl_dir = org_dir / ".task-log"
+    if tl_dir.exists():
+        for f in tl_dir.glob("*.md"):
+            text = f.read_text(encoding="utf-8", errors="ignore")
+            for m in re.findall(r'(?:subagent|agent|担当)[：:]\s*(\S+)', text, re.IGNORECASE):
+                agent_counts[m] = agent_counts.get(m, 0) + 1
 
 # Also check session summaries (JSON files)
 ss_dir = org_dir / ".session-summaries"
