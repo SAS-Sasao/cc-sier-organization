@@ -49,3 +49,15 @@
 | ストコン ドメイン知識 | retail-domain-researcher | docs/retail-domain/store-computer-domain-knowledge.md |
 | AWS移行 技術スタック | tech-researcher | docs/research/store-computer-aws-migration-tech.md |
 | 統合学習スケジュール | secretary | docs/secretary/store-computer-learning-schedule.md |
+
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-23T19:35:00"
+```

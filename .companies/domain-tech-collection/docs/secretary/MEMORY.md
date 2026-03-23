@@ -1,6 +1,6 @@
 # 秘書 MEMORY（Case Bank 学習結果）
 
-> 最終更新: 2026-03-23 | Case Bank: 7件 | 平均報酬: 1.00
+> 最終更新: 2026-03-23 19:35 | Case Bank: 8件 | 平均報酬: 1.00
 
 ## ルーティング先読み
 
@@ -14,6 +14,7 @@
 | 情報ソースマスタ作成・整備 | agent-teams (tech-researcher + retail-domain) | 1.00 |
 | WBS・準備計画の作成 | direct (秘書直接対応) | 1.00 |
 | 知識収集 + TODO作成 | retail-domain-researcher (subagent) | 1.00 |
+| コンビニ業界構造の深掘り調査 | retail-domain-researcher (subagent) | 1.00 |
 
 ## 出力スタイル
 
