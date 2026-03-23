@@ -36,3 +36,14 @@ pr_number: 46
 | ファイル | 作成者 | パス |
 |---------|--------|------|
 | コンビニ業界構造レポート | retail-domain-researcher | `.companies/domain-tech-collection/docs/retail-domain/convenience-industry-structure.md` |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-23T19:25:55"
+```
