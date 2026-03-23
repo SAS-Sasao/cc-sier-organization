@@ -34,8 +34,8 @@ if board_path.exists():
     text = board_path.read_text(encoding="utf-8", errors="ignore")
     sections = re.split(r'^## ', text, flags=re.MULTILINE)
     for sec in sections:
-        rows = [l for l in sec.splitlines() if l.startswith('|') and not l.startswith('|--') and '—' not in l.split('|')[1:3]]
-        count = len([r for r in rows if r.strip() and not r.startswith('| タスクID')])
+        rows = [l for l in sec.splitlines() if l.startswith('|') and not l.startswith('|--')]
+        count = len([r for r in rows if r.strip() and not r.startswith('| タスクID') and '—' not in r.split('|')[1].strip()])
         if '🔵' in sec: board["todo"] = count
         elif '🟡' in sec: board["in_progress"] = count
         elif '🔴' in sec: board["review"] = count
