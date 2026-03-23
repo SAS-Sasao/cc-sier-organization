@@ -82,16 +82,21 @@ if not agent_counts:
                 agent_counts[m] = agent_counts.get(m, 0) + 1
 
 # Also check session summaries (JSON files)
+# Each session produces multiple summary snapshots; count unique session_ids
+# and use the latest snapshot per session for tool_count (cumulative)
 ss_dir = org_dir / ".session-summaries"
 session_count = 0
 total_tools = 0
 if ss_dir.exists():
-    for f in ss_dir.glob("*.json"):
+    _ss_latest = {}  # session_id -> (filename, data) keeping latest per session
+    for f in sorted(ss_dir.glob("*.json")):
         try:
             sd = json.loads(f.read_text(encoding="utf-8", errors="ignore"))
-            session_count += 1
-            total_tools += sd.get("tool_count", 0)
+            sid = sd.get("session_id", f.stem)
+            _ss_latest[sid] = sd  # sorted order ensures last = latest
         except: pass
+    session_count = len(_ss_latest)
+    total_tools = sum(sd.get("tool_count", 0) for sd in _ss_latest.values())
 
 # Sort by count descending
 agent_labels = list(agent_counts.keys())[:10]
