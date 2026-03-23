@@ -278,8 +278,8 @@ summary_lines.append(f"| ツール実行 | {tool_count} 回 |")
 summary_lines.append(f"")
 
 if human_messages:
-    summary_lines.append(f"**主な依頼内容（先頭3件）:**")
-    for msg in human_messages[:3]:
+    summary_lines.append(f"**主な依頼内容（{len(human_messages)}件）:**")
+    for msg in human_messages:
         first_line = msg.split('\n')[0][:80]
         summary_lines.append(f"- {first_line}")
     summary_lines.append(f"")
