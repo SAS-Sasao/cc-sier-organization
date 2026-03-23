@@ -47,12 +47,9 @@ OPERATOR=$(git config user.name 2>/dev/null || echo "anonymous")
 # 2. 会話ログファイルの特定
 # ================================================================
 PROJECT_PATH=$(pwd)
-PROJECT_HASH=$(python3 -c "
-import hashlib, sys
-print(hashlib.sha256(sys.argv[1].encode()).hexdigest())
-" "$PROJECT_PATH" 2>/dev/null)
-
-CONV_FILE="$HOME/.claude/projects/${PROJECT_HASH}/${SESSION_ID}.jsonl"
+# Claude Code のプロジェクトディレクトリ名: パスのスラッシュをハイフンに置換
+PROJECT_DIR_NAME=$(echo "$PROJECT_PATH" | sed 's|/|-|g')
+CONV_FILE="$HOME/.claude/projects/${PROJECT_DIR_NAME}/${SESSION_ID}.jsonl"
 
 if [[ ! -f "$CONV_FILE" ]]; then
   # フォールバック: session_id でディレクトリを検索
@@ -176,10 +173,14 @@ tool_count = 0
 human_messages = []  # サマリー用
 
 for entry in turns:
-    role = entry.get("role", "")
-    content = entry.get("content", "")
+    # JSONL structure: entry.message.role / entry.message.content
+    message = entry.get("message")
+    if not isinstance(message, dict):
+        continue
+    role = message.get("role", "")
+    content = message.get("content", "")
 
-    if role == "human":
+    if role == "user":
         human_count += 1
         if isinstance(content, str):
             masked = mask_text(content)
