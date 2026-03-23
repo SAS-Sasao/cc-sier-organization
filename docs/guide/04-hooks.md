@@ -9,6 +9,7 @@
 | `PostToolUse` | ツール実行のたびに | `capture-interaction.sh` | インタラクションログ記録 |
 | `PostToolUse` | docs/.md の保存時 | `quality-gate.sh` | 品質チェック自動実行 |
 | `Stop` | Claude の応答完了時 | `session-boundary.sh` | セッション統計・GitHub Issue・学習 |
+| `Stop` | セッション終了時 | `capture-conversation.sh` | 会話ログ取得・マスキング・MD保存 |
 
 ---
 
@@ -186,3 +187,138 @@ board_complete_task "jutaku-dev-team" "20260322-001" ".companies/.../requirement
 | セッション統計 | `.session-summaries/*.json` |
 
 **出力:** `docs/secretary/dashboard.html`（Chart.js使用、ダークモード対応）
+
+---
+
+## capture-conversation.sh（Stop Hook）
+
+セッション終了時に会話の全内容（発言・応答・ツール実行）を取得し、
+マスキング処理を施してMarkdownファイルに保存します。
+
+**起動タイミング:** `session-boundary.sh` から自動呼び出し（Stop Hook）
+
+**処理の順序:**
+
+| ステップ | 処理 | 出力先 |
+|---|---|---|
+| 1 | `session_id` を stdin から取得 | - |
+| 2 | `~/.claude/projects/{hash}/{session_id}.jsonl` を特定・読み込み | - |
+| 3 | `masters/customers/` から顧客名・担当者名を収集 | - |
+| 4 | マスキング処理（顧客名・担当者名・電話番号・メール・金額） | - |
+| 5 | Markdown形式に整形して保存 | `.conversation-log/YYYY-MM-DD-{id}.md` |
+| 6 | セッションサマリーを一時ファイルに出力 | `/tmp/conv-summary-{id}.txt` |
+
+**会話ログファイルの場所:**
+
+Claude Code は会話を以下に自動保存しています。
+
+```
+~/.claude/projects/{プロジェクトハッシュ}/{session-id}.jsonl
+```
+
+プロジェクトハッシュはプロジェクトディレクトリの絶対パスを SHA256 したものです。
+`capture-conversation.sh` がこれを自動算出してファイルを特定します。
+
+**マスキングの仕様:**
+
+| 対象 | 変換後 | 根拠 |
+|---|---|---|
+| `masters/customers/` 記載の顧客名 | `[CLIENT-01]` | ファイル名順で番号付け |
+| 顧客マスタの担当者名 | `[PERSON-01]` | 同上 |
+| 電話番号 | `[PHONE]` | 正規表現 |
+| メールアドレス | `[EMAIL]` | 正規表現 |
+| 金額（5桁以上・¥付き） | `[NUMBER]` | 正規表現 |
+
+マスキング辞書は `masters/customers/` から動的生成されるため、
+`/company-admin` で顧客を追加するたびに対象が自動的に増えます。
+
+**自動化の前提条件:**
+
+```
+① /company {org-slug} でアクティブ組織が設定されている
+   → .companies/.active に org-slug が書かれていること
+
+② chmod +x .claude/hooks/capture-conversation.sh が済んでいること
+```
+
+この2つが満たされていれば、新規・既存どちらの組織でも自動でログが記録されます。
+初回セッション時にディレクトリが自動作成されるため、事前準備は不要です。
+
+**会話ログのフォーマット（保存例）:**
+
+```markdown
+---
+session_id: "abc12345..."
+date: "2026-03-22"
+operator: "sasao"
+org: "jutaku-dev-team"
+masked: true
+---
+
+# 会話ログ — 2026-03-22 `abc12345`
+
+## 👤 Human
+
+[CLIENT-01]のDWH設計をやってほしい。
+メダリオンアーキテクチャで Bronze/Silver/Gold の3層構成で。
+
+---
+
+## 🤖 Claude
+
+承知しました。[CLIENT-01]のDWH設計を進めます。
+
+```tool_use:bash_tool
+command: ls .companies/jutaku-dev-team/masters/customers/
+```
+
+---
+
+## 統計
+
+| 項目 | 値 |
+|---|---|
+| 人間の発言数 | 8 |
+| Claudeの応答数 | 8 |
+| ツール実行数 | 24 |
+| マスキング適用 | 3 種類 |
+```
+
+---
+
+## enrich-case-bank.sh（/company-evolve から呼び出し）
+
+会話ログを走査して意図・フレーズを抽出し、Case Bank のエントリを補強します。
+
+**呼び出し方:** `company-evolve/SKILL.md` の Step 6 から `source` して使う
+
+**抽出する情報:**
+
+| 情報 | 用途 |
+|---|---|
+| 頻出フレーズ（2回以上） | MEMORY.md の出力スタイル学習に活用 |
+| タスクの背景・意図 | Case Bank エントリの `conversation_context` に付加 |
+| 意図パターン | 秘書の Read フェーズでルーティング精度向上に活用 |
+
+**Case Bank エントリへの付加情報:**
+
+```json
+{
+  "id": "20260319-143000-dwh",
+  "state": { "request_head": "A社のDWH設計をやって" },
+  "action": { "subagent": "data-architect" },
+  "reward": 0.9,
+  "conversation_context": [
+    "メダリオンアーキテクチャで Bronze/Silver/Gold の3層構成で",
+    "先週の要件定義の続きで、データ品質管理も入れてほしい"
+  ],
+  "conversation_enriched": true
+}
+```
+
+`conversation_context` により、秘書が次回類似の依頼を受けたとき
+「この種の依頼は背景に要件定義の続きがあることが多い」という情報を
+Subagentへの委譲判断に使えるようになります。
+
+**べき等性:** `enrich-log.json` で処理済みファイルを管理するため、
+同じ会話ログを2回処理しても重複しません。

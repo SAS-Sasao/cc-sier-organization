@@ -21,6 +21,7 @@ Memento-Skills: 経験 → Skill ファイル（Markdown）の更新
 | `masters/workflows.md` | 手続き的メモリ（成功した手順） |
 | `.claude/agents/*.md` | Subagentの知識・制約（Refinerが更新） |
 | `.claude/skills/*/SKILL.md` | Skill定義（Synthesizerが生成） |
+| `.conversation-log/*.md` | 会話エピソードメモリ（背景・意図・フレーズ） |
 
 ---
 
@@ -148,14 +149,16 @@ Memento-Skills: 経験 → Skill ファイル（Markdown）の更新
 .interaction-log/YYYY-MM-DD.md に記録
 
 セッション終了（Stop hook）
+    ├── capture-conversation.sh → .conversation-log/ に会話MD保存（マスキング済み）
     ├── .session-summaries/ に統計JSON
-    ├── GitHub Issue に投稿
+    ├── GitHub Issue に会話サマリーを含めて投稿
     ├── [Phase 1] task-log に reward スコア付与
     ├── [Phase 1] .case-bank/index.json を再構築
     ├── [Phase 3] 新規SKILL.md の PR
     └── [Phase 3] Agent更新の PR
 
 /company-evolve（定期 or /company-report 後自動）
+    ├── enrich-case-bank.sh → 会話ログから意図・フレーズを抽出してCase Bank補強
     ├── [Phase 2] MEMORY.md 更新
     ├── [Phase 2] workflows.md 追記
     ├── [Phase 3] skill-synthesizer 再実行
@@ -180,3 +183,4 @@ Memento-Skills: 経験 → Skill ファイル（Markdown）の更新
 | `.interaction-log/` | ❌ | 生ログは大きく個人的 |
 | `.session-summaries/` | ❌ | 中間データ |
 | `.case-bank/` | ❌ | ローカル学習データ |
+| `.conversation-log/*.md` | ❌ | 会話内容・プライバシー保護のためローカルのみ |
