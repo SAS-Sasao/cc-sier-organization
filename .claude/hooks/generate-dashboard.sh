@@ -116,7 +116,31 @@ if cb_path.exists():
 conv_dir = org_dir / ".conversation-log"
 conv_sessions = 0
 conv_human_total = 0
-conv_topics = []
+conv_rallies = []  # list of (human_text, claude_text) tuples
+
+def is_real_message(text):
+    """tool_result, command-message, SKILL本文などを除外"""
+    t = text.strip()
+    if not t or len(t) < 5:
+        return False
+    if t.startswith('```tool_result') or t.startswith('```tool_use'):
+        return False
+    if t.startswith('<command-message>') or t.startswith('<command-name>'):
+        return False
+    if t.startswith('Base directory for this skill:'):
+        return False
+    if t.startswith('#') and len(t) > 100:
+        return False
+    return True
+
+def extract_first_line(text, max_len=80):
+    """実際の発言の先頭行を抽出（短く切る）"""
+    for line in text.strip().split('\n'):
+        line = line.strip()
+        if line and not line.startswith('```') and not line.startswith('<'):
+            return line[:max_len] + ('...' if len(line) > max_len else '')
+    return text.strip()[:max_len]
+
 if conv_dir.exists():
     for f in sorted(conv_dir.glob("*.md")):
         try:
@@ -124,17 +148,27 @@ if conv_dir.exists():
             conv_sessions += 1
             human_sections = re.findall(r'## 👤 Human\n\n(.*?)(?=\n---|\Z)', text, re.DOTALL)
             conv_human_total += len(human_sections)
-            for sec in human_sections[:3]:
-                first_line = sec.strip().split('\n')[0][:60]
-                if len(first_line) > 10 and not first_line.startswith('```'):
-                    conv_topics.append(first_line)
+            # Extract rally pairs by scanning sections in order
+            sections = re.findall(r'## (👤 Human|🤖 Claude)\n\n(.*?)(?=\n---|\Z)', text, re.DOTALL)
+            pending_human = None
+            for role, body in sections:
+                if role == '👤 Human' and is_real_message(body):
+                    pending_human = extract_first_line(body)
+                elif role == '🤖 Claude' and pending_human is not None and is_real_message(body):
+                    conv_rallies.append((pending_human, extract_first_line(body)))
+                    pending_human = None
         except: pass
 
-# Build conversation topics HTML
+# Build conversation HTML — last 5 rallies
 conv_topics_html = ""
-if conv_topics:
-    items = "".join(f"<li>{t}</li>" for t in conv_topics[-10:])
-    conv_topics_html = f'<div class="conv-topics"><h3>最近の会話トピック</h3><ul>{items}</ul></div>'
+if conv_rallies:
+    recent = conv_rallies[-5:]
+    items = ""
+    for h, c in recent:
+        h_esc = h.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+        c_esc = c.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
+        items += f'<div class="rally"><div class="rally-human"><span class="rally-label">👤</span> {h_esc}</div><div class="rally-claude"><span class="rally-label">🤖</span> {c_esc}</div></div>'
+    conv_topics_html = f'<div class="conv-topics"><h3>直近の会話</h3>{items}</div>'
 
 # ================================================================
 # 6. TODO progress — docs/secretary/todos/*.md or docs/**/todos/*.md
@@ -328,9 +362,12 @@ html = f"""<!DOCTYPE html>
                   border-radius: 12px; padding: 20px; margin-bottom: 24px;
                   box-shadow: 0 2px 8px var(--shadow); }}
   .conv-topics h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
-  .conv-topics ul {{ list-style: none; padding: 0; }}
-  .conv-topics li {{ padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }}
-  .conv-topics li:last-child {{ border-bottom: none; }}
+  .rally {{ padding: 10px 0; border-bottom: 1px solid var(--border); }}
+  .rally:last-child {{ border-bottom: none; }}
+  .rally-human, .rally-claude {{ font-size: 0.85rem; padding: 4px 0; }}
+  .rally-human {{ color: var(--text); }}
+  .rally-claude {{ color: var(--muted); margin-left: 16px; }}
+  .rally-label {{ font-size: 0.8rem; margin-right: 4px; }}
   .plan-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }}
   .plan-card {{ background: var(--card-bg); border: 1px solid var(--border);
                border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
