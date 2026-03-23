@@ -10,7 +10,7 @@ description: >
 
 # CC-SIer レポートSkill
 
-指定期間の活動を4つの情報源から収集し、AI要約してレポートを生成します。
+指定期間の活動を5つの情報源から収集し、AI要約してレポートを生成します。
 
 ---
 
@@ -37,7 +37,7 @@ description: >
 
 ## 2. データ収集
 
-以下の4ソースを順に読み込む。読み込みに失敗したソースはスキップして続行する。
+以下の5ソースを順に読み込む。読み込みに失敗したソースはスキップして続行する。
 
 ### 2.1 .session-summaries/（最優先・軽量）
 
@@ -91,6 +91,25 @@ ls .companies/{org-slug}/.session-summaries/${TODAY_COMPACT}*.json 2>/dev/null
 
 `interaction-log` ラベルのものは除外する（ノイズになるため）。
 
+### 2.5 .conversation-log/（会話ログ）
+
+```
+対象: .companies/{org-slug}/.conversation-log/*.md
+期間フィルタ: ファイル名の日付プレフィックスで絞り込む
+収集内容:
+  - 各セッションの Human 発言（依頼内容の全量リスト）
+  - ファイル生成を伴わなかったやり取り（壁打ち・相談等）の把握
+  - セッションごとの会話トピック・統計情報
+```
+
+Bash例（today の場合）:
+```bash
+ls .companies/{org-slug}/.conversation-log/{TODAY}*.md 2>/dev/null
+```
+
+各ファイルから `## 👤 Human` セクションの内容を抽出し、依頼内容リストを構築する。
+`## 統計` セクションからセッションの発言数・ツール実行数も取得する。
+
 ---
 
 ## 3. AI要約（レポート生成）
@@ -140,6 +159,23 @@ ls .companies/{org-slug}/.session-summaries/${TODAY_COMPACT}*.json 2>/dev/null
 ### 新規オープンのIssue（期間内）
 - #{番号} タイトル
 
+## 会話トピック
+
+（.conversation-log/ から抽出した全依頼内容。タスクログに記録されなかった
+ 壁打ち・相談・軽微な修正依頼も含む）
+
+### セッション別の依頼内容
+- **セッション {session_short}**（{human_count}発言 / {assistant_count}応答 / {tool_count}ツール実行）
+  - {依頼内容1}
+  - {依頼内容2}
+  - ...
+
+{各セッションを繰り返し}
+
+### ファイル生成を伴わなかったやり取り
+（壁打ち・相談・質問応答など、task-log に記録されなかった会話）
+- {やり取りの概要}
+
 ## 次のアクション候補
 
 （タスクログ・Issueのオープン状況・未完成成果物から優先度順に3〜5件）
@@ -147,7 +183,7 @@ ls .companies/{org-slug}/.session-summaries/${TODAY_COMPACT}*.json 2>/dev/null
 
 ---
 _このレポートは /company-report Skill によって自動生成されました_
-_情報源: .session-summaries/ | .task-log/ | docs/ | GitHub Issues_
+_情報源: .session-summaries/ | .task-log/ | docs/ | GitHub Issues | .conversation-log/_
 ```
 
 ---

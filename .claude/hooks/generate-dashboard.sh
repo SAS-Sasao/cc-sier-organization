@@ -64,13 +64,17 @@ if tl_dir.exists():
         for m in re.findall(r'(?:subagent|agent|担当)[：:]\s*(\S+)', text, re.IGNORECASE):
             agent_counts[m] = agent_counts.get(m, 0) + 1
 
-# Also check session summaries
+# Also check session summaries (JSON files)
 ss_dir = org_dir / ".session-summaries"
+session_count = 0
+total_tools = 0
 if ss_dir.exists():
-    for f in ss_dir.glob("*.md"):
-        text = f.read_text(encoding="utf-8", errors="ignore")
-        for m in re.findall(r'(?:subagent|agent)[：:]\s*(\S+)', text, re.IGNORECASE):
-            agent_counts[m] = agent_counts.get(m, 0) + 1
+    for f in ss_dir.glob("*.json"):
+        try:
+            sd = json.loads(f.read_text(encoding="utf-8", errors="ignore"))
+            session_count += 1
+            total_tools += sd.get("tool_count", 0)
+        except: pass
 
 # Sort by count descending
 agent_labels = list(agent_counts.keys())[:10]
@@ -81,15 +85,39 @@ cb_path = org_dir / ".case-bank" / "index.json"
 score_dates, score_values = [], []
 if cb_path.exists():
     try:
-        cases = json.loads(cb_path.read_text(encoding="utf-8", errors="ignore"))
-        if isinstance(cases, list):
-            for c in cases[-30:]:
-                d = c.get("date", c.get("timestamp", ""))[:10]
-                s = c.get("reward_score", c.get("score", 0))
-                if d and isinstance(s, (int, float)):
-                    score_dates.append(d)
-                    score_values.append(s)
+        cb_data = json.loads(cb_path.read_text(encoding="utf-8", errors="ignore"))
+        cases_list = cb_data.get("cases", []) if isinstance(cb_data, dict) else cb_data
+        for c in cases_list[-30:]:
+            d = c.get("outcome", {}).get("started", "")[:10]
+            s = c.get("reward")
+            if d and isinstance(s, (int, float)):
+                score_dates.append(d)
+                score_values.append(s)
     except: pass
+
+# 5. Conversation log stats
+conv_dir = org_dir / ".conversation-log"
+conv_sessions = 0
+conv_human_total = 0
+conv_topics = []
+if conv_dir.exists():
+    for f in sorted(conv_dir.glob("*.md")):
+        try:
+            text = f.read_text(encoding="utf-8", errors="ignore")
+            conv_sessions += 1
+            human_sections = re.findall(r'## 👤 Human\n\n(.*?)(?=\n---|\Z)', text, re.DOTALL)
+            conv_human_total += len(human_sections)
+            for sec in human_sections[:3]:
+                first_line = sec.strip().split('\n')[0][:60]
+                if len(first_line) > 10 and not first_line.startswith('```'):
+                    conv_topics.append(first_line)
+        except: pass
+
+# Build conversation topics HTML
+conv_topics_html = ""
+if conv_topics:
+    items = "".join(f"<li>{t}</li>" for t in conv_topics[-10:])
+    conv_topics_html = f'<div class="conv-topics"><h3>最近の会話トピック</h3><ul>{items}</ul></div>'
 
 # --- HTML generation ---
 html = f"""<!DOCTYPE html>
@@ -127,6 +155,18 @@ html = f"""<!DOCTYPE html>
   .card-value.yellow {{ color: var(--yellow); }}
   .card-value.red {{ color: var(--red); }}
   .card-value.green {{ color: var(--green); }}
+  .stats-row {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }}
+  .stat-card {{ background: var(--card-bg); border: 1px solid var(--border);
+               border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }}
+  .stat-label {{ font-size: 0.75rem; color: var(--muted); }}
+  .stat-value {{ font-size: 1.5rem; font-weight: 600; margin-top: 2px; }}
+  .conv-topics {{ background: var(--card-bg); border: 1px solid var(--border);
+                  border-radius: 12px; padding: 20px; margin-bottom: 24px;
+                  box-shadow: 0 2px 8px var(--shadow); }}
+  .conv-topics h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+  .conv-topics ul {{ list-style: none; padding: 0; }}
+  .conv-topics li {{ padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }}
+  .conv-topics li:last-child {{ border-bottom: none; }}
   .charts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }}
   .chart-box {{ background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
@@ -157,6 +197,27 @@ html = f"""<!DOCTYPE html>
     <div class="card-value green" data-count="{board['done']}">0</div>
   </div>
 </div>
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">セッション数</div>
+    <div class="stat-value">{session_count}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">ツール実行数</div>
+    <div class="stat-value">{total_tools}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">会話セッション</div>
+    <div class="stat-value">{conv_sessions}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Human 発言数</div>
+    <div class="stat-value">{conv_human_total}</div>
+  </div>
+</div>
+
+{conv_topics_html}
 
 <div class="charts">
   <div class="chart-box">
