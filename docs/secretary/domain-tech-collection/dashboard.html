@@ -45,6 +45,32 @@
   .conv-topics ul { list-style: none; padding: 0; }
   .conv-topics li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
   .conv-topics li:last-child { border-bottom: none; }
+  .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .plan-card { background: var(--card-bg); border: 1px solid var(--border);
+               border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
+  .plan-card.full-width { margin-bottom: 24px; }
+  .plan-card h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .progress-bar { flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue); border-radius: 5px; transition: width 1s ease; }
+  .progress-fill.green { background: var(--green); }
+  .progress-text { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .ms-timeline { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .ms-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+  .ms-badge { background: var(--blue); color: #fff; border-radius: 4px; padding: 2px 8px;
+              font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
+  .ms-name { flex: 1; }
+  .ms-date { color: var(--muted); font-size: 0.8rem; flex-shrink: 0; }
+  .action-list { list-style: none; padding: 0; }
+  .action-list li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+                    display: flex; align-items: center; gap: 8px; }
+  .action-list li:last-child { border-bottom: none; }
+  .action-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }
+  .action-badge.todo { background: var(--blue); color: #fff; }
+  .action-badge.wbs { background: var(--yellow); color: #000; }
+  .action-badge.issue { background: var(--green); color: #fff; }
+  .check-box { color: var(--muted); }
+  .source-hint { font-size: 0.7rem; color: var(--muted); margin-top: 8px; font-style: italic; }
   .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
   .chart-box { background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
@@ -55,7 +81,7 @@
 </head>
 <body>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-23 10:57:24 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-23 14:03:27 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -79,11 +105,11 @@
 <div class="stats-row">
   <div class="stat-card">
     <div class="stat-label">セッション数</div>
-    <div class="stat-value">111</div>
+    <div class="stat-value">115</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">23371</div>
+    <div class="stat-value">24716</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -91,11 +117,36 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">140</div>
+    <div class="stat-value">153</div>
   </div>
 </div>
 
 <div class="conv-topics"><h3>最近の会話トピック</h3><ul><li>会話ログについて、現状issueには前半3行だけを表示しているが、出来れば全量表示してほしい。修正可能？</li><li>会話ログ取得機能およびissueの転記機能がうまく動作していなさそう。※機能追加後に/companyで処理を行ったが会話</li></ul></div>
+
+<div class="plan-grid">
+<div class="plan-card">
+  <h3>TODO 進捗</h3>
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+    <span class="progress-text">0/23 (0%)</span>
+  </div>
+  <ul class="action-list"><li><span class="check-box">&#9744;</span> ストコンの定義・役割を自分の言葉で説明できるようにする</li><li><span class="check-box">&#9744;</span> コンビニ3層構造を理解する</li><li><span class="check-box">&#9744;</span> ストコンの歴史的経緯を把握する</li><li><span class="check-box">&#9744;</span> 主要チェーンのストコン事情を整理する</li><li><span class="check-box">&#9744;</span> 発注3方式を理解する</li></ul>
+  <div class="source-hint">docs/secretary/todos/2026-03-21.md</div>
+</div>
+<div class="plan-card">
+  <h3>WBS / マイルストーン</h3>
+  <div class="progress-row">
+    <div class="progress-bar"><div class="progress-fill green" style="width:4%"></div></div>
+    <span class="progress-text">完了2 / 進行中4 / 未着手50</span>
+  </div>
+  <div class="ms-timeline"><div class="ms-item"><span class="ms-badge">M1</span><span class="ms-name">基礎固め完了</span><span class="ms-date">04/11（W3末）</span></div><div class="ms-item"><span class="ms-badge">M2</span><span class="ms-name">案件直結知識完了</span><span class="ms-date">05/02（W6末）</span></div><div class="ms-item"><span class="ms-badge">M3</span><span class="ms-name">移行技術・統合完了</span><span class="ms-date">05/23（W9末）</span></div><div class="ms-item"><span class="ms-badge">M4</span><span class="ms-name">総仕上げ・参画準備完了</span><span class="ms-date">05/29（W10末）</span></div></div>
+  <div class="source-hint">docs/secretary/storcon-preparation-wbs.md</div>
+</div>
+</div>
+<div class="plan-card full-width">
+  <h3>直近アクション</h3>
+  <ul class="action-list"><li><span class="action-badge todo">TODO</span> ストコンの定義・役割を自分の言葉で説明できるようにする</li><li><span class="action-badge todo">TODO</span> コンビニ3層構造を理解する</li><li><span class="action-badge todo">TODO</span> ストコンの歴史的経緯を把握する</li><li><span class="action-badge wbs">WBS</span> ` 進行中 / `[x]` 完了</li></ul>
+</div>
 
 <div class="charts">
   <div class="chart-box">
