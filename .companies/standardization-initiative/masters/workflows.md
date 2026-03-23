@@ -1,16 +1,17 @@
 # ワークフロー一覧
 
-## wf-todo-update
+## wf-branch-policy
 
-- **名称**: TODO進捗更新
-- **トリガー**: 「TODO更新」「進捗更新」「タスク完了報告」「対応完了」
-- **実行方式**: subagent（secretary）
-- **ステップ**:
-  1. `docs/secretary/todos/` 配下のTODOファイルを確認
-  2. ユーザーからの報告に基づきステータスを更新
-  3. ブランチ作成 → コミット → PR作成
-- **成果物**:
-  - `.companies/{org-slug}/docs/secretary/todos/YYYY-MM-DD.md`（更新）
+- **名称**: ブランチ・PR必須ポリシー
+- **対象**: `.companies/standardization-initiative/` 配下の全ファイル
+- **ルール**: 新規作成・更新を問わず、ファイル変更時は必ずブランチを作成し、PR経由でmainにマージすること
+- **ブランチ命名**: `standardization-initiative/{type}/{YYYY-MM-DD}-{summary}`
+- **コミットメッセージ**: `{type}: {概要} [standardization-initiative] by {operator}`
+- **フロー**:
+  1. mainからブランチを作成
+  2. ファイルを変更・作成
+  3. コミット → プッシュ → PR作成
+  4. mainに戻る
 
 ---
 
