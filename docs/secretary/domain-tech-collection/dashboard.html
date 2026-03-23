@@ -42,9 +42,12 @@
                   border-radius: 12px; padding: 20px; margin-bottom: 24px;
                   box-shadow: 0 2px 8px var(--shadow); }
   .conv-topics h3 { font-size: 0.95rem; margin-bottom: 12px; }
-  .conv-topics ul { list-style: none; padding: 0; }
-  .conv-topics li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-  .conv-topics li:last-child { border-bottom: none; }
+  .rally { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .rally:last-child { border-bottom: none; }
+  .rally-human, .rally-claude { font-size: 0.85rem; padding: 4px 0; }
+  .rally-human { color: var(--text); }
+  .rally-claude { color: var(--muted); margin-left: 16px; }
+  .rally-label { font-size: 0.8rem; margin-right: 4px; }
   .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .plan-card { background: var(--card-bg); border: 1px solid var(--border);
                border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
@@ -77,11 +80,17 @@
   .chart-box h3 { font-size: 0.95rem; margin-bottom: 12px; }
   canvas { max-height: 280px; }
   .footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; }
+  .back-btn { display: inline-block; margin-bottom: 16px; padding: 6px 16px;
+               background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+               color: var(--text); text-decoration: none; font-size: 0.85rem;
+               box-shadow: 0 1px 4px var(--shadow); transition: background 0.2s; }
+  .back-btn:hover { background: var(--border); }
 </style>
 </head>
 <body>
+<a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-23 18:05:04 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-23 19:08:16 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -105,23 +114,23 @@
 <div class="stats-row">
   <div class="stat-card">
     <div class="stat-label">セッション数</div>
-    <div class="stat-value">118</div>
+    <div class="stat-value">124</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">25762</div>
+    <div class="stat-value">28023</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
-    <div class="stat-value">3</div>
+    <div class="stat-value">5</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">169</div>
+    <div class="stat-value">223</div>
   </div>
 </div>
 
-<div class="conv-topics"><h3>最近の会話トピック</h3><ul><li>会話ログについて、現状issueには前半3行だけを表示しているが、出来れば全量表示してほしい。修正可能？</li><li>会話ログ取得機能およびissueの転記機能がうまく動作していなさそう。※機能追加後に/companyで処理を行ったが会話</li></ul></div>
+<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> domain-tech-collection で作業したい</div><div class="rally-claude"><span class="rally-label">🤖</span> 組織を **ドメイン知識や技術スタック収集PJT** (`domain-tech-collection`) に切り替えました。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 会話ログ取得機能およびissueの転記機能がうまく動作していなさそう。※機能追加後に/companyで処理を行ったが会話ログが0件になっている。</div><div class="rally-claude"><span class="rally-label">🤖</span> 調査します。まず関連するファイルと最近の変更を確認します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKコミットしてpushして！</div><div class="rally-claude"><span class="rally-label">🤖</span> コミット＆プッシュ完了しました。次回の `/company` セッション終了時から、会話ログが正しくカウント・保存され、Issue転記・Case Bank強化も...</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 技術スタックを収集する際に、はてなブックマークのithttps://b.hatena.ne.jp/hotentry/it　を取得元に含めてほしい。</div><div class="rally-claude"><span class="rally-label">🤖</span> 情報ソースマスタに追加します。まず現在のマスタを確認します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKマージしたからmain以外のローカルブランチ削除して。</div><div class="rally-claude"><span class="rally-label">🤖</span> 削除完了しました。mainを最新化し、作業ブランチ `domain-tech-collection/docs/2026-03-23-add-hatena-boo...</div></div></div>
 
 <div class="plan-grid">
 <div class="plan-card">
@@ -256,7 +265,7 @@ new Chart(document.getElementById('scoreChart'), {
     plugins: { legend: { display: false } },
     scales: {
       x: { grid: { color: gridColor } },
-      y: { grid: { color: gridColor }, beginAtZero: true }
+      y: { grid: { color: gridColor }, min: 0, max: 1, ticks: { stepSize: 0.2 } }
     },
     animation: { duration: 1200 }
   }
