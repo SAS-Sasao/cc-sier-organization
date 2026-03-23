@@ -353,6 +353,7 @@ html = f"""<!DOCTYPE html>
   .card {{ background: var(--card-bg); border: 1px solid var(--border);
            border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
   .card-label {{ font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }}
+  .card-hint {{ font-size: 0.65rem; color: var(--muted); margin-top: 4px; opacity: 0.7; }}
   .card-value {{ font-size: 2.2rem; font-weight: 700; margin-top: 4px; }}
   .card-value.blue {{ color: var(--blue); }}
   .card-value.yellow {{ color: var(--yellow); }}
@@ -421,18 +422,22 @@ html = f"""<!DOCTYPE html>
   <div class="card">
     <div class="card-label">Todo</div>
     <div class="card-value blue" data-count="{board['todo']}">0</div>
+    <div class="card-hint">WBS + タスクログの未着手</div>
   </div>
   <div class="card">
     <div class="card-label">In Progress</div>
     <div class="card-value yellow" data-count="{board['in_progress']}">0</div>
+    <div class="card-hint">WBS + タスクログの進行中</div>
   </div>
   <div class="card">
     <div class="card-label">Review (NG)</div>
     <div class="card-value red" data-count="{board['review']}">0</div>
+    <div class="card-hint">品質ゲートNG・要修正</div>
   </div>
   <div class="card">
     <div class="card-label">Done</div>
     <div class="card-value green" data-count="{board['done']}">0</div>
+    <div class="card-hint">WBS + タスクログの完了済み</div>
   </div>
 </div>
 
