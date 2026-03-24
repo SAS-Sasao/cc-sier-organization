@@ -12,10 +12,12 @@
 - **入力**: `.companies/domain-tech-collection/docs/info-source-master.md`
 - **ステップ**:
   1. `info-source-master.md` の優先度「高」ソースを中心に WebFetch で巡回
-  2. 各テイメイトがカテゴリ別に記事タイトル・要約を収集
+  2. 各テイメイトがカテゴリ別に記事タイトル・要約・**ソース元URL** を収集
   3. チームリード（秘書）がカテゴリ別に統合ダイジェストを生成
+  4. **品質ゲート `by-type/daily-digest.md` を実行し、全項目パスを確認**
 - **成果物**:
   - `.companies/domain-tech-collection/docs/daily-digest/YYYY-MM-DD.md`
+- **品質ゲート**: `masters/quality-gates/by-type/daily-digest.md`（severity: error）
 - **Git運用**: ブランチ＋PR
 - **Issue作成**: あり（ラベル: `org:domain-tech-collection`, `type:daily-digest`）
 - **スケジュール**: Cron 毎日 10:00
