@@ -91,7 +91,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-23 20:40:37 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-24 12:43:06 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -119,23 +119,23 @@
 <div class="stats-row">
   <div class="stat-card">
     <div class="stat-label">セッション数</div>
-    <div class="stat-value">12</div>
+    <div class="stat-value">13</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">3316</div>
+    <div class="stat-value">3472</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
-    <div class="stat-value">5</div>
+    <div class="stat-value">6</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">391</div>
+    <div class="stat-value">577</div>
   </div>
 </div>
 
-<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> board.mdもpushしてほしい。あとboardの更新はどうやってすればいい？</div><div class="rally-claude"><span class="rally-label">🤖</span> push完了。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 会話ログ取得機能およびissueの転記機能がうまく動作していなさそう。※機能追加後に/companyで処理を行ったが会話ログが0件になっている。</div><div class="rally-claude"><span class="rally-label">🤖</span> 調査します。まず関連するファイルと最近の変更を確認します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKコミットしてpushして！</div><div class="rally-claude"><span class="rally-label">🤖</span> コミット＆プッシュ完了しました。次回の `/company` セッション終了時から、会話ログが正しくカウント・保存され、Issue転記・Case Bank強化も...</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 技術スタックを収集する際に、はてなブックマークのithttps://b.hatena.ne.jp/hotentry/it　を取得元に含めてほしい。</div><div class="rally-claude"><span class="rally-label">🤖</span> 情報ソースマスタに追加します。まず現在のマスタを確認します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKマージしたからmain以外のローカルブランチ削除して。</div><div class="rally-claude"><span class="rally-label">🤖</span> 削除完了しました。mainを最新化し、作業ブランチ `domain-tech-collection/docs/2026-03-23-add-hatena-boo...</div></div></div>
+<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 今回のケースは失敗ケースとして学習してほしい</div><div class="rally-claude"><span class="rally-label">🤖</span> 了解です。今回の失敗ポイントを整理してメモリに保存し、学習ケースとして記録します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OK実行して</div><div class="rally-claude"><span class="rally-label">🤖</span> 継続学習（Memento-Skills Write フェーズ）を実行します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> pushするべきファイルはプッシュして</div><div class="rally-claude"><span class="rally-label">🤖</span> mainブランチに未コミットの変更が2件あります。レポートブランチに追加してpushします。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした</div><div class="rally-claude"><span class="rally-label">🤖</span> mainを最新化し、ブランチ削除完了です。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした</div><div class="rally-claude"><span class="rally-label">🤖</span> 完了。mainを最新化し、ブランチ削除済みです。</div></div></div>
 
 <div class="plan-grid">
 <div class="plan-card">
@@ -203,7 +203,7 @@ new Chart(document.getElementById('qgChart'), {
   type: 'doughnut',
   data: {
     labels: ['合格', '不合格'],
-    datasets: [{ data: [7, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
+    datasets: [{ data: [10, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
   },
   options: {
     cutout: '70%',
@@ -235,7 +235,7 @@ new Chart(document.getElementById('agentChart'), {
   data: {
     labels: ["retail-domain-researcher", "tech-researcher", "project-manager"],
     datasets: [{
-      data: [3, 1, 1],
+      data: [4, 2, 1],
       backgroundColor: '#4dabf7',
       borderRadius: 4,
     }]
@@ -255,10 +255,10 @@ new Chart(document.getElementById('agentChart'), {
 new Chart(document.getElementById('scoreChart'), {
   type: 'line',
   data: {
-    labels: ["2026-03-21", "2026-03-21", "2026-03-21", "2026-03-21", "2026-03-23"],
+    labels: ["2026-03-21", "2026-03-21", "2026-03-21", "2026-03-21", "2026-03-23", "2026-03-24"],
     datasets: [{
       label: '報酬スコア',
-      data: [1.0, 1.0, 1.0, 1.0, 1.0],
+      data: [1.0, 1.0, 1.0, 1.0, 1.0, 0.6],
       borderColor: '#ffc107',
       backgroundColor: 'rgba(255,193,7,0.1)',
       fill: true,
