@@ -7,8 +7,8 @@ started: 2026-03-25T19:55:18
 completed: 2026-03-25T20:00:00
 request: "WBS 4.1.1 PM全体像学習ノート生成 + W1必読ドキュメント一覧 + TODO更新"
 operator: SAS-Sasao
-issue_number: null
-pr_number: null
+issue_number: 65
+pr_number: 64
 ---
 
 # タスクログ: PM全体像学習ノート + W1必読リスト + TODO更新
