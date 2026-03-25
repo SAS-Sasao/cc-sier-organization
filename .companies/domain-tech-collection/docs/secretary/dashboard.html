@@ -75,6 +75,33 @@
   .action-badge.issue { background: var(--green); color: #fff; }
   .check-box { color: var(--muted); }
   .source-hint { font-size: 0.7rem; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .evolve-section { margin-bottom: 24px; }
+  .evolve-section h2 { font-size: 1.1rem; margin-bottom: 16px; }
+  .evolve-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .evolve-card { background: var(--card-bg); border: 1px solid var(--border);
+                  border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }
+  .evolve-card .ev-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+  .evolve-card .ev-value { font-size: 1.8rem; font-weight: 700; margin-top: 4px; }
+  .evolve-card .ev-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+  .today-tasks { background: var(--card-bg); border: 1px solid var(--border);
+                  border-radius: 12px; padding: 20px; margin-bottom: 16px;
+                  box-shadow: 0 2px 8px var(--shadow); }
+  .today-tasks h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .task-row { display: flex; align-items: center; gap: 12px; padding: 8px 0;
+               border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .task-row:last-child { border-bottom: none; }
+  .reward-badge { display: inline-block; padding: 2px 10px; border-radius: 12px;
+                   font-weight: 600; font-size: 0.8rem; min-width: 48px; text-align: center; }
+  .reward-high { background: rgba(25,135,84,0.15); color: var(--green); }
+  .reward-mid { background: rgba(255,193,7,0.15); color: var(--yellow); }
+  .reward-low { background: rgba(220,53,69,0.15); color: var(--red); }
+  .reward-none { background: var(--border); color: var(--muted); }
+  .task-id { flex: 1; font-family: monospace; font-size: 0.8rem; }
+  .task-mode { font-size: 0.7rem; color: var(--muted); }
+  .alert-card { background: var(--card-bg); border-left: 3px solid var(--red);
+                 border-radius: 12px; padding: 16px; margin-bottom: 16px;
+                 box-shadow: 0 2px 8px var(--shadow); }
+  .alert-card h3 { font-size: 0.9rem; color: var(--red); margin-bottom: 8px; }
   .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
   .chart-box { background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
@@ -91,7 +118,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-25 21:24:10 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-25 21:27:10 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -123,7 +150,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">3937</div>
+    <div class="stat-value">3954</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -131,11 +158,44 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">1105</div>
+    <div class="stat-value">1126</div>
   </div>
 </div>
 
 <div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした</div><div class="rally-claude"><span class="rally-label">🤖</span> 完了。mainを最新化し、ブランチ削除済みです。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ストコン調査とニュース巡回を実行してほしい</div><div class="rally-claude"><span class="rally-label">🤖</span> 2件を並列実行します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> **既存ドキュメントのカバー状況の確認:**</div><div class="rally-claude"><span class="rally-label">🤖</span> ストコン調査も完了しました。成果物を保存してコミット・PR作成に進みます。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした！</div><div class="rally-claude"><span class="rally-label">🤖</span> 完了。mainを最新化し、ブランチ削除済みです。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> Error: Exit code 123</div><div class="rally-claude"><span class="rally-label">🤖</span> これは実害のないエラーです。</div></div></div>
+
+<div class="evolve-section">
+  <h2>継続学習（company-evolve）</h2>
+  <div class="evolve-grid">
+    <div class="evolve-card">
+      <div class="ev-label">Case Bank</div>
+      <div class="ev-value" style="color:var(--blue)">14</div>
+      <div class="ev-sub">インデックス済みケース</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">平均報酬</div>
+      <div class="ev-value" style="color:var(--green)">0.88</div>
+      <div class="ev-sub">全ケース平均</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">報酬分布</div>
+      <div style="display:flex;gap:4px;height:14px;border-radius:7px;overflow:hidden;margin-top:10px">
+        <div style="flex:79;background:var(--green)" title="高 (≥0.7): 11件"></div>
+        <div style="flex:7;background:var(--yellow)" title="中 (0.4-0.7): 1件"></div>
+        <div style="flex:7;background:var(--red)" title="低 (<0.4): 1件"></div>
+        <div style="flex:7;background:var(--border)" title="未評価: 1件"></div>
+      </div>
+      <div class="ev-sub" style="margin-top:6px">高11 / 中1 / 低1 / 未1</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">本日評価</div>
+      <div class="ev-value" style="color:var(--blue)">5</div>
+      <div class="ev-sub">タスク</div>
+    </div>
+  </div>
+  <div class="today-tasks"><h3>本日のタスク評価</h3><div class="task-row"><span class="reward-badge reward-high">0.8</span><span class="task-id">daily-digest</span><span class="task-mode">direct</span></div><div class="task-row"><span class="reward-badge reward-low">0.2</span><span class="task-id">storcon-research</span><span class="task-mode">subagent</span></div><div class="task-row"><span class="reward-badge reward-high">1.0</span><span class="task-id">pm-overview-w1-reading</span><span class="task-mode">direct</span></div><div class="task-row"><span class="reward-badge reward-high">0.8</span><span class="task-id">storcon-aws-deep-dive</span><span class="task-mode">subagent</span></div><div class="task-row"><span class="reward-badge reward-none">N/A</span><span class="task-id">storcon-aws-tech-deep-dive</span><span class="task-mode"></span></div></div>
+  <div class="alert-card"><h3>⚠ 低報酬ケース</h3><div style="font-size:.85rem;padding:4px 0"><span class="reward-badge reward-low">0.2</span> <span style="font-family:monospace">20260325-192516-storcon-research</span></div></div>
+</div>
 
 <div class="plan-grid">
 <div class="plan-card">
