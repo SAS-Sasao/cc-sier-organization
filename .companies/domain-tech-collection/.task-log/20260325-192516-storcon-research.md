@@ -43,3 +43,14 @@ signals:
     retry_detected: false
 evaluated_at: "2026-03-25T19:29:31"
 ```
+
+## judge
+```yaml
+completeness: 8
+accuracy: 8
+clarity: 9
+total: 0.83
+failure_reason: ""
+judge_comment: "3チェーン(セブン/ファミマ/ローソン)のクラウド移行状況を比較表付きで網羅。POS連携アーキテクチャの技術詳細が実践的。Strangler Figパターン等の設計パターン言及もPM視点で有用。"
+judged_at: "2026-03-25T21:30:23+09:00"
+```

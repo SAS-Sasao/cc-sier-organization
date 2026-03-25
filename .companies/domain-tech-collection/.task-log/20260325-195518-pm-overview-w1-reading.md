@@ -46,3 +46,25 @@ pr_number: 64
 - PM全体像: ストコンAWS移行案件に特化した体制イメージを含む。管理帳票テンプレートは参画後に即活用可能
 - W1必読リスト: docs/ 配下を網羅的にGlobして既存ドキュメントを漏れなく把握。未生成はAWSハンズオンメモ1件のみ
 - TODO: PM全体像・W1リストの完了を反映し、残り3日の注力ポイントを明記
+
+## reward
+```yaml
+score: 1.0
+signals:
+  completed: true
+  artifacts_exist: true
+  no_excessive_edits: true
+  no_retry: true
+note: "3ファイル同時生成・品質良好・Case Bank参照パターンと一致"
+```
+
+## judge
+```yaml
+completeness: 9
+accuracy: 8
+clarity: 10
+total: 0.90
+failure_reason: ""
+judge_comment: "PM体制(PMO/機能PM/ベンダーPM)の整理が明確。W1必読リストはWBS全タスクを網羅しドキュメント有無を正確に把握。ストコン案件に当てはめた体制イメージが実践的。管理帳票テンプレートは参画後即活用可能。"
+judged_at: "2026-03-25T21:30:23+09:00"
+```

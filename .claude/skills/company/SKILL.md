@@ -242,12 +242,13 @@ Agent Teams を使用する場合（`references/agent-templates.md` を参照）
 4. ブランチに切り替え
 
 **作業後:**
-1. `git add .companies/{org-slug}/`（組織ディレクトリのみ）
-2. `git commit -m "{type}: {概要} [{org-slug}] by {operator}"`
-3. `git push origin {branch-name}`
-4. PR 作成（gh CLI）: タイトルと本文に組織名・変更概要を含める
-5. PR の URL をユーザーに報告
-6. `git checkout main` で元のブランチに戻る
+1. **LLM-as-Judge 評価**: 成果物が `docs/` 配下にある場合、secretary.md の「タスク完了後の品質評価」手順に従い、completeness / accuracy / clarity の3軸評価を実行し `.task-log/{task-id}.md` に `## judge` セクションを追記する（詳細は secretary.md 参照）。成果物がない場合はスキップ。
+2. `git add .companies/{org-slug}/`（組織ディレクトリのみ）
+3. `git commit -m "{type}: {概要} [{org-slug}] by {operator}"`
+4. `git push origin {branch-name}`
+5. PR 作成（gh CLI）: タイトルと本文に組織名・変更概要を含める
+6. PR の URL をユーザーに報告
+7. `git checkout main` で元のブランチに戻る
 
 ### 3.7 タスクログと Issue 作成
 
