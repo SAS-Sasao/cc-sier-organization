@@ -48,7 +48,7 @@
 | 2.1.1 | ストコンの全体像理解 | 自学 | W1 | 5h | 調査レポート§1 + JFA統計 + 各社IR | 学習ノート | [ ] |
 | 2.1.2 | 主要業務プロセス理解（発注3方式、廃棄、日次精算、検品） | 自学 | W2 | 6h | 調査レポート§2 + §4 | 学習ノート | [ ] |
 | 2.1.3 | 店舗内システム構成（POS連携、決済、温度管理、EOS/EOB） | 自学 | W3 | 5h | 調査レポート§3 | 学習ノート | [ ] |
-| 2.1.R1 | コンビニ業界構造の深掘り調査 | 小売 | W1-2 | - | Web調査 | `docs/retail-domain/` 配下レポート | [ ] |
+| 2.1.R1 | コンビニ業界構造の深掘り調査 | 小売 | W1-2 | - | Web調査 | `docs/retail-domain/` 配下レポート | [x] |
 
 **到達目標**: ストコンが何をしていて、どんなデータが流れているか説明できる
 
@@ -132,7 +132,7 @@
 
 | WBS | タスク | 担当 | 期間 | 時間 | リソース | 成果物 | ステータス |
 |-----|-------|------|------|------|---------|--------|----------|
-| 4.1.1 | 大規模移行PMの全体像（PMO/機能チームPM/ベンダーPM、WBS構成） | 自学 | W1 | 4h | PMBOK第7版§1-3 + IPA事例集 | 学習ノート | [ ] |
+| 4.1.1 | 大規模移行PMの全体像（PMO/機能チームPM/ベンダーPM、WBS構成） | 自学 | W1 | 4h | PMBOK第7版§1-3 + IPA事例集 | 学習ノート | [x] |
 | 4.1.2 | ステークホルダー管理基礎（影響度×関心度マップ、コミュニケーション計画） | 自学 | W2 | 4h | PMBOK§13 + PM実践講座 | ステークホルダーマップ案 | [ ] |
 | 4.1.3 | リスク管理基礎（FMEA、発生確率×影響度、移行特有のリスクカテゴリ） | 自学 | W3 | 4h | PMBOK§11 + IPA失敗事例集 | リスク一覧ドラフト | [ ] |
 
@@ -235,3 +235,8 @@
 | `docs/secretary/store-computer-learning-schedule.md` | 秘書室 | 学習スケジュール詳細版（本WBSの元資料） |
 | `docs/info-source-master.md` | リサーチ+小売 | 情報ソースマスタ（75+ソース） |
 | `docs/daily-digest/YYYY-MM-DD.md` | 秘書+リサーチ+小売 | 日次ニュースダイジェスト |
+| `docs/retail-domain/convenience-industry-structure.md` | 小売ドメイン室 | コンビニ業界構造レポート（WBS 2.1.R1） |
+| `docs/retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md` | 小売ドメイン室 | ストコン深掘り調査（3チェーン移行詳細・POS連携） |
+| `docs/retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md` | 小売ドメイン室 | ストコン最新動向レポート 2024-2026 |
+| `docs/secretary/learning-notes/wbs-4-1-1-migration-pm-overview.md` | 秘書室 | 大規模移行PM全体像 学習ノート（WBS 4.1.1） |
+| `docs/secretary/learning-notes/w1-reading-list.md` | 秘書室 | W1 必読ドキュメント一覧 |
