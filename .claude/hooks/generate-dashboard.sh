@@ -709,11 +709,9 @@ html = f"""<!DOCTYPE html>
   </div>
 </div>
 
-{conv_topics_html}
-
-{evolve_section_html}
-
 {plan_section_html}
+
+{conv_topics_html}
 
 <div class="charts">
   <div class="chart-box">
@@ -728,7 +726,11 @@ html = f"""<!DOCTYPE html>
     <h3>スコア推移（reward）</h3>
     <canvas id="scoreChart"></canvas>
   </div>
+</div>
 
+{evolve_section_html}
+
+<div class="charts">
   <!-- LLM-as-Judge: レーダーチャート -->
   <div class="chart-box" style="grid-column: span 2">
     <h3>Subagent 評価軸レーダー（LLM-as-Judge）</h3>
