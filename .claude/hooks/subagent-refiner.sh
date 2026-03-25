@@ -39,6 +39,15 @@ except Exception:
 if not cases:
     sys.exit(0)
 
+# failure_patterns を読み込む
+failure_patterns = index.get("failure_patterns", [])
+fp_by_agent = {}
+for fp in failure_patterns:
+    agent = fp.get("subagent", "")
+    if agent not in fp_by_agent:
+        fp_by_agent[agent] = []
+    fp_by_agent[agent].append(fp)
+
 # --- refiner-log 読み込み ---
 refiner_data = {"refined": {}, "spawned": []}
 if refiner_log_path.exists():
@@ -116,10 +125,47 @@ for agent_name, stats in agent_stats.items():
         output_fmt += f"- `{d}`（{count}件）\n"
 
     constraints = f"\n## constraints（{today} 自動更新）\n\n"
-    if stats["low_reward_heads"]:
-        constraints += "低報酬ケース（reward < 0.4）から導出した注意事項:\n"
-        for head, r in stats["low_reward_heads"][:5]:
-            constraints += f"- 「{head}」（報酬:{r}）パターンは注意\n"
+
+    # ---- constraints（judge の failure_reason を優先して使用）----
+    constraint_notes = []
+
+    # judge データがある場合は failure_reason を使う（より具体的）
+    judge_failures = [
+        c for c in cases
+        if c.get("judge") and c["judge"].get("total", 1.0) < 0.6
+        and c["judge"].get("failure_reason", "").strip()
+        and agent_name in c.get("action", {}).get("subagent", "")
+    ]
+    seen_reasons = set()
+    for c in judge_failures[:5]:
+        reason = c["judge"]["failure_reason"].strip()
+        total  = c["judge"].get("total", 0)
+        if reason and reason not in seen_reasons:
+            seen_reasons.add(reason)
+            constraint_notes.append(
+                f"- {reason}（judge score: {total:.2f}）← 繰り返し発生中、必ず対応すること"
+            )
+
+    # failure_patterns から件数の多い失敗も追加
+    agent_fps = fp_by_agent.get(agent_name, [])
+    for fp in sorted(agent_fps, key=lambda x: -x.get("count", 0))[:3]:
+        reason = fp.get("failure_reason", "")
+        count  = fp.get("count", 0)
+        if reason and reason not in seen_reasons and count >= 2:
+            seen_reasons.add(reason)
+            constraint_notes.append(
+                f"- {reason}（{count}件で同じ失敗を確認・要注意）"
+            )
+
+    # fallback: judge データがない場合は従来の低報酬ベース
+    if not constraint_notes:
+        for head, r in stats["low_reward_heads"][:3]:
+            if head:
+                constraint_notes.append(f"- 「{head}」（報酬:{r}）パターンは注意")
+
+    if constraint_notes:
+        constraints += "judge 評価 + Case Bank 実績から導出した注意事項:\n"
+        constraints += "\n".join(constraint_notes) + "\n"
     else:
         constraints += "低報酬ケースなし（良好）\n"
 

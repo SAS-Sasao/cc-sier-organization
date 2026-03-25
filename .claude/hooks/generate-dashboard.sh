@@ -117,7 +117,87 @@ if cb_path.exists():
                 score_values.append(s)
     except: pass
 
-# 5. Conversation log stats
+# 5. Judge data aggregation
+from collections import defaultdict as ddict
+from datetime import datetime as dt
+
+judge_by_agent = ddict(lambda: {"completeness": [], "accuracy": [], "clarity": [], "total": []})
+judge_trend_raw = []
+monthly_scores = ddict(lambda: ddict(list))  # month -> agent -> [total]
+this_month_str = datetime.now().strftime("%Y-%m")
+_lm_dt = datetime.now().replace(day=1)
+_prev = _lm_dt.replace(month=_lm_dt.month-1) if _lm_dt.month > 1 else _lm_dt.replace(year=_lm_dt.year-1, month=12)
+last_month_str = _prev.strftime("%Y-%m")
+
+judge_failure_patterns = []
+judge_most_improved = None
+
+case_bank = org_dir / ".case-bank" / "index.json"
+if case_bank.exists():
+    try:
+        _cb = json.loads(case_bank.read_text(encoding="utf-8", errors="ignore"))
+
+        # failure_patterns
+        judge_failure_patterns = _cb.get("failure_patterns", [])[:3]
+
+        for c in _cb.get("cases", []):
+            j = c.get("judge")
+            if not j or not isinstance(j, dict):
+                continue
+            agent = c.get("action", {}).get("subagent", "unknown")
+            started = c.get("outcome", {}).get("started", "")[:7]
+
+            for axis in ["completeness", "accuracy", "clarity", "total"]:
+                val = j.get(axis)
+                if val is not None:
+                    judge_by_agent[agent][axis].append(float(val))
+
+            if j.get("total") is not None:
+                judge_trend_raw.append({
+                    "date": c.get("outcome", {}).get("started", "")[:10],
+                    "score": round(float(j["total"]), 2),
+                })
+            if started:
+                monthly_scores[started][agent].append(float(j.get("total", 0)))
+    except Exception:
+        pass
+
+# Radar chart data (top 6 agents by case count)
+top_agents = sorted(
+    judge_by_agent.keys(),
+    key=lambda a: -len(judge_by_agent[a]["total"])
+)[:6]
+
+judge_radar = {
+    "labels": top_agents,
+    "completeness": [round(sum(judge_by_agent[a]["completeness"])/len(judge_by_agent[a]["completeness"]), 1) if judge_by_agent[a]["completeness"] else 0 for a in top_agents],
+    "accuracy":     [round(sum(judge_by_agent[a]["accuracy"])/len(judge_by_agent[a]["accuracy"]), 1) if judge_by_agent[a]["accuracy"] else 0 for a in top_agents],
+    "clarity":      [round(sum(judge_by_agent[a]["clarity"])/len(judge_by_agent[a]["clarity"]), 1) if judge_by_agent[a]["clarity"] else 0 for a in top_agents],
+}
+
+# Judge score trend (last 30)
+judge_trend_raw.sort(key=lambda x: x["date"])
+judge_trend = judge_trend_raw[-30:]
+
+# Most improved agent (this month vs last month)
+best_agent = None
+best_delta = 0
+for agent in set(list(monthly_scores[this_month_str].keys()) + list(monthly_scores[last_month_str].keys())):
+    this_scores = monthly_scores[this_month_str].get(agent, [])
+    last_scores = monthly_scores[last_month_str].get(agent, [])
+    if this_scores and last_scores:
+        delta = (sum(this_scores)/len(this_scores)) - (sum(last_scores)/len(last_scores))
+        if delta > best_delta:
+            best_delta = delta
+            best_agent = agent
+if best_agent:
+    judge_most_improved = {
+        "agent": best_agent,
+        "delta": round(best_delta, 2),
+        "this_month_avg": round(sum(monthly_scores[this_month_str][best_agent])/len(monthly_scores[this_month_str][best_agent]), 2),
+    }
+
+# 6. Conversation log stats
 conv_dir = org_dir / ".conversation-log"
 conv_sessions = 0
 conv_human_total = 0
@@ -322,6 +402,34 @@ if todo_html or wbs_html or actions_html:
 </div>
 {actions_html}'''
 
+# --- Judge widget data preparation ---
+radar_labels_json    = json.dumps(judge_radar["labels"], ensure_ascii=False)
+radar_complete_json  = json.dumps(judge_radar["completeness"])
+radar_accuracy_json  = json.dumps(judge_radar["accuracy"])
+radar_clarity_json   = json.dumps(judge_radar["clarity"])
+judge_t_labels_json  = json.dumps([t["date"] for t in judge_trend])
+judge_t_data_json    = json.dumps([t["score"] for t in judge_trend])
+
+# Improved highlight HTML
+improved_html = ""
+if judge_most_improved:
+    improved_html = f"""<div class="card" style="border-left: 3px solid #06d6a0;">
+  <div class="card-label">今月最も改善したSubagent</div>
+  <div style="font-size:1.4rem;font-weight:700;color:#06d6a0">{judge_most_improved['agent']}</div>
+  <div style="font-size:.85rem;color:var(--muted);margin-top:4px">
+    judge スコア +{judge_most_improved['delta']:.2f} ／ 今月平均: {judge_most_improved['this_month_avg']:.2f}
+  </div>
+</div>"""
+
+# Failure patterns HTML
+failure_items_html = "".join([
+    f'<li style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">'
+    f'<span style="color:var(--red);font-weight:500">{fp["subagent"]}</span> — '
+    f'{fp["failure_reason"]} '
+    f'<span style="color:var(--muted)">({fp["count"]}件)</span></li>'
+    for fp in judge_failure_patterns
+]) or "<li style='color:var(--muted);font-size:.82rem'>データ蓄積中</li>"
+
 # --- HTML generation ---
 html = f"""<!DOCTYPE html>
 <html lang="ja">
@@ -474,8 +582,29 @@ html = f"""<!DOCTYPE html>
     <canvas id="agentChart"></canvas>
   </div>
   <div class="chart-box" style="grid-column: 1 / -1;">
-    <h3>スコア推移</h3>
+    <h3>スコア推移（reward）</h3>
     <canvas id="scoreChart"></canvas>
+  </div>
+
+  <!-- LLM-as-Judge: レーダーチャート -->
+  <div class="chart-box" style="grid-column: span 2">
+    <h3>Subagent 評価軸レーダー（LLM-as-Judge）</h3>
+    <canvas id="radarChart" style="max-height:280px"></canvas>
+  </div>
+
+  <!-- LLM-as-Judge: スコア推移 -->
+  <div class="chart-box" style="grid-column: span 2">
+    <h3>judge スコア推移（completeness+accuracy+clarity 平均）</h3>
+    <canvas id="judgeChart"></canvas>
+  </div>
+
+  <!-- 改善ハイライト -->
+  {improved_html}
+
+  <!-- 失敗パターントップ3 -->
+  <div class="card">
+    <div class="card-label">よく出る失敗パターン（上位3件）</div>
+    <ul style="list-style:none;padding:0;margin:8px 0 0 0">{failure_items_html}</ul>
   </div>
 </div>
 
@@ -552,6 +681,76 @@ new Chart(document.getElementById('agentChart'), {{
     animation: {{ delay(ctx) {{ return ctx.dataIndex * 80; }} }}
   }}
 }});
+
+// Radar: LLM-as-Judge evaluation axes
+const radarCtx = document.getElementById('radarChart');
+if (radarCtx) {{
+  const radarLabelsData = {radar_labels_json};
+  if (radarLabelsData.length > 0) {{
+    new Chart(radarCtx.getContext('2d'), {{
+      type: 'radar',
+      data: {{
+        labels: ['completeness', 'accuracy', 'clarity'],
+        datasets: radarLabelsData.map((agent, i) => ({{
+          label: agent,
+          data: [
+            {radar_complete_json}[i] || 0,
+            {radar_accuracy_json}[i] || 0,
+            {radar_clarity_json}[i] || 0,
+          ],
+          borderWidth: 1.5,
+          fill: true,
+          backgroundColor: `hsla(${{i * 60}}, 70%, 60%, 0.1)`,
+          borderColor: `hsla(${{i * 60}}, 70%, 50%, 0.8)`,
+        }})),
+      }},
+      options: {{
+        animation: {{ duration: 1000, easing: 'easeOutQuart' }},
+        scales: {{
+          r: {{
+            min: 0, max: 10,
+            ticks: {{ stepSize: 2, color: textColor, font: {{ size: 10 }} }},
+            grid: {{ color: 'rgba(128,128,128,.15)' }},
+            pointLabels: {{ color: textColor, font: {{ size: 11 }} }},
+          }}
+        }},
+        plugins: {{ legend: {{ labels: {{ color: textColor, font: {{ size: 11 }} }} }} }},
+      }}
+    }});
+  }}
+}}
+
+// Line: Judge total trend
+const judgeCtx = document.getElementById('judgeChart');
+if (judgeCtx) {{
+  const judgeTrendLabels = {judge_t_labels_json};
+  const judgeTrendData = {judge_t_data_json};
+  if (judgeTrendData.length > 0) {{
+    new Chart(judgeCtx.getContext('2d'), {{
+      type: 'line',
+      data: {{
+        labels: judgeTrendLabels,
+        datasets: [{{
+          label: 'judge total',
+          data: judgeTrendData,
+          borderColor: '#7209b7',
+          backgroundColor: 'rgba(114,9,183,.12)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+        }}]
+      }},
+      options: {{
+        animation: {{ duration: 1200, easing: 'easeOutQuart' }},
+        plugins: {{ legend: {{ display: false }} }},
+        scales: {{
+          x: {{ grid: {{ color: gridColor }}, ticks: {{ color: textColor, maxTicksLimit: 8 }} }},
+          y: {{ min: 0, max: 1, grid: {{ color: gridColor }}, ticks: {{ color: textColor }} }}
+        }}
+      }}
+    }});
+  }}
+}}
 
 // Line: Score trend
 new Chart(document.getElementById('scoreChart'), {{
