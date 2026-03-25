@@ -91,7 +91,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-24 12:43:06 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-25 19:43:57 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -123,19 +123,19 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">3472</div>
+    <div class="stat-value">3364</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
-    <div class="stat-value">6</div>
+    <div class="stat-value">7</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">577</div>
+    <div class="stat-value">819</div>
   </div>
 </div>
 
-<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 今回のケースは失敗ケースとして学習してほしい</div><div class="rally-claude"><span class="rally-label">🤖</span> 了解です。今回の失敗ポイントを整理してメモリに保存し、学習ケースとして記録します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OK実行して</div><div class="rally-claude"><span class="rally-label">🤖</span> 継続学習（Memento-Skills Write フェーズ）を実行します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> pushするべきファイルはプッシュして</div><div class="rally-claude"><span class="rally-label">🤖</span> mainブランチに未コミットの変更が2件あります。レポートブランチに追加してpushします。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした</div><div class="rally-claude"><span class="rally-label">🤖</span> mainを最新化し、ブランチ削除完了です。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした</div><div class="rally-claude"><span class="rally-label">🤖</span> 完了。mainを最新化し、ブランチ削除済みです。</div></div></div>
+<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした</div><div class="rally-claude"><span class="rally-label">🤖</span> 完了。mainを最新化し、ブランチ削除済みです。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ストコン調査とニュース巡回を実行してほしい</div><div class="rally-claude"><span class="rally-label">🤖</span> 2件を並列実行します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> **既存ドキュメントのカバー状況の確認:**</div><div class="rally-claude"><span class="rally-label">🤖</span> ストコン調査も完了しました。成果物を保存してコミット・PR作成に進みます。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> マージした！</div><div class="rally-claude"><span class="rally-label">🤖</span> 完了。mainを最新化し、ブランチ削除済みです。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> Error: Exit code 123</div><div class="rally-claude"><span class="rally-label">🤖</span> これは実害のないエラーです。</div></div></div>
 
 <div class="plan-grid">
 <div class="plan-card">
@@ -172,8 +172,29 @@
     <canvas id="agentChart"></canvas>
   </div>
   <div class="chart-box" style="grid-column: 1 / -1;">
-    <h3>スコア推移</h3>
+    <h3>スコア推移（reward）</h3>
     <canvas id="scoreChart"></canvas>
+  </div>
+
+  <!-- LLM-as-Judge: レーダーチャート -->
+  <div class="chart-box" style="grid-column: span 2">
+    <h3>Subagent 評価軸レーダー（LLM-as-Judge）</h3>
+    <canvas id="radarChart" style="max-height:280px"></canvas>
+  </div>
+
+  <!-- LLM-as-Judge: スコア推移 -->
+  <div class="chart-box" style="grid-column: span 2">
+    <h3>judge スコア推移（completeness+accuracy+clarity 平均）</h3>
+    <canvas id="judgeChart"></canvas>
+  </div>
+
+  <!-- 改善ハイライト -->
+  
+
+  <!-- 失敗パターントップ3 -->
+  <div class="card">
+    <div class="card-label">よく出る失敗パターン（上位3件）</div>
+    <ul style="list-style:none;padding:0;margin:8px 0 0 0"><li style='color:var(--muted);font-size:.82rem'>データ蓄積中</li></ul>
   </div>
 </div>
 
@@ -203,7 +224,7 @@ new Chart(document.getElementById('qgChart'), {
   type: 'doughnut',
   data: {
     labels: ['合格', '不合格'],
-    datasets: [{ data: [10, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
+    datasets: [{ data: [12, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
   },
   options: {
     cutout: '70%',
@@ -235,7 +256,7 @@ new Chart(document.getElementById('agentChart'), {
   data: {
     labels: ["retail-domain-researcher", "tech-researcher", "project-manager"],
     datasets: [{
-      data: [4, 2, 1],
+      data: [5, 2, 1],
       backgroundColor: '#4dabf7',
       borderRadius: 4,
     }]
@@ -251,14 +272,84 @@ new Chart(document.getElementById('agentChart'), {
   }
 });
 
+// Radar: LLM-as-Judge evaluation axes
+const radarCtx = document.getElementById('radarChart');
+if (radarCtx) {
+  const radarLabelsData = [];
+  if (radarLabelsData.length > 0) {
+    new Chart(radarCtx.getContext('2d'), {
+      type: 'radar',
+      data: {
+        labels: ['completeness', 'accuracy', 'clarity'],
+        datasets: radarLabelsData.map((agent, i) => ({
+          label: agent,
+          data: [
+            [][i] || 0,
+            [][i] || 0,
+            [][i] || 0,
+          ],
+          borderWidth: 1.5,
+          fill: true,
+          backgroundColor: `hsla(${i * 60}, 70%, 60%, 0.1)`,
+          borderColor: `hsla(${i * 60}, 70%, 50%, 0.8)`,
+        })),
+      },
+      options: {
+        animation: { duration: 1000, easing: 'easeOutQuart' },
+        scales: {
+          r: {
+            min: 0, max: 10,
+            ticks: { stepSize: 2, color: textColor, font: { size: 10 } },
+            grid: { color: 'rgba(128,128,128,.15)' },
+            pointLabels: { color: textColor, font: { size: 11 } },
+          }
+        },
+        plugins: { legend: { labels: { color: textColor, font: { size: 11 } } } },
+      }
+    });
+  }
+}
+
+// Line: Judge total trend
+const judgeCtx = document.getElementById('judgeChart');
+if (judgeCtx) {
+  const judgeTrendLabels = [];
+  const judgeTrendData = [];
+  if (judgeTrendData.length > 0) {
+    new Chart(judgeCtx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: judgeTrendLabels,
+        datasets: [{
+          label: 'judge total',
+          data: judgeTrendData,
+          borderColor: '#7209b7',
+          backgroundColor: 'rgba(114,9,183,.12)',
+          tension: 0.4,
+          fill: true,
+          pointRadius: 3,
+        }]
+      },
+      options: {
+        animation: { duration: 1200, easing: 'easeOutQuart' },
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8 } },
+          y: { min: 0, max: 1, grid: { color: gridColor }, ticks: { color: textColor } }
+        }
+      }
+    });
+  }
+}
+
 // Line: Score trend
 new Chart(document.getElementById('scoreChart'), {
   type: 'line',
   data: {
-    labels: ["2026-03-21", "2026-03-21", "2026-03-21", "2026-03-21", "2026-03-23", "2026-03-24"],
+    labels: ["2026-03-21", "2026-03-21", "2026-03-21", "2026-03-21", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-25"],
     datasets: [{
       label: '報酬スコア',
-      data: [1.0, 1.0, 1.0, 1.0, 1.0, 0.6],
+      data: [1.0, 1.0, 1.0, 1.0, 1.0, 0.6, 0.8, 0.2],
       borderColor: '#ffc107',
       backgroundColor: 'rgba(255,193,7,0.1)',
       fill: true,
