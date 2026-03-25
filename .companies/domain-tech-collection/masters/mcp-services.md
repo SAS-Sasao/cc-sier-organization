@@ -4,7 +4,7 @@
 
 - **サービス名**: AWS Knowledge MCP Server
 - **提供元**: awslabs（AWS公式）
-- **ステータス**: configured
+- **ステータス**: active
 - **連携部署**: [dept-secretary, dept-research, dept-retail-domain]
 - **想定操作**: AWSドキュメント検索、リージョン情報取得、サービス利用可否確認、エージェントSOP取得
 - **設定先**: .mcp.json（プロジェクトルート）
