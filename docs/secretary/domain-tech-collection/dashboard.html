@@ -118,7 +118,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-25 21:27:10 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-25 21:30:41 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -150,7 +150,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">3954</div>
+    <div class="stat-value">3967</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -158,7 +158,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">1126</div>
+    <div class="stat-value">1142</div>
   </div>
 </div>
 
@@ -335,7 +335,7 @@ new Chart(document.getElementById('agentChart'), {
 // Radar: LLM-as-Judge evaluation axes
 const radarCtx = document.getElementById('radarChart');
 if (radarCtx) {
-  const radarLabelsData = [];
+  const radarLabelsData = ["", "retail-domain-researcher"];
   if (radarLabelsData.length > 0) {
     new Chart(radarCtx.getContext('2d'), {
       type: 'radar',
@@ -344,9 +344,9 @@ if (radarCtx) {
         datasets: radarLabelsData.map((agent, i) => ({
           label: agent,
           data: [
-            [][i] || 0,
-            [][i] || 0,
-            [][i] || 0,
+            [8.5, 8.5][i] || 0,
+            [7.5, 8.0][i] || 0,
+            [9.5, 9.0][i] || 0,
           ],
           borderWidth: 1.5,
           fill: true,
@@ -373,8 +373,8 @@ if (radarCtx) {
 // Line: Judge total trend
 const judgeCtx = document.getElementById('judgeChart');
 if (judgeCtx) {
-  const judgeTrendLabels = [];
-  const judgeTrendData = [];
+  const judgeTrendLabels = ["2026-03-25", "2026-03-25", "2026-03-25", "2026-03-25"];
+  const judgeTrendData = [0.8, 0.83, 0.9, 0.87];
   if (judgeTrendData.length > 0) {
     new Chart(judgeCtx.getContext('2d'), {
       type: 'line',
