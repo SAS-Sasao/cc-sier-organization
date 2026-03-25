@@ -117,6 +117,48 @@ if cb_path.exists():
                 score_values.append(s)
     except: pass
 
+# 4b. Case Bank evolve stats
+cb_total_cases = 0
+cb_avg_reward = 0.0
+cb_today_tasks = []  # [{task_id, reward, mode}]
+cb_low_reward = []   # [{task_id, reward}]
+cb_reward_dist = {"high": 0, "medium": 0, "low": 0, "none": 0}  # >=0.7, 0.4-0.7, <0.4, None
+today_str_compact = datetime.now().strftime("%Y-%m-%d")
+
+if cb_path.exists():
+    try:
+        _cb_evolve = json.loads(cb_path.read_text(encoding="utf-8", errors="ignore"))
+        _cb_cases = _cb_evolve.get("cases", [])
+        cb_total_cases = len(_cb_cases)
+        _rewards = [c.get("reward") for c in _cb_cases if c.get("reward") is not None]
+        cb_avg_reward = round(sum(_rewards) / len(_rewards), 2) if _rewards else 0.0
+
+        for c in _cb_cases:
+            tid = c.get("task_id", c.get("id", "unknown"))
+            reward = c.get("reward")
+            mode = c.get("action", {}).get("mode", c.get("mode", "?"))
+            started = c.get("outcome", {}).get("started", c.get("started", ""))
+
+            # Reward distribution
+            if reward is None:
+                cb_reward_dist["none"] += 1
+            elif reward >= 0.7:
+                cb_reward_dist["high"] += 1
+            elif reward >= 0.4:
+                cb_reward_dist["medium"] += 1
+            else:
+                cb_reward_dist["low"] += 1
+
+            # Today's tasks
+            if tid.startswith(datetime.now().strftime("%Y%m%d")):
+                cb_today_tasks.append({"task_id": tid, "reward": reward, "mode": mode})
+
+            # Low reward alerts
+            if reward is not None and reward < 0.4:
+                cb_low_reward.append({"task_id": tid, "reward": reward})
+    except:
+        pass
+
 # 5. Judge data aggregation
 from collections import defaultdict as ddict
 from datetime import datetime as dt
@@ -394,6 +436,78 @@ if next_actions:
   <ul class="action-list">{items_html}</ul>
 </div>'''
 
+# --- Evolve section HTML ---
+evolve_section_html = ""
+if cb_total_cases > 0:
+    # Reward color helper
+    def reward_class(r):
+        if r is None: return "reward-none"
+        if r >= 0.7: return "reward-high"
+        if r >= 0.4: return "reward-mid"
+        return "reward-low"
+
+    def reward_text(r):
+        return f"{r:.1f}" if r is not None else "N/A"
+
+    # Today's tasks HTML
+    today_html = ""
+    if cb_today_tasks:
+        rows = ""
+        for t in cb_today_tasks:
+            rc = reward_class(t["reward"])
+            rt = reward_text(t["reward"])
+            tid_short = t["task_id"].split("-", 2)[-1] if "-" in t["task_id"] else t["task_id"]
+            rows += f'<div class="task-row"><span class="reward-badge {rc}">{rt}</span><span class="task-id">{tid_short}</span><span class="task-mode">{t["mode"]}</span></div>'
+        today_html = f'<div class="today-tasks"><h3>本日のタスク評価</h3>{rows}</div>'
+
+    # Low reward alerts HTML
+    alert_html = ""
+    if cb_low_reward:
+        items = "".join(
+            f'<div style="font-size:.85rem;padding:4px 0">'
+            f'<span class="reward-badge reward-low">{r["reward"]:.1f}</span> '
+            f'<span style="font-family:monospace">{r["task_id"]}</span></div>'
+            for r in cb_low_reward[-3:]
+        )
+        alert_html = f'<div class="alert-card"><h3>⚠ 低報酬ケース</h3>{items}</div>'
+
+    # Reward distribution bar
+    dist_total = sum(cb_reward_dist.values())
+    dist_pcts = {k: round(v / dist_total * 100) if dist_total > 0 else 0 for k, v in cb_reward_dist.items()}
+
+    evolve_section_html = f'''<div class="evolve-section">
+  <h2>継続学習（company-evolve）</h2>
+  <div class="evolve-grid">
+    <div class="evolve-card">
+      <div class="ev-label">Case Bank</div>
+      <div class="ev-value" style="color:var(--blue)">{cb_total_cases}</div>
+      <div class="ev-sub">インデックス済みケース</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">平均報酬</div>
+      <div class="ev-value" style="color:{"var(--green)" if cb_avg_reward >= 0.7 else "var(--yellow)" if cb_avg_reward >= 0.4 else "var(--red)"}">{cb_avg_reward:.2f}</div>
+      <div class="ev-sub">全ケース平均</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">報酬分布</div>
+      <div style="display:flex;gap:4px;height:14px;border-radius:7px;overflow:hidden;margin-top:10px">
+        <div style="flex:{dist_pcts['high']};background:var(--green)" title="高 (≥0.7): {cb_reward_dist['high']}件"></div>
+        <div style="flex:{dist_pcts['medium']};background:var(--yellow)" title="中 (0.4-0.7): {cb_reward_dist['medium']}件"></div>
+        <div style="flex:{dist_pcts['low']};background:var(--red)" title="低 (<0.4): {cb_reward_dist['low']}件"></div>
+        <div style="flex:{dist_pcts['none']};background:var(--border)" title="未評価: {cb_reward_dist['none']}件"></div>
+      </div>
+      <div class="ev-sub" style="margin-top:6px">高{cb_reward_dist['high']} / 中{cb_reward_dist['medium']} / 低{cb_reward_dist['low']} / 未{cb_reward_dist['none']}</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">本日評価</div>
+      <div class="ev-value" style="color:var(--blue)">{len(cb_today_tasks)}</div>
+      <div class="ev-sub">タスク</div>
+    </div>
+  </div>
+  {today_html}
+  {alert_html}
+</div>'''
+
 plan_section_html = ""
 if todo_html or wbs_html or actions_html:
     plan_section_html = f'''<div class="plan-grid">
@@ -508,6 +622,33 @@ html = f"""<!DOCTYPE html>
   .action-badge.issue {{ background: var(--green); color: #fff; }}
   .check-box {{ color: var(--muted); }}
   .source-hint {{ font-size: 0.7rem; color: var(--muted); margin-top: 8px; font-style: italic; }}
+  .evolve-section {{ margin-bottom: 24px; }}
+  .evolve-section h2 {{ font-size: 1.1rem; margin-bottom: 16px; }}
+  .evolve-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }}
+  .evolve-card {{ background: var(--card-bg); border: 1px solid var(--border);
+                  border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }}
+  .evolve-card .ev-label {{ font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }}
+  .evolve-card .ev-value {{ font-size: 1.8rem; font-weight: 700; margin-top: 4px; }}
+  .evolve-card .ev-sub {{ font-size: 0.75rem; color: var(--muted); margin-top: 2px; }}
+  .today-tasks {{ background: var(--card-bg); border: 1px solid var(--border);
+                  border-radius: 12px; padding: 20px; margin-bottom: 16px;
+                  box-shadow: 0 2px 8px var(--shadow); }}
+  .today-tasks h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+  .task-row {{ display: flex; align-items: center; gap: 12px; padding: 8px 0;
+               border-bottom: 1px solid var(--border); font-size: 0.85rem; }}
+  .task-row:last-child {{ border-bottom: none; }}
+  .reward-badge {{ display: inline-block; padding: 2px 10px; border-radius: 12px;
+                   font-weight: 600; font-size: 0.8rem; min-width: 48px; text-align: center; }}
+  .reward-high {{ background: rgba(25,135,84,0.15); color: var(--green); }}
+  .reward-mid {{ background: rgba(255,193,7,0.15); color: var(--yellow); }}
+  .reward-low {{ background: rgba(220,53,69,0.15); color: var(--red); }}
+  .reward-none {{ background: var(--border); color: var(--muted); }}
+  .task-id {{ flex: 1; font-family: monospace; font-size: 0.8rem; }}
+  .task-mode {{ font-size: 0.7rem; color: var(--muted); }}
+  .alert-card {{ background: var(--card-bg); border-left: 3px solid var(--red);
+                 border-radius: 12px; padding: 16px; margin-bottom: 16px;
+                 box-shadow: 0 2px 8px var(--shadow); }}
+  .alert-card h3 {{ font-size: 0.9rem; color: var(--red); margin-bottom: 8px; }}
   .charts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }}
   .chart-box {{ background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
@@ -569,6 +710,8 @@ html = f"""<!DOCTYPE html>
 </div>
 
 {conv_topics_html}
+
+{evolve_section_html}
 
 {plan_section_html}
 
