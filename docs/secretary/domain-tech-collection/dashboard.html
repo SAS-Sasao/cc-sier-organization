@@ -118,7 +118,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-25 21:36:09 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-25 21:39:50 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -150,7 +150,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">3983</div>
+    <div class="stat-value">3993</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -158,7 +158,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">1161</div>
+    <div class="stat-value">1174</div>
   </div>
 </div>
 
@@ -198,10 +198,6 @@
     <h3>Subagent 使用頻度</h3>
     <canvas id="agentChart"></canvas>
   </div>
-  <div class="chart-box" style="grid-column: 1 / -1;">
-    <h3>スコア推移（reward）</h3>
-    <canvas id="scoreChart"></canvas>
-  </div>
 </div>
 
 <div class="evolve-section">
@@ -238,25 +234,33 @@
 </div>
 
 <div class="charts">
-  <!-- LLM-as-Judge: レーダーチャート -->
-  <div class="chart-box" style="grid-column: span 2">
-    <h3>Subagent 評価軸レーダー（LLM-as-Judge）</h3>
-    <canvas id="radarChart" style="max-height:280px"></canvas>
+  <div class="chart-box">
+    <h3>🔧 reward スコア推移（プロセス評価）</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">タスクの<strong>進め方</strong>を機械的に評価。completed / artifacts_exist / no_excessive_edits / no_retry の4シグナルで自動採点。</p>
+    <canvas id="scoreChart"></canvas>
   </div>
-
-  <!-- LLM-as-Judge: スコア推移 -->
-  <div class="chart-box" style="grid-column: span 2">
-    <h3>judge スコア推移（completeness+accuracy+clarity 平均）</h3>
+  <div class="chart-box">
+    <h3>📝 judge スコア推移（成果物評価）</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">成果物の<strong>出来栄え</strong>をAIが評価。completeness（網羅性）/ accuracy（正確性）/ clarity（意図理解）の3軸で採点。</p>
     <canvas id="judgeChart"></canvas>
   </div>
 
-  <!-- 改善ハイライト -->
-  
+  <!-- LLM-as-Judge: レーダーチャート -->
+  <div class="chart-box">
+    <h3>Subagent 評価軸レーダー</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Subagentごとの3軸評価平均。得意・不得意がひと目でわかる。</p>
+    <canvas id="radarChart" style="max-height:280px"></canvas>
+  </div>
 
-  <!-- 失敗パターントップ3 -->
-  <div class="card">
-    <div class="card-label">よく出る失敗パターン（上位3件）</div>
-    <ul style="list-style:none;padding:0;margin:8px 0 0 0"><li style='color:var(--muted);font-size:.82rem'>データ蓄積中</li></ul>
+  <!-- 改善ハイライト + 失敗パターン -->
+  <div class="chart-box">
+    <h3>改善インサイト</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">judge 評価で検出された改善ポイント。failure_reason が蓄積されると自動で Subagent の制約に反映される。</p>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:8px">改善ハイライト: 月をまたいだデータが蓄積されると表示されます</div>
+    <div style="margin-top:12px">
+      <div style="font-size:.8rem;font-weight:600;margin-bottom:8px">よく出る失敗パターン（上位3件）</div>
+      <ul style="list-style:none;padding:0;margin:0"><li style='color:var(--muted);font-size:.82rem'>データ蓄積中</li></ul>
+    </div>
   </div>
 </div>
 
