@@ -120,6 +120,24 @@ for md_file in sorted(task_log_dir.glob("*.md")):
         except ValueError:
             pass
 
+    # --- Judge score (## judge section) ---
+    judge_data = None
+    judge_section = re.search(r'## judge\s*```yaml\s*(.*?)```', text, re.DOTALL)
+    if judge_section:
+        judge_yaml = judge_section.group(1)
+        judge_data = {}
+        for key in ['completeness', 'accuracy', 'clarity', 'total']:
+            m = re.search(rf'^{key}:\s*([\d.]+)', judge_yaml, re.MULTILINE)
+            if m:
+                judge_data[key] = float(m.group(1))
+        for key in ['failure_reason', 'judge_comment']:
+            m = re.search(rf'^{key}:\s*"?(.*?)"?\s*$', judge_yaml, re.MULTILINE)
+            if m:
+                judge_data[key] = m.group(1).strip()
+        m = re.search(r'^judged_at:\s*"?(.*?)"?\s*$', judge_yaml, re.MULTILINE)
+        if m:
+            judge_data['judged_at'] = m.group(1).strip()
+
     # --- Artifacts: both absolute and relative paths ---
     artifacts = []
     # Absolute: `.companies/org/docs/...`
@@ -149,6 +167,7 @@ for md_file in sorted(task_log_dir.glob("*.md")):
             "artifact_count": len(artifacts),
         },
         "reward": reward_score,
+        "judge": judge_data,
         "outcome": {
             "files_written": artifacts[:8],
             "started": started,
@@ -172,12 +191,48 @@ for md_file in sorted(task_log_dir.glob("*.md")):
     cases.append(new_case)
 
 # ================================================================
+# Aggregate failure_patterns from judge data
+# ================================================================
+from collections import Counter
+failure_counter = Counter()
+for c in cases:
+    j = c.get("judge")
+    if j and isinstance(j, dict):
+        total = j.get("total", 1.0)
+        reason = j.get("failure_reason", "").strip()
+        subagent = c.get("action", {}).get("subagent", "unknown")
+        if total < 0.6 and reason:
+            key = f"{subagent}::{reason}"
+            failure_counter[key] += 1
+
+failure_patterns = []
+for key, count in failure_counter.most_common(10):
+    parts = key.split("::", 1)
+    subagent = parts[0] if len(parts) > 1 else "unknown"
+    reason = parts[1] if len(parts) > 1 else key
+    # Average score for this pattern
+    related = [
+        c.get("judge", {}).get("total", 0)
+        for c in cases
+        if c.get("action", {}).get("subagent") == subagent
+        and c.get("judge", {}).get("failure_reason", "") == reason
+    ]
+    avg_score = sum(related) / len(related) if related else 0
+    failure_patterns.append({
+        "subagent": subagent,
+        "failure_reason": reason,
+        "count": count,
+        "avg_score": round(avg_score, 2),
+    })
+
+# ================================================================
 # Write index.json
 # ================================================================
 index = {
     "org_slug": org_slug,
     "updated_at": datetime.now().isoformat(timespec="seconds"),
     "case_count": len(cases),
+    "failure_patterns": failure_patterns,
     "cases": cases,
 }
 index.update(extra_fields)
