@@ -38,6 +38,14 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 3. 最新動向は [storecomputer-latest-trends-2024-2026.md](../../retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md) と [storcon-deep-dive-2026-03-25.md](../../retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md) で補完
 4. 各社のクラウド移行状況を横並びで比較する
 
+### AWS技術スタック深堀り（3/25追加）
+
+| # | ドキュメント | 概要 |
+|---|------------|------|
+| 5 | [ストコンAWS技術スタック深堀り調査](../../retail-domain/industry-reports/storcon-aws-tech-deep-dive-2026-03-25.md) | DMS/MGN/Transit Gateway/IoT Greengrass等の具体的設定・落とし穴。PM視点の判断基準付き。**WBS 2.1.1 + 3.1.1 横断資料** |
+
+> この資料は既存の [AWS移行技術スタック](../../research/store-computer-aws-migration-tech.md)（概要レベル）の**次のレイヤー**。設定オプション・カットオーバー手順・学習ロードマップ（Must/Should/Nice-to-have）を含む。
+
 ### 未生成ドキュメント
 
 なし — WBS 2.1.1 に必要なドキュメントはすべて生成済み。
@@ -56,6 +64,7 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 | # | ドキュメント | 概要 |
 |---|------------|------|
 | 1 | [AWS移行技術スタック](../../research/store-computer-aws-migration-tech.md) | AWS基本技術スタック（第2章）にIAM/VPC/EC2/S3等の概要あり。ストコン案件での活用ポイント付き |
+| 2 | [ストコンAWS技術スタック深堀り調査](../../retail-domain/industry-reports/storcon-aws-tech-deep-dive-2026-03-25.md) | DMS/MGN/Transit Gateway等の実践的な設定詳細。学習ロードマップ（Must 7項目 / Should 6項目）付き。**3/25追加** |
 
 ### 外部リソース（推奨）
 
@@ -71,6 +80,7 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 2. AWS Skill Builder の Cloud Practitioner Essentials で体系的に学習
 3. ハンズオンで実際にリソースを作成・操作
 4. ストコン案件での活用シーンと結びつけて理解を深める
+5. [深堀り調査レポート](../../retail-domain/industry-reports/storcon-aws-tech-deep-dive-2026-03-25.md) の **第6章（学習ロードマップ）** でMust項目を優先的に学習。特にDMS・MGN・Transit Gatewayの設定詳細を理解する
 
 ### 未生成ドキュメント
 
