@@ -10,7 +10,7 @@
 ## 概要
 
 W1 に割り当てられている WBS タスクと対応するドキュメントの一覧。
-既に生成済みのドキュメントにはフルパスを記載し、未生成のものは何を生成すべきか明記する。
+既に生成済みのドキュメントにはリンクを付与し、未生成のものは何を生成すべきか明記する。
 
 ---
 
@@ -21,30 +21,28 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 必読ドキュメント（生成済み）
 
-| # | ドキュメント | パス | 概要 |
-|---|------------|------|------|
-| 1 | ストコンドメイン知識 | `.companies/domain-tech-collection/docs/retail-domain/store-computer-domain-knowledge.md` | ストコンの定義・役割・主要機能・システム構成・業務プロセス・用語集を網羅。全6章。**最重要資料** |
-| 2 | コンビニ業界構造 深掘り調査 | `.companies/domain-tech-collection/docs/retail-domain/convenience-industry-structure.md` | 業界全体構造、FCモデル、サプライチェーン、IT観点での業界構造、PM留意点。WBS 2.1.R1の成果物 |
-| 3 | ストコン最新動向レポート | `.companies/domain-tech-collection/docs/retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md` | 2024-2026年のクラウド移行事例、エッジコンピューティング、PCI DSS v4.0対応 |
-| 4 | ストコン深掘り調査 3/25 | `.companies/domain-tech-collection/docs/retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md` | 3チェーン（セブン/ファミマ/ローソン）のクラウド移行最新状況、POS連携アーキテクチャ詳細 |
+| # | ドキュメント | 概要 |
+|---|------------|------|
+| 1 | [ストコンドメイン知識](../../retail-domain/store-computer-domain-knowledge.md) | ストコンの定義・役割・主要機能・システム構成・業務プロセス・用語集を網羅。全6章。**最重要資料** |
+| 2 | [コンビニ業界構造 深掘り調査](../../retail-domain/convenience-industry-structure.md) | 業界全体構造、FCモデル、サプライチェーン、IT観点での業界構造、PM留意点。WBS 2.1.R1の成果物 |
+| 3 | [ストコン最新動向レポート 2024-2026](../../retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md) | 2024-2026年のクラウド移行事例、エッジコンピューティング、PCI DSS v4.0対応 |
+| 4 | [ストコン深掘り調査 3/25](../../retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md) | 3チェーン（セブン/ファミマ/ローソン）のクラウド移行最新状況、POS連携アーキテクチャ詳細 |
 
 ### 学習の進め方
 
-1. まず `store-computer-domain-knowledge.md` の **第1章（全体像）** を精読
+1. まず [store-computer-domain-knowledge.md](../../retail-domain/store-computer-domain-knowledge.md) の **第1章（全体像）** を精読
    - ストコンの定義・役割を自分の言葉で説明できるようにする
    - コンビニ3層構造（本部-店舗-物流）を理解する
    - ストコンの歴史的経緯を把握する
-2. 次に `convenience-industry-structure.md` で業界全体の構造を理解
-3. 最新動向は `storecomputer-latest-trends-2024-2026.md` と `storcon-deep-dive-2026-03-25.md` で補完
+2. 次に [convenience-industry-structure.md](../../retail-domain/convenience-industry-structure.md) で業界全体の構造を理解
+3. 最新動向は [storecomputer-latest-trends-2024-2026.md](../../retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md) と [storcon-deep-dive-2026-03-25.md](../../retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md) で補完
 4. 各社のクラウド移行状況を横並びで比較する
 
 ### 未生成ドキュメント
 
-| # | 生成すべきもの | 目的 | 担当 |
-|---|-------------|------|------|
-| - | (なし) | WBS 2.1.1 に必要なドキュメントはすべて生成済み | - |
+なし — WBS 2.1.1 に必要なドキュメントはすべて生成済み。
 
-> **補足**: 3/21作成のTODOリスト（`docs/secretary/todos/2026-03-21.md`）にストコン学習の詳細チェックリストあり。併せて参照。
+> **補足**: [3/21作成のTODOリスト](../todos/2026-03-21.md) にストコン学習の詳細チェックリストあり。併せて参照。
 
 ---
 
@@ -55,9 +53,9 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 必読ドキュメント（生成済み）
 
-| # | ドキュメント | パス | 概要 |
-|---|------------|------|------|
-| 1 | AWS移行技術スタック | `.companies/domain-tech-collection/docs/research/store-computer-aws-migration-tech.md` | AWS基本技術スタック（第2章）にIAM/VPC/EC2/S3等の概要あり。ストコン案件での活用ポイント付き |
+| # | ドキュメント | 概要 |
+|---|------------|------|
+| 1 | [AWS移行技術スタック](../../research/store-computer-aws-migration-tech.md) | AWS基本技術スタック（第2章）にIAM/VPC/EC2/S3等の概要あり。ストコン案件での活用ポイント付き |
 
 ### 外部リソース（推奨）
 
@@ -69,18 +67,16 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 学習の進め方
 
-1. `store-computer-aws-migration-tech.md` の **第2章（AWS基本技術スタック）** でサービス概要を把握
+1. [store-computer-aws-migration-tech.md](../../research/store-computer-aws-migration-tech.md) の **第2章（AWS基本技術スタック）** でサービス概要を把握
 2. AWS Skill Builder の Cloud Practitioner Essentials で体系的に学習
 3. ハンズオンで実際にリソースを作成・操作
 4. ストコン案件での活用シーンと結びつけて理解を深める
 
 ### 未生成ドキュメント
 
-| # | 生成すべきもの | 目的 | 担当 |
-|---|-------------|------|------|
-| 1 | **AWS基礎ハンズオンメモ** | IAM/VPC/EC2/S3のハンズオン実施結果・気づきを記録する学習ノート。ストコン案件での活用ポイントを自分の言葉で記載 | 自学（W1中） |
-
-> **想定パス**: `.companies/domain-tech-collection/docs/secretary/learning-notes/wbs-3-1-1-aws-basics-handson.md`
+| # | 生成すべきもの | 想定パス | 目的 | 生成方法 |
+|---|-------------|---------|------|---------|
+| 1 | **AWS基礎ハンズオンメモ** | `docs/secretary/learning-notes/wbs-3-1-1-aws-basics-handson.md` | IAM/VPC/EC2/S3のハンズオン実施結果・気づきを記録する学習ノート。ストコン案件での活用ポイントを自分の言葉で記載 | 自学で実施後に秘書室が記録支援 |
 
 ---
 
@@ -91,9 +87,9 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 必読ドキュメント（生成済み）
 
-| # | ドキュメント | パス | 概要 |
-|---|------------|------|------|
-| 1 | **PM全体像学習ノート** | `.companies/domain-tech-collection/docs/secretary/learning-notes/wbs-4-1-1-migration-pm-overview.md` | PMO/機能チームPM/ベンダーPMの役割分担、典型的WBS構成、ストコン案件のPM体制イメージ、会議体・エスカレーション・管理帳票テンプレート。**本日生成** |
+| # | ドキュメント | 概要 |
+|---|------------|------|
+| 1 | [PM全体像学習ノート](./wbs-4-1-1-migration-pm-overview.md) | PMO/機能チームPM/ベンダーPMの役割分担、典型的WBS構成、ストコン案件のPM体制イメージ、会議体・エスカレーション・管理帳票テンプレート。**本日生成** |
 
 ### 外部リソース（推奨）
 
@@ -105,16 +101,14 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 学習の進め方
 
-1. 本日生成した `wbs-4-1-1-migration-pm-overview.md` を通読
+1. 本日生成した [wbs-4-1-1-migration-pm-overview.md](./wbs-4-1-1-migration-pm-overview.md) を通読
 2. PMBOK第7版の該当セクションで体系的な知識を補完
 3. IPA資料で日本のSI案件固有の事情を理解
 4. 学習ノート末尾の自己チェックリストで理解度を確認
 
 ### 未生成ドキュメント
 
-| # | 生成すべきもの | 目的 | 担当 |
-|---|-------------|------|------|
-| - | (なし) | 本日の依頼で生成完了 | - |
+なし — 本日の依頼で生成完了。
 
 ---
 
@@ -125,11 +119,11 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 必読ドキュメント（生成済み）
 
-| # | ドキュメント | パス | 概要 |
-|---|------------|------|------|
-| 1 | 日次ダイジェスト 3/24 | `.companies/domain-tech-collection/docs/daily-digest/2026-03-24.md` | W1初日のダイジェスト |
-| 2 | 日次ダイジェスト 3/25 | `.companies/domain-tech-collection/docs/daily-digest/2026-03-25.md` | 本日分。AI/ML・小売動向・EC関連 |
-| 3 | 情報ソースマスタ | `.companies/domain-tech-collection/docs/info-source-master.md` | 巡回対象の情報ソース一覧（75+ソース） |
+| # | ドキュメント | 概要 |
+|---|------------|------|
+| 1 | [日次ダイジェスト 3/24](../../daily-digest/2026-03-24.md) | W1初日のダイジェスト |
+| 2 | [日次ダイジェスト 3/25](../../daily-digest/2026-03-25.md) | 本日分。AI/ML・小売動向・EC関連 |
+| 3 | [情報ソースマスタ](../../info-source-master.md) | 巡回対象の情報ソース一覧（75+ソース） |
 
 ### 残りの日次ダイジェスト
 
@@ -148,10 +142,10 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 ### 生成済みドキュメント
 
-| # | ドキュメント | パス | 概要 |
-|---|------------|------|------|
-| 1 | コンビニ業界構造 深掘り調査 | `.companies/domain-tech-collection/docs/retail-domain/convenience-industry-structure.md` | 3/23作成。業界全体構造、FCモデル、サプライチェーン、IT構造、トレンド、PM留意点 |
-| 2 | ストコン深掘り調査 3/25 | `.companies/domain-tech-collection/docs/retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md` | 3/25作成。3チェーンのクラウド移行最新状況、POS連携アーキテクチャ |
+| # | ドキュメント | 概要 |
+|---|------------|------|
+| 1 | [コンビニ業界構造 深掘り調査](../../retail-domain/convenience-industry-structure.md) | 3/23作成。業界全体構造、FCモデル、サプライチェーン、IT構造、トレンド、PM留意点 |
+| 2 | [ストコン深掘り調査 3/25](../../retail-domain/industry-reports/storcon-deep-dive-2026-03-25.md) | 3/25作成。3チェーンのクラウド移行最新状況、POS連携アーキテクチャ |
 
 > このタスクは完了済み。成果物は WBS 2.1.1 の学習リソースとして活用する。
 
@@ -161,13 +155,13 @@ W1 に割り当てられている WBS タスクと対応するドキュメント
 
 W1の学習を補完する既存ドキュメント:
 
-| # | ドキュメント | パス | 用途 |
-|---|------------|------|------|
-| 1 | 参画準備WBS | `.companies/domain-tech-collection/docs/secretary/storcon-preparation-wbs.md` | 全体の学習計画・マイルストーン |
-| 2 | 学習スケジュール詳細 | `.companies/domain-tech-collection/docs/secretary/store-computer-learning-schedule.md` | WBSの元資料。Phase別の学習内容詳細 |
-| 3 | ストコンドメイン知識 | `.companies/domain-tech-collection/docs/retail-domain/store-computer-domain-knowledge.md` | 全6章のドメイン知識体系 |
-| 4 | AWS移行技術スタック | `.companies/domain-tech-collection/docs/research/store-computer-aws-migration-tech.md` | AWS技術スタック全9章 |
-| 5 | ストコン最新動向 | `.companies/domain-tech-collection/docs/retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md` | 2024-2026年のIT/DXトレンド |
+| # | ドキュメント | 用途 |
+|---|------------|------|
+| 1 | [参画準備WBS](../storcon-preparation-wbs.md) | 全体の学習計画・マイルストーン |
+| 2 | [学習スケジュール詳細](../store-computer-learning-schedule.md) | WBSの元資料。Phase別の学習内容詳細 |
+| 3 | [ストコンドメイン知識](../../retail-domain/store-computer-domain-knowledge.md) | 全6章のドメイン知識体系 |
+| 4 | [AWS移行技術スタック](../../research/store-computer-aws-migration-tech.md) | AWS技術スタック全9章 |
+| 5 | [ストコン最新動向](../../retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md) | 2024-2026年のIT/DXトレンド |
 
 ---
 
