@@ -527,13 +527,15 @@ judge_t_data_json    = json.dumps([t["score"] for t in judge_trend])
 # Improved highlight HTML
 improved_html = ""
 if judge_most_improved:
-    improved_html = f"""<div class="card" style="border-left: 3px solid #06d6a0;">
-  <div class="card-label">今月最も改善したSubagent</div>
-  <div style="font-size:1.4rem;font-weight:700;color:#06d6a0">{judge_most_improved['agent']}</div>
-  <div style="font-size:.85rem;color:var(--muted);margin-top:4px">
+    improved_html = f"""<div style="border-left: 3px solid #06d6a0; padding: 12px 16px; border-radius: 8px; background: var(--card-bg); margin-bottom: 8px;">
+  <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase">今月最も改善した Subagent</div>
+  <div style="font-size:1.2rem;font-weight:700;color:#06d6a0;margin-top:4px">{judge_most_improved['agent']}</div>
+  <div style="font-size:.82rem;color:var(--muted);margin-top:2px">
     judge スコア +{judge_most_improved['delta']:.2f} ／ 今月平均: {judge_most_improved['this_month_avg']:.2f}
   </div>
 </div>"""
+else:
+    improved_html = '<div style="font-size:.82rem;color:var(--muted);margin-bottom:8px">改善ハイライト: 月をまたいだデータが蓄積されると表示されます</div>'
 
 # Failure patterns HTML
 failure_items_html = "".join([
@@ -722,34 +724,38 @@ html = f"""<!DOCTYPE html>
     <h3>Subagent 使用頻度</h3>
     <canvas id="agentChart"></canvas>
   </div>
-  <div class="chart-box" style="grid-column: 1 / -1;">
-    <h3>スコア推移（reward）</h3>
-    <canvas id="scoreChart"></canvas>
-  </div>
 </div>
 
 {evolve_section_html}
 
 <div class="charts">
-  <!-- LLM-as-Judge: レーダーチャート -->
-  <div class="chart-box" style="grid-column: span 2">
-    <h3>Subagent 評価軸レーダー（LLM-as-Judge）</h3>
-    <canvas id="radarChart" style="max-height:280px"></canvas>
+  <div class="chart-box">
+    <h3>🔧 reward スコア推移（プロセス評価）</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">タスクの<strong>進め方</strong>を機械的に評価。completed / artifacts_exist / no_excessive_edits / no_retry の4シグナルで自動採点。</p>
+    <canvas id="scoreChart"></canvas>
   </div>
-
-  <!-- LLM-as-Judge: スコア推移 -->
-  <div class="chart-box" style="grid-column: span 2">
-    <h3>judge スコア推移（completeness+accuracy+clarity 平均）</h3>
+  <div class="chart-box">
+    <h3>📝 judge スコア推移（成果物評価）</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">成果物の<strong>出来栄え</strong>をAIが評価。completeness（網羅性）/ accuracy（正確性）/ clarity（意図理解）の3軸で採点。</p>
     <canvas id="judgeChart"></canvas>
   </div>
 
-  <!-- 改善ハイライト -->
-  {improved_html}
+  <!-- LLM-as-Judge: レーダーチャート -->
+  <div class="chart-box">
+    <h3>Subagent 評価軸レーダー</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Subagentごとの3軸評価平均。得意・不得意がひと目でわかる。</p>
+    <canvas id="radarChart" style="max-height:280px"></canvas>
+  </div>
 
-  <!-- 失敗パターントップ3 -->
-  <div class="card">
-    <div class="card-label">よく出る失敗パターン（上位3件）</div>
-    <ul style="list-style:none;padding:0;margin:8px 0 0 0">{failure_items_html}</ul>
+  <!-- 改善ハイライト + 失敗パターン -->
+  <div class="chart-box">
+    <h3>改善インサイト</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">judge 評価で検出された改善ポイント。failure_reason が蓄積されると自動で Subagent の制約に反映される。</p>
+    {improved_html}
+    <div style="margin-top:12px">
+      <div style="font-size:.8rem;font-weight:600;margin-bottom:8px">よく出る失敗パターン（上位3件）</div>
+      <ul style="list-style:none;padding:0;margin:0">{failure_items_html}</ul>
+    </div>
   </div>
 </div>
 
