@@ -69,3 +69,14 @@ AWS公式ドキュメントの事前調査: AWS Knowledge MCP Serverを使用し
 |---------|--------|------|
 | 技術調査レポート | tech-researcher | .companies/domain-tech-collection/docs/research/storcon-aws-modernization-analytics-2026-03-26.md |
 | 業務シナリオ分析 | retail-domain-researcher | .companies/domain-tech-collection/docs/retail-domain/industry-reports/storcon-modernization-business-scenarios-2026-03-26.md |
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-26T17:32:08"
+```
