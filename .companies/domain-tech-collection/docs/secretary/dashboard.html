@@ -122,7 +122,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-26 18:19:06 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-26 18:20:09 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -154,7 +154,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">4497</div>
+    <div class="stat-value">4503</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -162,7 +162,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">1562</div>
+    <div class="stat-value">1569</div>
   </div>
 </div>
 
@@ -191,16 +191,16 @@
   <ul class="action-list"><li><span class="action-badge todo">TODO</span> [store-computer-domain-knowledge.md](../../retail-domain/store-computer-domain-k</li><li><span class="action-badge todo">TODO</span> ストコンの定義・役割を自分の言葉で説明できるようにする</li><li><span class="action-badge todo">TODO</span> コンビニ3層構造（本部-ストコン-POS）を理解する</li><li><span class="action-badge wbs">WBS</span> ` 進行中 / `[x]` 完了</li></ul>
 </div>
 
-<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> これSKIIL側に明示的に記載するようにしなくても大丈夫？？</div><div class="rally-claude"><span class="rally-label">🤖</span> その通りですね。SKILL.mdが仕様書の役割なので、hookに実装されたロジックを記載しておかないと将来のセッションで仕様と実装が乖離します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ごめん俺のローカルにファイルで記憶している失敗パターンをダッシュボードに記載しておいて欲しい</div><div class="rally-claude"><span class="rally-label">🤖</span> 失敗パターンのファイルはどこにありますか？パスを教えてください。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 以前あなたに伝えた失敗パターン\\wsl.localhost\Ubuntu-22.04\home\sasao020211\.claude配下のどこかで管理するよ...</div><div class="rally-claude"><span class="rally-label">🤖</span> memoryに保存した失敗パターンのことですね。確認します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> reward スコア推移（プロセス評価）、judge スコア推移（成果物評価）、Subagent 評価軸レーダーのグラフの縦の長さを改善インサイトのカードに合わ...</div><div class="rally-claude"><span class="rally-label">🤖</span> グローバルの `canvas { max-height: 280px; }` とインラインの `max-height:280px` を変更します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 800pxくらいにしてみて</div><div class="rally-claude"><span class="rally-label">🤖</span> 800pxに変更してプッシュしました。</div></div></div>
+<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> ごめん俺のローカルにファイルで記憶している失敗パターンをダッシュボードに記載しておいて欲しい</div><div class="rally-claude"><span class="rally-label">🤖</span> 失敗パターンのファイルはどこにありますか？パスを教えてください。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 以前あなたに伝えた失敗パターン\\wsl.localhost\Ubuntu-22.04\home\sasao020211\.claude配下のどこかで管理するよ...</div><div class="rally-claude"><span class="rally-label">🤖</span> memoryに保存した失敗パターンのことですね。確認します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> reward スコア推移（プロセス評価）、judge スコア推移（成果物評価）、Subagent 評価軸レーダーのグラフの縦の長さを改善インサイトのカードに合わ...</div><div class="rally-claude"><span class="rally-label">🤖</span> グローバルの `canvas { max-height: 280px; }` とインラインの `max-height:280px` を変更します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 800pxくらいにしてみて</div><div class="rally-claude"><span class="rally-label">🤖</span> 800pxに変更してプッシュしました。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> グラフを中央に寄せて改善インサイトの縦の長さに合わせてほしい。</div><div class="rally-claude"><span class="rally-label">🤖</span> 3つのチャートを改善インサイトと同じ行でペアにし、canvasを中央寄せ＋高さを改善インサイトに合わせます。グリッドレイアウトを2カラム固定にして、各chart...</div></div></div>
 
 <div class="charts">
   <div class="chart-box">
     <h3>品質ゲート合格率</h3>
-    <canvas id="qgChart"></canvas>
+    <canvas id="qgChart" style="max-height:280px"></canvas>
   </div>
   <div class="chart-box">
     <h3>Subagent 使用頻度</h3>
-    <canvas id="agentChart"></canvas>
+    <canvas id="agentChart" style="max-height:280px"></canvas>
   </div>
 </div>
 
