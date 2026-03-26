@@ -773,7 +773,11 @@ html = f"""<!DOCTYPE html>
   .chart-box {{ background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
   .chart-box h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
-  canvas {{ max-height: 800px; }}
+  canvas {{ width: 100%; }}
+  .chart-box canvas {{ display: block; margin: 0 auto; }}
+  .charts-aligned {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }}
+  .charts-aligned .chart-box {{ display: flex; flex-direction: column; }}
+  .charts-aligned .chart-box canvas {{ flex: 1; min-height: 0; }}
   .footer {{ margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; }}
   .back-btn {{ display: inline-block; margin-bottom: 16px; padding: 6px 16px;
                background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
@@ -846,26 +850,28 @@ html = f"""<!DOCTYPE html>
 
 {evolve_section_html}
 
-<div class="charts">
+<!-- Row 1: reward推移 + judge推移 -->
+<div class="charts-aligned">
   <div class="chart-box">
-    <h3>🔧 reward スコア推移（プロセス評価）</h3>
+    <h3>reward スコア推移（プロセス評価）</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">タスクの<strong>進め方</strong>を機械的に評価。completed / artifacts_exist / no_excessive_edits / no_retry の4シグナルで自動採点。</p>
     <canvas id="scoreChart"></canvas>
   </div>
   <div class="chart-box">
-    <h3>📝 judge スコア推移（成果物評価）</h3>
+    <h3>judge スコア推移（成果物評価）</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">成果物の<strong>出来栄え</strong>をAIが評価。completeness（網羅性）/ accuracy（正確性）/ clarity（意図理解）の3軸で採点。</p>
     <canvas id="judgeChart"></canvas>
   </div>
+</div>
 
-  <!-- LLM-as-Judge: レーダーチャート -->
+<!-- Row 2: レーダー + 改善インサイト -->
+<div class="charts-aligned" style="margin-top:16px">
   <div class="chart-box">
     <h3>Subagent 評価軸レーダー</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Subagentごとの3軸評価平均。得意・不得意がひと目でわかる。</p>
-    <canvas id="radarChart" style="max-height:800px"></canvas>
+    <canvas id="radarChart"></canvas>
   </div>
 
-  <!-- 改善インサイト -->
   <div class="chart-box">
     <h3>改善インサイト</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">judge 評価から自動分析。弱点の可視化・低スコア原因・改善アクションを提示。</p>
