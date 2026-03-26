@@ -122,6 +122,7 @@ for md_file in sorted(task_log_dir.glob("*.md")):
 
     # --- Judge score (## judge section) ---
     judge_data = None
+    # Format 1: YAML code block
     judge_section = re.search(r'## judge\s*```yaml\s*(.*?)```', text, re.DOTALL)
     if judge_section:
         judge_yaml = judge_section.group(1)
@@ -137,6 +138,32 @@ for md_file in sorted(task_log_dir.glob("*.md")):
         m = re.search(r'^judged_at:\s*"?(.*?)"?\s*$', judge_yaml, re.MULTILINE)
         if m:
             judge_data['judged_at'] = m.group(1).strip()
+    # Format 2: Markdown table (| 軸 | スコア | コメント |)
+    if judge_data is None:
+        judge_block = re.search(r'## judge\b(.*?)(?=\n## |\n---|\Z)', text, re.DOTALL)
+        if judge_block:
+            jtext = judge_block.group(1)
+            # Parse table rows: | completeness | 4 | ... | or | completeness | 4/5 | ... |
+            scores = {}
+            for row in re.finditer(r'\|\s*(completeness|accuracy|clarity)\s*\|\s*([\d.]+)(?:\s*/\s*\d+)?\s*\|', jtext, re.IGNORECASE):
+                scores[row.group(1).lower()] = float(row.group(2))
+            # Parse total: **総合スコア**: 4.3 / 5.0 or **総合**: **4.3/5.0**
+            total_m = re.search(r'総合[^:]*[:：]\s*\*{0,2}([\d.]+)\s*/\s*([\d.]+)', jtext)
+            if total_m:
+                raw_total = float(total_m.group(1))
+                max_total = float(total_m.group(2))
+                scores['total'] = round(raw_total / max_total, 2) if max_total > 0 else raw_total
+            if scores:
+                judge_data = {}
+                for key in ['completeness', 'accuracy', 'clarity']:
+                    if key in scores:
+                        # Normalize 1-5 scale to 0.0-1.0 scale
+                        val = scores[key]
+                        judge_data[key] = round(val / 5.0, 2) if val > 1.0 else val
+                if 'total' in scores:
+                    judge_data['total'] = scores['total']
+                judge_data.setdefault('failure_reason', '')
+                judge_data.setdefault('judge_comment', '')
 
     # --- Artifacts: both absolute and relative paths ---
     artifacts = []
@@ -182,6 +209,9 @@ for md_file in sorted(task_log_dir.glob("*.md")):
             new_case["reward"] = old_case["reward"]
         if old_case.get("reward_signals"):
             new_case["reward_signals"] = old_case["reward_signals"]
+        # Keep judge if already evaluated and new parse found nothing
+        if new_case["judge"] is None and old_case.get("judge") is not None:
+            new_case["judge"] = old_case["judge"]
         # Keep conversation context
         if old_case.get("conversation_context"):
             new_case["conversation_context"] = old_case["conversation_context"]
