@@ -11,7 +11,12 @@ rebuild_case_bank() {
   command -v python3 &>/dev/null || return 0
   mkdir -p "$case_bank_dir"
 
-  python3 - "$task_log_dir" "$case_bank_dir" "$org_slug" <<'PYEOF'
+  # Resolve feedback memory directory
+  local cwd_slug
+  cwd_slug=$(pwd | sed 's|/|-|g; s|^-||')
+  local feedback_dir="${HOME}/.claude/projects/-${cwd_slug}/memory"
+
+  python3 - "$task_log_dir" "$case_bank_dir" "$org_slug" "$feedback_dir" <<'PYEOF'
 import sys, re, json
 from pathlib import Path
 from datetime import datetime
@@ -19,6 +24,7 @@ from datetime import datetime
 task_log_dir = Path(sys.argv[1])
 case_bank_dir = Path(sys.argv[2])
 org_slug = sys.argv[3]
+feedback_dir = Path(sys.argv[4]) if len(sys.argv) > 4 else None
 
 # ================================================================
 # Load existing Case Bank to preserve enriched data
@@ -254,6 +260,79 @@ for key, count in failure_counter.most_common(10):
         "count": count,
         "avg_score": round(avg_score, 2),
     })
+
+# ================================================================
+# Merge feedback memory into failure_patterns
+# ================================================================
+if feedback_dir and feedback_dir.exists():
+    existing_fb_ids = {fp.get("feedback_id") for fp in failure_patterns if fp.get("feedback_id")}
+
+    KNOWN_AGENTS = re.compile(
+        r'(?:secretary|tech-researcher|retail-domain-researcher|project-manager|'
+        r'system-architect|data-architect|lead-developer|backend-developer|'
+        r'frontend-developer|test-engineer|sre-engineer|cloud-engineer|'
+        r'ci-cd-engineer|qa-lead|knowledge-manager|ai-developer|'
+        r'devops-coordinator|standards-lead|technical-writer)'
+    )
+
+    for fb_file in sorted(feedback_dir.glob("feedback_*.md")):
+        fb_text = fb_file.read_text(encoding="utf-8", errors="ignore")
+        fb_id = fb_file.stem
+
+        # Skip if already merged
+        if fb_id in existing_fb_ids:
+            continue
+
+        # Parse frontmatter
+        fm_match = re.match(r'^---\s*\n(.*?)\n---\s*\n', fb_text, re.DOTALL)
+        if not fm_match:
+            continue
+        fm = fm_match.group(1)
+
+        # Verify type: feedback
+        fb_type = ""
+        for line in fm.split("\n"):
+            m = re.match(r'type:\s*(.+)', line)
+            if m:
+                fb_type = m.group(1).strip()
+        if fb_type != "feedback":
+            continue
+
+        # Extract name/description
+        fb_name, fb_desc = "", ""
+        for line in fm.split("\n"):
+            m = re.match(r'name:\s*(.+)', line)
+            if m:
+                fb_name = m.group(1).strip()
+            m = re.match(r'description:\s*(.+)', line)
+            if m:
+                fb_desc = m.group(1).strip()
+
+        # Extract "How to apply" section
+        how_match = re.search(
+            r'\*\*How to apply:\*\*\s*(.*?)(?=\n##|\n\*\*Why|\n\*\*How to apply|\Z)',
+            fb_text, re.DOTALL
+        )
+        how_to_apply = how_match.group(1).strip()[:200] if how_match else ""
+
+        # Detect related subagent
+        agents_found = KNOWN_AGENTS.findall(fb_text.lower())
+        subagent = agents_found[0] if agents_found else "general"
+
+        # Extract keywords for Read-phase matching
+        keywords = [kw for kw in re.split(r'[\s、。「」【】（）・,\-]', fb_name + " " + fb_desc)
+                    if len(kw) >= 2 and not kw.startswith("*")][:8]
+
+        failure_patterns.append({
+            "subagent": subagent,
+            "failure_reason": fb_desc[:100] if fb_desc else fb_name[:100],
+            "count": 1,
+            "avg_score": 0.0,
+            "source": "feedback-memory",
+            "feedback_id": fb_id,
+            "how_to_apply": how_to_apply,
+            "match_keywords": keywords,
+        })
 
 # ================================================================
 # Write index.json

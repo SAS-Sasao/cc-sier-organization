@@ -41,6 +41,19 @@ rebuild_case_bank "{org-slug}"
 
 task-log 全件を `.case-bank/index.json` にインデックス化する。
 
+#### 2.2.1 feedbackメモリ統合
+
+rebuild-case-bank.sh は feedbackメモリ（`~/.claude/projects/...memory/feedback_*.md`）も
+走査し、`failure_patterns` 配列に `source: "feedback-memory"` としてマージする。
+
+feedbackメモリから抽出する情報:
+- frontmatter の `name`, `description` → `failure_reason`
+- `**How to apply:**` セクション → `how_to_apply`（具体的対策、200字以内）
+- 本文中のsubagent名 → `subagent`（見つからない場合は `"general"`）
+- `name` + `description` の形態素 → `match_keywords`（Read フェーズ照合用）
+
+べき等性: `feedback_id`（ファイル名stem）で重複排除。2回実行しても重複しない。
+
 ### 2.3 Skill Writer（SKILL.md 自体の改善）
 
 #### 2.3.1 トリガーワード拡張
@@ -127,14 +140,24 @@ Git: ブランチ → コミット → PR（ラベル: `subagent-refiner`, `org:
 6. .case-bank/index.json を読み込む（なければスキップ）
 7. ユーザーの依頼と request_keywords を照合
 8. reward ≥ 0.6 のケースを上位3件取得
-9. 以下の Stateful Prompt を判断に注入する:
+9. failure_patterns を以下の基準で照合:
+   a. judge 由来: ルーティング先 subagent 名で一致 → 上位2件注入
+   b. feedback-memory 由来: match_keywords と依頼文の重複率 ≥ 0.2 → 上位2件注入
+   c. subagent が "general" の feedback は依頼内容に関わらず常に注入候補
+10. 以下の Stateful Prompt を判断に注入する:
 
 【過去の類似ケース（Case Bank より）】
 - 「{request_head}」→ {subagent}（{mode}）報酬:{reward}
 高報酬ケースと同じルーティングを優先すること。
+
+【過去の失敗パターン】
+- ⚠️ {failure_reason}（{source}）
+  → 対策: {how_to_apply}
 ```
 
-照合ロジック: request_keywords の重複率 ≥ 0.3 で「類似」と判定。
+照合ロジック:
+- 類似ケース: request_keywords の重複率 ≥ 0.3 で「類似」と判定
+- 失敗パターン（feedback-memory）: match_keywords の重複率 ≥ 0.2 で「関連あり」と判定
 
 ## 5. ユーザーへの報告
 

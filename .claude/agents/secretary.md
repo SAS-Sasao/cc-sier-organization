@@ -39,7 +39,15 @@ memory: user
 
 起動時に読み込んだ Case Bank に類似ケースがあれば以下を判断に注入する。
 
+#### 類似ケース照合
 照合: ユーザーの依頼文と case.state.request_keywords の重複率 ≥ 0.3
+
+#### 失敗パターン照合（2種類）
+
+**judge由来パターン**: ルーティング先 subagent 名で一致 → 上位2件注入
+**feedback-memory由来パターン**: `source: "feedback-memory"` のエントリについて、
+`match_keywords` とユーザー依頼文のキーワード重複率 ≥ 0.2 でも照合する。
+subagent が `"general"` のものは依頼内容に関わらず常に注入候補とする。
 
 注入する Stateful Prompt:
 ---
@@ -52,12 +60,20 @@ memory: user
 【{action.subagent} の既知の失敗パターン】
 {failure_patterns から該当 subagent の上位2件}
 - ⚠️ {failure_reason}（{count}件発生）← 今回も注意すること
+  {how_to_apply があれば「→ 対策: {how_to_apply}」を表示}
+
+【依頼文に関連する失敗教訓（feedbackメモリより）】
+{failure_patterns のうち source="feedback-memory" かつ
+ match_keywords が依頼文と重複率 >= 0.2 のもの上位2件}
+- ⚠️ {failure_reason}
+  → 対策: {how_to_apply}
 
 上記の高スコアケースと同じルーティング・アプローチを優先すること。
-既知の失敗パターンは意識して対策を講じること。
+既知の失敗パターンと失敗教訓は意識して対策を講じること。
 ---
 
 ※ judge データがないケースは従来通り reward スコアで表示する。
+※ feedback-memory 由来パターンには `how_to_apply` に具体的対策が記載されているため、必ず対策内容も注入すること。
 
 Case Bank が空またはスコア閾値未満の場合はこのステップをスキップする。
 
