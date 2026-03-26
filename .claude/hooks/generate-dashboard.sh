@@ -192,7 +192,11 @@ if case_bank.exists():
             for axis in ["completeness", "accuracy", "clarity", "total"]:
                 val = j.get(axis)
                 if val is not None:
-                    judge_by_agent[agent][axis].append(float(val))
+                    fval = float(val)
+                    # Normalize: scores > 1.0 are on 0-10 scale, convert to 0-1.0
+                    if axis != "total" and fval > 1.0:
+                        fval = fval / 10.0
+                    judge_by_agent[agent][axis].append(fval)
 
             if j.get("total") is not None:
                 judge_trend_raw.append({
@@ -859,8 +863,8 @@ if (radarCtx) {{
         animation: {{ duration: 1000, easing: 'easeOutQuart' }},
         scales: {{
           r: {{
-            min: 0, max: 10,
-            ticks: {{ stepSize: 2, color: textColor, font: {{ size: 10 }} }},
+            min: 0, max: 1.0,
+            ticks: {{ stepSize: 0.2, color: textColor, font: {{ size: 10 }} }},
             grid: {{ color: 'rgba(128,128,128,.15)' }},
             pointLabels: {{ color: textColor, font: {{ size: 11 }} }},
           }}
