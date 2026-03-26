@@ -773,7 +773,7 @@ html = f"""<!DOCTYPE html>
   .chart-box {{ background: var(--card-bg); border: 1px solid var(--border);
                 border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
   .chart-box h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
-  canvas {{ max-height: 480px; }}
+  canvas {{ max-height: 800px; }}
   .footer {{ margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; }}
   .back-btn {{ display: inline-block; margin-bottom: 16px; padding: 6px 16px;
                background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
@@ -862,7 +862,7 @@ html = f"""<!DOCTYPE html>
   <div class="chart-box">
     <h3>Subagent 評価軸レーダー</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">Subagentごとの3軸評価平均。得意・不得意がひと目でわかる。</p>
-    <canvas id="radarChart" style="max-height:480px"></canvas>
+    <canvas id="radarChart" style="max-height:800px"></canvas>
   </div>
 
   <!-- 改善インサイト -->
