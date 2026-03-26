@@ -118,7 +118,7 @@
 <body>
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
 <h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-03-26 09:11:43 ｜ 5分ごとに自動リフレッシュ</p>
+<p class="subtitle">最終更新: 2026-03-26 09:15:11 ｜ 5分ごとに自動リフレッシュ</p>
 
 <div class="grid">
   <div class="card">
@@ -150,7 +150,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">4142</div>
+    <div class="stat-value">4143</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
@@ -158,7 +158,7 @@
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">1338</div>
+    <div class="stat-value">1341</div>
   </div>
 </div>
 
@@ -210,7 +210,7 @@
     </div>
     <div class="evolve-card">
       <div class="ev-label">平均報酬</div>
-      <div class="ev-value" style="color:var(--green)">0.87</div>
+      <div class="ev-value" style="color:var(--green)">0.88</div>
       <div class="ev-sub">全ケース平均</div>
     </div>
     <div class="evolve-card">
@@ -229,7 +229,7 @@
       <div class="ev-sub">タスク</div>
     </div>
   </div>
-  <div class="today-tasks"><h3>本日のタスク評価</h3><div class="task-row"><span class="reward-badge reward-high">0.8</span><span class="task-id">daily-digest</span><span class="task-mode">agent-teams</span></div><div class="task-row"><span class="reward-badge reward-high">0.8</span><span class="task-id">storcon-diagram-memo</span><span class="task-mode">subagent</span></div></div>
+  <div class="today-tasks"><h3>本日のタスク評価</h3><div class="task-row"><span class="reward-badge reward-high">1.0</span><span class="task-id">daily-digest</span><span class="task-mode">agent-teams</span></div><div class="task-row"><span class="reward-badge reward-high">0.8</span><span class="task-id">storcon-diagram-memo</span><span class="task-mode">subagent</span></div></div>
   <div class="alert-card"><h3>⚠ 低報酬ケース</h3><div style="font-size:.85rem;padding:4px 0"><span class="reward-badge reward-low">0.2</span> <span style="font-family:monospace">20260325-192516-storcon-research</span></div></div>
 </div>
 
@@ -350,9 +350,9 @@ if (radarCtx) {
         datasets: radarLabelsData.map((agent, i) => ({
           label: agent,
           data: [
-            [8.5, 8.5][i] || 0,
-            [7.5, 8.0][i] || 0,
-            [9.5, 9.0][i] || 0,
+            [5.9, 6.0][i] || 0,
+            [5.3, 5.6][i] || 0,
+            [6.7, 6.3][i] || 0,
           ],
           borderWidth: 1.5,
           fill: true,
@@ -379,8 +379,8 @@ if (radarCtx) {
 // Line: Judge total trend
 const judgeCtx = document.getElementById('judgeChart');
 if (judgeCtx) {
-  const judgeTrendLabels = ["2026-03-25", "2026-03-25", "2026-03-25", "2026-03-25"];
-  const judgeTrendData = [0.8, 0.83, 0.9, 0.87];
+  const judgeTrendLabels = ["2026-03-25", "2026-03-25", "2026-03-25", "2026-03-25", "2026-03-26", "2026-03-26"];
+  const judgeTrendData = [0.8, 0.83, 0.9, 0.87, 0.86, 0.93];
   if (judgeTrendData.length > 0) {
     new Chart(judgeCtx.getContext('2d'), {
       type: 'line',
@@ -415,7 +415,7 @@ new Chart(document.getElementById('scoreChart'), {
     labels: ["2026-03-21", "2026-03-21", "2026-03-21", "2026-03-21", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-25", "2026-03-25", "2026-03-25", "2026-03-26", "2026-03-26"],
     datasets: [{
       label: '報酬スコア',
-      data: [1.0, 1.0, 1.0, 1.0, 1.0, 0.6, 0.8, 0.2, 1.0, 0.8, 0.8, 0.8],
+      data: [1.0, 1.0, 1.0, 1.0, 1.0, 0.6, 0.8, 0.2, 1.0, 0.8, 1.0, 0.8],
       borderColor: '#ffc107',
       backgroundColor: 'rgba(255,193,7,0.1)',
       fill: true,
