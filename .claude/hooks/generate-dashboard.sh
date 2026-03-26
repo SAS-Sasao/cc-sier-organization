@@ -840,11 +840,11 @@ html = f"""<!DOCTYPE html>
 <div class="charts">
   <div class="chart-box">
     <h3>品質ゲート合格率</h3>
-    <canvas id="qgChart"></canvas>
+    <canvas id="qgChart" style="max-height:280px"></canvas>
   </div>
   <div class="chart-box">
     <h3>Subagent 使用頻度</h3>
-    <canvas id="agentChart"></canvas>
+    <canvas id="agentChart" style="max-height:280px"></canvas>
   </div>
 </div>
 
