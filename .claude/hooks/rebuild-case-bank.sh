@@ -89,25 +89,47 @@ for md_file in sorted(task_log_dir.glob("*.md")):
         mode = "direct"
 
     # --- Subagent detection (multiple patterns) ---
-    # Known agent name pattern: lowercase ASCII with hyphens (e.g. retail-domain-researcher)
-    AGENT_RE = r'[a-z][a-z0-9]+(?:-[a-z0-9]+)+'  # must contain at least one hyphen
+    # Known agent name pattern: lowercase ASCII with optional hyphens (e.g. retail-domain-researcher, secretary)
+    AGENT_RE = r'[a-z][a-z0-9]+(?:-[a-z0-9]+)*'  # hyphens optional to match "secretary"
+    # Known agent names for exact matching (avoid false positives from relaxed regex)
+    KNOWN_AGENTS = {'secretary', 'tech-researcher', 'retail-domain-researcher',
+                    'project-manager', 'system-architect', 'lead-developer',
+                    'frontend-developer', 'backend-developer', 'test-engineer',
+                    'qa-lead', 'cloud-engineer', 'sre-engineer', 'ci-cd-engineer',
+                    'data-architect', 'ai-developer', 'technical-writer',
+                    'standards-lead', 'knowledge-manager', 'process-engineer'}
     subagents = []
     # Pattern 1: "secretary → {name}" in log entries
     for m in re.findall(rf'secretary\s*→\s*({AGENT_RE})', text):
-        subagents.append(m)
+        if m in KNOWN_AGENTS:
+            subagents.append(m)
     # Pattern 2: "- **アサイン**: agent-name" (single line)
     assign_single = re.search(r'\*\*アサイン\*\*:\s*(.+)$', text, re.MULTILINE)
     if assign_single:
         for name in re.findall(AGENT_RE, assign_single.group(1)):
-            subagents.append(name)
+            if name in KNOWN_AGENTS:
+                subagents.append(name)
     # Pattern 3: "  - agent-name: 作業内容" in indented assign list
     assign_list = re.search(r'\*\*アサイン\*\*:\s*\n((?:\s+-\s+.+\n)*)', text)
     if assign_list:
         for name in re.findall(rf'^\s+-\s+({AGENT_RE}):', assign_list.group(1), re.MULTILINE):
-            subagents.append(name)
-    # Pattern 4: "### {agent-name}" section headers in work log
-    for m in re.finditer(rf'^###\s+({AGENT_RE})\s*$', text, re.MULTILINE):
-        subagents.append(m.group(1))
+            if name in KNOWN_AGENTS:
+                subagents.append(name)
+    # Pattern 4: "### {agent-name}" or "### [timestamp] {agent-name}" section headers
+    for m in re.finditer(rf'^###\s+(?:\[.*?\]\s+)?({AGENT_RE})\s*$', text, re.MULTILINE):
+        if m.group(1) in KNOWN_AGENTS:
+            subagents.append(m.group(1))
+    # Pattern 5: Markdown table "委譲先" column containing agent names
+    for m in re.findall(rf'\|\s*({AGENT_RE})\s*\|', text):
+        if m in KNOWN_AGENTS:
+            subagents.append(m)
+    # Pattern 6: "| ... | {agent-name} | ..." in any table row (broader scan)
+    for m in re.findall(rf'(?:委譲先|担当|ロール|Subagent)[^\n]*({AGENT_RE})', text):
+        if m in KNOWN_AGENTS:
+            subagents.append(m)
+    # Pattern 7: mode=direct or "秘書室" implies secretary
+    if not subagents and (mode == "direct" or "秘書室" in text or "秘書が直接" in text):
+        subagents.append("secretary")
     # Deduplicate preserving order
     seen = set()
     unique_subagents = []
@@ -128,8 +150,14 @@ for md_file in sorted(task_log_dir.glob("*.md")):
 
     # --- Judge score (## judge section) ---
     judge_data = None
-    # Format 1: YAML code block
-    judge_section = re.search(r'## judge\s*```yaml\s*(.*?)```', text, re.DOTALL)
+    # Format 1: YAML code block (search within ## judge section, pick LAST yaml block)
+    judge_block_all = re.search(r'## judge\b(.*?)(?=\n## [^#]|\Z)', text, re.DOTALL)
+    judge_section = None
+    if judge_block_all:
+        # Find all ```yaml ... ``` blocks within the judge section, use the last one
+        yaml_blocks = list(re.finditer(r'```yaml\s*(.*?)```', judge_block_all.group(1), re.DOTALL))
+        if yaml_blocks:
+            judge_section = yaml_blocks[-1]  # use last (総合評価) block
     if judge_section:
         judge_yaml = judge_section.group(1)
         judge_data = {}
