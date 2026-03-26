@@ -50,3 +50,14 @@ pr_number: null
 | ファイル | 作成者 | パス |
 |---------|--------|------|
 | ストコン図解メモ | retail-domain-researcher | .companies/domain-tech-collection/docs/secretary/learning-notes/wbs-2-1-1-storcon-diagram-memo.md |
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-26T09:07:56"
+```
