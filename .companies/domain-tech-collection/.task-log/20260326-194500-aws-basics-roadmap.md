@@ -1,0 +1,56 @@
+# タスクログ: AWS基礎 学習ロードマップ+ハンズオン手順書（WBS 3.1.1 工程A）
+
+- **task-id**: 20260326-194500-aws-basics-roadmap
+- **開始日時**: 2026-03-26 19:45
+- **依頼者**: 笹尾豊樹
+- **operator**: SAS-Sasao
+- **ステータス**: completed
+- **完了日時**: 2026-03-26 19:55
+
+## 概要
+
+WBS 3.1.1 AWS基礎（IAM, VPC, EC2, S3）の自学タスクについて、
+工程A（調査・整理）をエージェントに委譲。ストコン案件に必要な4サービスに絞り、
+学習ロードマップ+ハンズオン手順書を作成する。
+
+学習時間を8h→約4h（工程Bのみ）に圧縮する狙い。
+
+## 委譲内容
+
+| 対象WBS | 委譲先 | 調査テーマ | 成果物パス |
+|---------|--------|-----------|-----------|
+| 3.1.1 | tech-researcher | IAM/VPC/EC2/S3 学習ロードマップ+ハンズオン手順書 | docs/research/aws-basics-handson-roadmap.md |
+
+## 秘書判断
+
+- 実行モード: Subagent委譲（1本）
+- 理由: 技術スタック学習の先行資料作成。既存のAWS移行技術レポートをベースに、ハンズオンに特化した実用ガイドを生成。
+- コスト設定 balanced に準拠。
+
+## 完了サマリー
+
+| 成果物 | 概要 |
+|--------|------|
+| `docs/research/aws-basics-handson-roadmap.md` | 925行。IAM(45min)/VPC(60min)/EC2(75min)/S3(60min)の学習ロードマップ+ハンズオン手順書。Mermaid図多数、ストコン案件マッピング、SAA模擬問題4問、W2-W3接続ガイド付き |
+
+## reward
+```yaml
+score: 0.8
+signals:
+  completed: true
+  artifacts_exist: true
+  no_excessive_edits: true
+  no_retry: true
+scored_at: "2026-03-26T19:55:00+09:00"
+```
+
+## judge
+```yaml
+completeness: 9
+accuracy: 9
+clarity: 10
+total: 0.93
+failure_reason: ""
+judge_comment: "4サービスすべてで概念整理(Mermaid図)+ストコン案件での活用+ハンズオン手順+SAA対策+チェックリストを網羅。PM視点とSAA対策の区分が明確で、学習者が迷わない構成。模擬問題4問も実践的でストコン案件に即した出題。既存資料への相互リンクも適切"
+judged_at: "2026-03-26T19:55:00+09:00"
+```
