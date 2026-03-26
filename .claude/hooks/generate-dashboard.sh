@@ -216,9 +216,59 @@ top_agents = sorted(
 
 judge_radar = {
     "labels": top_agents,
-    "completeness": [round(sum(judge_by_agent[a]["completeness"])/len(judge_by_agent[a]["completeness"]), 1) if judge_by_agent[a]["completeness"] else 0 for a in top_agents],
-    "accuracy":     [round(sum(judge_by_agent[a]["accuracy"])/len(judge_by_agent[a]["accuracy"]), 1) if judge_by_agent[a]["accuracy"] else 0 for a in top_agents],
-    "clarity":      [round(sum(judge_by_agent[a]["clarity"])/len(judge_by_agent[a]["clarity"]), 1) if judge_by_agent[a]["clarity"] else 0 for a in top_agents],
+    "completeness": [round(sum(judge_by_agent[a]["completeness"])/len(judge_by_agent[a]["completeness"]), 2) if judge_by_agent[a]["completeness"] else 0 for a in top_agents],
+    "accuracy":     [round(sum(judge_by_agent[a]["accuracy"])/len(judge_by_agent[a]["accuracy"]), 2) if judge_by_agent[a]["accuracy"] else 0 for a in top_agents],
+    "clarity":      [round(sum(judge_by_agent[a]["clarity"])/len(judge_by_agent[a]["clarity"]), 2) if judge_by_agent[a]["clarity"] else 0 for a in top_agents],
+}
+
+# --- Improvement Insights Analysis ---
+# 1. Per-agent weakest axis
+agent_weaknesses = []
+for agent in judge_by_agent:
+    axes = {}
+    for axis in ["completeness", "accuracy", "clarity"]:
+        vals = judge_by_agent[agent][axis]
+        if vals:
+            axes[axis] = round(sum(vals) / len(vals), 2)
+    if axes:
+        weakest = min(axes, key=axes.get)
+        n_cases = len(judge_by_agent[agent]["total"])
+        agent_weaknesses.append({
+            "agent": agent or "(secretary直接)",
+            "weakest_axis": weakest,
+            "weakest_score": axes[weakest],
+            "all_axes": axes,
+            "case_count": n_cases,
+        })
+
+# 2. Low-score case analysis (total < 0.7)
+low_score_cases = []
+if case_bank.exists():
+    try:
+        _cb2 = json.loads(case_bank.read_text(encoding="utf-8", errors="ignore"))
+        for c in _cb2.get("cases", []):
+            j = c.get("judge")
+            if not j or not isinstance(j, dict):
+                continue
+            total = j.get("total")
+            if total is not None and float(total) < 0.7:
+                low_score_cases.append({
+                    "task_id": c.get("id", "?"),
+                    "agent": c.get("action", {}).get("subagent", "") or "(secretary直接)",
+                    "total": round(float(total), 2),
+                    "comment": j.get("judge_comment", ""),
+                    "failure_reason": j.get("failure_reason", ""),
+                    "request": (c.get("state", {}).get("request_head", "") or "")[:60],
+                })
+    except Exception:
+        pass
+
+# 3. Action suggestions based on weak axes
+axis_labels_ja = {"completeness": "網羅性", "accuracy": "正確性", "clarity": "明瞭性"}
+action_suggestions = {
+    "completeness": "調査範囲の事前定義やチェックリストの活用を検討。Subagentへの指示で「必ず含めるべき観点」を明示する。",
+    "accuracy": "情報ソースの信頼性確認を強化。公式ドキュメントURLの添付を必須にし、推測と事実を明確に区別する。",
+    "clarity": "成果物のフォーマット統一（目次・マトリックス・図解）を推進。読み手のペルソナ（PM/エンジニア）を指示に含める。",
 }
 
 # Judge score trend (last 30)
@@ -541,6 +591,70 @@ if judge_most_improved:
 else:
     improved_html = '<div style="font-size:.82rem;color:var(--muted);margin-bottom:8px">改善ハイライト: 月をまたいだデータが蓄積されると表示されます</div>'
 
+# --- Weakness analysis HTML ---
+weakness_html = ""
+if agent_weaknesses:
+    rows = ""
+    for w in sorted(agent_weaknesses, key=lambda x: x["weakest_score"]):
+        axes_bar = ""
+        for ax in ["completeness", "accuracy", "clarity"]:
+            v = w["all_axes"].get(ax, 0)
+            pct = int(v * 100)
+            color = "#ef476f" if ax == w["weakest_axis"] else "#06d6a0"
+            axes_bar += f'<div style="display:flex;align-items:center;gap:6px;margin:2px 0">'
+            axes_bar += f'<span style="font-size:.7rem;width:50px;color:var(--muted)">{axis_labels_ja[ax]}</span>'
+            axes_bar += f'<div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">'
+            axes_bar += f'<div style="width:{pct}%;height:100%;background:{color};border-radius:3px"></div></div>'
+            axes_bar += f'<span style="font-size:.7rem;width:30px;text-align:right">{v:.2f}</span></div>'
+        rows += f'''<div style="padding:8px 0;border-bottom:1px solid var(--border)">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:.82rem;font-weight:600">{w["agent"]}</span>
+    <span style="font-size:.7rem;color:var(--muted)">{w["case_count"]}件</span>
+  </div>
+  {axes_bar}
+  <div style="font-size:.72rem;color:#ef476f;margin-top:4px">
+    弱点: {axis_labels_ja[w["weakest_axis"]]}（{w["weakest_score"]:.2f}）
+  </div>
+</div>'''
+    weakness_html = f'<div style="margin-bottom:12px"><div style="font-size:.8rem;font-weight:600;margin-bottom:6px">軸別弱点分析</div>{rows}</div>'
+
+# --- Low-score case analysis HTML ---
+low_score_html = ""
+if low_score_cases:
+    items = ""
+    for lc in low_score_cases[:5]:
+        comment = lc["comment"][:80] + "..." if len(lc["comment"]) > 80 else lc["comment"]
+        items += f'''<li style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">
+  <div style="display:flex;justify-content:space-between">
+    <span style="font-weight:500">{lc["agent"]}</span>
+    <span style="color:var(--red);font-weight:600">{lc["total"]:.2f}</span>
+  </div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:2px">{lc["request"]}...</div>
+  <div style="font-size:.72rem;color:var(--text);margin-top:2px">{comment}</div>
+</li>'''
+    low_score_html = f'<div style="margin-bottom:12px"><div style="font-size:.8rem;font-weight:600;margin-bottom:6px">低スコアケース（&lt;0.7）</div><ul style="list-style:none;padding:0;margin:0">{items}</ul></div>'
+
+# --- Action suggestions HTML ---
+suggested_actions_html = ""
+if agent_weaknesses:
+    # Collect globally weakest axes across all agents
+    global_axis_scores = {ax: [] for ax in ["completeness", "accuracy", "clarity"]}
+    for w in agent_weaknesses:
+        for ax, v in w["all_axes"].items():
+            global_axis_scores[ax].append(v)
+    global_avgs = {ax: sum(vs)/len(vs) if vs else 1.0 for ax, vs in global_axis_scores.items()}
+    weak_axes = [ax for ax, avg in sorted(global_avgs.items(), key=lambda x: x[1]) if avg < 0.9][:2]
+
+    if weak_axes:
+        action_items = ""
+        for ax in weak_axes:
+            action_items += f'''<li style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">
+  <span style="font-weight:600;color:var(--accent)">{axis_labels_ja[ax]}</span>
+  <span style="color:var(--muted)">（全体平均 {global_avgs[ax]:.2f}）</span>
+  <div style="font-size:.72rem;margin-top:3px">{action_suggestions[ax]}</div>
+</li>'''
+        suggested_actions_html = f'<div style="margin-bottom:12px"><div style="font-size:.8rem;font-weight:600;margin-bottom:6px">改善アクション提案</div><ul style="list-style:none;padding:0;margin:0">{action_items}</ul></div>'
+
 # Failure patterns HTML
 failure_items_html = "".join([
     f'<li style="padding:6px 0;border-bottom:1px solid var(--border);font-size:.82rem">'
@@ -751,11 +865,14 @@ html = f"""<!DOCTYPE html>
     <canvas id="radarChart" style="max-height:280px"></canvas>
   </div>
 
-  <!-- 改善ハイライト + 失敗パターン -->
+  <!-- 改善インサイト -->
   <div class="chart-box">
     <h3>改善インサイト</h3>
-    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">judge 評価で検出された改善ポイント。failure_reason が蓄積されると自動で Subagent の制約に反映される。</p>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">judge 評価から自動分析。弱点の可視化・低スコア原因・改善アクションを提示。</p>
     {improved_html}
+    {weakness_html}
+    {low_score_html}
+    {suggested_actions_html}
     <div style="margin-top:12px">
       <div style="font-size:.8rem;font-weight:600;margin-bottom:8px">よく出る失敗パターン（上位3件）</div>
       <ul style="list-style:none;padding:0;margin:0">{failure_items_html}</ul>
