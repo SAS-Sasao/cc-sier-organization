@@ -235,6 +235,16 @@ for md_file in sorted(task_log_dir.glob("*.md")):
         },
     }
 
+    # Auto-derive reward from judge total if reward is still None
+    if new_case["reward"] is None and new_case["judge"] and new_case["judge"].get("total") is not None:
+        total = new_case["judge"]["total"]
+        if total >= 0.7:
+            new_case["reward"] = 0.8
+        elif total >= 0.4:
+            new_case["reward"] = 0.6
+        else:
+            new_case["reward"] = 0.2
+
     # Preserve enriched fields from existing case
     if task_id in existing_cases:
         old_case = existing_cases[task_id]
