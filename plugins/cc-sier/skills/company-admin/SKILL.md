@@ -244,7 +244,42 @@ Q3: 想定操作は？
 2. .companies/{org-slug}/CLAUDE.md をテンプレートから再生成
 ```
 
-### 6.8 Gitワークフロー
+### 6.8 タスクログと Issue 作成
+
+マスタ変更もファイル生成を伴う作業のため、task-logを記録する。
+
+**タスク受付時**に `.companies/{org-slug}/.task-log/{task-id}.md` を作成する。
+
+task-id: `YYYYMMDD-HHMMSS-admin-{操作slug}`
+
+```yaml
+---
+task_id: "{task-id}"
+org: "{org-slug}"
+operator: "{operator}"
+status: in-progress
+mode: direct
+started: "{ISO8601}"
+completed: ""
+request: "{ユーザーの依頼原文}"
+issue_number: null
+pr_number: null
+---
+```
+
+記録するセクション:
+- **実行計画**: 対象マスタ、操作種別（追加/変更/削除）、連鎖更新の範囲
+- **成果物**: 更新されたマスタファイル、生成されたSubagent/CLAUDE.md等
+
+**タスク完了時**: `status: completed`、`completed` フィールドを更新。
+
+**Issue 作成**: タスク完了時に `gh issue create` で Issue を作成。ラベル:
+- `org:{org-slug}`
+- `mode:direct`
+- `type:admin`
+- `dept:secretary`
+
+### 6.9 Gitワークフロー
 
 マスタ変更はすべてGitワークフローで管理します。
 
@@ -252,7 +287,7 @@ Q3: 想定操作は？
 1. ブランチ作成: {org-slug}/admin/{YYYY-MM-DD}-{操作概要}
    例: a-sha-dwh-project/admin/2026-03-19-add-dept-security
 2. マスタ更新 + 連鎖更新を実行（セクション5・6の処理）
-3. コミット: feat: {操作概要} [{org-slug}]
+3. コミット: feat: {操作概要} [{org-slug}] by {operator}
 4. PR作成（変更サマリーをPR本文に記載）
 5. mainブランチに戻る
 ```

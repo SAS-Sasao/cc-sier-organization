@@ -19,7 +19,6 @@ description: >
 ## 1. 操作対象の判定
 
 起動時に `.companies/.active` を読み取り、`{org-slug}` を特定する。
-また `git config user.name` を実行してユーザー名を取得し、`{operator}` として保持する（取得できない場合は `anonymous`）。
 以降、すべてのマスタ参照先は `.companies/{org-slug}/masters/` となる。
 
 ユーザーの依頼から対象マスタと操作種別を特定します。
@@ -131,7 +130,7 @@ Q3: 想定操作は？
 | ワークフローID | `wf-` プレフィックス + kebab-case + 一意 |
 | プロジェクトID | `proj-` プレフィックス + 一意 |
 | ステータス | 定義された enum 値のいずれか |
-| フォルダパス | `.companies/{org-slug}/docs/` プレフィックス + 他部署と非重複 |
+| フォルダパス | `.companies/{org-slug}/` プレフィックス + 他部署と非重複 |
 
 ### 4.2 整合性検証
 
@@ -168,9 +167,9 @@ Q3: 想定操作は？
 
 ```
 1. masters/departments.md にエントリ追加
-2. .companies/{org-slug}/docs/{folder}/ フォルダ作成（サブフォルダ含む）
+2. .companies/{org-slug}/{folder}/ フォルダ作成（サブフォルダ含む）
    → references/departments.md のテンプレートを参照
-3. .companies/{org-slug}/docs/{folder}/CLAUDE.md 生成
+3. .companies/{org-slug}/{folder}/CLAUDE.md 生成
    → references/departments.md の CLAUDE.md テンプレートから生成
 4. .companies/{org-slug}/CLAUDE.md の組織構成ツリー・部署一覧テーブルに追記
 5. 新規ロールがある場合 → ロール追加の連鎖更新も実行
@@ -204,7 +203,7 @@ Q3: 想定操作は？
 ### 6.4 部署削除時の連鎖更新（安全策付き）
 
 ```
-1. .companies/{org-slug}/docs/{folder}/ 配下のファイル存在チェック
+1. .companies/{org-slug}/{folder}/ 配下のファイル存在チェック
    → ファイルがある場合: 物理削除不可。以下を提案:
      「この部署にはデータが残っています。削除ではなくアーカイブ（archived ステータス）
       にすることをお勧めします。アーカイブしますか？」
@@ -245,7 +244,42 @@ Q3: 想定操作は？
 2. .companies/{org-slug}/CLAUDE.md をテンプレートから再生成
 ```
 
-### 6.8 Gitワークフロー
+### 6.8 タスクログと Issue 作成
+
+マスタ変更もファイル生成を伴う作業のため、task-logを記録する。
+
+**タスク受付時**に `.companies/{org-slug}/.task-log/{task-id}.md` を作成する。
+
+task-id: `YYYYMMDD-HHMMSS-admin-{操作slug}`
+
+```yaml
+---
+task_id: "{task-id}"
+org: "{org-slug}"
+operator: "{operator}"
+status: in-progress
+mode: direct
+started: "{ISO8601}"
+completed: ""
+request: "{ユーザーの依頼原文}"
+issue_number: null
+pr_number: null
+---
+```
+
+記録するセクション:
+- **実行計画**: 対象マスタ、操作種別（追加/変更/削除）、連鎖更新の範囲
+- **成果物**: 更新されたマスタファイル、生成されたSubagent/CLAUDE.md等
+
+**タスク完了時**: `status: completed`、`completed` フィールドを更新。
+
+**Issue 作成**: タスク完了時に `gh issue create` で Issue を作成。ラベル:
+- `org:{org-slug}`
+- `mode:direct`
+- `type:admin`
+- `dept:secretary`
+
+### 6.9 Gitワークフロー
 
 マスタ変更はすべてGitワークフローで管理します。
 
@@ -298,7 +332,7 @@ Q3: 想定操作は？
 
 | 対象 | 安全策 |
 |------|--------|
-| **部署** | `.companies/{org-slug}/docs/{dept}/` にファイルがある → 削除不可、アーカイブ提案 |
+| **部署** | `.companies/{org-slug}/{dept}/` にファイルがある → 削除不可、アーカイブ提案 |
 | **ロール** | workflows.md で参照中 → 警告 + 代替ロール要求 |
 | **ワークフロー** | そのまま削除可能（他マスタへの影響なし） |
 | **プロジェクト** | archived への変更を推奨。物理削除は関連フォルダが空の場合のみ |

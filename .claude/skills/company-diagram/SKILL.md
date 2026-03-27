@@ -102,7 +102,50 @@ docs/diagrams/
 - レイヤー構成テーブル
 - 「構成図一覧に戻る」リンク
 
-## 5. Git ワークフロー
+## 5. タスクログと Issue 作成
+
+構成図の生成はファイル生成を伴う作業のため、必ずtask-logを記録する。
+
+### 5.1 タスクログ記録
+
+**タスク受付時**に `.companies/{org-slug}/.task-log/{task-id}.md` を作成する。
+
+task-id: `YYYYMMDD-HHMMSS-diagram-{name}`
+
+```yaml
+---
+task_id: "{task-id}"
+org: "{org-slug}"
+operator: "{operator}"
+status: in-progress
+mode: direct
+started: "{ISO8601}"
+completed: ""
+request: "{ユーザーの依頼原文}"
+issue_number: null
+pr_number: null
+---
+```
+
+記録するセクション:
+- **実行計画**: 描画対象、使用AWSサービス、MCP Server利用
+- **成果物**: PNG、詳細HTML、一覧HTML更新、ソースMD
+
+**タスク完了時**: `status: completed`、`completed` フィールドを更新。
+
+### 5.2 LLM-as-Judge 評価
+
+成果物が `docs/` 配下にあるため、コミット前に completeness / accuracy / clarity の3軸評価を実施し、task-logに `## judge` セクションを追記する。
+
+### 5.3 Issue 作成
+
+タスク完了時に `gh issue create` で Issue を作成する。ラベル:
+- `org:{org-slug}`
+- `mode:direct`
+- `type:feat`
+- `dept:secretary`
+
+## 6. Git ワークフロー
 
 ```
 1. ブランチ: {org-slug}/feat/{YYYY-MM-DD}-add-diagram-{name}
@@ -112,13 +155,13 @@ docs/diagrams/
 5. main に戻る
 ```
 
-## 6. GitHub Pages 連携
+## 7. GitHub Pages 連携
 
 - 構成図は `docs/diagrams/` に配置（GitHub Pages 公開対象）
 - トップページ `docs/index.html` にオレンジ枠のカードで自動リンク
 - `/company-dashboard` 実行時も `generate-dashboard.sh` が `docs/diagrams/index.html` を検出してカードを維持
 
-## 7. 前提条件
+## 8. 前提条件
 
 | 項目 | 要件 |
 |------|------|
