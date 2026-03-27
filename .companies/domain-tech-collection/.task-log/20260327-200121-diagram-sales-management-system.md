@@ -52,3 +52,14 @@ pr_number: 120
 ### 備考
 - コスト概算テーブルを追加し、「月額20万円」の要件に対する具体的な数値回答を提供
 - graph_attrを使わない学習を継続適用し1回で生成成功
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-27T20:04:30"
+```
