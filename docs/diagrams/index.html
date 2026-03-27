@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AWS構成図 - cc-sier-organization</title>
+<title>AWS構成図一覧 - cc-sier-organization</title>
 <style>
 :root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
         --muted:#6c757d; --orange:#e67e22; --shadow:rgba(0,0,0,.06); }
@@ -17,81 +17,49 @@ body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif
 .back-btn:hover { text-decoration:underline; }
 h1 { font-size:1.5rem; margin-bottom:8px; }
 .subtitle { color:var(--muted); font-size:.88rem; margin-bottom:24px; }
-.diagram-list { display:grid; gap:24px; }
-.diagram-card { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
-                padding:24px; box-shadow:0 2px 8px var(--shadow); }
-.diagram-card h2 { font-size:1.1rem; margin-bottom:4px; }
-.diagram-meta { color:var(--muted); font-size:.82rem; margin-bottom:16px; }
-.diagram-meta span { margin-right:16px; }
-.diagram-img { text-align:center; margin-bottom:16px; }
-.diagram-img img { max-width:100%; height:auto; border-radius:8px; border:1px solid var(--border);
-                   cursor:pointer; transition:transform .2s; }
-.diagram-img img:hover { transform:scale(1.02); }
-.diagram-desc { font-size:.9rem; line-height:1.6; }
-.diagram-desc table { width:100%; border-collapse:collapse; margin-top:12px; font-size:.85rem; }
-.diagram-desc th { text-align:left; background:var(--bg); padding:8px 12px; border:1px solid var(--border); white-space:nowrap; }
-.diagram-desc td { padding:8px 12px; border:1px solid var(--border); }
-.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.75rem; font-weight:600; margin-right:6px; }
-.badge-batch { background:#3b82f6; color:#fff; }
-.badge-rt { background:#22c55e; color:#fff; }
+.count { color:var(--muted); font-size:.82rem; margin-bottom:16px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+        text-decoration:none; color:var(--text); overflow:hidden;
+        transition:box-shadow .2s, transform .15s; display:block; }
+.card:hover { box-shadow:0 6px 20px var(--shadow); transform:translateY(-2px); }
+.card-thumb { width:100%; height:180px; object-fit:cover; border-bottom:1px solid var(--border); background:var(--bg); }
+.card-body { padding:16px 20px; }
+.card-title { font-size:1rem; font-weight:600; margin-bottom:6px; }
+.card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.card-desc { font-size:.84rem; color:var(--muted); line-height:1.5; }
+.card-date { font-size:.78rem; color:var(--muted); margin-top:8px; }
 .updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
-
-/* Lightbox */
-.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.85);
-            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
-.lightbox.active { display:flex; }
-.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
 </style>
 </head>
 <body>
 <a href="../" class="back-btn">&larr; トップに戻る</a>
-<h1>AWS 構成図ギャラリー</h1>
-<p class="subtitle">AWS Diagram MCP Server で生成した構成図一覧</p>
+<h1>AWS 構成図一覧</h1>
+<p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
+<p class="count">1 件の構成図</p>
 
-<div class="diagram-list">
-  <div class="diagram-card">
-    <h2>StoreCon AWS Migration - DWH Architecture</h2>
-    <div class="diagram-meta">
-      <span>案件: コンビニストコンAWS移行</span>
-      <span>領域: DWH / データ基盤</span>
-      <span>生成日: 2026-03-27</span>
+<div class="grid">
+  <a href="./storcon-dwh-architecture.html" class="card">
+    <img class="card-thumb" src="./storcon-dwh-architecture.png" alt="StoreCon DWH Architecture">
+    <div class="card-body">
+      <div class="card-title">StoreCon AWS Migration - DWH Architecture</div>
+      <div class="card-meta">
+        <span class="tag tag-project">ストコンAWS移行</span>
+        <span class="tag tag-area">DWH / データ基盤</span>
+      </div>
+      <div class="card-desc">ストアコンピュータのクラウド移行におけるDWH領域。S3データレイク + Redshift + QuickSight。</div>
+      <div class="card-date">2026-03-27</div>
     </div>
-    <div class="diagram-img">
-      <img src="./storcon-dwh-architecture.png" alt="StoreCon DWH Architecture" onclick="openLightbox(this.src)">
-    </div>
-    <div class="diagram-desc">
-      <p>コンビニエンスストアのストアコンピュータ（ストコン）AWS移行案件におけるDWH領域のアーキテクチャ構成図。</p>
-      <table>
-        <tr><th>レイヤー</th><th>サービス</th><th>用途</th></tr>
-        <tr><td>データソース</td><td>Store Computer / POS Terminal</td><td>店舗の売上・発注・在庫データ</td></tr>
-        <tr><td>取り込み <span class="badge badge-batch">Batch</span></td><td>AWS DMS</td><td>ストコンDBからの一括移行</td></tr>
-        <tr><td>取り込み <span class="badge badge-rt">Realtime</span></td><td>Kinesis Data Streams + Firehose</td><td>POSトランザクションのリアルタイム取得</td></tr>
-        <tr><td>データレイク</td><td>Amazon S3 (Raw / Processed / Curated)</td><td>3層構造でデータ品質を段階的に向上</td></tr>
-        <tr><td>ETL / ガバナンス</td><td>AWS Glue, Glue Data Catalog, Lake Formation</td><td>ETL処理、メタデータ管理、アクセス制御</td></tr>
-        <tr><td>DWH / 分析</td><td>Amazon Redshift, Amazon Athena</td><td>構造化分析、アドホッククエリ</td></tr>
-        <tr><td>可視化</td><td>Amazon QuickSight</td><td>BI ダッシュボード、レポート</td></tr>
-      </table>
-    </div>
-  </div>
+  </a>
 </div>
 
 <p class="updated">Powered by AWS Diagram MCP Server</p>
-
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <img id="lightbox-img" src="" alt="拡大表示">
-</div>
-
-<script>
-function openLightbox(src) {
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox').classList.add('active');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('active');
-}
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeLightbox();
-});
-</script>
 </body>
 </html>

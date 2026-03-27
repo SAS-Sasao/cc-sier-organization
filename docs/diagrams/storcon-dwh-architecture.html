@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreCon DWH Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+
+/* Diagram */
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+
+/* Description */
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-batch { background:#3b82f6; color:#fff; }
+.badge-rt { background:#22c55e; color:#fff; }
+
+/* Flow */
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+
+/* Lightbox */
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>StoreCon AWS Migration - DWH Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコンAWS移行</span>
+  <span class="tag tag-area">DWH / データ基盤</span>
+  <span>生成日: 2026-03-27</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./storcon-dwh-architecture.png" alt="StoreCon DWH Architecture" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>コンビニエンスストアのストアコンピュータ（ストコン）をオンプレミスからAWSへクラウド移行する案件における、DWH（データウェアハウス）領域のアーキテクチャ構成図です。</p>
+  <p>店舗のPOS端末からのリアルタイムデータと、ストアコンピュータからのバッチデータを統合し、S3データレイク → Redshift DWH → QuickSight BI の分析パイプラインを構成しています。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+  <h3 style="font-size:.95rem; margin-bottom:12px;"><span class="badge badge-batch">Batch</span> ストコンDB → DWH</h3>
+  <div class="flow">
+    <span class="flow-step">Store Computer</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS DMS</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (Raw)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS Glue</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (Curated)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight</span>
+  </div>
+
+  <h3 style="font-size:.95rem; margin:20px 0 12px;"><span class="badge badge-rt">Realtime</span> POSトランザクション → DWH</h3>
+  <div class="flow">
+    <span class="flow-step">POS Terminal</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Data Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Data Firehose</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (Raw)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS Glue</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Athena / Redshift</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>データソース</td><td>Store Computer / POS Terminal</td><td>店舗の売上・発注・在庫データ</td></tr>
+    <tr><td>取り込み <span class="badge badge-batch">Batch</span></td><td>AWS DMS</td><td>ストコンDBからの一括移行</td></tr>
+    <tr><td>取り込み <span class="badge badge-rt">Realtime</span></td><td>Kinesis Data Streams + Firehose</td><td>POSトランザクションのリアルタイム取得</td></tr>
+    <tr><td>データレイク</td><td>Amazon S3 (Raw / Processed / Curated)</td><td>3層構造でデータ品質を段階的に向上</td></tr>
+    <tr><td>ETL / ガバナンス</td><td>AWS Glue, Glue Data Catalog, Lake Formation</td><td>ETL処理、メタデータ管理、アクセス制御</td></tr>
+    <tr><td>DWH</td><td>Amazon Redshift</td><td>構造化データの集計・分析クエリ</td></tr>
+    <tr><td>アドホック分析</td><td>Amazon Athena</td><td>S3上のデータに対するSQLクエリ</td></tr>
+    <tr><td>可視化</td><td>Amazon QuickSight</td><td>BIダッシュボード、定期レポート</td></tr>
+  </table>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
