@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Data Lakehouse on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+
+/* Diagram */
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+
+/* Description */
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-batch { background:#3b82f6; color:#fff; }
+.badge-rt { background:#22c55e; color:#fff; }
+.badge-gov { background:#8b5cf6; color:#fff; }
+
+/* Flow */
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+
+/* Lightbox */
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Modern Data Lakehouse on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-area">Data Lakehouse</span>
+  <span>生成日: 2026-03-27</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./modern-data-lakehouse.png" alt="Modern Data Lakehouse on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>モダンなデータレイクハウスアーキテクチャの参照構成図です。従来のデータレイクとデータウェアハウスの長所を組み合わせ、Medallionアーキテクチャ（Bronze / Silver / Gold）による段階的なデータ品質向上を実現します。</p>
+  <p>バッチ取り込み（DMS）、ストリーミング取り込み（Kinesis）、ファイルアップロード（Step Functions）の3つの取り込みパターンに対応し、Glue ETL / EMR Spark による処理パイプラインを経て、Athena（アドホック分析）と Redshift Serverless（DWH分析）の両方からデータを活用できます。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-batch">Batch</span> CDC レプリケーション</h3>
+  <div class="flow">
+    <span class="flow-step">On-Prem DB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS DMS (CDC)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Bronze (Raw)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Silver (Cleaned)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EMR Spark</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Gold (Aggregated)</span>
+  </div>
+
+  <h3><span class="badge badge-rt">Realtime</span> ストリーミング取り込み</h3>
+  <div class="flow">
+    <span class="flow-step">Streaming Events</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Data Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Firehose</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Bronze (Raw)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Silver / Gold</span>
+  </div>
+
+  <h3><span class="badge badge-gov">Governance</span> メタデータ・アクセス制御</h3>
+  <div class="flow">
+    <span class="flow-step">Glue ETL / EMR</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue Data Catalog</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lake Formation</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Athena / Redshift</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>データソース</td><td>On-Prem DB / Streaming / File Upload</td><td>バッチ・ストリーミング・ファイルの3種類の取り込みパターン</td></tr>
+    <tr><td>取り込み <span class="badge badge-batch">Batch</span></td><td>AWS DMS</td><td>CDC（Change Data Capture）によるDB差分レプリケーション</td></tr>
+    <tr><td>取り込み <span class="badge badge-rt">Realtime</span></td><td>Kinesis Data Streams + Firehose</td><td>ストリーミングデータのリアルタイム取得とS3配信</td></tr>
+    <tr><td>取り込み（ファイル）</td><td>Step Functions</td><td>ファイルアップロードトリガーによるオーケストレーション</td></tr>
+    <tr><td>Bronze (Raw)</td><td>Amazon S3</td><td>ソースデータをそのまま保持。スキーマオンリード</td></tr>
+    <tr><td>Silver (Cleaned)</td><td>Amazon S3</td><td>データクレンジング・型変換・重複排除後のデータ</td></tr>
+    <tr><td>Gold (Aggregated)</td><td>Amazon S3</td><td>ビジネスロジック適用済み。分析・BI向けに最適化</td></tr>
+    <tr><td>ETL処理</td><td>AWS Glue ETL / Amazon EMR (Spark)</td><td>Bronze→Silver (Glue)、Silver→Gold (EMR Spark) の変換処理</td></tr>
+    <tr><td>カタログ</td><td>AWS Glue Data Catalog</td><td>スキーマ管理・テーブル定義・パーティション情報</td></tr>
+    <tr><td>ガバナンス</td><td>AWS Lake Formation</td><td>きめ細かいアクセス制御・列レベルセキュリティ</td></tr>
+    <tr><td>アドホック分析</td><td>Amazon Athena</td><td>S3上のデータに対するサーバーレスSQLクエリ</td></tr>
+    <tr><td>DWH分析</td><td>Amazon Redshift Serverless</td><td>高性能なDWHクエリ。BI/定期レポート向け</td></tr>
+    <tr><td>可視化</td><td>Amazon QuickSight</td><td>BIダッシュボード、セルフサービス分析</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>Medallionアーキテクチャとは</h2>
+  <p>Medallionアーキテクチャは、データレイク内のデータを品質レベルに応じて3層（Bronze / Silver / Gold）に整理するデータ管理パターンです。Databricks社が提唱し、現在ではAWSを含む主要クラウドで広く採用されています。</p>
+  <p><strong>Bronze層</strong>: ソースデータをそのまま格納。変換なし。障害時の再処理に対応。</p>
+  <p><strong>Silver層</strong>: クレンジング・正規化・型変換を適用。データ品質を担保。</p>
+  <p><strong>Gold層</strong>: ビジネスロジックを適用し、分析・BI向けに最適化。集計・結合済み。</p>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
