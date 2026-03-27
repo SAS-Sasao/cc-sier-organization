@@ -30,3 +30,6 @@ bk/
 
 # ロックファイル
 .claude/scheduled_tasks.lock
+
+# MCP Server生成の一時ファイル（docs/diagrams/ にコピー済み）
+generated-diagrams/
