@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Management System on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+.tag-budget { background:#d1fae5; color:#065f46; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+  .tag-budget { background:#064e3b; color:#6ee7b7; }
+}
+
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-user { background:#3b82f6; color:#fff; }
+.badge-app { background:#22c55e; color:#fff; }
+.badge-cicd { background:#ec4899; color:#fff; }
+.badge-sec { background:#f59e0b; color:#fff; }
+
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+
+.cost-table td:last-child { text-align:right; font-family:monospace; }
+
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Sales Management System on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-area">Application</span>
+  <span class="tag tag-budget">月額 ~20万円</span>
+  <span>生成日: 2026-03-27</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./sales-management-system.png" alt="Sales Management System on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>月額約20万円（~$1,300）の予算で、50〜70名が利用する販売管理システムを運用するためのコスト最適化されたAWSアーキテクチャです。</p>
+  <p>フロントエンドはSPA（Single Page Application）をCloudFront + S3で配信し、バックエンドAPIはECS Fargate上のコンテナで実行。データベースにはAurora Serverless v2を採用し、利用量に応じた自動スケーリングでコストを最適化しています。</p>
+  <p>CI/CDはGitHub Actionsからコンテナイメージをビルドし、ECRにプッシュ後、ECS Fargateにデプロイするフローです。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-user">User</span> ユーザーアクセス</h3>
+  <div class="flow">
+    <span class="flow-step">ブラウザ</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Route 53</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront + WAF</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (SPA)</span>
+  </div>
+
+  <h3><span class="badge badge-app">API</span> API リクエスト</h3>
+  <div class="flow">
+    <span class="flow-step">SPA (Frontend)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront /api/*</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECS Fargate</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora Serverless v2</span>
+  </div>
+
+  <h3><span class="badge badge-cicd">CI/CD</span> デプロイフロー</h3>
+  <div class="flow">
+    <span class="flow-step">GitHub Actions</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Docker Build</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECR Push</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECS Rolling Deploy</span>
+  </div>
+
+  <h3><span class="badge badge-sec">Auth</span> 認証フロー</h3>
+  <div class="flow">
+    <span class="flow-step">ユーザー</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Cognito User Pool</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">JWT Token</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB (認証検証)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>DNS</td><td>Route 53</td><td>ドメイン管理・名前解決</td></tr>
+    <tr><td>CDN</td><td>CloudFront</td><td>静的コンテンツ配信・APIリバースプロキシ</td></tr>
+    <tr><td>セキュリティ</td><td>WAF / ACM</td><td>Webアプリケーションファイアウォール・SSL証明書</td></tr>
+    <tr><td>認証</td><td>Cognito User Pool</td><td>ユーザー認証・JWT発行（50-70名の無料枠内）</td></tr>
+    <tr><td>フロントエンド</td><td>S3 Static Hosting</td><td>SPA（React/Vue等）の静的ファイル配信</td></tr>
+    <tr><td>ロードバランサー</td><td>ALB</td><td>APIリクエストの振り分け・ヘルスチェック</td></tr>
+    <tr><td>アプリケーション</td><td>ECS Fargate (2タスク)</td><td>バックエンドAPI。Private Subnetで実行</td></tr>
+    <tr><td>データベース</td><td>Aurora Serverless v2</td><td>PostgreSQL互換。0.5〜2 ACU自動スケーリング</td></tr>
+    <tr><td>ファイルストレージ</td><td>S3</td><td>帳票・請求書等のファイルアップロード保存</td></tr>
+    <tr><td>シークレット管理</td><td>Secrets Manager</td><td>DB接続情報・API キーの安全な管理</td></tr>
+    <tr><td>CI/CD</td><td>GitHub Actions + ECR</td><td>ビルド・テスト・コンテナイメージ管理・デプロイ</td></tr>
+    <tr><td>ネットワーク</td><td>VPC / NAT Gateway</td><td>Public/Privateサブネット分離・外部通信</td></tr>
+    <tr><td>監視</td><td>CloudWatch + SNS</td><td>メトリクス監視・アラート通知</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>月額コスト概算</h2>
+  <table class="cost-table">
+    <tr><th>サービス</th><th>構成</th><th>月額概算</th></tr>
+    <tr><td>ECS Fargate</td><td>2タスク (0.5 vCPU, 1GB)</td><td>$30</td></tr>
+    <tr><td>ALB</td><td>1台</td><td>$20</td></tr>
+    <tr><td>Aurora Serverless v2</td><td>0.5〜2 ACU (PostgreSQL)</td><td>$50-80</td></tr>
+    <tr><td>NAT Gateway</td><td>1台 + データ転送</td><td>$35-45</td></tr>
+    <tr><td>CloudFront</td><td>配信 + リクエスト</td><td>$5-10</td></tr>
+    <tr><td>S3</td><td>SPA + ファイルストレージ</td><td>$5</td></tr>
+    <tr><td>ECR</td><td>コンテナイメージ保管</td><td>$5</td></tr>
+    <tr><td>Route 53</td><td>ホストゾーン + クエリ</td><td>$1</td></tr>
+    <tr><td>WAF</td><td>基本ルール</td><td>$10-15</td></tr>
+    <tr><td>Cognito</td><td>70 MAU (無料枠内)</td><td>$0</td></tr>
+    <tr><td>Secrets Manager</td><td>2-3シークレット</td><td>$2</td></tr>
+    <tr><td>CloudWatch</td><td>ログ + メトリクス</td><td>$10</td></tr>
+    <tr><th colspan="2">合計</th><th style="text-align:right">$173-223</th></tr>
+    <tr><th colspan="2">日本円換算（1$=150円）</th><th style="text-align:right">約26,000〜33,000円</th></tr>
+  </table>
+  <p style="margin-top:12px;">実際のコストは利用パターンやデータ量により変動しますが、50-70名規模では月額3〜4万円程度に収まる見込みです。20万円の予算に対して十分な余裕があり、本番/ステージング環境の両方を運用可能です。</p>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>ECS Fargate によるサーバーレスコンテナ</strong>: EC2インスタンス管理が不要。50-70名規模なら0.5 vCPU x 2タスクで十分なスループットを確保。ローリングデプロイでダウンタイムゼロの更新が可能です。</p>
+  <p><strong>Aurora Serverless v2 の自動スケーリング</strong>: 業務時間帯（9:00-18:00）はACUが自動で上がり、夜間・休日は最小ACU（0.5）に下がるため、利用パターンに応じたコスト最適化が実現します。</p>
+  <p><strong>Cognito で認証をマネージド化</strong>: 50,000 MAUまで無料。MFA対応、パスワードポリシー設定、JWT発行を標準機能で実現。自前で認証基盤を構築する必要がありません。</p>
+  <p><strong>GitHub Actions + ECR のCI/CD</strong>: AWS外のCI/CDサービス（GitHub Actions）を使うことで、CodePipeline/CodeBuildのコストを削減。ECRへのプッシュ後、ECSサービスの更新で自動デプロイされます。</p>
+  <p><strong>CloudFront + WAF でエッジセキュリティ</strong>: DDoS対策（Shield Standard 無料）、SQLインジェクション/XSS防止（WAF）、SSL終端を一括で提供。CloudFrontのキャッシュでオリジンへの負荷も軽減します。</p>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
