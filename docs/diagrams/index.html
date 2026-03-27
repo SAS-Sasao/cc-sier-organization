@@ -43,7 +43,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count">1 件の構成図</p>
+<p class="count">2 件の構成図</p>
 
 <div class="grid">
   <a href="./storcon-dwh-architecture.html" class="card">
@@ -55,6 +55,18 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
         <span class="tag tag-area">DWH / データ基盤</span>
       </div>
       <div class="card-desc">ストアコンピュータのクラウド移行におけるDWH領域。S3データレイク + Redshift + QuickSight。</div>
+      <div class="card-date">2026-03-27</div>
+    </div>
+  </a>
+  <a href="./storcon-cicd-pipeline.html" class="card">
+    <img class="card-thumb" src="./storcon-cicd-pipeline.png" alt="StoreCon CI/CD Pipeline">
+    <div class="card-body">
+      <div class="card-title">StoreCon CI/CD Pipeline</div>
+      <div class="card-meta">
+        <span class="tag tag-project">ストコンAWS移行</span>
+        <span class="tag tag-area">CI/CD</span>
+      </div>
+      <div class="card-desc">GitHub Actions + CodeBuild + ECR + ECS Fargate。承認ゲート付きデプロイパイプライン。</div>
       <div class="card-date">2026-03-27</div>
     </div>
   </a>

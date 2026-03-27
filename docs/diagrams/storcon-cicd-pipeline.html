@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreCon CI/CD Pipeline - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-src { background:#3b82f6; color:#fff; }
+.badge-build { background:#8b5cf6; color:#fff; }
+.badge-deploy { background:#22c55e; color:#fff; }
+.badge-approve { background:#ef4444; color:#fff; }
+.badge-monitor { background:#6b7280; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>StoreCon CI/CD Pipeline</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコンAWS移行</span>
+  <span class="tag tag-area">CI/CD</span>
+  <span>生成日: 2026-03-27</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./storcon-cicd-pipeline.png" alt="StoreCon CI/CD Pipeline" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>コンビニストコンAWS移行案件における CI/CD パイプラインの構成図です。GitHub Actions をトリガーとし、AWS CodeBuild でビルド・テスト、ECR でコンテナイメージ管理、ECS Fargate への Blue/Green デプロイを実現します。</p>
+  <p>本番デプロイ前に SNS 通知 + 手動承認ゲートを設け、安全なリリースフローを確保しています。インフラは AWS CDK + CloudFormation で IaC 管理します。</p>
+</div>
+
+<div class="section">
+  <h2>パイプラインフロー</h2>
+
+  <h3><span class="badge badge-src">Source</span> <span class="badge badge-build">Build & Test</span> コード → ビルド</h3>
+  <div class="flow">
+    <span class="flow-step">GitHub (Push / PR)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">GitHub Actions</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CodeBuild (Build & Test)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECR (Push Image)</span>
+  </div>
+
+  <h3><span class="badge badge-deploy">Deploy STG</span> ステージング環境</h3>
+  <div class="flow">
+    <span class="flow-step">ECR</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECS Fargate (Staging)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">RDS (Staging)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">E2E Test</span>
+  </div>
+
+  <h3><span class="badge badge-approve">Approval</span> <span class="badge badge-deploy">Deploy PRD</span> 承認 → 本番</h3>
+  <div class="flow">
+    <span class="flow-step">E2E Test Pass</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SNS Notification</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Manual Approve</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECS Fargate (Production)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">RDS (Production)</span>
+  </div>
+
+  <h3><span class="badge badge-monitor">IaC</span> インフラ管理</h3>
+  <div class="flow">
+    <span class="flow-step">GitHub Actions</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS CDK</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFormation</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">STG / PRD Stacks</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>構成要素</h2>
+  <table>
+    <tr><th>ステージ</th><th>サービス</th><th>用途</th></tr>
+    <tr><td><span class="badge badge-src">Source</span></td><td>GitHub / GitHub Actions</td><td>コード管理、パイプライントリガー</td></tr>
+    <tr><td><span class="badge badge-build">Build</span></td><td>AWS CodeBuild</td><td>ビルド、単体テスト、結合テスト</td></tr>
+    <tr><td><span class="badge badge-build">Build</span></td><td>AWS CodeArtifact</td><td>依存パッケージのプライベートリポジトリ</td></tr>
+    <tr><td><span class="badge badge-build">Artifact</span></td><td>Amazon ECR</td><td>コンテナイメージの保存・バージョン管理</td></tr>
+    <tr><td><span class="badge badge-monitor">IaC</span></td><td>AWS CDK / CloudFormation</td><td>インフラ定義・スタック管理</td></tr>
+    <tr><td><span class="badge badge-deploy">Deploy</span></td><td>ECS Fargate (STG / PRD)</td><td>コンテナ実行環境（サーバーレス）</td></tr>
+    <tr><td><span class="badge badge-deploy">Deploy</span></td><td>Amazon RDS (STG / PRD)</td><td>リレーショナルDB（環境分離）</td></tr>
+    <tr><td><span class="badge badge-approve">Approval</span></td><td>Amazon SNS</td><td>本番デプロイ前の通知・承認ゲート</td></tr>
+    <tr><td><span class="badge badge-monitor">Monitor</span></td><td>CloudWatch</td><td>メトリクス監視・ログ集約</td></tr>
+    <tr><td><span class="badge badge-monitor">Monitor</span></td><td>CloudTrail</td><td>API操作の監査ログ</td></tr>
+    <tr><td><span class="badge badge-monitor">Security</span></td><td>Secrets Manager / IAM Role</td><td>シークレット管理・最小権限ポリシー</td></tr>
+  </table>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
