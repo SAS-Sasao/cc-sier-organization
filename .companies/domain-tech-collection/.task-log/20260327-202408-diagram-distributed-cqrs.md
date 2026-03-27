@@ -52,3 +52,14 @@ pr_number: 124
 ### 備考
 - 列指向DBの使い分け（Keyspaces=ワイドカラムOLTP、Redshift=カラムナOLAP）を明示
 - レイテンシー特性テーブルを追加し、各アクセスパターンの期待レイテンシーを可視化
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-27T20:26:44"
+```
