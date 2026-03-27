@@ -8,8 +8,8 @@ subagent: "company-diagram"
 started: "2026-03-27T19:21:16+09:00"
 completed: "2026-03-27T19:22:00+09:00"
 request: "モダンなデータレイクハウス構成を学びたい"
-issue_number: null
-pr_number: null
+issue_number: 117
+pr_number: 116
 ---
 
 ## 実行計画
