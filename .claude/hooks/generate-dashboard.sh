@@ -1099,6 +1099,14 @@ for org in orgs:
       <div class="org-label">ダッシュボードを開く →</div>
     </a>'''
 
+# ダイジェストページが存在すれば追加
+if Path("docs/daily-digest/index.html").exists():
+    cards += '''
+    <a href="./daily-digest/index.html" class="card" style="border:2px solid #198754;">
+      <div class="org-name">日次ダイジェスト</div>
+      <div class="org-label">技術・小売ニュース巡回 →</div>
+    </a>'''
+
 html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
