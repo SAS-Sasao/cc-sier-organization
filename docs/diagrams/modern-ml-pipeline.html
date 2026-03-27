@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern ML Pipeline on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-data { background:#3b82f6; color:#fff; }
+.badge-ml { background:#22c55e; color:#fff; }
+.badge-infer { background:#ec4899; color:#fff; }
+.badge-mon { background:#ef4444; color:#fff; }
+.badge-genai { background:#8b5cf6; color:#fff; }
+
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Modern ML Pipeline on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-area">ML Pipeline</span>
+  <span>生成日: 2026-03-27</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./modern-ml-pipeline.png" alt="Modern ML Pipeline on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>データウェアハウス（Redshift）やデータレイク（S3 Gold Layer）に蓄積されたデータを活用し、機械学習モデルの開発・学習・デプロイ・運用までを一気通貫で実現するモダンMLパイプラインの参照構成図です。</p>
+  <p>SageMaker を中心に、特徴量エンジニアリング（Glue / EMR）、実験管理（Studio Notebook）、モデル学習・登録（Training Job / Model Registry）、推論（リアルタイムエンドポイント / バッチ推論）、モニタリング（CloudWatch / EventBridge）の全フェーズをカバーしています。</p>
+  <p>さらに、Bedrock による RAG（Retrieval-Augmented Generation）を組み合わせることで、DWHの業務知識を活用した生成AIアプリケーションへの拡張も可能です。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-data">Data</span> 特徴量エンジニアリング</h3>
+  <div class="flow">
+    <span class="flow-step">Redshift DWH</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">UNLOAD to S3</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">特徴量データセット</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">S3 Gold Layer</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EMR Spark</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">大規模特徴量変換</span>
+  </div>
+
+  <h3><span class="badge badge-ml">ML</span> モデル開発・学習・登録</h3>
+  <div class="flow">
+    <span class="flow-step">SageMaker Studio</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">実験・EDA</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Training Job</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Model Registry</span>
+  </div>
+
+  <h3><span class="badge badge-infer">Inference</span> 推論デプロイ</h3>
+  <div class="flow">
+    <span class="flow-step">Model Registry</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SageMaker Endpoint (Real-time)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Model Registry</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Batch Transform (バッチ推論)</span>
+  </div>
+
+  <h3><span class="badge badge-mon">Monitor</span> モニタリング・アラート</h3>
+  <div class="flow">
+    <span class="flow-step">SageMaker Endpoint</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudWatch</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EventBridge</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SNS Alert</span>
+  </div>
+
+  <h3><span class="badge badge-genai">GenAI</span> RAG拡張</h3>
+  <div class="flow">
+    <span class="flow-step">S3 Gold Layer</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Bedrock (RAG)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">業務知識を活用した生成AI</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>データソース</td><td>Redshift DWH / S3 Gold Layer</td><td>DWHの集計データ、データレイクの加工済みデータ</td></tr>
+    <tr><td>特徴量エンジニアリング</td><td>AWS Glue ETL / Amazon EMR (Spark)</td><td>特徴量抽出・変換・正規化。大規模データはEMR、定型処理はGlue</td></tr>
+    <tr><td>実験・開発</td><td>SageMaker Studio Notebook</td><td>EDA（探索的データ分析）、モデル実験、ハイパーパラメータ探索</td></tr>
+    <tr><td>モデル学習</td><td>SageMaker Training Job</td><td>分散学習、Spot Instance活用、学習ジョブの自動スケーリング</td></tr>
+    <tr><td>モデル管理</td><td>SageMaker Model Registry</td><td>モデルバージョン管理、承認ワークフロー、系統追跡</td></tr>
+    <tr><td>オーケストレーション</td><td>Step Functions</td><td>特徴量生成→学習→評価→登録の自動パイプライン</td></tr>
+    <tr><td>リアルタイム推論</td><td>SageMaker Endpoint + Lambda</td><td>API経由のリアルタイム予測。Lambdaで前処理を実行</td></tr>
+    <tr><td>バッチ推論</td><td>AWS Batch (SageMaker Transform)</td><td>大量データに対する一括推論処理</td></tr>
+    <tr><td>GenAI拡張</td><td>Amazon Bedrock</td><td>DWHの業務知識をナレッジベースとしたRAG構成</td></tr>
+    <tr><td>モニタリング</td><td>CloudWatch + EventBridge + SNS</td><td>モデルドリフト検知、レイテンシ監視、アラート通知</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>MLOps のポイント</h2>
+  <p><strong>Step Functions によるパイプライン自動化</strong>: 特徴量生成 → モデル学習 → 評価 → Model Registry 登録 → エンドポイントデプロイの一連のフローを自動化。手動介入なしで継続的な再学習が可能です。</p>
+  <p><strong>Model Registry による承認ワークフロー</strong>: 学習済みモデルを Model Registry に登録し、「Approved」ステータスのモデルのみを本番デプロイ。データサイエンティストとMLエンジニアの責務を分離できます。</p>
+  <p><strong>モデルモニタリング</strong>: CloudWatch でエンドポイントのレイテンシ・エラー率を監視し、EventBridge ルールで閾値超過時に SNS 通知。モデルドリフト（入力データの分布変化）も SageMaker Model Monitor で検知できます。</p>
+  <p><strong>Bedrock RAG との統合</strong>: DWHに蓄積された業務データをベクトル化し、Bedrock の Knowledge Base として活用。従来のML予測と生成AIによる自然言語での洞察提供を組み合わせたハイブリッドな分析基盤を構築できます。</p>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
