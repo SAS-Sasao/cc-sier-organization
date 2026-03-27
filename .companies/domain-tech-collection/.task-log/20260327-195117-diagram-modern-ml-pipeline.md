@@ -52,3 +52,14 @@ pr_number: 118
 ### 備考
 - 前回のデータレイクハウス構成図（Medallion）と連続したテーマ。S3 Gold Layer → ML Pipeline の接続を明示し、2つの図を組み合わせて理解できるように設計
 - graph_attr を使わない（前回の学習を反映）ことで1回で生成成功
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-27T19:54:23"
+```
