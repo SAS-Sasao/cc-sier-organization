@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distributed Low-Latency CQRS Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-write { background:#ef4444; color:#fff; }
+.badge-read { background:#22c55e; color:#fff; }
+.badge-event { background:#f59e0b; color:#fff; }
+.badge-col { background:#8b5cf6; color:#fff; }
+.badge-dist { background:#6b7280; color:#fff; }
+
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+
+.latency-table td:nth-child(3) { font-family:monospace; text-align:right; }
+
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Distributed Low-Latency CQRS Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-area">Distributed DB / CQRS</span>
+  <span>生成日: 2026-03-27</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./distributed-cqrs-architecture.png" alt="Distributed Low-Latency CQRS Architecture" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>CQRS（Command Query Responsibility Segregation）パターンを採用し、書き込みと読み込みを分離した低レイテンシー分散アーキテクチャの参照構成図です。</p>
+  <p>書き込み側はDynamoDBをプライマリストアとし、CDC（Change Data Capture）でDynamoDB Streams → Kinesis経由で列指向DB（Amazon Keyspaces / Redshift）にリアルタイム同期します。読み込み側はDAX（DynamoDB Accelerator）によるマイクロ秒レイテンシーのホットリードと、Keyspaces/Redshiftによる分析クエリの2パスを提供します。</p>
+  <p>DynamoDB Global Tablesによるマルチリージョンレプリケーションと、Route 53のレイテンシーベースルーティングにより、グローバルに低レイテンシーなアクセスを実現します。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-write">Write</span> コマンドパス（書き込み）</h3>
+  <div class="flow">
+    <span class="flow-step">App Client</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Command Handler (Lambda)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB (Primary)</span>
+  </div>
+
+  <h3><span class="badge badge-read">Read</span> クエリパス（ホットリード）</h3>
+  <div class="flow">
+    <span class="flow-step">App Client</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Query Handler (Lambda)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DAX (In-Memory, &lt;1ms)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB</span>
+  </div>
+
+  <h3><span class="badge badge-event">CDC</span> イベント処理（リアルタイム同期）</h3>
+  <div class="flow">
+    <span class="flow-step">DynamoDB Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Data Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Sync Processor (Lambda)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Keyspaces / Redshift</span>
+  </div>
+
+  <h3><span class="badge badge-col">Columnar</span> 列指向クエリ</h3>
+  <div class="flow">
+    <span class="flow-step">分析クエリ</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Keyspaces (Wide Column)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">集計・BI</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift (Columnar DWH)</span>
+  </div>
+
+  <h3><span class="badge badge-dist">Global</span> グローバル分散</h3>
+  <div class="flow">
+    <span class="flow-step">DynamoDB (Primary)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Global Tables (Multi-Region)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Route 53 (Latency Routing)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>エッジ</td><td>CloudFront + API Gateway</td><td>グローバルCDN + APIルーティング</td></tr>
+    <tr><td>コマンド処理</td><td>Lambda (Command Handler)</td><td>書き込みリクエストの処理・バリデーション</td></tr>
+    <tr><td>プライマリストア</td><td>DynamoDB</td><td>低レイテンシーKey-Valueストア。単一桁ミリ秒の書き込み</td></tr>
+    <tr><td>キャッシュ</td><td>DAX (DynamoDB Accelerator)</td><td>マイクロ秒レイテンシーのインメモリキャッシュ</td></tr>
+    <tr><td>セッションキャッシュ</td><td>ElastiCache for Redis</td><td>セッション管理・集計キャッシュ</td></tr>
+    <tr><td>CDC</td><td>DynamoDB Streams</td><td>変更データキャプチャ（リアルタイム）</td></tr>
+    <tr><td>イベント処理</td><td>Kinesis Data Streams + Lambda</td><td>CDC イベントのファンアウト・変換・同期</td></tr>
+    <tr><td>列指向DB（ワイドカラム）</td><td>Amazon Keyspaces (Cassandra)</td><td>分散ワイドカラムストア。時系列・パーティション集約クエリ</td></tr>
+    <tr><td>列指向DB（DWH）</td><td>Amazon Redshift</td><td>カラムナストレージによる高速集計・分析クエリ</td></tr>
+    <tr><td>グローバル複製</td><td>DynamoDB Global Tables</td><td>マルチリージョン自動レプリケーション</td></tr>
+    <tr><td>ルーティング</td><td>Route 53 (Latency Routing)</td><td>レイテンシーベースの最寄りリージョンルーティング</td></tr>
+    <tr><td>可観測性</td><td>CloudWatch + X-Ray</td><td>メトリクス監視 + 分散トレーシング</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>レイテンシー特性</h2>
+  <table class="latency-table">
+    <tr><th>アクセスパターン</th><th>経路</th><th>レイテンシー</th></tr>
+    <tr><td>ホットリード（キャッシュヒット）</td><td>API GW → Lambda → DAX</td><td>&lt; 1 ms</td></tr>
+    <tr><td>ホットリード（キャッシュミス）</td><td>API GW → Lambda → DAX → DynamoDB</td><td>1-5 ms</td></tr>
+    <tr><td>書き込み</td><td>API GW → Lambda → DynamoDB</td><td>5-10 ms</td></tr>
+    <tr><td>ワイドカラムクエリ</td><td>Keyspaces (Cassandra)</td><td>5-10 ms</td></tr>
+    <tr><td>分析クエリ</td><td>Redshift (Columnar)</td><td>100ms-数秒</td></tr>
+    <tr><td>CDC同期遅延</td><td>Streams → Kinesis → Lambda</td><td>1-3 秒</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>CQRSによる書き込み/読み込みの分離</strong>: コマンド（書き込み）とクエリ（読み込み）を別々のデータストアで最適化。書き込みはDynamoDBで一貫性を保証し、読み込みはDAX/Keyspaces/Redshiftで用途に応じた最適なレイテンシーを提供します。</p>
+  <p><strong>列指向DBの使い分け</strong>: Amazon Keyspaces（Cassandra互換）はワイドカラム型で、パーティションキーによる高速な範囲クエリに適します。Redshiftはカラムナストレージで大量データの集計・分析に最適。用途に応じて2つの列指向DBを使い分けることで、OLTPとOLAPの両方をカバーします。</p>
+  <p><strong>DynamoDB Streams によるリアルタイムCDC</strong>: プライマリストア（DynamoDB）への書き込みが即座にStreamsに流れ、Kinesis経由でKeyspaces/Redshiftに同期。結果整合性モデルで1-3秒のラグはありますが、ほぼリアルタイムに列指向DB側のデータが更新されます。</p>
+  <p><strong>Global Tables + Latency Routing</strong>: DynamoDB Global Tablesで複数リージョンに自動レプリケーション。Route 53のレイテンシーベースルーティングと組み合わせることで、ユーザーの地理的位置に関わらず低レイテンシーを実現します。</p>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
