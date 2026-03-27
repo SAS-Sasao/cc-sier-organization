@@ -8,8 +8,8 @@ subagent: "company-diagram"
 started: "2026-03-27T20:24:08+09:00"
 completed: "2026-03-27T20:25:00+09:00"
 request: "アプリケーションDBに低レイテンシーにする為に分散アーキテクチャを採用したい。列思考DBを使用しながらアーキテクチャ構成してほしい"
-issue_number: null
-pr_number: null
+issue_number: 125
+pr_number: 124
 ---
 
 ## 実行計画
