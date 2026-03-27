@@ -8,8 +8,8 @@ subagent: "company-diagram"
 started: "2026-03-27T19:51:17+09:00"
 completed: "2026-03-27T19:52:00+09:00"
 request: "データウェアハウスで集めたデータをMLする為のアーキテクチャ。モダンな構成を提案してほしい"
-issue_number: null
-pr_number: null
+issue_number: 119
+pr_number: 118
 ---
 
 ## 実行計画
