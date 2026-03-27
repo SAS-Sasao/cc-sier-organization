@@ -52,3 +52,14 @@ pr_number: 116
 ### 備考
 - graph_attr パラメータ指定時にMCP Serverがエラーを返す制約を発見し、除去で回避（学習ポイント）
 - 学習目的の依頼のため、Medallionアーキテクチャの解説セクションを追加して教育的価値を向上させた
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-27T19:24:48"
+```
