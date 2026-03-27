@@ -1107,6 +1107,14 @@ if Path("docs/daily-digest/index.html").exists():
       <div class="org-label">技術・小売ニュース巡回 →</div>
     </a>'''
 
+# 構成図ページが存在すれば追加
+if Path("docs/diagrams/index.html").exists():
+    cards += '''
+    <a href="./diagrams/index.html" class="card" style="border:2px solid #e67e22;">
+      <div class="org-name">AWS 構成図</div>
+      <div class="org-label">アーキテクチャ図ギャラリー →</div>
+    </a>'''
+
 html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
