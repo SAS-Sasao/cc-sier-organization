@@ -8,8 +8,8 @@ subagent: "company-diagram"
 started: "2026-03-27T20:01:21+09:00"
 completed: "2026-03-27T20:02:00+09:00"
 request: "毎月のAWS費用20万程度のアプリケーション運用を行うための構成図を考えてほしい。アプリケーションは販売管理システムで利用者数50～70人程。CI/CDはgithub actionsを使用する想定"
-issue_number: null
-pr_number: null
+issue_number: 121
+pr_number: 120
 ---
 
 ## 実行計画
