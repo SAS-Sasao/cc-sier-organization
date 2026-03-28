@@ -17,6 +17,10 @@ body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif
 .back-btn:hover { text-decoration:underline; }
 .dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
 .dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
 h1 { font-size:1.3rem; margin-bottom:8px; }
 .meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
 .badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
@@ -61,7 +65,13 @@ h1 { font-size:1.3rem; margin-bottom:8px; }
 <div class="code-container">
   <div class="code-header">
     <span class="filename">enterprise-mdm-insights.yaml</span>
-    <span class="lines">796 lines</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">796 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
   </div>
   <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
 </div>
@@ -84,6 +94,18 @@ lines.forEach((line, i) => {
   codeTd.className = "code"; codeTd.innerHTML = highlight(line);
   tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
 });
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
 function highlight(line) {
   let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
