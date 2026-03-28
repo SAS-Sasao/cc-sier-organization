@@ -33,6 +33,16 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 .filter-btn:hover { border-color:var(--blue); color:var(--blue); }
 .filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
 .no-results { display:none; padding:40px; text-align:center; color:var(--muted); font-size:.9rem; }
+
+/* Pagination */
+.pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:24px; flex-wrap:wrap; }
+.page-btn { min-width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center;
+            border:1px solid var(--border); border-radius:8px; background:var(--bg2); color:var(--text);
+            font-size:.85rem; cursor:pointer; transition:all .15s; text-decoration:none; }
+.page-btn:hover { border-color:var(--blue); color:var(--blue); }
+.page-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); pointer-events:none; }
+.page-btn.disabled { opacity:.35; pointer-events:none; }
+.page-info { font-size:.82rem; color:var(--muted); margin:0 8px; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
 .card { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
         text-decoration:none; color:var(--text); overflow:hidden;
@@ -58,7 +68,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count"><span id="match-count">11</span> / 11 件の構成図</p>
+<p class="count"><span id="match-count">1-11 / 11</span> 件の構成図</p>
 
 <!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
 <div class="search-bar">
@@ -203,21 +213,29 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
   </a>
 </div>
 
+<!-- ▼ ページネーション（カード追加時に編集不要） -->
+<div class="pagination" id="pagination"></div>
+<!-- ▲ ページネーション ここまで -->
+
 <p class="updated">Powered by AWS Diagram MCP Server</p>
 
-<!-- ▼ 検索・フィルタ JavaScript（カード追加時に編集不要） -->
+<!-- ▼ 検索・フィルタ・ページネーション JavaScript（カード追加時に編集不要） -->
 <script>
 (function() {
+  var PER_PAGE = 20;
+  var currentPage = 1;
   var input = document.getElementById('search-input');
   var tagsContainer = document.getElementById('filter-tags');
   var noResults = document.getElementById('no-results');
   var matchCount = document.getElementById('match-count');
-  var cards = document.querySelectorAll('.card');
+  var paginationEl = document.getElementById('pagination');
+  var allCards = Array.prototype.slice.call(document.querySelectorAll('.card'));
   var activeFilters = { project: '', area: '' };
+  var filtered = [];
 
   // Build filter tag buttons from existing cards
   var projects = [], areas = [];
-  cards.forEach(function(c) {
+  allCards.forEach(function(c) {
     var p = c.querySelector('.tag-project');
     var a = c.querySelector('.tag-area');
     if (p && projects.indexOf(p.textContent) === -1) projects.push(p.textContent);
@@ -229,7 +247,6 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
     btn.className = 'filter-btn';
     btn.textContent = label;
     btn.setAttribute('data-type', type);
-    btn.setAttribute('data-value', label);
     btn.addEventListener('click', function() {
       if (this.classList.contains('active')) {
         this.classList.remove('active');
@@ -239,6 +256,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
         this.classList.add('active');
         activeFilters[type] = label;
       }
+      currentPage = 1;
       applyFilter();
     });
     return btn;
@@ -249,25 +267,88 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 
   function applyFilter() {
     var query = input.value.toLowerCase();
-    var visible = 0;
-    cards.forEach(function(c) {
+    filtered = allCards.filter(function(c) {
       var text = c.textContent.toLowerCase();
       var pTag = c.querySelector('.tag-project');
       var aTag = c.querySelector('.tag-area');
       var pMatch = !activeFilters.project || (pTag && pTag.textContent === activeFilters.project);
       var aMatch = !activeFilters.area || (aTag && aTag.textContent === activeFilters.area);
       var qMatch = !query || text.indexOf(query) !== -1;
-      var show = pMatch && aMatch && qMatch;
-      c.style.display = show ? '' : 'none';
-      if (show) visible++;
+      return pMatch && aMatch && qMatch;
     });
-    matchCount.textContent = visible;
-    noResults.style.display = visible === 0 ? 'block' : 'none';
+    renderPage();
   }
 
-  input.addEventListener('input', applyFilter);
+  function renderPage() {
+    var total = filtered.length;
+    var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    var start = (currentPage - 1) * PER_PAGE;
+    var end = start + PER_PAGE;
+    var pageItems = filtered.slice(start, end);
+
+    // Hide all, then show only current page items
+    allCards.forEach(function(c) { c.style.display = 'none'; });
+    pageItems.forEach(function(c) { c.style.display = ''; });
+
+    // Update count
+    if (total === 0) {
+      matchCount.textContent = '0';
+      noResults.style.display = 'block';
+    } else {
+      matchCount.textContent = (start + 1) + '-' + Math.min(end, total) + ' / ' + total;
+      noResults.style.display = 'none';
+    }
+
+    // Render pagination buttons
+    paginationEl.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    function addBtn(label, page, disabled, active) {
+      var btn = document.createElement('button');
+      btn.className = 'page-btn' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
+      btn.textContent = label;
+      if (!disabled && !active) {
+        btn.addEventListener('click', function() {
+          currentPage = page;
+          renderPage();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      paginationEl.appendChild(btn);
+    }
+
+    addBtn('\u00AB', 1, currentPage === 1, false);
+    addBtn('\u2039', currentPage - 1, currentPage === 1, false);
+
+    // Page number buttons with ellipsis
+    var pages = [];
+    for (var i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== '...') {
+        pages.push('...');
+      }
+    }
+    pages.forEach(function(p) {
+      if (p === '...') {
+        var span = document.createElement('span');
+        span.className = 'page-info';
+        span.textContent = '...';
+        paginationEl.appendChild(span);
+      } else {
+        addBtn(String(p), p, false, p === currentPage);
+      }
+    });
+
+    addBtn('\u203A', currentPage + 1, currentPage === totalPages, false);
+    addBtn('\u00BB', totalPages, currentPage === totalPages, false);
+  }
+
+  input.addEventListener('input', function() { currentPage = 1; applyFilter(); });
+  applyFilter();
 })();
 </script>
-<!-- ▲ 検索・フィルタ JavaScript ここまで -->
+<!-- ▲ 検索・フィルタ・ページネーション JavaScript ここまで -->
 </body>
 </html>
