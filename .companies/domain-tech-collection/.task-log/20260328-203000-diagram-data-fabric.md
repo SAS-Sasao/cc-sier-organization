@@ -7,8 +7,8 @@ mode: direct
 started: "2026-03-28T20:30:00+09:00"
 completed: "2026-03-28T20:45:00+09:00"
 request: "大規模データを分析できるようにしてほしい。データファブリックアーキテクチャの構築をしてみてほしい"
-issue_number: null
-pr_number: null
+issue_number: 134
+pr_number: 133
 ---
 
 ## 実行計画
