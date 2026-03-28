@@ -252,6 +252,23 @@ cc-sier-organization/
 
 ---
 
+## GitHub Pages ポータル
+
+**https://sas-sasao.github.io/cc-sier-organization/**
+
+各組織のダッシュボードや成果物をブラウザから閲覧できるポータルサイトです。5分ごとに自動リフレッシュされます。
+
+| ページ | URL | 内容 |
+|---|---|---|
+| ポータルトップ | [/](https://sas-sasao.github.io/cc-sier-organization/) | 組織選択画面。各ダッシュボード・コンテンツへのハブ |
+| 組織ダッシュボード | [/secretary/{org-slug}/dashboard.html](https://sas-sasao.github.io/cc-sier-organization/secretary/domain-tech-collection/dashboard.html) | タスクボード状況・品質ゲート合格率・Subagent使用頻度・スコア推移をアニメーション付きで可視化 |
+| 日次ダイジェスト | [/daily-digest/](https://sas-sasao.github.io/cc-sier-organization/daily-digest/index.html) | 技術・小売ニュース巡回の日次ダイジェストを日付タブ・キーボードナビ・ダークモード対応で閲覧 |
+| AWS構成図ギャラリー | [/diagrams/](https://sas-sasao.github.io/cc-sier-organization/diagrams/index.html) | `/company-diagram` で生成したAWSアーキテクチャ構成図の一覧・詳細表示 |
+
+ダッシュボードは `/company-dashboard` で生成、日次ダイジェストは `/company-digest-html` で生成、構成図は `/company-diagram` で生成されます。
+
+---
+
 ## クイックスタート
 
 ### 1. セットアップ
