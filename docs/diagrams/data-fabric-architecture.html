@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Fabric Architecture on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-batch { background:#3b82f6; color:#fff; }
+.badge-rt { background:#22c55e; color:#fff; }
+.badge-api { background:#8b5cf6; color:#fff; }
+.badge-meta { background:#e67e22; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Data Fabric Architecture on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-area">Data Fabric</span>
+  <span>生成日: 2026-03-28</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./data-fabric-architecture.png" alt="Data Fabric Architecture on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>データファブリックは、組織内に分散する多様なデータソース（オンプレミスDB、クラウドDB、SaaS、ストリーミング）を統合的に管理し、セルフサービスでデータアクセスを提供するアーキテクチャパターンです。</p>
+  <p>従来のデータレイクハウス（Medallionアーキテクチャ）が「データの品質層を段階的に上げる」ことに焦点を置くのに対し、データファブリックは「分散データソースを横断的に発見・統合・ガバナンスする」ことに重点を置いています。AWS Glue Data Catalog + Lake Formation + Glue Crawlers がファブリックの核心層（Active Metadata Layer）を構成し、Neptune によるナレッジグラフがメタデータ間の関係性を可視化します。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-batch">Batch</span> オンプレミス / RDS → データレイク</h3>
+  <div class="flow">
+    <span class="flow-step">Legacy DB / RDS</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS DMS (CDC)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Raw Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Curated Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Enriched Zone</span>
+  </div>
+
+  <h3><span class="badge badge-rt">Realtime</span> ストリーミングデータ取り込み</h3>
+  <div class="flow">
+    <span class="flow-step">Kinesis Data Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Firehose</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Raw Zone</span>
+  </div>
+
+  <h3><span class="badge badge-api">API</span> SaaS / 外部連携</h3>
+  <div class="flow">
+    <span class="flow-step">SaaS APIs</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AppFlow / EventBridge</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Raw Zone</span>
+  </div>
+
+  <h3><span class="badge badge-meta">Metadata</span> データファブリック層（自動検出 → ガバナンス）</h3>
+  <div class="flow">
+    <span class="flow-step">S3 全ゾーン</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue Crawlers (自動検出)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue Data Catalog</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lake Formation (アクセス制御)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Athena / Redshift / EMR</span>
+  </div>
+
+  <h3><span class="badge badge-meta">Knowledge</span> ナレッジグラフ構築</h3>
+  <div class="flow">
+    <span class="flow-step">Enriched Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Comprehend (NLP)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Neptune (Knowledge Graph)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>データソース</td><td>On-Prem DB, RDS, DynamoDB, SaaS APIs, Kinesis</td><td>バッチ・ストリーミング・API連携の3パターンで多様なソースに対応</td></tr>
+    <tr><td>取り込み <span class="badge badge-batch">Batch</span></td><td>AWS DMS, Glue ETL</td><td>CDC レプリケーション、バッチ変換・クレンジング</td></tr>
+    <tr><td>取り込み <span class="badge badge-rt">Realtime</span></td><td>Kinesis Data Streams + Firehose</td><td>ストリーミングデータのリアルタイム取得と S3 配信</td></tr>
+    <tr><td>取り込み <span class="badge badge-api">API</span></td><td>AppFlow / EventBridge</td><td>SaaS アプリケーションとのイベント連携</td></tr>
+    <tr><td>統合データレイク</td><td>Amazon S3 (Raw / Curated / Enriched)</td><td>3ゾーン構成でデータ品質を段階管理</td></tr>
+    <tr><td style="background:#fef3c7"><strong>メタデータ & ガバナンス</strong><br>(Data Fabric Core)</td><td>Glue Crawlers, Glue Data Catalog, Lake Formation</td><td>スキーマ自動検出、統合メタデータ管理、列/行レベルアクセス制御</td></tr>
+    <tr><td>データ処理</td><td>Athena (フェデレーテッドクエリ), Redshift Serverless, EMR</td><td>SQL分析、DWHクエリ、Spark分散処理</td></tr>
+    <tr><td>ナレッジ & AI</td><td>Neptune, Comprehend, SageMaker</td><td>ナレッジグラフ、NLPエンティティ抽出、ML モデル</td></tr>
+    <tr><td>セルフサービス消費</td><td>QuickSight, API Gateway, SageMaker Notebook</td><td>BIダッシュボード、データAPI、探索的分析</td></tr>
+    <tr><td>監視</td><td>CloudWatch</td><td>ETLジョブ・処理エンジンのメトリクス・ログ</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. Active Metadata Layer がファブリックの核心</strong><br>
+  Glue Crawlers が S3 全ゾーンを自動スキャンしてスキーマを検出、Glue Data Catalog に統合メタデータとして登録。Lake Formation がカタログ全体のアクセス制御を一元管理する。この3層がデータファブリックの「織物（fabric）」の役割を果たし、分散データを論理的に統合する。</p>
+  <p><strong>2. フェデレーテッドクエリによるデータ仮想化</strong><br>
+  Athena のフェデレーテッドクエリにより、S3・Redshift・外部DBを物理的に移動せず横断的にSQLクエリが可能。データの実体はソースに残したまま、仮想的に統合アクセスを実現する。</p>
+  <p><strong>3. Neptune ナレッジグラフによるメタデータの関係性可視化</strong><br>
+  Glue Data Catalog のメタデータと Comprehend の NLP エンティティ抽出結果を Neptune に投入し、テーブル間・エンティティ間の関係性をグラフで管理する。データリネージの追跡やインパクト分析が可能になる。</p>
+  <p><strong>4. 3取り込みパターンによるソース多様性対応</strong><br>
+  バッチ（DMS/Glue ETL）、ストリーミング（Kinesis）、API連携（AppFlow/EventBridge）の3経路を設計。オンプレミスDB・クラウドDB・SaaS・IoTデバイスなど、あらゆるデータソースに対応。新規ソース追加時も取り込み層の拡張のみで対応可能。</p>
+  <p><strong>5. セルフサービスによるデータ民主化</strong><br>
+  QuickSight（BI）、API Gateway（プログラマティックアクセス）、SageMaker Notebook（データサイエンティスト向け）の3消費チャネルを用意。Lake Formation のポリシーが全チャネルに適用されるため、セルフサービスでありながらガバナンスを維持。</p>
+</div>
+
+<div class="section">
+  <h2>データレイクハウスとの違い</h2>
+  <table>
+    <tr><th>観点</th><th>Data Lakehouse（Medallion）</th><th>Data Fabric（本構成）</th></tr>
+    <tr><td>主眼</td><td>データ品質の段階的向上</td><td>分散データの統合管理・発見・ガバナンス</td></tr>
+    <tr><td>メタデータ</td><td>ETL処理のカタログ管理</td><td>Active Metadata（自動検出・関係性グラフ）</td></tr>
+    <tr><td>データ移動</td><td>必ず S3 に集約</td><td>フェデレーテッドクエリで移動不要も可</td></tr>
+    <tr><td>AI活用</td><td>分析結果の可視化</td><td>メタデータ自体の AI 分析・推薦</td></tr>
+    <tr><td>適合ケース</td><td>単一データソースの品質管理</td><td>複数組織・複数ソースの横断統合</td></tr>
+  </table>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server | Reviewed by AWS Knowledge MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
