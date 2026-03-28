@@ -45,5 +45,5 @@ signals:
     artifacts_exist: true
     excessive_edits: false
     retry_detected: false
-evaluated_at: "2026-03-23T19:25:55"
+evaluated_at: "2026-03-28T20:09:10"
 ```

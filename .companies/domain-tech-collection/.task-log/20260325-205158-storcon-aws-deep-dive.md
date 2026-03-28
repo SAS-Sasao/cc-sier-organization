@@ -44,22 +44,11 @@ pr_number: null
 
 ## reward
 ```yaml
-score: 0.8
+score: 1.0
 signals:
     completed: true
-    artifacts_exist: false
+    artifacts_exist: true
     excessive_edits: false
     retry_detected: false
-evaluated_at: "2026-03-25T21:15:45"
-```
-
-## judge
-```yaml
-completeness: 9
-accuracy: 8
-clarity: 9
-total: 0.87
-failure_reason: ""
-judge_comment: "DMS/MGN/Transit Gateway等7サービスの設定詳細が実践的。カットオーバー5段階手順は時刻付きで具体的。学習ロードマップMust/Should/Nice-to-haveの3段階整理がPM視点で有用。AWS公式ドキュメントリンク30+件収録。MCP活用で情報の信頼性が高い。"
-judged_at: "2026-03-25T21:30:23+09:00"
+evaluated_at: "2026-03-28T20:09:11"
 ```

@@ -72,11 +72,11 @@ AWS公式ドキュメントの事前調査: AWS Knowledge MCP Serverを使用し
 
 ## reward
 ```yaml
-score: 0.8
+score: 1.0
 signals:
     completed: true
-    artifacts_exist: false
+    artifacts_exist: true
     excessive_edits: false
     retry_detected: false
-evaluated_at: "2026-03-26T17:32:08"
+evaluated_at: "2026-03-28T20:09:11"
 ```

@@ -853,8 +853,8 @@ html = f"""<!DOCTYPE html>
 <!-- Row 1: reward推移 + judge推移 -->
 <div class="charts-aligned">
   <div class="chart-box">
-    <h3>reward スコア推移（プロセス評価）</h3>
-    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">タスクの<strong>進め方</strong>を機械的に評価。completed / artifacts_exist / no_excessive_edits / no_retry の4シグナルで自動採点。</p>
+    <h3>reward スコア推移（統合評価）</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">プロセス評価（4シグナル）40% + judge評価（3軸）60% の統合スコア。judge未評価タスクはプロセス評価のみ。</p>
     <canvas id="scoreChart"></canvas>
   </div>
   <div class="chart-box">

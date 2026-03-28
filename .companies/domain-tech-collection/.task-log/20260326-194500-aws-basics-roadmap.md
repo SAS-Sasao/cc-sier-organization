@@ -32,25 +32,3 @@ WBS 3.1.1 AWS基礎（IAM, VPC, EC2, S3）の自学タスクについて、
 | 成果物 | 概要 |
 |--------|------|
 | `docs/research/aws-basics-handson-roadmap.md` | 925行。IAM(45min)/VPC(60min)/EC2(75min)/S3(60min)の学習ロードマップ+ハンズオン手順書。Mermaid図多数、ストコン案件マッピング、SAA模擬問題4問、W2-W3接続ガイド付き |
-
-## reward
-```yaml
-score: 0.8
-signals:
-  completed: true
-  artifacts_exist: true
-  no_excessive_edits: true
-  no_retry: true
-scored_at: "2026-03-26T19:55:00+09:00"
-```
-
-## judge
-```yaml
-completeness: 9
-accuracy: 9
-clarity: 10
-total: 0.93
-failure_reason: ""
-judge_comment: "4サービスすべてで概念整理(Mermaid図)+ストコン案件での活用+ハンズオン手順+SAA対策+チェックリストを網羅。PM視点とSAA対策の区分が明確で、学習者が迷わない構成。模擬問題4問も実践的でストコン案件に即した出題。既存資料への相互リンクも適切"
-judged_at: "2026-03-26T19:55:00+09:00"
-```

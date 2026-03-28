@@ -38,3 +38,14 @@ failure_reason: ""
 judge_comment: "7パターンすべてに症状→根本原因→ケーススタディ（ストコン案件想定）→処方箋→セルフチェックを網羅。処方箋は具体的なフレームワーク（15分ルール、3層翻訳、断り方5パターン等）で即実践可能。タイムライン別の発生時期マッピングが実用的。PMスキルマップの伸びしろ4領域と完全に対応。"
 judged_at: "2026-03-27T14:40:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.958
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-28T20:10:25"
+```

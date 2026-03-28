@@ -49,22 +49,11 @@ pr_number: 64
 
 ## reward
 ```yaml
-score: 1.0
+score: 0.8
 signals:
-  completed: true
-  artifacts_exist: true
-  no_excessive_edits: true
-  no_retry: true
-note: "3ファイル同時生成・品質良好・Case Bank参照パターンと一致"
-```
-
-## judge
-```yaml
-completeness: 9
-accuracy: 8
-clarity: 10
-total: 0.90
-failure_reason: ""
-judge_comment: "PM体制(PMO/機能PM/ベンダーPM)の整理が明確。W1必読リストはWBS全タスクを網羅しドキュメント有無を正確に把握。ストコン案件に当てはめた体制イメージが実践的。管理帳票テンプレートは参画後即活用可能。"
-judged_at: "2026-03-25T21:30:23+09:00"
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-28T20:10:52"
 ```

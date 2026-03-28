@@ -34,14 +34,3 @@
 - 日次収集の優先度ガイド（高/中/低）と月次マスタ更新ポリシーを含む
 - 次フェーズとして日次巡回・要約の自動化と、マスタの定期更新の仕組み化を予定
 
-
-## reward
-```yaml
-score: 1.0
-signals:
-    completed: true
-    artifacts_exist: true
-    excessive_edits: false
-    retry_detected: false
-evaluated_at: "2026-03-23T19:35:00"
-```
