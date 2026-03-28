@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Driven Dev Knowledge Platform - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./ai-dev-knowledge-platform.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./ai-dev-knowledge-platform.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>AI-Driven Dev Knowledge Platform - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-03-28</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>297 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">ai-dev-knowledge-platform.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">297 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Powered by AWS IaC MCP Server</p>
+<script>
+const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: >\n  AI-Driven Dev Knowledge Platform - Bedrock RAG architecture for domain knowledge,\n  dev patterns, and member skills. Enhances AI-driven development accuracy and efficiency.\n\nParameters:\n  EnvironmentName:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, stg, prod]\n    Description: Environment name\n  ProjectName:\n    Type: String\n    Default: ai-dev-knowledge\n    Description: Project name prefix for resource naming\n\nResources:\n  # ============================================================\n  # Knowledge Store (S3 Buckets)\n  # ============================================================\n  DomainKnowledgeBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${ProjectName}-domain-knowledge-${EnvironmentName}-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n\n  DevPatternsBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${ProjectName}-dev-patterns-${EnvironmentName}-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n\n  MemberProfilesBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${ProjectName}-member-profiles-${EnvironmentName}-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n\n  # ============================================================\n  # Session Store (DynamoDB)\n  # ============================================================\n  SessionTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub '${ProjectName}-sessions-${EnvironmentName}'\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - AttributeName: sessionId\n          AttributeType: S\n        - AttributeName: userId\n          AttributeType: S\n      KeySchema:\n        - AttributeName: sessionId\n          KeyType: HASH\n      GlobalSecondaryIndexes:\n        - IndexName: userId-index\n          KeySchema:\n            - AttributeName: userId\n              KeyType: HASH\n          Projection:\n            ProjectionType: ALL\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n      SSESpecification:\n        SSEEnabled: true\n      TimeToLiveSpecification:\n        AttributeName: ttl\n        Enabled: true\n\n  # ============================================================\n  # Authentication (Cognito)\n  # ============================================================\n  UserPool:\n    Type: AWS::Cognito::UserPool\n    Properties:\n      UserPoolName: !Sub '${ProjectName}-users-${EnvironmentName}'\n      AutoVerifiedAttributes:\n        - email\n      MfaConfiguration: OPTIONAL\n      Policies:\n        PasswordPolicy:\n          MinimumLength: 12\n          RequireLowercase: true\n          RequireNumbers: true\n          RequireSymbols: true\n          RequireUppercase: true\n\n  UserPoolClient:\n    Type: AWS::Cognito::UserPoolClient\n    Properties:\n      ClientName: !Sub '${ProjectName}-client-${EnvironmentName}'\n      UserPoolId: !Ref UserPool\n      GenerateSecret: false\n      ExplicitAuthFlows:\n        - ALLOW_USER_SRP_AUTH\n        - ALLOW_REFRESH_TOKEN_AUTH\n\n  # ============================================================\n  # IAM Roles\n  # ============================================================\n  LambdaExecutionRole:\n    Type: AWS::IAM::Role\n    Properties:\n      RoleName: !Sub '${ProjectName}-lambda-role-${EnvironmentName}'\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: lambda.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n      Policies:\n        - PolicyName: KnowledgePlatformAccess\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - s3:GetObject\n                  - s3:PutObject\n                  - s3:ListBucket\n                Resource:\n                  - !GetAtt DomainKnowledgeBucket.Arn\n                  - !Sub '${DomainKnowledgeBucket.Arn}/*'\n                  - !GetAtt DevPatternsBucket.Arn\n                  - !Sub '${DevPatternsBucket.Arn}/*'\n                  - !GetAtt MemberProfilesBucket.Arn\n                  - !Sub '${MemberProfilesBucket.Arn}/*'\n              - Effect: Allow\n                Action:\n                  - dynamodb:GetItem\n                  - dynamodb:PutItem\n                  - dynamodb:UpdateItem\n                  - dynamodb:Query\n                Resource:\n                  - !GetAtt SessionTable.Arn\n                  - !Sub '${SessionTable.Arn}/index/*'\n              - Effect: Allow\n                Action:\n                  - bedrock:InvokeModel\n                  - bedrock:Retrieve\n                Resource: '*'\n\n  # ============================================================\n  # Lambda Functions\n  # ============================================================\n  QueryHandlerFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '${ProjectName}-query-handler-${EnvironmentName}'\n      Runtime: python3.12\n      Handler: index.handler\n      MemorySize: 512\n      Timeout: 30\n      Role: !GetAtt LambdaExecutionRole.Arn\n      # TODO: Replace with actual code package\n      Code:\n        ZipFile: |\n          def handler(event, context):\n              return {\"statusCode\": 200, \"body\": \"Query Handler\"}\n      Environment:\n        Variables:\n          SESSION_TABLE: !Ref SessionTable\n          ENVIRONMENT: !Ref EnvironmentName\n\n  ContextEnricherFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '${ProjectName}-context-enricher-${EnvironmentName}'\n      Runtime: python3.12\n      Handler: index.handler\n      MemorySize: 512\n      Timeout: 60\n      Role: !GetAtt LambdaExecutionRole.Arn\n      # TODO: Replace with actual code package\n      Code:\n        ZipFile: |\n          def handler(event, context):\n              return {\"statusCode\": 200, \"body\": \"Context Enricher\"}\n      Environment:\n        Variables:\n          SESSION_TABLE: !Ref SessionTable\n          ENVIRONMENT: !Ref EnvironmentName\n\n  ChunkerProcessorFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '${ProjectName}-chunker-processor-${EnvironmentName}'\n      Runtime: python3.12\n      Handler: index.handler\n      MemorySize: 1024\n      Timeout: 300\n      Role: !GetAtt LambdaExecutionRole.Arn\n      # TODO: Replace with actual code package\n      Code:\n        ZipFile: |\n          def handler(event, context):\n              return {\"statusCode\": 200, \"body\": \"Chunker Processor\"}\n      Environment:\n        Variables:\n          DOMAIN_BUCKET: !Ref DomainKnowledgeBucket\n          DEV_BUCKET: !Ref DevPatternsBucket\n          MEMBER_BUCKET: !Ref MemberProfilesBucket\n          ENVIRONMENT: !Ref EnvironmentName\n\n  # ============================================================\n  # API Gateway\n  # ============================================================\n  ApiGateway:\n    Type: AWS::ApiGateway::RestApi\n    Properties:\n      Name: !Sub '${ProjectName}-api-${EnvironmentName}'\n      Description: AI-Driven Dev Knowledge Platform API\n      EndpointConfiguration:\n        Types:\n          - REGIONAL\n\n  # ============================================================\n  # EventBridge Scheduler\n  # ============================================================\n  KnowledgeSyncRule:\n    Type: AWS::Events::Rule\n    Properties:\n      Name: !Sub '${ProjectName}-knowledge-sync-${EnvironmentName}'\n      Description: Trigger daily knowledge re-ingestion\n      ScheduleExpression: 'cron(0 2 * * ? *)'  # TODO: Adjust schedule as needed\n      State: ENABLED\n\n  # ============================================================\n  # CloudWatch Monitoring\n  # ============================================================\n  QueryHandlerAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub '${ProjectName}-query-handler-errors-${EnvironmentName}'\n      MetricName: Errors\n      Namespace: AWS/Lambda\n      Statistic: Sum\n      Period: 300\n      EvaluationPeriods: 2\n      Threshold: 5\n      ComparisonOperator: GreaterThanOrEqualToThreshold\n      Dimensions:\n        - Name: FunctionName\n          Value: !Ref QueryHandlerFunction\n\nOutputs:\n  DomainKnowledgeBucketArn:\n    Description: Domain Knowledge S3 Bucket ARN\n    Value: !GetAtt DomainKnowledgeBucket.Arn\n  DevPatternsBucketArn:\n    Description: Dev Patterns S3 Bucket ARN\n    Value: !GetAtt DevPatternsBucket.Arn\n  MemberProfilesBucketArn:\n    Description: Member Profiles S3 Bucket ARN\n    Value: !GetAtt MemberProfilesBucket.Arn\n  SessionTableArn:\n    Description: DynamoDB Session Table ARN\n    Value: !GetAtt SessionTable.Arn\n  UserPoolId:\n    Description: Cognito User Pool ID\n    Value: !Ref UserPool\n  ApiGatewayUrl:\n    Description: API Gateway endpoint URL\n    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/'\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

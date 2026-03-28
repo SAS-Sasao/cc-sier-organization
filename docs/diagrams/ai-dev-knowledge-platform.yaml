@@ -1,0 +1,297 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  AI-Driven Dev Knowledge Platform - Bedrock RAG architecture for domain knowledge,
+  dev patterns, and member skills. Enhances AI-driven development accuracy and efficiency.
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: Environment name
+  ProjectName:
+    Type: String
+    Default: ai-dev-knowledge
+    Description: Project name prefix for resource naming
+
+Resources:
+  # ============================================================
+  # Knowledge Store (S3 Buckets)
+  # ============================================================
+  DomainKnowledgeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-domain-knowledge-${EnvironmentName}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  DevPatternsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-dev-patterns-${EnvironmentName}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  MemberProfilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-member-profiles-${EnvironmentName}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  # ============================================================
+  # Session Store (DynamoDB)
+  # ============================================================
+  SessionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-sessions-${EnvironmentName}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: sessionId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: sessionId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: userId-index
+          KeySchema:
+            - AttributeName: userId
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ============================================================
+  # Authentication (Cognito)
+  # ============================================================
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${ProjectName}-users-${EnvironmentName}'
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: OPTIONAL
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${ProjectName}-client-${EnvironmentName}'
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  # ============================================================
+  # IAM Roles
+  # ============================================================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-lambda-role-${EnvironmentName}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: KnowledgePlatformAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt DomainKnowledgeBucket.Arn
+                  - !Sub '${DomainKnowledgeBucket.Arn}/*'
+                  - !GetAtt DevPatternsBucket.Arn
+                  - !Sub '${DevPatternsBucket.Arn}/*'
+                  - !GetAtt MemberProfilesBucket.Arn
+                  - !Sub '${MemberProfilesBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:Query
+                Resource:
+                  - !GetAtt SessionTable.Arn
+                  - !Sub '${SessionTable.Arn}/index/*'
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:Retrieve
+                Resource: '*'
+
+  # ============================================================
+  # Lambda Functions
+  # ============================================================
+  QueryHandlerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-query-handler-${EnvironmentName}'
+      Runtime: python3.12
+      Handler: index.handler
+      MemorySize: 512
+      Timeout: 30
+      Role: !GetAtt LambdaExecutionRole.Arn
+      # TODO: Replace with actual code package
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return {"statusCode": 200, "body": "Query Handler"}
+      Environment:
+        Variables:
+          SESSION_TABLE: !Ref SessionTable
+          ENVIRONMENT: !Ref EnvironmentName
+
+  ContextEnricherFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-context-enricher-${EnvironmentName}'
+      Runtime: python3.12
+      Handler: index.handler
+      MemorySize: 512
+      Timeout: 60
+      Role: !GetAtt LambdaExecutionRole.Arn
+      # TODO: Replace with actual code package
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return {"statusCode": 200, "body": "Context Enricher"}
+      Environment:
+        Variables:
+          SESSION_TABLE: !Ref SessionTable
+          ENVIRONMENT: !Ref EnvironmentName
+
+  ChunkerProcessorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-chunker-processor-${EnvironmentName}'
+      Runtime: python3.12
+      Handler: index.handler
+      MemorySize: 1024
+      Timeout: 300
+      Role: !GetAtt LambdaExecutionRole.Arn
+      # TODO: Replace with actual code package
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return {"statusCode": 200, "body": "Chunker Processor"}
+      Environment:
+        Variables:
+          DOMAIN_BUCKET: !Ref DomainKnowledgeBucket
+          DEV_BUCKET: !Ref DevPatternsBucket
+          MEMBER_BUCKET: !Ref MemberProfilesBucket
+          ENVIRONMENT: !Ref EnvironmentName
+
+  # ============================================================
+  # API Gateway
+  # ============================================================
+  ApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-api-${EnvironmentName}'
+      Description: AI-Driven Dev Knowledge Platform API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # ============================================================
+  # EventBridge Scheduler
+  # ============================================================
+  KnowledgeSyncRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${ProjectName}-knowledge-sync-${EnvironmentName}'
+      Description: Trigger daily knowledge re-ingestion
+      ScheduleExpression: 'cron(0 2 * * ? *)'  # TODO: Adjust schedule as needed
+      State: ENABLED
+
+  # ============================================================
+  # CloudWatch Monitoring
+  # ============================================================
+  QueryHandlerAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectName}-query-handler-errors-${EnvironmentName}'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 5
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref QueryHandlerFunction
+
+Outputs:
+  DomainKnowledgeBucketArn:
+    Description: Domain Knowledge S3 Bucket ARN
+    Value: !GetAtt DomainKnowledgeBucket.Arn
+  DevPatternsBucketArn:
+    Description: Dev Patterns S3 Bucket ARN
+    Value: !GetAtt DevPatternsBucket.Arn
+  MemberProfilesBucketArn:
+    Description: Member Profiles S3 Bucket ARN
+    Value: !GetAtt MemberProfilesBucket.Arn
+  SessionTableArn:
+    Description: DynamoDB Session Table ARN
+    Value: !GetAtt SessionTable.Arn
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref UserPool
+  ApiGatewayUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/'
