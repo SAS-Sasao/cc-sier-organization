@@ -1,0 +1,1042 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  StoreCon Application Architecture (コンビニストコン マイクロサービス)
+  Ordering / Inventory / Sales / Staff の4マイクロサービスを ECS Fargate で運用。
+  Aurora (Writer + Reader)、DynamoDB (商品マスタ)、ElastiCache Redis (キャッシュ)、
+  SQS (非同期メッセージ)、S3 (帳票保存) を組み合わせた本番グレード構成。
+
+# ============================================================
+# パラメータ定義
+# ============================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: デプロイ環境 (dev / stg / prod)
+
+  DomainName:
+    Type: String
+    Default: storcon.example.com # TODO: 実運用時に変更してください
+    Description: CloudFront に紐付けるドメイン名
+
+  CertificateArn:
+    Type: String
+    Default: arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx # TODO: 実運用時に変更してください
+    Description: CloudFront 用 ACM 証明書 ARN (us-east-1 必須)
+
+  # 各マイクロサービスのコンテナイメージ URI
+  OrderingImageUri:
+    Type: String
+    Default: 123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-ordering:latest # TODO: 実運用時に変更してください
+  InventoryImageUri:
+    Type: String
+    Default: 123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-inventory:latest # TODO: 実運用時に変更してください
+  SalesImageUri:
+    Type: String
+    Default: 123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-sales:latest # TODO: 実運用時に変更してください
+  StaffImageUri:
+    Type: String
+    Default: 123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-staff:latest # TODO: 実運用時に変更してください
+
+  AlertEmail:
+    Type: String
+    Default: storcon-ops@example.com # TODO: 実運用時に変更してください
+    Description: 運用アラート通知先メールアドレス
+
+# ============================================================
+# リソース定義
+# ============================================================
+Resources:
+
+  # ----------------------------------------------------------
+  # KMS カスタマーマネージドキー
+  # ----------------------------------------------------------
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "${EnvironmentName} - StoreCon 共通暗号化キー"
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableRootAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+  KMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${EnvironmentName}-storcon"
+      TargetKeyId: !Ref KMSKey
+
+  # ----------------------------------------------------------
+  # VPC ネットワーク
+  # ----------------------------------------------------------
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.2.0.0/16 # TODO: 実運用時に変更してください
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-storcon-vpc"
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.2.1.0/24 # TODO: 実運用時に変更してください
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-storcon-public-1a"
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.2.2.0/24 # TODO: 実運用時に変更してください
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-storcon-public-1c"
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.2.11.0/24 # TODO: 実運用時に変更してください
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-storcon-private-1a"
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.2.12.0/24 # TODO: 実運用時に変更してください
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-storcon-private-1c"
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  NatEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-storcon-nat"
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnet2RouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnet1RouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet2RouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
+
+  # ----------------------------------------------------------
+  # WAF WebACL (CloudFront 用)
+  # 注意: Scope: CLOUDFRONT は us-east-1 デプロイが必須
+  # 別スタック (us-east-1) で作成し ARN を Parameter として受け取ること
+  # ----------------------------------------------------------
+  # WAFWebACLArn は Parameter 化して CloudFront に渡すことを推奨
+  # (例: !Sub "arn:aws:wafv2:us-east-1:${AWS::AccountId}:global/webacl/storcon-waf/xxx")
+
+  # ----------------------------------------------------------
+  # CloudFront Distribution
+  # ----------------------------------------------------------
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${EnvironmentName}-storcon-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub "${EnvironmentName} - StoreCon コンビニ管理 SPA"
+        DefaultRootObject: index.html
+        Aliases:
+          - !Ref DomainName
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        Origins:
+          - Id: APIGatewayOrigin
+            DomainName: !Sub "${RestAPI}.execute-api.${AWS::Region}.amazonaws.com"
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          TargetOriginId: APIGatewayOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # CachingDisabled (API)
+          OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+
+  # ----------------------------------------------------------
+  # Cognito User Pool (店舗スタッフ認証)
+  # ----------------------------------------------------------
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${EnvironmentName}-storcon-user-pool"
+      AutoVerifiedAttributes: [email]
+      MfaConfiguration: OPTIONAL  # TODO: prod では ON を推奨
+      PasswordPolicy:
+        MinimumLength: 12
+        RequireUppercase: true
+        RequireLowercase: true
+        RequireNumbers: true
+        RequireSymbols: true
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true  # 店舗管理者のみユーザー作成可
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Sub "${EnvironmentName}-storcon-client"
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  # ----------------------------------------------------------
+  # API Gateway (REST API)
+  # ----------------------------------------------------------
+  RestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${EnvironmentName}-storcon-api"
+      Description: StoreCon マイクロサービス統合 API ゲートウェイ
+      EndpointConfiguration:
+        Types: [REGIONAL]
+
+  APIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref RestAPI
+
+  APIStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestAPI
+      DeploymentId: !Ref APIDeployment
+      StageName: !Ref EnvironmentName
+      TracingEnabled: true
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          MetricsEnabled: true
+          LoggingLevel: INFO
+
+  # ----------------------------------------------------------
+  # ALB (ECS Fargate 向け)
+  # ----------------------------------------------------------
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: StoreCon ALB セキュリティグループ
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${EnvironmentName}-storcon-alb"
+      Scheme: internet-facing
+      SecurityGroups: [!Ref ALBSecurityGroup]
+      Subnets: [!Ref PublicSubnet1, !Ref PublicSubnet2]
+
+  # マイクロサービス別ターゲットグループ
+  OrderingTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${EnvironmentName}-ordering-tg"
+      Protocol: HTTP
+      Port: 8080
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /ordering/health
+
+  InventoryTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${EnvironmentName}-inventory-tg"
+      Protocol: HTTP
+      Port: 8081
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /inventory/health
+
+  SalesTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${EnvironmentName}-sales-tg"
+      Protocol: HTTP
+      Port: 8082
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /sales/health
+
+  StaffTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${EnvironmentName}-staff-tg"
+      Protocol: HTTP
+      Port: 8083
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /staff/health
+
+  # ----------------------------------------------------------
+  # ECS Cluster + IAM ロール
+  # ----------------------------------------------------------
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${EnvironmentName}-storcon-cluster"
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-storcon-task-exec-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: KMSDecrypt
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !GetAtt KMSKey.Arn
+                  - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/${EnvironmentName}/storcon/*"
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-storcon-task-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StorconServicePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # SQS 送受信
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource:
+                  - !GetAtt OrderEventQueue.Arn
+                  - !GetAtt InventoryEventQueue.Arn
+              # DynamoDB 商品マスタ読み取り
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !GetAtt ProductMasterTable.Arn
+              # S3 帳票書き込み
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                Resource: !Sub "${ReportBucket.Arn}/*"
+              # X-Ray
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: "*"
+
+  ECSServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Fargate サービス セキュリティグループ
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8083
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  # ----------------------------------------------------------
+  # ECS TaskDefinition x4 (Ordering / Inventory / Sales / Staff)
+  # ----------------------------------------------------------
+  OrderingTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${EnvironmentName}-ordering-task"
+      Cpu: "512"
+      Memory: "1024"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: ordering-service
+          Image: !Ref OrderingImageUri
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: SERVICE_NAME
+              Value: ordering
+            - Name: ORDER_QUEUE_URL
+              Value: !Ref OrderEventQueue
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${EnvironmentName}-storcon/ordering"
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  InventoryTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${EnvironmentName}-inventory-task"
+      Cpu: "512"
+      Memory: "1024"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: inventory-service
+          Image: !Ref InventoryImageUri
+          PortMappings:
+            - ContainerPort: 8081
+          Environment:
+            - Name: SERVICE_NAME
+              Value: inventory
+            - Name: INVENTORY_QUEUE_URL
+              Value: !Ref InventoryEventQueue
+            - Name: DYNAMO_TABLE
+              Value: !Ref ProductMasterTable
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${EnvironmentName}-storcon/inventory"
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  SalesTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${EnvironmentName}-sales-task"
+      Cpu: "512"
+      Memory: "1024"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: sales-service
+          Image: !Ref SalesImageUri
+          PortMappings:
+            - ContainerPort: 8082
+          Environment:
+            - Name: SERVICE_NAME
+              Value: sales
+            - Name: REPORT_BUCKET
+              Value: !Ref ReportBucket
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${EnvironmentName}-storcon/sales"
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  StaffTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${EnvironmentName}-staff-task"
+      Cpu: "256"  # スタッフ管理は軽量なため小さめ
+      Memory: "512"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: staff-service
+          Image: !Ref StaffImageUri
+          PortMappings:
+            - ContainerPort: 8083
+          Environment:
+            - Name: SERVICE_NAME
+              Value: staff
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Sub "/ecs/${EnvironmentName}-storcon/staff"
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+
+  # ECS Service x4 (各マイクロサービス)
+  OrderingService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${EnvironmentName}-ordering-service"
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref OrderingTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+          SecurityGroups: [!Ref ECSServiceSecurityGroup]
+          AssignPublicIp: DISABLED
+      LoadBalancers:
+        - ContainerName: ordering-service
+          ContainerPort: 8080
+          TargetGroupArn: !Ref OrderingTargetGroup
+
+  InventoryService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${EnvironmentName}-inventory-service"
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref InventoryTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+          SecurityGroups: [!Ref ECSServiceSecurityGroup]
+          AssignPublicIp: DISABLED
+      LoadBalancers:
+        - ContainerName: inventory-service
+          ContainerPort: 8081
+          TargetGroupArn: !Ref InventoryTargetGroup
+
+  SalesService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${EnvironmentName}-sales-service"
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref SalesTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+          SecurityGroups: [!Ref ECSServiceSecurityGroup]
+          AssignPublicIp: DISABLED
+      LoadBalancers:
+        - ContainerName: sales-service
+          ContainerPort: 8082
+          TargetGroupArn: !Ref SalesTargetGroup
+
+  StaffService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${EnvironmentName}-staff-service"
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref StaffTaskDefinition
+      DesiredCount: 1  # スタッフ管理は最小構成
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+          SecurityGroups: [!Ref ECSServiceSecurityGroup]
+          AssignPublicIp: DISABLED
+      LoadBalancers:
+        - ContainerName: staff-service
+          ContainerPort: 8083
+          TargetGroupArn: !Ref StaffTargetGroup
+
+  # ----------------------------------------------------------
+  # Aurora Cluster (Writer + Reader)
+  # ----------------------------------------------------------
+  AuroraSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: StoreCon Aurora サブネットグループ
+      SubnetIds: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+
+  AuroraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Aurora PostgreSQL セキュリティグループ
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ECSServiceSecurityGroup
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Sub "${EnvironmentName}-storcon-aurora"
+      Engine: aurora-postgresql
+      EngineVersion: "15.4" # TODO: 実運用時に最新マイナーバージョンを確認してください
+      DatabaseName: storcondb
+      MasterUsername: storconadmin
+      ManageMasterUserPassword: true
+      MasterUserSecret:
+        KmsKeyId: !Ref KMSKey
+      StorageEncrypted: true
+      KmsKeyId: !Ref KMSKey
+      DBSubnetGroupName: !Ref AuroraSubnetGroup
+      VpcSecurityGroupIds: [!Ref AuroraSecurityGroup]
+      BackupRetentionPeriod: 7  # TODO: prod は 14 日以上推奨
+      DeletionProtection: false # TODO: prod では true に変更してください
+      EnableCloudwatchLogsExports: [postgresql]
+
+  AuroraWriterInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub "${EnvironmentName}-storcon-writer"
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.t3.medium # TODO: 実運用時に変更してください (prod: db.r6g.large 推奨)
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+
+  AuroraReaderInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub "${EnvironmentName}-storcon-reader"
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.t3.medium # TODO: 実運用時に変更してください
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+
+  # ----------------------------------------------------------
+  # DynamoDB テーブル (商品マスタ)
+  # ----------------------------------------------------------
+  ProductMasterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${EnvironmentName}-storcon-product-master"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: ProductId   # JANコード等
+          AttributeType: S
+        - AttributeName: Category
+          AttributeType: S
+      KeySchema:
+        - AttributeName: ProductId
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: CategoryIndex
+          KeySchema:
+            - AttributeName: Category
+              KeyType: HASH
+            - AttributeName: ProductId
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref KMSKey
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # ----------------------------------------------------------
+  # ElastiCache for Redis (商品マスタキャッシュ)
+  # ----------------------------------------------------------
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      CacheSubnetGroupName: !Sub "${EnvironmentName}-storcon-redis-subnet"
+      Description: StoreCon Redis キャッシュ サブネットグループ
+      SubnetIds: [!Ref PrivateSubnet1, !Ref PrivateSubnet2]
+
+  RedisSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Redis セキュリティグループ (ECS からのみ許可)
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref ECSServiceSecurityGroup
+
+  RedisCluster:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupId: !Sub "${EnvironmentName}-storcon-redis"
+      ReplicationGroupDescription: StoreCon 商品マスタ キャッシュ
+      NodeGroupConfiguration:
+        - ReplicaCount: 1
+          PrimaryAvailabilityZone: !Select [0, !GetAZs ""]
+          ReplicaAvailabilityZones:
+            - !Select [1, !GetAZs ""]
+      CacheNodeType: cache.t3.micro # TODO: 実運用時に変更してください
+      Engine: redis
+      EngineVersion: "7.1"
+      AtRestEncryptionEnabled: true
+      TransitEncryptionEnabled: true
+      KmsKeyId: !Ref KMSKey
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds: [!Ref RedisSecurityGroup]
+      AutomaticFailoverEnabled: true
+      MultiAZEnabled: true
+
+  # ----------------------------------------------------------
+  # SQS Queue x2 (サービス間非同期メッセージング)
+  # ----------------------------------------------------------
+
+  # 受注イベントキュー (Ordering → Inventory)
+  OrderEventQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${EnvironmentName}-storcon-order-events-dlq"
+      KmsMasterKeyId: !Ref KMSKey
+      MessageRetentionPeriod: 1209600  # 14日
+
+  OrderEventQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${EnvironmentName}-storcon-order-events"
+      KmsMasterKeyId: !Ref KMSKey
+      VisibilityTimeout: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt OrderEventQueueDLQ.Arn
+        maxReceiveCount: 3  # 3回失敗で DLQ に移動
+
+  # 在庫更新イベントキュー (Inventory → Sales)
+  InventoryEventQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${EnvironmentName}-storcon-inventory-events-dlq"
+      KmsMasterKeyId: !Ref KMSKey
+      MessageRetentionPeriod: 1209600
+
+  InventoryEventQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${EnvironmentName}-storcon-inventory-events"
+      KmsMasterKeyId: !Ref KMSKey
+      VisibilityTimeout: 300
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt InventoryEventQueueDLQ.Arn
+        maxReceiveCount: 3
+
+  # ----------------------------------------------------------
+  # Lambda 関数 (SQS イベントハンドラ)
+  # ----------------------------------------------------------
+  EventHandlerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-storcon-event-handler-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: EventHandlerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource:
+                  - !GetAtt OrderEventQueue.Arn
+                  - !GetAtt InventoryEventQueue.Arn
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
+                  - dynamodb:PutItem
+                Resource: !GetAtt ProductMasterTable.Arn
+              - Effect: Allow
+                Action: [kms:Decrypt, kms:GenerateDataKey]
+                Resource: !GetAtt KMSKey.Arn
+
+  EventHandlerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${EnvironmentName}-storcon-event-handler"
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Role: !GetAtt EventHandlerRole.Arn
+      Timeout: 60
+      MemorySize: 256
+      Code:
+        ZipFile: |
+          # TODO: 実運用時は実際のイベントハンドラコードをデプロイしてください
+          import json
+          def lambda_handler(event, context):
+              for record in event.get('Records', []):
+                  body = json.loads(record['body'])
+                  print(f"Processing event: {body}")
+              return {'statusCode': 200}
+      Environment:
+        Variables:
+          PRODUCT_TABLE: !Ref ProductMasterTable
+          ENVIRONMENT: !Ref EnvironmentName
+      TracingConfig:
+        Mode: Active
+
+  OrderEventTrigger:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      FunctionName: !GetAtt EventHandlerLambda.Arn
+      EventSourceArn: !GetAtt OrderEventQueue.Arn
+      BatchSize: 10
+      FunctionResponseTypes: [ReportBatchItemFailures]  # 部分的な失敗を報告
+
+  # ----------------------------------------------------------
+  # S3 バケット (帳票・レポート保存)
+  # ----------------------------------------------------------
+  ReportBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${EnvironmentName}-storcon-reports-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref KMSKey
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveOldReports
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90  # 90日後に S3 Glacier Instant に移動
+                StorageClass: GLACIER_IR
+            ExpirationInDays: 2555  # 7年後に削除 (コンビニ会計規制対応) # TODO: 法的要件に応じて変更してください
+
+  # ----------------------------------------------------------
+  # CloudWatch ログ + アラーム + SNS
+  # ----------------------------------------------------------
+  StorconLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${EnvironmentName}-storcon"
+      RetentionInDays: 30 # TODO: prod は 90 日以上推奨
+
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${EnvironmentName}-storcon-alerts"
+      KmsMasterKeyId: !Ref KMSKey
+      Subscription:
+        - Endpoint: !Ref AlertEmail
+          Protocol: email
+
+  # 受注キュー DLQ 監視 (未処理メッセージが溜まったらアラート)
+  OrderDLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${EnvironmentName}-storcon-order-dlq-not-empty"
+      AlarmDescription: 受注イベント DLQ にメッセージが蓄積されています
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt OrderEventQueueDLQ.QueueName
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions: [!Ref AlertTopic]
+
+  AuroraConnectionsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${EnvironmentName}-storcon-aurora-high-connections"
+      AlarmDescription: Aurora データベース接続数が上限に近づいています
+      MetricName: DatabaseConnections
+      Namespace: AWS/RDS
+      Dimensions:
+        - Name: DBClusterIdentifier
+          Value: !Ref AuroraCluster
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80  # TODO: Aurora インスタンスタイプの最大接続数に応じて変更してください
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: [!Ref AlertTopic]
+
+# ============================================================
+# 出力
+# ============================================================
+Outputs:
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-vpc-id"
+
+  CloudFrontDomain:
+    Description: CloudFront ディストリビューション ドメイン名
+    Value: !GetAtt CloudFrontDistribution.DomainName
+
+  APIEndpoint:
+    Description: API Gateway エンドポイント
+    Value: !Sub "https://${RestAPI}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentName}"
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-api-endpoint"
+
+  ECSClusterArn:
+    Description: ECS クラスター ARN
+    Value: !GetAtt ECSCluster.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-ecs-cluster-arn"
+
+  AuroraWriterEndpoint:
+    Description: Aurora Writer エンドポイント
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-aurora-writer"
+
+  AuroraReaderEndpoint:
+    Description: Aurora Reader エンドポイント
+    Value: !GetAtt AuroraCluster.ReadEndpoint.Address
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-aurora-reader"
+
+  ProductMasterTableArn:
+    Description: 商品マスタ DynamoDB テーブル ARN
+    Value: !GetAtt ProductMasterTable.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-product-table-arn"
+
+  RedisEndpoint:
+    Description: ElastiCache Redis エンドポイント
+    Value: !GetAtt RedisCluster.PrimaryEndPoint.Address
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-redis-endpoint"
+
+  OrderEventQueueUrl:
+    Description: 受注イベント SQS URL
+    Value: !Ref OrderEventQueue
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-order-queue-url"
+
+  InventoryEventQueueUrl:
+    Description: 在庫更新イベント SQS URL
+    Value: !Ref InventoryEventQueue
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-inventory-queue-url"
+
+  ReportBucketArn:
+    Description: 帳票 S3 バケット ARN
+    Value: !GetAtt ReportBucket.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-report-bucket-arn"
+
+  UserPoolId:
+    Description: Cognito ユーザープール ID
+    Value: !Ref UserPool
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-user-pool-id"
+
+  KMSKeyArn:
+    Description: KMS キー ARN
+    Value: !GetAtt KMSKey.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-storcon-kms-key-arn"

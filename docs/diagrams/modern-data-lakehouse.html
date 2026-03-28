@@ -58,6 +58,12 @@ td { padding:10px 12px; border:1px solid var(--border); }
             z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
 .lightbox.active { display:flex; }
 .lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+
+/* IaC Button */
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
 </style>
 </head>
 <body>
@@ -73,6 +79,7 @@ td { padding:10px 12px; border:1px solid var(--border); }
 <div class="diagram-container">
   <img src="./modern-data-lakehouse.png" alt="Modern Data Lakehouse on AWS" onclick="openLightbox(this.src)">
   <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./modern-data-lakehouse-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
 </div>
 
 <div class="section">

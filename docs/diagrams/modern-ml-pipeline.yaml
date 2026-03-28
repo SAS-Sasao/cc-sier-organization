@@ -1,0 +1,836 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Modern ML Pipeline テンプレート
+  SageMaker + Glue + Step Functions + Lambda + CloudWatch による
+  エンドツーエンドの機械学習パイプライン（教育・参照用）
+  Bedrock 統合は Condition パラメータで有効化可能
+
+# ============================================================
+# Parameters
+# ============================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: デプロイ対象環境（dev / stg / prod）
+
+  # TODO: 実運用時に変更してください（SageMaker ノートブックインスタンスのサイズ）
+  NotebookInstanceType:
+    Type: String
+    Default: ml.t3.medium
+    AllowedValues:
+      - ml.t3.medium
+      - ml.t3.large
+      - ml.m5.xlarge
+      - ml.p3.2xlarge  # GPU インスタンス（深層学習用）
+    Description: SageMaker Notebook Instance タイプ
+
+  # TODO: 実運用時に変更してください（学習ジョブのインスタンスタイプ）
+  TrainingInstanceType:
+    Type: String
+    Default: ml.m5.xlarge
+    AllowedValues:
+      - ml.m5.large
+      - ml.m5.xlarge
+      - ml.m5.4xlarge
+      - ml.p3.2xlarge
+      - ml.g4dn.xlarge
+    Description: SageMaker Training Job インスタンスタイプ
+
+  # TODO: 実運用時に変更してください（推論エンドポイントのインスタンスタイプ）
+  InferenceInstanceType:
+    Type: String
+    Default: ml.m5.large
+    AllowedValues:
+      - ml.t2.medium
+      - ml.m5.large
+      - ml.m5.xlarge
+      - ml.g4dn.xlarge
+    Description: SageMaker Endpoint インスタンスタイプ
+
+  # TODO: 実運用時に変更してください（モデル精度の閾値、以下なら本番デプロイしない）
+  ModelAccuracyThreshold:
+    Type: Number
+    Default: 0.85
+    Description: モデル精度の最低閾値（0.0〜1.0）
+
+  # TODO: 実運用時に変更してください（アラート通知先）
+  AlertEmail:
+    Type: String
+    Default: "ml-ops@example.com"
+    Description: ML エンドポイント監視アラートの通知先メールアドレス
+
+  # Bedrock 統合を有効化するかどうかのフラグ
+  EnableBedrock:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: >
+      Amazon Bedrock 統合を有効化する場合は true に設定してください。
+      有効化すると Lambda から Bedrock Claude モデルを呼び出せます。
+
+# ============================================================
+# Conditions
+# ============================================================
+Conditions:
+  # Bedrock 統合有効化フラグが true の場合のみ関連リソースを作成
+  IsBedrockEnabled: !Equals [!Ref EnableBedrock, "true"]
+
+# ============================================================
+# Resources
+# ============================================================
+Resources:
+
+  # ----------------------------------------------------------
+  # KMS キー（S3・SageMaker・Lambda 暗号化用）
+  # ----------------------------------------------------------
+  MLPipelineKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: ML Pipeline 暗号化キー（SageMaker/S3/Lambda）
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowRootAccount
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+          - Sid: AllowSageMakerService
+            Effect: Allow
+            Principal:
+              Service: sagemaker.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: "*"
+
+  MLPipelineKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${EnvironmentName}-ml-pipeline"
+      TargetKeyId: !Ref MLPipelineKMSKey
+
+  # ----------------------------------------------------------
+  # S3 バケット（学習データ / モデルアーティファクト）
+  # ----------------------------------------------------------
+
+  # 学習データ格納バケット（特徴量エンジニアリング済みデータを保存）
+  TrainingDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # TODO: 実運用時に変更してください
+      BucketName: !Sub "${EnvironmentName}-ml-training-data-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref MLPipelineKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # モデルアーティファクト格納バケット（学習済みモデルを保存）
+  ModelArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # TODO: 実運用時に変更してください
+      BucketName: !Sub "${EnvironmentName}-ml-model-artifacts-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref MLPipelineKMSKey
+      VersioningConfiguration:
+        Status: Enabled  # モデルのバージョン管理のため有効化
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveOldModels
+            Status: Enabled
+            Transitions:
+              # 180日後に古いモデルを Glacier に移動してコスト削減
+              - TransitionInDays: 180
+                StorageClass: GLACIER  # TODO: 実運用時に保持ポリシーを調整してください
+
+  # ----------------------------------------------------------
+  # IAM Role: SageMaker 実行ロール（最小権限）
+  # ----------------------------------------------------------
+  SageMakerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-sagemaker-execution-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sagemaker.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+      Policies:
+        - PolicyName: SageMakerS3Policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt TrainingDataBucket.Arn
+                  - !Sub "${TrainingDataBucket.Arn}/*"
+                  - !GetAtt ModelArtifactBucket.Arn
+                  - !Sub "${ModelArtifactBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:Decrypt
+                Resource: !GetAtt MLPipelineKMSKey.Arn
+              - Effect: Allow
+                Action:
+                  - glue:GetTable
+                  - glue:GetDatabase
+                  - glue:GetPartitions
+                Resource: "*"
+        # Bedrock 有効時のみ権限を追加
+        - !If
+          - IsBedrockEnabled
+          - PolicyName: BedrockAccessPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - bedrock:InvokeModel
+                    - bedrock:InvokeModelWithResponseStream
+                  Resource:
+                    # TODO: 実運用時に使用する Bedrock モデル ARN に変更してください
+                    - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+          - !Ref AWS::NoValue
+
+  # ----------------------------------------------------------
+  # SageMaker Notebook Instance（探索的分析・実験用）
+  # ----------------------------------------------------------
+  StorConMLNotebook:
+    Type: AWS::SageMaker::NotebookInstance
+    Properties:
+      NotebookInstanceName: !Sub "${EnvironmentName}-storcon-ml-notebook"
+      InstanceType: !Ref NotebookInstanceType
+      RoleArn: !GetAtt SageMakerExecutionRole.Arn
+      KmsKeyId: !Ref MLPipelineKMSKey
+      # TODO: 実運用時に VPC 配置を検討してください（PrivateLink 経由でのアクセス）
+      # SubnetId: !Ref PrivateSubnet
+      # SecurityGroupIds: [!Ref NotebookSecurityGroup]
+      VolumeSizeInGB: 50  # TODO: 実運用時にデータ量に応じて変更してください
+      LifecycleConfigName: !GetAtt NotebookLifecycleConfig.NotebookInstanceLifecycleConfigName
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ノートブック起動時の初期化スクリプト
+  NotebookLifecycleConfig:
+    Type: AWS::SageMaker::NotebookInstanceLifecycleConfig
+    Properties:
+      NotebookInstanceLifecycleConfigName: !Sub "${EnvironmentName}-storcon-notebook-lifecycle"
+      OnStart:
+        - Content: !Base64 |
+            #!/bin/bash
+            # 必要なライブラリをインストール
+            pip install mlflow scikit-learn pandas boto3 --quiet
+            # TODO: 実運用時に追加ライブラリを設定してください
+            echo "Notebook 初期化完了"
+
+  # ----------------------------------------------------------
+  # Glue ETL Job（特徴量エンジニアリング）
+  # ----------------------------------------------------------
+  GlueFeatureEngineeringRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-glue-feature-engineering-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: FeatureEngineeringS3Policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt TrainingDataBucket.Arn
+                  - !Sub "${TrainingDataBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:Decrypt
+                Resource: !GetAtt MLPipelineKMSKey.Arn
+
+  FeatureEngineeringGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${EnvironmentName}-feature-engineering"
+      Description: 生データから ML 学習用の特徴量を生成（標準化・エンコーディング等）
+      Role: !GetAtt GlueFeatureEngineeringRole.Arn
+      GlueVersion: "4.0"
+      WorkerType: G.1X  # TODO: 実運用時にデータ量に合わせて変更してください
+      NumberOfWorkers: 3
+      Timeout: 60
+      # TODO: 実運用時に実際の特徴量エンジニアリングスクリプトパスに変更してください
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${TrainingDataBucket}/scripts/feature_engineering.py"
+        PythonVersion: "3"
+      DefaultArguments:
+        "--job-language": "python"
+        "--enable-metrics": "true"
+        "--enable-continuous-cloudwatch-log": "true"
+        "--output-bucket": !Ref TrainingDataBucket
+        "--encryption-key": !Ref MLPipelineKMSKey
+
+  # ----------------------------------------------------------
+  # Lambda 関数: 推論前処理
+  # ----------------------------------------------------------
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-ml-lambda-execution-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: LambdaSageMakerInvokePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sagemaker:InvokeEndpoint
+                Resource: !Sub "arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:endpoint/${EnvironmentName}-storcon-ml-endpoint"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !GetAtt MLPipelineKMSKey.Arn
+        # Bedrock 有効時のみ権限を追加
+        - !If
+          - IsBedrockEnabled
+          - PolicyName: LambdaBedrockPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - bedrock:InvokeModel
+                  Resource:
+                    # TODO: 実運用時に使用する Bedrock モデル ARN に変更してください
+                    - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+          - !Ref AWS::NoValue
+
+  # 推論前処理 Lambda（入力データの正規化・バリデーション）
+  InferencePreprocessLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${EnvironmentName}-ml-inference-preprocess"
+      Description: SageMaker 推論エンドポイント呼び出し前のデータ前処理
+      Runtime: python3.12  # TODO: 実運用時に最新の Lambda ランタイムに更新してください
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30  # TODO: 実運用時に処理時間に合わせて変更してください
+      MemorySize: 256
+      KmsKeyArn: !Ref MLPipelineKMSKey
+      Environment:
+        Variables:
+          ENDPOINT_NAME: !Sub "${EnvironmentName}-storcon-ml-endpoint"
+          ENVIRONMENT: !Ref EnvironmentName
+          # TODO: 実運用時に必要な環境変数を追加してください
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+
+          sagemaker_runtime = boto3.client('sagemaker-runtime')
+          ENDPOINT_NAME = os.environ['ENDPOINT_NAME']
+
+          def lambda_handler(event, context):
+              """
+              推論前処理:
+              1. 入力データのバリデーション
+              2. 特徴量の正規化
+              3. SageMaker エンドポイント呼び出し
+              """
+              # TODO: 実運用時に実際の前処理ロジックに変更してください
+              try:
+                  input_data = event.get('data', {})
+                  # 特徴量の正規化（サンプル）
+                  processed_features = preprocess_features(input_data)
+                  payload = json.dumps(processed_features)
+                  response = sagemaker_runtime.invoke_endpoint(
+                      EndpointName=ENDPOINT_NAME,
+                      ContentType='application/json',
+                      Body=payload
+                  )
+                  result = json.loads(response['Body'].read().decode())
+                  return {
+                      'statusCode': 200,
+                      'prediction': result,
+                      'input': input_data
+                  }
+              except Exception as e:
+                  return {'statusCode': 500, 'error': str(e)}
+
+          def preprocess_features(data):
+              # TODO: 実運用時に実際の前処理ロジックを実装してください
+              return data
+
+  # 推論後処理 Lambda（結果の整形・後続サービスへの通知）
+  InferencePostprocessLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${EnvironmentName}-ml-inference-postprocess"
+      Description: SageMaker 推論結果の後処理（整形・通知・DB書き込み等）
+      Runtime: python3.12
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      KmsKeyArn: !Ref MLPipelineKMSKey
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref EnvironmentName
+          BEDROCK_ENABLED: !Ref EnableBedrock
+          # TODO: 実運用時に必要な環境変数を追加してください
+      Code:
+        ZipFile: |
+          import json
+          import os
+
+          BEDROCK_ENABLED = os.environ.get('BEDROCK_ENABLED', 'false').lower() == 'true'
+
+          def lambda_handler(event, context):
+              """
+              推論後処理:
+              1. 予測結果の整形・スコアリング
+              2. Bedrock が有効な場合は自然言語による説明生成
+              3. 後続システムへの結果通知
+              """
+              # TODO: 実運用時に実際の後処理ロジックに変更してください
+              prediction = event.get('prediction', {})
+
+              if BEDROCK_ENABLED:
+                  # Bedrock Claude を使用して予測結果の説明文を生成
+                  # TODO: 実運用時に Bedrock モデル ID を変更してください
+                  explanation = generate_explanation_with_bedrock(prediction)
+                  prediction['explanation'] = explanation
+
+              return {
+                  'statusCode': 200,
+                  'result': prediction
+              }
+
+          def generate_explanation_with_bedrock(prediction):
+              """Bedrock Claude による予測説明生成（Bedrock 有効時のみ実行）"""
+              import boto3
+              bedrock = boto3.client('bedrock-runtime')
+              # TODO: 実運用時にプロンプトを調整してください
+              prompt = f"以下の予測結果を分かりやすく説明してください: {json.dumps(prediction)}"
+              response = bedrock.invoke_model(
+                  modelId="anthropic.claude-3-sonnet-20240229-v1:0",
+                  body=json.dumps({"prompt": prompt, "max_tokens": 500})
+              )
+              return json.loads(response['body'].read())
+
+  # ----------------------------------------------------------
+  # SageMaker Endpoint Config + Endpoint（リアルタイム推論）
+  # ----------------------------------------------------------
+  # NOTE: SageMaker Model リソースは学習完了後に作成されます。
+  #       ここでは Endpoint Config と Endpoint の骨格のみ定義します。
+  #       実運用では Step Functions からモデル登録後に Endpoint を更新してください。
+
+  # TODO: 実運用時は SageMaker Model Registry 経由でモデルを管理してください
+  StorConMLEndpointConfig:
+    Type: AWS::SageMaker::EndpointConfig
+    Properties:
+      EndpointConfigName: !Sub "${EnvironmentName}-storcon-ml-endpoint-config"
+      KmsKeyId: !Ref MLPipelineKMSKey
+      ProductionVariants:
+        - VariantName: AllTraffic
+          # TODO: 実運用時に学習済みモデル名に変更してください
+          ModelName: !Sub "${EnvironmentName}-storcon-model-placeholder"
+          InstanceType: !Ref InferenceInstanceType
+          InitialInstanceCount: 1  # TODO: 実運用時に適切なインスタンス数に変更してください
+          InitialVariantWeight: 1.0
+      DataCaptureConfig:
+        EnableCapture: true  # 推論データをキャプチャして Model Monitor に活用
+        InitialSamplingPercentage: 10  # TODO: 実運用時にサンプリング率を調整してください
+        DestinationS3Uri: !Sub "s3://${ModelArtifactBucket}/data-capture/"
+        CaptureOptions:
+          - CaptureMode: Input
+          - CaptureMode: Output
+
+  StorConMLEndpoint:
+    Type: AWS::SageMaker::Endpoint
+    Properties:
+      EndpointName: !Sub "${EnvironmentName}-storcon-ml-endpoint"
+      EndpointConfigName: !GetAtt StorConMLEndpointConfig.EndpointConfigName
+
+  # ----------------------------------------------------------
+  # SNS Topic（アラート通知）
+  # ----------------------------------------------------------
+  MLAlertSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${EnvironmentName}-ml-pipeline-alerts"
+      KmsMasterKeyId: !Ref MLPipelineKMSKey
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref AlertEmail  # TODO: 実運用時に通知先を変更してください
+
+  # ----------------------------------------------------------
+  # CloudWatch アラーム（エンドポイント監視）
+  # ----------------------------------------------------------
+
+  # 推論レイテンシー監視（高レイテンシー検出）
+  EndpointLatencyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${EnvironmentName}-ml-endpoint-high-latency"
+      AlarmDescription: SageMaker 推論エンドポイントのレイテンシーが閾値を超えました
+      MetricName: ModelLatency
+      Namespace: AWS/SageMaker
+      Dimensions:
+        - Name: EndpointName
+          Value: !Sub "${EnvironmentName}-storcon-ml-endpoint"
+        - Name: VariantName
+          Value: AllTraffic
+      Statistic: Average
+      Period: 300  # 5分間隔
+      EvaluationPeriods: 3
+      Threshold: 500  # TODO: 実運用時にレイテンシー閾値（ms）を調整してください
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref MLAlertSNSTopic
+      TreatMissingData: notBreaching
+
+  # エンドポイントエラー率監視
+  EndpointErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${EnvironmentName}-ml-endpoint-high-error-rate"
+      AlarmDescription: SageMaker 推論エンドポイントのエラー率が閾値を超えました
+      MetricName: Invocation5XXErrors
+      Namespace: AWS/SageMaker
+      Dimensions:
+        - Name: EndpointName
+          Value: !Sub "${EnvironmentName}-storcon-ml-endpoint"
+        - Name: VariantName
+          Value: AllTraffic
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10  # TODO: 実運用時にエラー件数閾値を調整してください
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref MLAlertSNSTopic
+      TreatMissingData: notBreaching
+
+  # ----------------------------------------------------------
+  # IAM Role: Step Functions 実行ロール
+  # ----------------------------------------------------------
+  MLStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-ml-statemachine-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: MLPipelineOrchestrationPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # Glue ジョブ制御（特徴量エンジニアリング）
+              - Effect: Allow
+                Action:
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:BatchStopJobRun
+                Resource: !Sub "arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/*"
+              # SageMaker 学習・評価・登録
+              - Effect: Allow
+                Action:
+                  - sagemaker:CreateTrainingJob
+                  - sagemaker:DescribeTrainingJob
+                  - sagemaker:StopTrainingJob
+                  - sagemaker:CreateModel
+                  - sagemaker:CreateModelPackage
+                  - sagemaker:DescribeModelPackage
+                  - sagemaker:UpdateEndpoint
+                  - sagemaker:CreateEndpointConfig
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt SageMakerExecutionRole.Arn
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt InferencePreprocessLambda.Arn
+                  - !GetAtt InferencePostprocessLambda.Arn
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref MLAlertSNSTopic
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: "*"
+
+  # ----------------------------------------------------------
+  # Step Functions StateMachine（ML パイプライン）
+  # 特徴量生成 → 学習 → 評価 → 条件分岐 → モデル登録
+  # ----------------------------------------------------------
+  MLPipelineStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub "${EnvironmentName}-ml-pipeline"
+      RoleArn: !GetAtt MLStateMachineRole.Arn
+      StateMachineType: STANDARD
+      TracingConfiguration:
+        Enabled: true
+      DefinitionString: !Sub
+        - |
+          {
+            "Comment": "ML パイプライン: 特徴量生成 → 学習 → 評価 → 登録",
+            "StartAt": "FeatureEngineering",
+            "States": {
+              "FeatureEngineering": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::glue:startJobRun.sync",
+                "Parameters": {
+                  "JobName": "${FeatureJobName}"
+                },
+                "Next": "TrainModel",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 60, "MaxAttempts": 2}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotifyFailure"}]
+              },
+              "TrainModel": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::sagemaker:createTrainingJob.sync",
+                "Parameters": {
+                  "TrainingJobName.$": "States.Format('${Env}-storcon-training-{}', $$.Execution.Name)",
+                  "AlgorithmSpecification": {
+                    "TrainingImage": "763104351884.dkr.ecr.ap-northeast-1.amazonaws.com/xgboost:1.7-1",
+                    "TrainingInputMode": "File"
+                  },
+                  "RoleArn": "${SageMakerRoleArn}",
+                  "InputDataConfig": [{
+                    "ChannelName": "train",
+                    "DataSource": {
+                      "S3DataSource": {
+                        "S3DataType": "S3Prefix",
+                        "S3Uri": "s3://${TrainingBucket}/features/train/",
+                        "S3DataDistributionType": "FullyReplicated"
+                      }
+                    }
+                  }],
+                  "OutputDataConfig": {
+                    "S3OutputPath": "s3://${ArtifactBucket}/models/",
+                    "KmsKeyId": "${KMSKeyId}"
+                  },
+                  "ResourceConfig": {
+                    "InstanceType": "${TrainingInstance}",
+                    "InstanceCount": 1,
+                    "VolumeSizeInGB": 30
+                  },
+                  "StoppingCondition": {
+                    "MaxRuntimeInSeconds": 3600
+                  }
+                },
+                "Next": "EvaluateModel",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "IntervalSeconds": 60, "MaxAttempts": 1}],
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "NotifyFailure"}]
+              },
+              "EvaluateModel": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "Parameters": {
+                  "FunctionName": "${PreprocessLambdaArn}",
+                  "Payload": {
+                    "action": "evaluate",
+                    "trainingJobName.$": "$.TrainingJobName"
+                  }
+                },
+                "Next": "CheckAccuracy",
+                "ResultPath": "$.evaluationResult"
+              },
+              "CheckAccuracy": {
+                "Type": "Choice",
+                "Choices": [{
+                  "Variable": "$.evaluationResult.Payload.accuracy",
+                  "NumericGreaterThanEquals": ${AccuracyThreshold},
+                  "Next": "RegisterModel"
+                }],
+                "Default": "NotifyLowAccuracy"
+              },
+              "RegisterModel": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::sagemaker:createModel",
+                "Parameters": {
+                  "ModelName.$": "States.Format('${Env}-storcon-model-{}', $$.Execution.Name)",
+                  "PrimaryContainer": {
+                    "Image": "763104351884.dkr.ecr.ap-northeast-1.amazonaws.com/xgboost:1.7-1",
+                    "ModelDataUrl.$": "$.ModelArtifacts.S3ModelArtifacts"
+                  },
+                  "ExecutionRoleArn": "${SageMakerRoleArn}"
+                },
+                "Next": "PipelineSucceeded"
+              },
+              "NotifyLowAccuracy": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::sns:publish",
+                "Parameters": {
+                  "TopicArn": "${AlertTopicArn}",
+                  "Message": "モデル精度が閾値を下回りました。モデルの再学習またはハイパーパラメータ調整が必要です。",
+                  "Subject": "[ML Pipeline] モデル精度不足 - 本番デプロイをスキップしました"
+                },
+                "Next": "PipelineFailed"
+              },
+              "NotifyFailure": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::sns:publish",
+                "Parameters": {
+                  "TopicArn": "${AlertTopicArn}",
+                  "Message.$": "States.Format('ML パイプライン実行に失敗しました。実行ID: {}', $$.Execution.Name)",
+                  "Subject": "[ML Pipeline] パイプライン実行失敗"
+                },
+                "Next": "PipelineFailed"
+              },
+              "PipelineSucceeded": {
+                "Type": "Succeed"
+              },
+              "PipelineFailed": {
+                "Type": "Fail",
+                "Error": "MLPipelineError"
+              }
+            }
+          }
+        - FeatureJobName: !Ref FeatureEngineeringGlueJob
+          SageMakerRoleArn: !GetAtt SageMakerExecutionRole.Arn
+          TrainingBucket: !Ref TrainingDataBucket
+          ArtifactBucket: !Ref ModelArtifactBucket
+          KMSKeyId: !Ref MLPipelineKMSKey
+          TrainingInstance: !Ref TrainingInstanceType
+          AccuracyThreshold: !Ref ModelAccuracyThreshold
+          AlertTopicArn: !Ref MLAlertSNSTopic
+          PreprocessLambdaArn: !GetAtt InferencePreprocessLambda.Arn
+          Env: !Ref EnvironmentName
+
+  # ----------------------------------------------------------
+  # Bedrock 統合リソース（EnableBedrock=true の場合のみ作成）
+  # ----------------------------------------------------------
+  # NOTE: Bedrock はフルマネージドサービスのため追加インフラリソースは最小限です。
+  #       Lambda の IAM ロールに bedrock:InvokeModel 権限が既に付与されています。
+  #       以下は Bedrock 用の CloudWatch ロググループのみ作成します。
+  BedrockInvocationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Condition: IsBedrockEnabled
+    Properties:
+      LogGroupName: !Sub "/bedrock/${EnvironmentName}-storcon-ml-invocations"
+      RetentionInDays: 30  # TODO: 実運用時に保持期間を調整してください
+      KmsKeyId: !GetAtt MLPipelineKMSKey.Arn
+
+# ============================================================
+# Outputs
+# ============================================================
+Outputs:
+  SageMakerNotebookUrl:
+    Description: SageMaker Notebook Instance URL
+    Value: !Sub "https://${StorConMLNotebook.NotebookInstanceName}.notebook.${AWS::Region}.sagemaker.aws/lab"
+
+  SageMakerExecutionRoleArn:
+    Description: SageMaker 実行ロール ARN
+    Value: !GetAtt SageMakerExecutionRole.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-SageMakerExecutionRoleArn"
+
+  TrainingDataBucketArn:
+    Description: 学習データ S3 バケット ARN
+    Value: !GetAtt TrainingDataBucket.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-MLTrainingDataBucketArn"
+
+  ModelArtifactBucketArn:
+    Description: モデルアーティファクト S3 バケット ARN
+    Value: !GetAtt ModelArtifactBucket.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-MLModelArtifactBucketArn"
+
+  MLEndpointName:
+    Description: SageMaker リアルタイム推論エンドポイント名
+    Value: !GetAtt StorConMLEndpoint.EndpointName
+    Export:
+      Name: !Sub "${EnvironmentName}-MLEndpointName"
+
+  MLPipelineStateMachineArn:
+    Description: ML パイプライン Step Functions ARN
+    Value: !Ref MLPipelineStateMachine
+    Export:
+      Name: !Sub "${EnvironmentName}-MLPipelineStateMachineArn"
+
+  PreprocessLambdaArn:
+    Description: 推論前処理 Lambda ARN
+    Value: !GetAtt InferencePreprocessLambda.Arn
+
+  PostprocessLambdaArn:
+    Description: 推論後処理 Lambda ARN
+    Value: !GetAtt InferencePostprocessLambda.Arn
+
+  AlertTopicArn:
+    Description: ML アラート SNS Topic ARN
+    Value: !Ref MLAlertSNSTopic
+
+  MLPipelineKMSKeyArn:
+    Description: ML Pipeline 暗号化 KMS キー ARN
+    Value: !GetAtt MLPipelineKMSKey.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-MLPipelineKMSKeyArn"
+
+  BedrockStatus:
+    Description: Bedrock 統合の有効/無効状態
+    Value: !If [IsBedrockEnabled, "Enabled", "Disabled"]

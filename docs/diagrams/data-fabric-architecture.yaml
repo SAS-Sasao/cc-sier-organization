@@ -1,0 +1,715 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  [Data Fabric Architecture]
+  S3 マルチゾーン（Raw/Curated/Enriched）、Glue によるスキーマ検出と ETL、
+  Lake Formation によるデータガバナンス、Redshift Serverless による分析、
+  Kinesis によるストリーミング取り込み、Step Functions による ETL オーケストレーションを
+  組み合わせたデータファブリック構成。
+  教育・参照用テンプレート。実運用時は各パラメータを見直すこと。
+
+# ==============================================================================
+# パラメータ定義
+# ==============================================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev  # TODO: 実運用時に変更してください (dev / stg / prod)
+    AllowedValues:
+      - dev
+      - stg
+      - prod
+    Description: デプロイ環境名
+
+  ProjectName:
+    Type: String
+    Default: datafabric  # TODO: 実運用時に変更してください
+    Description: プロジェクト名（リソース命名に使用）
+
+  # VPC 設定（Redshift Serverless 用）
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16  # TODO: 実運用時にネットワーク設計に合わせて変更してください
+    Description: VPC CIDR ブロック
+
+  PrivateSubnet1Cidr:
+    Type: String
+    Default: 10.0.1.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートサブネット 1 の CIDR
+
+  PrivateSubnet2Cidr:
+    Type: String
+    Default: 10.0.2.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートサブネット 2 の CIDR
+
+  KinesisShardCount:
+    Type: Number
+    Default: 2  # TODO: 実運用時にスループット要件に合わせて変更してください
+    Description: Kinesis Data Stream のシャード数
+
+  RedshiftBaseCapacity:
+    Type: Number
+    Default: 8  # TODO: 実運用時にワークロードに合わせて調整してください（8〜512 RPU）
+    Description: Redshift Serverless のベースキャパシティ (RPU)
+
+  GlueWorkerCount:
+    Type: Number
+    Default: 5  # TODO: 実運用時にデータ量に合わせて変更してください
+    Description: Glue ETL ジョブのワーカー数
+
+# ==============================================================================
+# リソース定義
+# ==============================================================================
+Resources:
+
+  # ----------------------------------------------------------------------------
+  # KMS キー（データ暗号化）
+  # ----------------------------------------------------------------------------
+  DataKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "${ProjectName}-${EnvironmentName} データ基盤共通 KMS キー"
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow Glue and Redshift to use the key
+            Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+                - redshift.amazonaws.com
+                - firehose.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  DataKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${ProjectName}-${EnvironmentName}-data"
+      TargetKeyId: !Ref DataKMSKey
+
+  # ----------------------------------------------------------------------------
+  # VPC（Redshift Serverless 用）
+  # ----------------------------------------------------------------------------
+  DataFabricVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-vpc"
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # プライベートサブネット（Redshift Serverless 配置先）
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DataFabricVPC
+      CidrBlock: !Ref PrivateSubnet1Cidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-private-1"
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DataFabricVPC
+      CidrBlock: !Ref PrivateSubnet2Cidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-private-2"
+
+  # Redshift Serverless 用セキュリティグループ
+  RedshiftSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Redshift Serverless セキュリティグループ
+      VpcId: !Ref DataFabricVPC
+      SecurityGroupIngress:
+        # TODO: 実運用時は接続元 IP/セキュリティグループを限定してください
+        - IpProtocol: tcp
+          FromPort: 5439
+          ToPort: 5439
+          CidrIp: !Ref VpcCidr  # VPC 内からのみ許可
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-redshift-sg"
+
+  # ----------------------------------------------------------------------------
+  # S3 バケット（データレイク 3 ゾーン）
+  # ----------------------------------------------------------------------------
+  # Raw ゾーン: 生データをそのまま格納
+  RawZoneBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${EnvironmentName}-raw-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      # ライフサイクル: Raw データは低頻度アクセス後にアーカイブ
+      LifecycleConfiguration:
+        Rules:
+          - Id: RawDataLifecycle
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90   # TODO: 実運用時に変更してください
+                StorageClass: STANDARD_IA
+              - TransitionInDays: 365  # TODO: 実運用時に変更してください
+                StorageClass: GLACIER
+      Tags:
+        - Key: DataZone
+          Value: raw
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # Curated ゾーン: クレンジング・変換済みデータ
+  CuratedZoneBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${EnvironmentName}-curated-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: DataZone
+          Value: curated
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # Enriched ゾーン: 分析・ML 向けに加工済みデータ
+  EnrichedZoneBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${EnvironmentName}-enriched-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: DataZone
+          Value: enriched
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # Glue Database & Crawler（自動スキーマ検出）
+  # ----------------------------------------------------------------------------
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub "${ProjectName}_${EnvironmentName}_catalog"
+        Description: !Sub "${ProjectName} データカタログ (${EnvironmentName})"
+
+  # IAM ロール（Glue 実行ロール）
+  GlueServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-glue-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: GlueS3KMSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt RawZoneBucket.Arn
+                  - !Sub "${RawZoneBucket.Arn}/*"
+                  - !GetAtt CuratedZoneBucket.Arn
+                  - !Sub "${CuratedZoneBucket.Arn}/*"
+                  - !GetAtt EnrichedZoneBucket.Arn
+                  - !Sub "${EnrichedZoneBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DataKMSKey.Arn
+
+  # Crawler（Raw ゾーンのスキーマ自動検出）
+  RawZoneCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-raw-crawler"
+      Role: !GetAtt GlueServiceRole.Arn
+      DatabaseName: !Ref GlueDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${RawZoneBucket}/"
+      # スケジュール: 毎時実行
+      Schedule:
+        ScheduleExpression: cron(0 * * * ? *)  # TODO: 実運用時に変更してください
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+      Configuration: |
+        {
+          "Version": 1.0,
+          "Grouping": {
+            "TableGroupingPolicy": "CombineCompatibleSchemas"
+          }
+        }
+
+  # Glue ETL ジョブ（Raw → Curated 変換）
+  GlueETLJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-raw-to-curated"
+      Role: !GetAtt GlueServiceRole.Arn
+      GlueVersion: '4.0'  # TODO: 実運用時に最新バージョンを確認してください
+      WorkerType: G.1X  # TODO: 実運用時にデータ量に合わせて変更してください
+      NumberOfWorkers: !Ref GlueWorkerCount
+      # Spark ジョブ設定
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${RawZoneBucket}/scripts/raw_to_curated.py"
+        # TODO: 実運用時に実際のスクリプトパスに変更してください
+        PythonVersion: '3'
+      DefaultArguments:
+        '--job-language': python
+        '--enable-metrics': 'true'
+        '--enable-continuous-cloudwatch-log': 'true'
+        '--enable-glue-datacatalog': 'true'
+        '--SOURCE_BUCKET': !Ref RawZoneBucket
+        '--TARGET_BUCKET': !Ref CuratedZoneBucket
+        '--DATABASE_NAME': !Ref GlueDatabase
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Timeout: 120  # TODO: 実運用時に変更してください（分単位）
+
+  # ----------------------------------------------------------------------------
+  # Lake Formation 設定
+  # ----------------------------------------------------------------------------
+  # Lake Formation データレイク設定
+  # NOTE: LakeFormation の初期化は手動操作が必要な場合があります
+  LakeFormationDataLakeSettings:
+    Type: AWS::LakeFormation::DataLakeSettings
+    Properties:
+      Admins:
+        - DataLakePrincipalIdentifier: !GetAtt GlueServiceRole.Arn
+
+  # Glue ロールへのデータレイクパーミッション付与
+  LakeFormationGluePermission:
+    Type: AWS::LakeFormation::Permissions
+    DependsOn: LakeFormationDataLakeSettings
+    Properties:
+      DataLakePrincipal:
+        DataLakePrincipalIdentifier: !GetAtt GlueServiceRole.Arn
+      Resource:
+        DatabaseResource:
+          Name: !Ref GlueDatabase
+      Permissions:
+        - ALL
+      PermissionsWithGrantOption:
+        - ALL
+
+  # ----------------------------------------------------------------------------
+  # Kinesis Data Stream（ストリーミング取り込み）
+  # ----------------------------------------------------------------------------
+  DataIngestionStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-ingestion-stream"
+      ShardCount: !Ref KinesisShardCount
+      # KMS 暗号化を有効化
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !Ref DataKMSKey
+      RetentionPeriodHours: 24  # TODO: 実運用時に変更してください（最大168時間）
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # IAM ロール（Firehose 実行ロール）
+  FirehoseDeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-firehose-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FirehosePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt RawZoneBucket.Arn
+                  - !Sub "${RawZoneBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: !GetAtt DataIngestionStream.Arn
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DataKMSKey.Arn
+
+  # Kinesis Firehose（Kinesis → S3 Raw ゾーンへの配信）
+  FirehoseDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub "${ProjectName}-${EnvironmentName}-delivery-stream"
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt DataIngestionStream.Arn
+        RoleARN: !GetAtt FirehoseDeliveryRole.Arn
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt RawZoneBucket.Arn
+        RoleARN: !GetAtt FirehoseDeliveryRole.Arn
+        # パーティション設定（年/月/日/時で階層化）
+        Prefix: 'streaming/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/hour=!{timestamp:HH}/'
+        ErrorOutputPrefix: 'errors/year=!{timestamp:yyyy}/month=!{timestamp:MM}/!{firehose:error-output-type}/'
+        BufferingHints:
+          IntervalInSeconds: 300  # TODO: 実運用時に変更してください（秒）
+          SizeInMBs: 128          # TODO: 実運用時に変更してください（MB）
+        CompressionFormat: GZIP
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !GetAtt DataKMSKey.Arn
+
+  # ----------------------------------------------------------------------------
+  # Athena WorkGroup
+  # ----------------------------------------------------------------------------
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-workgroup"
+      Description: !Sub "${ProjectName} Athena クエリ実行環境 (${EnvironmentName})"
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub "s3://${EnrichedZoneBucket}/athena-results/"
+          EncryptionConfiguration:
+            EncryptionOption: SSE_KMS
+            KmsKey: !Ref DataKMSKey
+        # クエリスキャン量の上限設定（コスト制御）
+        BytesScannedCutoffPerQuery: 10737418240  # TODO: 実運用時に変更してください（10 GB）
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # Redshift Serverless（分析用データウェアハウス）
+  # ----------------------------------------------------------------------------
+  # Redshift Serverless 用 IAM ロール
+  RedshiftServerlessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-redshift-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RedshiftS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt EnrichedZoneBucket.Arn
+                  - !Sub "${EnrichedZoneBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DataKMSKey.Arn
+
+  # Redshift Serverless Namespace
+  RedshiftNamespace:
+    Type: AWS::RedshiftServerless::Namespace
+    Properties:
+      NamespaceName: !Sub "${ProjectName}-${EnvironmentName}-namespace"
+      AdminUsername: admin  # TODO: 実運用時に変更してください
+      AdminUserPassword: !Sub "{{resolve:ssm-secure:/${ProjectName}/${EnvironmentName}/redshift/admin-password}}"
+      # TODO: 実運用時は Parameter Store に管理者パスワードを登録してください
+      DbName: !Sub "${ProjectName}_db"
+      IamRoles:
+        - !GetAtt RedshiftServerlessRole.Arn
+      # KMS 暗号化を有効化
+      KmsKeyId: !Ref DataKMSKey
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # Redshift Serverless Workgroup
+  RedshiftWorkgroup:
+    Type: AWS::RedshiftServerless::Workgroup
+    Properties:
+      WorkgroupName: !Sub "${ProjectName}-${EnvironmentName}-workgroup"
+      NamespaceName: !Ref RedshiftNamespace
+      BaseCapacity: !Ref RedshiftBaseCapacity
+      # VPC 内に配置
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !Ref RedshiftSecurityGroup
+      PubliclyAccessible: false  # パブリックアクセス禁止
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # Step Functions（ETL オーケストレーション）
+  # ----------------------------------------------------------------------------
+  StepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-sfn-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SFNGluePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:GetJobRuns
+                  - glue:BatchStopJobRun
+                  - glue:StartCrawler
+                  - glue:GetCrawler
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: '*'
+
+  # ETL パイプライン StateMachine
+  ETLStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub "${ProjectName}-${EnvironmentName}-etl-pipeline"
+      StateMachineType: STANDARD
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      # X-Ray トレーシングを有効化
+      TracingConfiguration:
+        Enabled: true
+      Definition:
+        Comment: "Data Fabric ETL パイプライン: Raw → Curated → Enriched"
+        StartAt: StartCrawler
+        States:
+          # Step 1: Crawler でスキーマ検出
+          StartCrawler:
+            Type: Task
+            Resource: arn:aws:states:::glue:startCrawler.sync
+            Parameters:
+              Name: !Ref RawZoneCrawler
+            Next: RunETLJob
+            Catch:
+              - ErrorEquals: ["States.ALL"]
+                Next: NotifyFailure
+          # Step 2: ETL ジョブ実行
+          RunETLJob:
+            Type: Task
+            Resource: arn:aws:states:::glue:startJobRun.sync
+            Parameters:
+              JobName: !Ref GlueETLJob
+            Next: ETLSucceeded
+            Catch:
+              - ErrorEquals: ["States.ALL"]
+                Next: NotifyFailure
+          ETLSucceeded:
+            Type: Succeed
+          NotifyFailure:
+            Type: Fail
+            Error: ETLPipelineError
+            Cause: "ETL パイプラインでエラーが発生しました"
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # CloudWatch ダッシュボード
+  # ----------------------------------------------------------------------------
+  DataFabricDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub "${ProjectName}-${EnvironmentName}-dashboard"
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "properties": {
+                "title": "Kinesis Stream - 受信レコード数",
+                "metrics": [
+                  ["AWS/Kinesis", "IncomingRecords", "StreamName", "${DataIngestionStream}"]
+                ],
+                "period": 300,
+                "stat": "Sum",
+                "region": "${AWS::Region}"
+              }
+            },
+            {
+              "type": "metric",
+              "properties": {
+                "title": "Glue ETL ジョブ - 実行時間",
+                "metrics": [
+                  ["Glue", "glue.ALL.jvm.heap.used", "JobName", "${GlueETLJob}", "JobRunId", "ALL"]
+                ],
+                "period": 300,
+                "stat": "Average",
+                "region": "${AWS::Region}"
+              }
+            }
+          ]
+        }
+
+# ==============================================================================
+# 出力
+# ==============================================================================
+Outputs:
+  RawZoneBucketName:
+    Description: Raw ゾーン S3 バケット名
+    Value: !Ref RawZoneBucket
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-raw-bucket"
+
+  CuratedZoneBucketName:
+    Description: Curated ゾーン S3 バケット名
+    Value: !Ref CuratedZoneBucket
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-curated-bucket"
+
+  EnrichedZoneBucketName:
+    Description: Enriched ゾーン S3 バケット名
+    Value: !Ref EnrichedZoneBucket
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-enriched-bucket"
+
+  GlueDatabaseName:
+    Description: Glue データベース名
+    Value: !Ref GlueDatabase
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-glue-db"
+
+  KinesisStreamArn:
+    Description: Kinesis Data Stream の ARN
+    Value: !GetAtt DataIngestionStream.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-kinesis-arn"
+
+  FirehoseStreamArn:
+    Description: Kinesis Firehose の ARN
+    Value: !GetAtt FirehoseDeliveryStream.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-firehose-arn"
+
+  AthenaWorkGroupName:
+    Description: Athena WorkGroup 名
+    Value: !Ref AthenaWorkGroup
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-athena-wg"
+
+  RedshiftWorkgroupEndpoint:
+    Description: Redshift Serverless Workgroup エンドポイント
+    Value: !GetAtt RedshiftWorkgroup.Workgroup.Endpoint.Address
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-redshift-endpoint"
+
+  ETLStateMachineArn:
+    Description: Step Functions ETL StateMachine の ARN
+    Value: !Ref ETLStateMachine
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-sfn-arn"
+
+  DataKMSKeyArn:
+    Description: データ基盤共通 KMS キーの ARN
+    Value: !GetAtt DataKMSKey.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-kms-arn"
+
+  VpcId:
+    Description: VPC ID
+    Value: !Ref DataFabricVPC
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-vpc-id"
