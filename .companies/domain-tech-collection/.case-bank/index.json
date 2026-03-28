@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-28T21:45:11",
+  "updated_at": "2026-03-28T21:46:59",
   "case_count": 31,
   "failure_patterns": [
     {
@@ -82,6 +82,19 @@
         "カスタムプロンプトにLLM",
         "as",
         "Judge評価ステップを明示的に含めること"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "IaCビューアHTML等でJS正規表現を含むコードをbashヒアドキュメント内で生成すると$1/$2がシェル変数展開されて壊れる",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_no_bash_heredoc_js",
+      "how_to_apply": "- IaCコードビューアHTMLは `references/generate-iac-viewer.py` を `python3` で直接実行して生成する\n- bashの `cat << 'EOF'` でも `$` はエスケープされない場合がある（特にネストしたヒアドキュメント）\n- JS/正規表現を含むファイル生成は、常にPythonスクリプト単体で実行すること",
+      "match_keywords": [
+        "bashヒアドキュメント内でのJS生成禁止",
+        "IaCビューアHTML等でJS正規表現を含むコードをbashヒアドキュメント内で生成すると$1/$2がシェル変数展開されて壊れる"
       ]
     },
     {
@@ -177,19 +190,6 @@
         "TODO提案時にWBS完了ステータスを必ず照合する",
         "TODO案にWBSで既に[x]完了のタスクを含めてしまった失敗",
         "提案前にWBSと前日TODOの両方を照合すること"
-      ]
-    },
-    {
-      "subagent": "secretary",
-      "failure_reason": "IaCビューアHTML生成時にbashヒアドキュメント内でPythonを実行し、JS正規表現の$1/$2/$3がシェル変数展開されて壊れた",
-      "count": 1,
-      "avg_score": 0.0,
-      "source": "diagram-iac-viewer",
-      "how_to_apply": "IaCコードビューアHTMLの生成は必ず references/generate-iac-viewer.py を直接実行すること。bashヒアドキュメント内でのインラインPython生成は禁止。シェルとJSの$記号が衝突するため。",
-      "detected_at": "2026-03-28T21:50:00+09:00",
-      "tags": [
-        "IaCビューアHTML生成時のシェル変数展開によるJS破損",
-        "bashヒアドキュメント内でのインラインコード生成禁止"
       ]
     }
   ],
