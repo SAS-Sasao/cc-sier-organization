@@ -18,6 +18,21 @@ body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif
 h1 { font-size:1.5rem; margin-bottom:8px; }
 .subtitle { color:var(--muted); font-size:.88rem; margin-bottom:24px; }
 .count { color:var(--muted); font-size:.82rem; margin-bottom:16px; }
+
+/* Search & Filter */
+.search-bar { margin-bottom:16px; }
+.search-input { width:100%; max-width:480px; padding:10px 16px; border:1px solid var(--border);
+                border-radius:8px; font-size:.9rem; background:var(--bg2); color:var(--text);
+                outline:none; transition:border-color .2s; }
+.search-input:focus { border-color:var(--blue); }
+.search-input::placeholder { color:var(--muted); }
+.filter-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.filter-btn { padding:4px 12px; border:1px solid var(--border); border-radius:16px;
+              font-size:.75rem; font-weight:600; cursor:pointer; background:var(--bg2);
+              color:var(--muted); transition:all .15s; }
+.filter-btn:hover { border-color:var(--blue); color:var(--blue); }
+.filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.no-results { display:none; padding:40px; text-align:center; color:var(--muted); font-size:.9rem; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
 .card { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
         text-decoration:none; color:var(--text); overflow:hidden;
@@ -43,7 +58,15 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count">11 件の構成図</p>
+<p class="count"><span id="match-count">11</span> / 11 件の構成図</p>
+
+<!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
+<div class="search-bar">
+  <input type="text" id="search-input" class="search-input" placeholder="タイトル・プロジェクト・領域・説明で検索...">
+</div>
+<div class="filter-tags" id="filter-tags"></div>
+<p class="no-results" id="no-results">該当する構成図がありません</p>
+<!-- ▲ 検索・フィルタ ここまで -->
 
 <div class="grid">
   <a href="./storcon-dwh-architecture.html" class="card">
@@ -181,5 +204,70 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 </div>
 
 <p class="updated">Powered by AWS Diagram MCP Server</p>
+
+<!-- ▼ 検索・フィルタ JavaScript（カード追加時に編集不要） -->
+<script>
+(function() {
+  var input = document.getElementById('search-input');
+  var tagsContainer = document.getElementById('filter-tags');
+  var noResults = document.getElementById('no-results');
+  var matchCount = document.getElementById('match-count');
+  var cards = document.querySelectorAll('.card');
+  var activeFilters = { project: '', area: '' };
+
+  // Build filter tag buttons from existing cards
+  var projects = [], areas = [];
+  cards.forEach(function(c) {
+    var p = c.querySelector('.tag-project');
+    var a = c.querySelector('.tag-area');
+    if (p && projects.indexOf(p.textContent) === -1) projects.push(p.textContent);
+    if (a && areas.indexOf(a.textContent) === -1) areas.push(a.textContent);
+  });
+
+  function createBtn(label, type) {
+    var btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.textContent = label;
+    btn.setAttribute('data-type', type);
+    btn.setAttribute('data-value', label);
+    btn.addEventListener('click', function() {
+      if (this.classList.contains('active')) {
+        this.classList.remove('active');
+        activeFilters[type] = '';
+      } else {
+        document.querySelectorAll('.filter-btn[data-type="' + type + '"]').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        activeFilters[type] = label;
+      }
+      applyFilter();
+    });
+    return btn;
+  }
+
+  projects.forEach(function(p) { tagsContainer.appendChild(createBtn(p, 'project')); });
+  areas.forEach(function(a) { tagsContainer.appendChild(createBtn(a, 'area')); });
+
+  function applyFilter() {
+    var query = input.value.toLowerCase();
+    var visible = 0;
+    cards.forEach(function(c) {
+      var text = c.textContent.toLowerCase();
+      var pTag = c.querySelector('.tag-project');
+      var aTag = c.querySelector('.tag-area');
+      var pMatch = !activeFilters.project || (pTag && pTag.textContent === activeFilters.project);
+      var aMatch = !activeFilters.area || (aTag && aTag.textContent === activeFilters.area);
+      var qMatch = !query || text.indexOf(query) !== -1;
+      var show = pMatch && aMatch && qMatch;
+      c.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    matchCount.textContent = visible;
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  input.addEventListener('input', applyFilter);
+})();
+</script>
+<!-- ▲ 検索・フィルタ JavaScript ここまで -->
 </body>
 </html>
