@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise MDM & Data Insights Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+/* IaC Button */
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-saas { background:#3b82f6; color:#fff; }
+.badge-cdc { background:#22c55e; color:#fff; }
+.badge-mdm { background:#e67e22; color:#fff; }
+.badge-insight { background:#ef4444; color:#fff; }
+.badge-ai { background:#8b5cf6; color:#fff; }
+.badge-gov { background:#6b7280; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Enterprise MDM & Data Insights Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-area">MDM / Enterprise</span>
+  <span>生成日: 2026-03-28</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./enterprise-mdm-insights.png" alt="Enterprise MDM & Data Insights Architecture" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./enterprise-mdm-insights-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>CRM（Salesforce等）やERP（SAP等）といったエンタープライズシステムに分散するマスターデータを、MDM（Master Data Management）層で統合・名寄せ・品質管理し、分析基盤でビジネスインサイトを提供するアーキテクチャです。</p>
+  <p>従来のデータレイクハウスが「データ品質の段階的向上」に焦点を置くのに対し、本構成は「分散エンタープライズシステムのマスターデータ統合」に特化しています。AWS Entity Resolutionによるファジーマッチング名寄せ、Glue Data Qualityによる品質ゲート、Lake Formationによるきめ細かいアクセス制御がMDMの核心層を構成します。</p>
+  <p>Golden Zone（MDM統合済みデータ）をRedshift ServerlessとAthenaで分析し、QuickSightでBI可視化、Bedrockで生成AIによるインサイト提供まで一気通貫で実現します。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-saas">SaaS</span> CRM → データレイク</h3>
+  <div class="flow">
+    <span class="flow-step">CRM (Salesforce)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AppFlow / EventBridge</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Firehose</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Raw Zone</span>
+  </div>
+
+  <h3><span class="badge badge-cdc">CDC</span> ERP / Legacy DB → データレイク</h3>
+  <div class="flow">
+    <span class="flow-step">ERP (SAP) / Legacy DB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS DMS (CDC)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Raw Zone</span>
+  </div>
+
+  <h3><span class="badge badge-mdm">MDM</span> マスターデータ統合パイプライン</h3>
+  <div class="flow">
+    <span class="flow-step">S3 Raw Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL (Cleanse)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Staged Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Entity Resolution (Match & Merge)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Data Quality (Gate)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Golden Zone (MDM)</span>
+  </div>
+
+  <h3><span class="badge badge-insight">Insight</span> 分析・BI</h3>
+  <div class="flow">
+    <span class="flow-step">S3 Golden Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift Serverless / Athena</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight (BI Dashboard)</span>
+  </div>
+
+  <h3><span class="badge badge-ai">AI</span> 生成AIインサイト</h3>
+  <div class="flow">
+    <span class="flow-step">S3 Golden Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Bedrock (RAG)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">自然言語でのデータインサイト</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>データソース</td><td>CRM (Salesforce等), ERP (SAP等), Legacy DB</td><td>SaaS API連携・CDC・バッチの3パターンで多様なソースに対応</td></tr>
+    <tr><td>取り込み <span class="badge badge-saas">SaaS</span></td><td>Amazon AppFlow + EventBridge</td><td>SaaSアプリケーションからのイベント・バッチ連携</td></tr>
+    <tr><td>取り込み <span class="badge badge-cdc">CDC</span></td><td>AWS DMS</td><td>ERP/Legacy DBからのCDC差分レプリケーション</td></tr>
+    <tr><td>取り込みバッファ</td><td>Kinesis Data Firehose</td><td>ストリーミングデータのS3配信・マイクロバッチ化</td></tr>
+    <tr><td>Raw Zone</td><td>Amazon S3</td><td>ソースデータをそのまま保持。スキーマオンリード</td></tr>
+    <tr><td>Staged Zone</td><td>Amazon S3</td><td>クレンジング・正規化済みデータ。名寄せ前の中間層</td></tr>
+    <tr><td style="background:#fff3e0"><strong>Golden Zone (MDM)</strong></td><td>Amazon S3</td><td>名寄せ・品質検証済みのマスターデータ。Single Source of Truth</td></tr>
+    <tr><td style="background:#fff3e0"><strong>名寄せ</strong></td><td>AWS Entity Resolution</td><td>ファジーマッチング（Levenshtein/Soundex/Cosine）による顧客・取引先名寄せ</td></tr>
+    <tr><td style="background:#fff3e0"><strong>品質管理</strong></td><td>AWS Glue Data Quality</td><td>DQDLルールによる品質ゲート（完全性・一意性・正確性）</td></tr>
+    <tr><td>メタデータ</td><td>Glue Data Catalog + Lake Formation</td><td>スキーマ管理・列/行レベルアクセス制御</td></tr>
+    <tr><td>オーケストレーション</td><td>Step Functions + EventBridge</td><td>MDMパイプラインの自動実行・変更イベント通知</td></tr>
+    <tr><td>分析 (DWH)</td><td>Redshift Serverless</td><td>高性能DWHクエリ。定期レポート・KPI分析</td></tr>
+    <tr><td>分析 (アドホック)</td><td>Amazon Athena</td><td>S3上のデータに対するサーバーレスSQLクエリ</td></tr>
+    <tr><td>可視化</td><td>Amazon QuickSight</td><td>BIダッシュボード。顧客360度ビュー・売上分析</td></tr>
+    <tr><td>生成AI</td><td>Amazon Bedrock (RAG)</td><td>Golden Zoneの業務知識を活用した自然言語インサイト</td></tr>
+    <tr><td>ガバナンス</td><td>KMS + CloudWatch + CloudTrail</td><td>暗号化・パイプライン監視・監査ログ</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>MDM（マスターデータ管理）のポイント</h2>
+  <p><strong>1. Entity Resolutionによるインテリジェント名寄せ</strong><br>
+  CRM（顧客名・メール）とERP（取引先コード・住所）のように、異なるスキーマ・表記ゆれのデータをファジーマッチングで統合。ルールベース（Levenshtein距離、Soundex）とMLベースの2方式を選択可能。従来のETLによる完全一致マッチングでは見逃していた「同一エンティティの異なる表記」を高精度で検出する。</p>
+  <p><strong>2. Glue Data Qualityによる品質ゲート</strong><br>
+  DQDL（Data Quality Definition Language）でルールを定義し、名寄せ後のデータがGolden Zoneに入る前に品質検証を実施。完全性（NULLチェック）、一意性（重複排除確認）、正確性（値範囲チェック）の3軸で品質を担保。品質スコアが閾値を下回るとStep Functionsがアラートを発報し、手動確認フローに遷移。</p>
+  <p><strong>3. Golden Zone = Single Source of Truth</strong><br>
+  MDMの最終成果物であるGolden Zoneは、組織全体のマスターデータの「唯一の正」として機能。Lake Formationにより部門ごと・ロールごとのアクセス制御を適用し、全分析チャネル（Redshift/Athena/QuickSight/Bedrock）からGolden Zoneを参照。データの一貫性と信頼性を組織横断で保証する。</p>
+  <p><strong>4. Step Functionsによるパイプラインオーケストレーション</strong><br>
+  Raw取り込み→クレンジング→名寄せ→品質ゲート→Golden配置の全フェーズをStep Functionsで自動化。各ステップの成功/失敗に応じた分岐処理（リトライ・アラート・手動承認）を定義し、MDMパイプラインの信頼性を確保。EventBridgeでGolden Zone更新時にダウンストリーム（Redshift COPY等）を自動トリガー。</p>
+  <p><strong>5. Bedrock RAGによる自然言語インサイト</strong><br>
+  Golden Zoneの統合マスターデータをBedrock Knowledge Baseとして活用。「A社の過去3年の取引推移は？」「解約リスクの高い顧客セグメントは？」といった自然言語クエリに対し、MDMデータに基づいた正確なインサイトを生成AIが提供。SQLが書けないビジネスユーザーにもデータドリブンな意思決定を可能にする。</p>
+</div>
+
+<div class="section">
+  <h2>CRM/ERP統合における考慮事項</h2>
+  <table>
+    <tr><th>観点</th><th>CRM（Salesforce等）</th><th>ERP（SAP等）</th></tr>
+    <tr><td>取り込み方式</td><td>AppFlow SaaS API連携（イベント/バッチ）</td><td>DMS CDC（データベース差分同期）</td></tr>
+    <tr><td>主要エンティティ</td><td>顧客・商談・リード・活動</td><td>取引先・受注・在庫・会計</td></tr>
+    <tr><td>名寄せキー</td><td>顧客名・メール・電話番号</td><td>取引先コード・法人番号・住所</td></tr>
+    <tr><td>更新頻度</td><td>リアルタイム（イベント駆動）</td><td>準リアルタイム（CDC）/ 日次バッチ</td></tr>
+    <tr><td>データ品質課題</td><td>表記ゆれ・重複登録・不完全データ</td><td>コード体系の差異・マルチ通貨・多言語</td></tr>
+  </table>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server | Reviewed by AWS Knowledge MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
