@@ -34,3 +34,14 @@ failure_reason: ""
 judge_comment: "CloudFront/APIGateway/Lambda/DynamoDB/Cognito/SQS/SNS/EventBridge/StepFunctions/CloudWatch等の主要サーバーレスサービスを網羅。データフロー4パターン（同期API・静的配信・非同期・イベント駆動）をHTMLで詳細解説。LR方向指定だが複雑さにより一部レイアウトが非線形になった点のみ軽微な減点。"
 judged_at: "2026-03-28T16:15:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-28T14:55:45"
+```
