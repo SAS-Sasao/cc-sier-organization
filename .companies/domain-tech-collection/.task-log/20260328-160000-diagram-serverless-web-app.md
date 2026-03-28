@@ -7,8 +7,8 @@ mode: direct
 started: "2026-03-28T16:00:00+09:00"
 completed: "2026-03-28T16:15:00+09:00"
 request: "未生成分野のダイアグラムでおすすめの領域を見繕って対応してほしい"
-issue_number: null
-pr_number: null
+issue_number: 130
+pr_number: 129
 ---
 
 ## 実行計画
