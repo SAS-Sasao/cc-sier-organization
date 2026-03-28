@@ -55,3 +55,14 @@ total: 0.90
 
 - cfn-lint: 初回3エラー（Lambda Role未定義）→ IAM Role追加で修正
 - IaCビューア: generate-iac-viewer.py で生成完了
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-28T23:23:11"
+```

@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-28T21:54:59",
-  "case_count": 31,
+  "updated_at": "2026-03-28T23:23:11",
+  "case_count": 32,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -1095,6 +1095,38 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-28T21:30:00+09:00"
+      }
+    },
+    {
+      "id": "20260328-231620-diagram-ai-dev-knowledge-platform",
+      "state": {
+        "request_keywords": [
+          "AWSベッドロックを使用し",
+          "ドメイン知識や開発ナレッジ",
+          "社内のメンバー情報などのナレッジを溜め",
+          "それを利用してAI駆動開発の精度と効率を底上げするようなアーキテクチャを書いてほしい"
+        ],
+        "request_head": "AWSベッドロックを使用し、ドメイン知識や開発ナレッジ、社内のメンバー情報などのナレッジを溜め、それを利用してAI駆動開",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.8,
+        "accuracy": 1.8,
+        "clarity": 1.8,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/diagrams/ai-dev-knowledge-platform.md"
+        ],
+        "started": "2026-03-28T23:16:20+09:00"
       }
     }
   ],
