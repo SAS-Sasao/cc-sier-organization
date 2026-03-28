@@ -1,0 +1,1136 @@
+{
+  "org_slug": "domain-tech-collection",
+  "updated_at": "2026-03-28T21:45:11",
+  "case_count": 31,
+  "failure_patterns": [
+    {
+      "subagent": "general",
+      "failure_reason": "git branch | xargs git branch -d でアスタリスク・mainの誤削除エラーが出る問題の対策",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_branch_cleanup",
+      "how_to_apply": "以下のコマンドを使うこと:\n```bash\ngit pull origin main && git branch --no-color | sed 's/^\\* //' | grep -v '^main$' | xargs -r git branch -d\n```\n`sed 's/^\\* //'` でアスタリスクを除去してからgrepすることで、誤マッチを防ぐ。",
+      "match_keywords": [
+        "ブランチ削除コマンドのエラー回避",
+        "git",
+        "branch",
+        "xargs",
+        "git",
+        "branch",
+        "でアスタリスク",
+        "mainの誤削除エラーが出る問題の対策"
+      ]
+    },
+    {
+      "subagent": "tech-researcher",
+      "failure_reason": "wf-daily-digest実行時にSubagentのツール制約とソースリンク欠落で2回手戻りが発生した教訓",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_daily_digest_failures",
+      "how_to_apply": "Web巡回を伴うワークフロー（wf-daily-digest等）では、Subagentに委譲せず秘書が直接 WebFetch を並列実行する。Agent Teamsの「並列巡回」は実質的に秘書による並列WebFetchで代替すること。",
+      "match_keywords": [
+        "日次ダイジェスト生成の失敗パターンと対策",
+        "wf",
+        "daily",
+        "digest実行時にSubagentのツール制約とソースリンク欠落で2回手戻りが発生した教訓"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "成果物ドキュメントで別ドキュメントを参照する場合は必ずMarkdownリンクを張ること（パス表示だけはNG）",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_document_links",
+      "how_to_apply": "- テーブル内のパス列 → `[ファイル名](../relative/path.md)` 形式にする\n- 本文中でファイルに言及する場合も同様にリンク化する\n- 相対パスは、そのドキュメントの配置場所からの相対パスで記述する\n- 未生成ドキュメントはリンク不要（想定パスをバッククォートで表示）\n- Subagentに委譲する場合もこのルールを指示に含めること",
+      "match_keywords": [
+        "ドキュメント間リンクの必須化",
+        "成果物ドキュメントで別ドキュメントを参照する場合は必ずMarkdownリンクを張ること",
+        "パス表示だけはNG"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "docs/配下に成果物を生成するタスクでは、秘書Subagent経由でもメイン会話での直接オーケストレーションでも、git commitの前に必ずjudge評価を実施する",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_judge_before_commit",
+      "how_to_apply": "- チェックポイント: `git add` の直前に「judge評価は済んだか？」を自己確認する\n- 秘書Subagent経由の場合: プロンプトにjudge評価ステップを明示（既存ルール）\n- メイン会話で直接オーケストレーションする場合: 全Subagentの完了後、コミット前にjudge評価を自ら実施する\n- 対象条件: 成果物が `docs/` 配下に存在するタスクのみ（ログ・設定変更のみ",
+      "match_keywords": [
+        "judge評価はコミット前に必ず実施する",
+        "docs/配下に成果物を生成するタスクでは",
+        "秘書Subagent経由でもメイン会話での直接オーケストレーションでも",
+        "git",
+        "commitの前に必ずjudge評価を実施する"
+      ]
+    },
+    {
+      "subagent": "secretary",
+      "failure_reason": "Agent toolで秘書を起動する際、カスタムプロンプトにLLM-as-Judge評価ステップを明示的に含めること",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_judge_in_agent_prompt",
+      "how_to_apply": "- 秘書エージェントの Agent ツール起動時のプロンプトに以下を追加:\n  「タスク完了後、成果物がdocs/配下にある場合は secretary.md の『タスク完了後の品質評価（LLM-as-Judge）』セクションに従って3軸評価を実行し、task-logに ## judge セクションを追記すること」\n- もしくは、SendMessage で既存の秘書エージェントに依頼する形にして、s",
+      "match_keywords": [
+        "秘書Agent起動時にjudge評価を必ず含める",
+        "Agent",
+        "toolで秘書を起動する際",
+        "カスタムプロンプトにLLM",
+        "as",
+        "Judge評価ステップを明示的に含めること"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "異なる評価軸の指標を安易に統合してはならない。rewardとjudgeのように目的が異なる指標は分離して表示する",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_no_metric_merge",
+      "how_to_apply": "評価指標の変更・統合は必ずユーザーに方針を確認してから実装する。「小数点の精度が足りない」→「別の指標を混ぜる」は論理の飛躍。異なる目的の指標はダッシュボード上で並列表示し、それぞれの推移を独立して追えるようにする。",
+      "match_keywords": [
+        "feedback_no_metric_merge",
+        "異なる評価軸の指標を安易に統合してはならない",
+        "rewardとjudgeのように目的が異なる指標は分離して表示する"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "マージ後のブランチ削除→reward未push分のコミット&プッシュを一連のパターンとして実行する",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_post_merge_workflow",
+      "how_to_apply": "「マージしたからブランチ削除して」と言われたら、ブランチ削除・pull後に `git status` で未コミット差分を確認し、あればそのまま続けてコミット&プッシュまで完了させる。ユーザーの追加指示を待たない。",
+      "match_keywords": [
+        "post",
+        "merge",
+        "workflow",
+        "マージ後のブランチ削除→reward未push分のコミット&プッシュを一連のパターンとして実行する"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "rebuild-case-bank.shでjudge totalからreward自動算出を実装済み。3回連続で発生した根本原因と修正内容。",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_reward_from_judge",
+      "how_to_apply": "- 根本修正済みのため、今後は/company-evolve実行時に自動でrewardが付与される\n- 万が一再発した場合はrebuild-case-bank.shのjudge→reward導出ロジックを確認する",
+      "match_keywords": [
+        "judge結果からrewardを確実に付与する",
+        "rebuild",
+        "case",
+        "bank.shでjudge",
+        "totalからreward自動算出を実装済み",
+        "3回連続で発生した根本原因と修正内容"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "/company-admin, /company-diagram等のSkill直接実行でtask-logが作成されず、Case Bankに評価対象として追加されなかった失敗パターン",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_skill_tasklog",
+      "how_to_apply": "- 新規Skill作成時は、SKILL.mdにtask-log記録フロー（作成→進捗記録→完了更新）を必ず含める\n- 既存Skillの改修時も、task-log記録が欠けていないか確認する\n- task-log記録の有無はSkillレビュー時の必須チェック項目とする\n- /company のセクション3.7（タスクログと Issue 作成）のフローを各Skillに組み込む形が望ましい",
+      "match_keywords": [
+        "Skill直接実行時もtask",
+        "log記録を必ず組み込む",
+        "/company",
+        "admin",
+        "/company",
+        "diagram等のSkill直接実行でtask",
+        "logが作成されず",
+        "Case"
+      ]
+    },
+    {
+      "subagent": "tech-researcher",
+      "failure_reason": "タスクログの委譲先にagent名を英字で記載しないと、rebuild-case-bank.shがSubagent名を検出できずダッシュボードのレーダーチャートに反映されない",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_tasklog_subagent_detection",
+      "how_to_apply": "- タスクログの委譲先テーブルには `tech-researcher`、`retail-domain-researcher` など英字agent名を使用する\n- 「秘書室」「小売ドメイン室」のような日本語名だけでは検出されない\n- mode=direct のタスクは自動で secretary が補完される（修正済み）\n- rebuild-case-bank.sh に Pattern 5-7 を追加",
+      "match_keywords": [
+        "タスクログにSubagent名を英字で明記する",
+        "タスクログの委譲先にagent名を英字で記載しないと",
+        "rebuild",
+        "case",
+        "bank.shがSubagent名を検出できずダッシュボードのレーダーチャートに反映されない"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "TODO案にWBSで既に[x]完了のタスクを含めてしまった失敗。提案前にWBSと前日TODOの両方を照合すること",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_todo_wbs_crosscheck",
+      "how_to_apply": "TODO整理時は以下の順序で照合する:\n1. `storcon-preparation-wbs.md` を読み、各タスクの最新ステータスを確認\n2. 前日TODOの未完了項目を取得\n3. WBSで `[x]` のタスクを候補から除外\n4. 残った未完了タスクのみで本日のTODO案を構成",
+      "match_keywords": [
+        "TODO提案時にWBS完了ステータスを必ず照合する",
+        "TODO案にWBSで既に[x]完了のタスクを含めてしまった失敗",
+        "提案前にWBSと前日TODOの両方を照合すること"
+      ]
+    },
+    {
+      "subagent": "secretary",
+      "failure_reason": "IaCビューアHTML生成時にbashヒアドキュメント内でPythonを実行し、JS正規表現の$1/$2/$3がシェル変数展開されて壊れた",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "diagram-iac-viewer",
+      "how_to_apply": "IaCコードビューアHTMLの生成は必ず references/generate-iac-viewer.py を直接実行すること。bashヒアドキュメント内でのインラインPython生成は禁止。シェルとJSの$記号が衝突するため。",
+      "detected_at": "2026-03-28T21:50:00+09:00",
+      "tags": [
+        "IaCビューアHTML生成時のシェル変数展開によるJS破損",
+        "bashヒアドキュメント内でのインラインコード生成禁止"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "20260321-103000-store-computer-learning-plan",
+      "state": {
+        "request_keywords": [
+          "コンビニエンスストアのストアコンピューターのサーバーをオンプレミス→AWSクラウドに載せ替える案件に2026年6月から参画するにあたり",
+          "必要なドメイン知識",
+          "技術スタックの学習スケジュールと必要リソース"
+        ],
+        "request_head": "コンビニエンスストアのストアコンピューターのサーバーをオンプレミス→AWSクラウドに載せ替える案件に2026年6月から参",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,tech-researcher,secretary",
+        "mode": "agent-teams",
+        "artifact_count": 3
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/store-computer-domain-knowledge.md",
+          ".companies/domain-tech-collection/docs/research/store-computer-aws-migration-tech.md",
+          ".companies/domain-tech-collection/docs/secretary/store-computer-learning-schedule.md"
+        ],
+        "started": "2026-03-21 10:30"
+      }
+    },
+    {
+      "id": "20260321-110000-pm-learning-content",
+      "state": {
+        "request_keywords": [
+          "既存の学習スケジュールに",
+          "特定機能チームのPMとして参画するために必要なPM視点の学習内容を追加する"
+        ],
+        "request_head": "既存の学習スケジュールに、特定機能チームのPMとして参画するために必要なPM視点の学習内容を追加する。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "project-manager",
+        "mode": "subagent",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/store-computer-learning-schedule.md"
+        ],
+        "started": "2026-03-21 11:00"
+      }
+    },
+    {
+      "id": "20260321-120000-info-source-master",
+      "state": {
+        "request_keywords": [
+          "ドメイン知識",
+          "技術スタックの日次収集活動のため",
+          "有用な情報ソース",
+          "URL",
+          "概要",
+          "をまとめたマスタmdファイルを作成する"
+        ],
+        "request_head": "ドメイン知識・技術スタックの日次収集活動のため、有用な情報ソース（URL・概要）をまとめたマスタmdファイルを作成する。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/info-source-master.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260321-120000-store-computer-domain-knowledge",
+      "state": {
+        "request_keywords": [],
+        "request_head": "",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260321-143000-storecomputer-latest-trends",
+      "state": {
+        "request_keywords": [
+          "コンビニエンスストアのストアコンピューター",
+          "ストコン",
+          "に関する最新動向調査",
+          "2024〜2026年"
+        ],
+        "request_head": "コンビニエンスストアのストアコンピューター（ストコン）に関する最新動向調査（2024〜2026年）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260321-210000-preparation-wbs",
+      "state": {
+        "request_keywords": [
+          "既存の学習スケジュールと新規提案を統合した参画準備WBSを作成してほしい"
+        ],
+        "request_head": "既存の学習スケジュールと新規提案を統合した参画準備WBSを作成してほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/storcon-preparation-wbs.md"
+        ],
+        "started": "2026-03-21T21:00:00"
+      }
+    },
+    {
+      "id": "20260321-213000-storcon-knowledge-todo",
+      "state": {
+        "request_keywords": [
+          "ストコンについての知識収集をしたい",
+          "知識収集してtodoファイルに学習内容を記載したい"
+        ],
+        "request_head": "ストコンについての知識収集をしたい。知識収集してtodoファイルに学習内容を記載したい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,secretary",
+        "mode": "subagent",
+        "artifact_count": 2
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/industry-reports/storecomputer-latest-trends-2024-2026.md",
+          ".companies/domain-tech-collection/docs/secretary/todos/2026-03-21.md"
+        ],
+        "started": "2026-03-21T21:30:00"
+      }
+    },
+    {
+      "id": "20260323-191000-convenience-industry-research",
+      "state": {
+        "request_keywords": [
+          "WBS",
+          "2.1.R1",
+          "コンビニ業界構造の深掘り調査を小売ドメイン室に依頼する"
+        ],
+        "request_head": "WBS 2.1.R1 コンビニ業界構造の深掘り調査を小売ドメイン室に依頼する",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,secretary",
+        "mode": "subagent",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/convenience-industry-structure.md"
+        ],
+        "started": "2026-03-23T19:10:00"
+      }
+    },
+    {
+      "id": "20260324-100411-daily-digest",
+      "state": {
+        "request_keywords": [
+          "ニュース巡回",
+          "日次ダイジェスト生成"
+        ],
+        "request_head": "ニュース巡回（日次ダイジェスト生成）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "tech-researcher,retail-domain-researcher,secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-24T10:04:11"
+      }
+    },
+    {
+      "id": "20260325-192516-daily-digest",
+      "state": {
+        "request_keywords": [
+          "ニュース巡回",
+          "日次ダイジェスト生成"
+        ],
+        "request_head": "ニュース巡回（日次ダイジェスト生成）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 8.0,
+        "accuracy": 7.0,
+        "clarity": 9.0,
+        "total": 0.8,
+        "failure_reason": "",
+        "judge_comment": "8ソース巡回し主要トピックを網羅。AWSは更新なしだが正しく報告。ハイライト表とカテゴリ分けが明瞭。ソースURLの一部が実リンクでなくドメイン名のみの箇所あり。",
+        "judged_at": "2026-03-25T21:30:23+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-25T19:25:16"
+      }
+    },
+    {
+      "id": "20260325-192516-storcon-research",
+      "state": {
+        "request_keywords": [
+          "ストコン調査",
+          "WBS",
+          "2.1.R1",
+          "コンビニ業界構造の深掘り調査の継続"
+        ],
+        "request_head": "ストコン調査（WBS 2.1.R1 コンビニ業界構造の深掘り調査の継続）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,secretary",
+        "mode": "subagent",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 8.0,
+        "accuracy": 8.0,
+        "clarity": 9.0,
+        "total": 0.83,
+        "failure_reason": "",
+        "judge_comment": "3チェーン(セブン/ファミマ/ローソン)のクラウド移行状況を比較表付きで網羅。POS連携アーキテクチャの技術詳細が実践的。Strangler Figパターン等の設計パターン言及もPM視点で有用。",
+        "judged_at": "2026-03-25T21:30:23+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-25T19:25:16"
+      }
+    },
+    {
+      "id": "20260325-195518-pm-overview-w1-reading",
+      "state": {
+        "request_keywords": [
+          "WBS",
+          "4.1.1",
+          "PM全体像学習ノート生成",
+          "W1必読ドキュメント一覧",
+          "TODO更新"
+        ],
+        "request_head": "WBS 4.1.1 PM全体像学習ノート生成 + W1必読ドキュメント一覧 + TODO更新",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 3
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 8.0,
+        "clarity": 10.0,
+        "total": 0.9,
+        "failure_reason": "",
+        "judge_comment": "PM体制(PMO/機能PM/ベンダーPM)の整理が明確。W1必読リストはWBS全タスクを網羅しドキュメント有無を正確に把握。ストコン案件に当てはめた体制イメージが実践的。管理帳票テンプレートは参画後即活用可能。",
+        "judged_at": "2026-03-25T21:30:23+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/learning-notes/wbs-4-1-1-migration-pm-overview.md",
+          ".companies/domain-tech-collection/docs/secretary/learning-notes/w1-reading-list.md",
+          ".companies/domain-tech-collection/docs/secretary/todos/2026-03-25.md"
+        ],
+        "started": "2026-03-25T19:55:18"
+      }
+    },
+    {
+      "id": "20260325-205158-storcon-aws-deep-dive",
+      "state": {
+        "request_keywords": [
+          "ストコン調査でAWSの技術スタックで対応するべき内容を深堀調査して私が学習するべき内容もピックアップしてほしい",
+          "成果物が良質なものなら",
+          "learning-notesに内容を追加"
+        ],
+        "request_head": "ストコン調査でAWSの技術スタックで対応するべき内容を深堀調査して私が学習するべき内容もピックアップしてほしい。成果物が",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,secretary",
+        "mode": "subagent",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 8.0,
+        "clarity": 9.0,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": "DMS/MGN/Transit Gateway等7サービスの設定詳細が実践的。カットオーバー5段階手順は時刻付きで具体的。学習ロードマップMust/Should/Nice-to-haveの3段階整理がPM視点で有用。AWS公式ドキュメントリンク30+件収録。MCP活用で情報の信頼性が高い。",
+        "judged_at": "2026-03-25T21:30:23+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-25T20:51:58"
+      }
+    },
+    {
+      "id": "20260325-210500-storcon-aws-tech-deep-dive",
+      "state": {
+        "request_keywords": [],
+        "request_head": "",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 3
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/store-computer-aws-migration-tech.md",
+          ".companies/domain-tech-collection/docs/retail-domain/store-computer-domain-knowledge.md",
+          ".companies/domain-tech-collection/docs/retail-domain/industry-reports/storcon-aws-tech-deep-dive-2026-03-25.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260326-080629-daily-digest",
+      "state": {
+        "request_keywords": [
+          "毎日の情報収集作業を実施したい"
+        ],
+        "request_head": "毎日の情報収集作業を実施したい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "total": 0.86,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-26T08:06:29"
+      },
+      "conversation_context": [
+        "```tool_result\nSession 51aa8a5e (08:14-09:18):\n  - A\n  - 毎日の情報収集作業を実施したい\n  - OKマージした！\n  - main以外のローカルブランチ削除した？\n  - OK！\n  - OK！\n  - OK本日のtodo整理したい\n  - "
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260326-083011-storcon-diagram-memo",
+      "state": {
+        "request_keywords": [
+          "ストコンの全体像理解",
+          "WBS",
+          "2.1.1",
+          "の図解メモを作成してほしい"
+        ],
+        "request_head": "ストコンの全体像理解（WBS 2.1.1）の図解メモを作成してほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,secretary",
+        "mode": "subagent",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "total": 0.94,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-26T08:30:11"
+      },
+      "conversation_context": [
+        "```tool_result\n46-| WBS | タスク | 担当 | 期間 | 時間 | リソース | 成果物 | ステータス |\n47-|-----|-------|------|------|------|---------|--------|----------|\n48:| 2.1.1 |",
+        "```tool_result\n    45→\n    46→| WBS | タスク | 担当 | 期間 | 時間 | リソース | 成果物 | ステータス |\n    47→|-----|-------|------|------|------|---------|--------|--------"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260326-120000-storcon-aws-modernization-analytics",
+      "state": {
+        "request_keywords": [
+          "ストコンに必要そうなAWS知識の収集",
+          "モダナイゼーションとデータ分析系を深堀したい"
+        ],
+        "request_head": "ストコンに必要そうなAWS知識の収集。モダナイゼーションとデータ分析系を深堀したい。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "tech-researcher,retail-domain-researcher,secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-26T12:00:00"
+      }
+    },
+    {
+      "id": "20260326-193000-w2-advance-research",
+      "state": {
+        "request_keywords": [],
+        "request_head": "",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "retail-domain-researcher,tech-researcher",
+        "mode": "",
+        "artifact_count": 3
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 8.0,
+        "clarity": 9.0,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": "3本とも依頼スコープを網羅し構造化されている。W2自学の工程B（読んで理解する）への橋渡し資料として十分な品質",
+        "judged_at": "2026-03-26T19:45:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/convenience-business-processes.md",
+          ".companies/domain-tech-collection/docs/research/aws-database-comparison-for-storcon.md",
+          ".companies/domain-tech-collection/docs/research/migration-stakeholder-structure.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260326-194500-aws-basics-roadmap",
+      "state": {
+        "request_keywords": [],
+        "request_head": "",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "tech-researcher",
+        "mode": "",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 9.0,
+        "clarity": 10.0,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "4サービスすべてで概念整理(Mermaid図)+ストコン案件での活用+ハンズオン手順+SAA対策+チェックリストを網羅。PM視点とSAA対策の区分が明確で、学習者が迷わない構成。模擬問題4問も実践的でストコン案件に即した出題。既存資料への相互リンクも適切",
+        "judged_at": "2026-03-26T19:55:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/aws-basics-handson-roadmap.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260327-084645-daily-digest",
+      "state": {
+        "request_keywords": [
+          "毎日の技術リサーチ",
+          "wf-daily-digest"
+        ],
+        "request_head": "毎日の技術リサーチ（wf-daily-digest）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 8.0,
+        "accuracy": 8.0,
+        "clarity": 9.0,
+        "total": 0.83,
+        "failure_reason": "",
+        "judge_comment": "8ソース巡回で32件収集。品質ゲート全項目パス。クロスドメイン分析4件でSIer示唆充実。AWS What's NewはJS描画のため取得不可だがDevelopersIOで補完しAWS関連記事をカバー。ソースリンク全件https形式。前日重複の除外が適切。",
+        "judged_at": "2026-03-27T08:55:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-03-27.md"
+        ],
+        "started": "2026-03-27T08:46:45+09:00"
+      },
+      "conversation_context": [
+        "```tool_result\n     1→---\n     2→org: domain-tech-collection\n     3→status: in-progress\n     4→mode: agent-teams\n     5→started: 2026-03-27T08:46:45+0"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260327-140105-pm-skill-map",
+      "state": {
+        "request_keywords": [
+          "PMスキルマップ作成",
+          "壁打ち結果をもとに機能チームPMの6領域×学習ロードマップを成果物化"
+        ],
+        "request_head": "PMスキルマップ作成 — 壁打ち結果をもとに機能チームPMの6領域×学習ロードマップを成果物化",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 8.0,
+        "clarity": 9.0,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": "6責務領域の定義、現在地評価（L1-L4）、3フェーズ学習ロードマップ、Phase1の成果物15件を具体的に列挙。既存WBSとの対応表で既存資産との整合性も確保。推奨リソースは一般的な書籍・IPA資料が中心で案件固有の参照先は限定的だが、参画前の独学フェーズとしては十分。",
+        "judged_at": "2026-03-27T14:10:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/learning-notes/pm-skill-map.md"
+        ],
+        "started": "2026-03-27T14:01:05+09:00"
+      }
+    },
+    {
+      "id": "20260327-143112-pm-failure-patterns",
+      "state": {
+        "request_keywords": [
+          "SIer技術者出身PMの失敗パターン集をケーススタディ形式で作成"
+        ],
+        "request_head": "SIer技術者出身PMの失敗パターン集をケーススタディ形式で作成",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 9.0,
+        "clarity": 10.0,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "7パターンすべてに症状→根本原因→ケーススタディ（ストコン案件想定）→処方箋→セルフチェックを網羅。処方箋は具体的なフレームワーク（15分ルール、3層翻訳、断り方5パターン等）で即実践可能。タイムライン別の発生時期マッピングが実用的。PMスキルマップの伸びしろ4領域と完全に対応。",
+        "judged_at": "2026-03-27T14:40:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/learning-notes/pm-failure-patterns.md"
+        ],
+        "started": "2026-03-27T14:31:12+09:00"
+      }
+    },
+    {
+      "id": "20260327-192111-diagram-modern-data-lakehouse",
+      "state": {
+        "request_keywords": [
+          "モダンなデータレイクハウス構成を学びたい"
+        ],
+        "request_head": "モダンなデータレイクハウス構成を学びたい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-27T19:21:16+09:00"
+      },
+      "conversation_context": [
+        "```tool_result\nUser has answered your questions: \"どの領域のAWS構成図を作成しますか？\"=\"モダンなデータレイクハウス構成を学びたい。\" user notes: モダンなデータレイクハウス構成を学びたい。. You can now continue"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260327-195117-diagram-modern-ml-pipeline",
+      "state": {
+        "request_keywords": [
+          "データウェアハウスで集めたデータをMLする為のアーキテクチャ",
+          "モダンな構成を提案してほしい"
+        ],
+        "request_head": "データウェアハウスで集めたデータをMLする為のアーキテクチャ。モダンな構成を提案してほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-27T19:51:17+09:00"
+      },
+      "conversation_context": [
+        "```tool_result\nUser has answered your questions: \"どの領域のAWS構成図を作成しますか？\"=\"データウェアハウスで集めたデータをMLする為のアーキテクチャ。モダンな構成を提案してほしい\" user notes: データウェアハウスで集めたデータをML"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260327-200121-diagram-sales-management-system",
+      "state": {
+        "request_keywords": [
+          "毎月のAWS費用20万程度のアプリケーション運用を行うための構成図を考えてほしい",
+          "アプリケーションは販売管理システムで利用者数50～70人程",
+          "CI/CDはgithub",
+          "actionsを使用する想定"
+        ],
+        "request_head": "毎月のAWS費用20万程度のアプリケーション運用を行うための構成図を考えてほしい。アプリケーションは販売管理システムで利",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-27T20:01:21+09:00"
+      },
+      "conversation_context": [
+        "```tool_result\nUser has answered your questions: \"どの領域のAWS構成図を作成しますか？\"=\"毎月のAWS費用20万程度のアプリケーション運用を行うための構成図を考えてほしい。アプリケーションは販売管理システムで利用者数50～70人程。CI/CDはg"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260327-202408-diagram-distributed-cqrs",
+      "state": {
+        "request_keywords": [
+          "アプリケーションDBに低レイテンシーにする為に分散アーキテクチャを採用したい",
+          "列思考DBを使用しながらアーキテクチャ構成してほしい"
+        ],
+        "request_head": "アプリケーションDBに低レイテンシーにする為に分散アーキテクチャを採用したい。列思考DBを使用しながらアーキテクチャ構成",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-27T20:24:08+09:00"
+      }
+    },
+    {
+      "id": "20260328-100000-daily-digest",
+      "state": {
+        "request_keywords": [
+          "毎日の情報収集を行いたい"
+        ],
+        "request_head": "毎日の情報収集を行いたい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "tech-researcher,retail-domain-researcher,secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "total": 0.94,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-28T10:00:00"
+      },
+      "conversation_context": [
+        "毎日の情報収集を行いたい。"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260328-160000-diagram-serverless-web-app",
+      "state": {
+        "request_keywords": [
+          "未生成分野のダイアグラムでおすすめの領域を見繕って対応してほしい"
+        ],
+        "request_head": "未生成分野のダイアグラムでおすすめの領域を見繕って対応してほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 9.0,
+        "accuracy": 8.0,
+        "clarity": 9.0,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": "CloudFront/APIGateway/Lambda/DynamoDB/Cognito/SQS/SNS/EventBridge/StepFunctions/CloudWatch等の主要サーバーレスサービスを網羅。データフロー4パターン（同期API・静的配信・非同期・イベント駆動）をHTMLで詳細解説。LR方向指定だが複雑さにより一部レイアウトが非線形になった点のみ軽微な減点。",
+        "judged_at": "2026-03-28T16:15:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-28T16:00:00+09:00"
+      }
+    },
+    {
+      "id": "20260328-203000-diagram-data-fabric",
+      "state": {
+        "request_keywords": [
+          "大規模データを分析できるようにしてほしい",
+          "データファブリックアーキテクチャの構築をしてみてほしい"
+        ],
+        "request_head": "大規模データを分析できるようにしてほしい。データファブリックアーキテクチャの構築をしてみてほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 10.0,
+        "accuracy": 9.0,
+        "clarity": 9.0,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "Data Fabric核心要素（Active Metadata/フェデレーテッドクエリ/ナレッジグラフ/セルフサービス）を網羅。AWS Knowledge MCPレビューで6/6 Pass。Data Lakehouseとの差分比較表も付加。Comprehend→Neptune連携の中間処理（Lambda等）が図では省略されている点のみ軽微な抽象化。",
+        "judged_at": "2026-03-28T20:45:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-28T20:30:00+09:00"
+      }
+    },
+    {
+      "id": "20260328-210000-admin-add-mcp-iac",
+      "state": {
+        "request_keywords": [
+          "AWS",
+          "IaC",
+          "MCP",
+          "Serverを追加してIaCソースを書くときは呼び出すようにしてほしい"
+        ],
+        "request_head": "AWS IaC MCP Serverを追加してIaCソースを書くときは呼び出すようにしてほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-28T21:00:00+09:00"
+      }
+    },
+    {
+      "id": "20260328-213000-diagram-enterprise-mdm-insights",
+      "state": {
+        "request_keywords": [
+          "エンタープライズアーキテクチャ",
+          "CRMとERPを使用している前提",
+          "でMDMをためられ",
+          "データをインサイトできるようなアーキテクトを考えてほしい"
+        ],
+        "request_head": "エンタープライズアーキテクチャ（CRMとERPを使用している前提）でMDMをためられ、データをインサイトできるようなアー",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 10.0,
+        "accuracy": 9.0,
+        "clarity": 9.0,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "CRM/ERPからMDM統合→インサイトまで一気通貫の参照アーキテクチャ。Entity Resolution名寄せ・Glue Data Quality品質ゲート・Lake Formationガバナンスの3層MDMコアが明確。Bedrock RAGによるAIインサイトも組み込み済み。AWS Knowledge MCPレビュー6/6 Pass。IaCテンプレート(910行)・コードビューアHTML・詳細ページ・一覧カードすべて生成済み。Subagent: cloud-engineer (IaC YAML生成)",
+        "judged_at": "2026-03-28T21:45:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-28T21:30:00+09:00"
+      }
+    }
+  ],
+  "frequent_phrases": [
+    {
+      "phrase": "以外のローカルブランチ削除して",
+      "count": 3
+    },
+    {
+      "phrase": "に記載出来ていない機能について追記して",
+      "count": 2
+    },
+    {
+      "phrase": "の仕事を仮想組織として",
+      "count": 2
+    },
+    {
+      "phrase": "使うほど賢くなる継続学習機能を内蔵して",
+      "count": 2
+    },
+    {
+      "phrase": "アーキテクチャ構成図を生成して",
+      "count": 2
+    }
+  ],
+  "intent_patterns": [
+    {
+      "intent": "1.私がまだ生成していない分野のダイアグラムでおすすめの領域を見繕って対応",
+      "full": "1.私がまだ生成していない分野のダイアグラムでおすすめの領域を見繕って対応してほしい。\n2.任せる！\n3.英語名で任せる！",
+      "date": "2026-03-28"
+    },
+    {
+      "intent": "ダイアグラム生成する際にテンプレシートに必ず以下を含めるように",
+      "full": "ダイアグラム生成する際にテンプレシートに必ず以下を含めるようにしてほしい。\n概要\nデータフロー\nレイヤー構成\n設計のポイント\n※その他は生成するアーキテクチャに必要な情報を含める\n※現状含まれていない",
+      "date": "2026-03-28"
+    }
+  ],
+  "conversation_enriched_at": "2026-03-28T19:56:04"
+}
