@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   Enterprise MDM & Data Insights Architecture テンプレート
-  CRM/ERP の分散データを MDM 層で統合し、Kinesis によるリアルタイム取り込み +
+  CRM/ERP の分散データを MDM 層で統合し、Kinesis リアルタイム取り込み +
   Glue ETL（クレンジング・名寄せ）+ Step Functions オーケストレーション +
   Redshift Serverless / Athena による分析インサイト提供（教育・参照用）
 
@@ -19,27 +19,23 @@ Parameters:
   VpcCIDR:
     Type: String
     Default: "10.2.0.0/16"
-    Description: MDM / Insights 基盤用 VPC の CIDR ブロック
 
   # TODO: 実運用時に変更してください
   PrivateSubnet1CIDR:
     Type: String
     Default: "10.2.11.0/24"
-    Description: Redshift Serverless 用プライベートサブネット（AZ-1）
 
   # TODO: 実運用時に変更してください
   PrivateSubnet2CIDR:
     Type: String
     Default: "10.2.12.0/24"
-    Description: Redshift Serverless 用プライベートサブネット（AZ-2）
 
-  # TODO: 実運用時に変更してください（シャード数は CRM/ERP のイベント量に応じて調整）
+  # TODO: 実運用時に変更してください（イベント量に応じてシャード数を調整）
   KinesisShardCount:
     Type: Number
     Default: 2
     MinValue: 1
     MaxValue: 100
-    Description: Kinesis Data Stream のシャード数
 
   # TODO: 実運用時に変更してください（データ量に応じて Worker 数を増減）
   GlueWorkerCount:
@@ -47,27 +43,23 @@ Parameters:
     Default: 5
     MinValue: 2
     MaxValue: 50
-    Description: Glue ETL Job の Worker 数（G.1X 換算）
 
-  # TODO: 実運用時に変更してください（Redshift Serverless の基本 RPU 数）
+  # TODO: 実運用時に変更してください（最小 8 RPU）
   RedshiftBaseRPU:
     Type: Number
     Default: 8
     MinValue: 8
     MaxValue: 512
-    Description: Redshift Serverless Workgroup の基本キャパシティ（RPU）
 
   # TODO: 実運用時に変更してください（Lake Formation 管理者 IAM ロール/ユーザー ARN）
   LakeFormationAdminArn:
     Type: String
     Default: "arn:aws:iam::123456789012:role/MDMDataLakeAdmin"
-    Description: Lake Formation データ管理者の IAM ロール/ユーザー ARN
 
-  # TODO: 実運用時に変更してください（アラート送信先メールアドレス）
+  # TODO: 実運用時に変更してください
   AlertEmail:
     Type: String
     Default: "mdm-ops@example.com"
-    Description: パイプライン監視アラートの送信先メールアドレス
 
 # ============================================================
 # Resources
@@ -75,7 +67,7 @@ Parameters:
 Resources:
 
   # ----------------------------------------------------------
-  # VPC / ネットワーク定義（Redshift Serverless 用）
+  # VPC / ネットワーク（Redshift Serverless 用 Private Subnet x2）
   # ----------------------------------------------------------
   MDMInsightsVPC:
     Type: AWS::EC2::VPC
@@ -107,7 +99,7 @@ Resources:
         - Key: Name
           Value: !Sub "${EnvironmentName}-mdm-private-subnet-2"
 
-  # Redshift Serverless 用セキュリティグループ（VPC 内からのみ 5439 ポートを許可）
+  # VPC 内からのみ Redshift 5439 ポートを許可
   RedshiftSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -117,19 +109,16 @@ Resources:
         - IpProtocol: tcp
           FromPort: 5439
           ToPort: 5439
-          CidrIp: !Ref VpcCIDR  # VPC 内からのみ接続許可（直接インターネット公開禁止）
-      Tags:
-        - Key: Name
-          Value: !Sub "${EnvironmentName}-redshift-sg"
+          CidrIp: !Ref VpcCIDR
 
   # ----------------------------------------------------------
-  # KMS キー（全リソース共通暗号化キー）
+  # KMS キー（全リソース共通暗号化・年次自動ローテーション有効）
   # ----------------------------------------------------------
   MDMKMSKey:
     Type: AWS::KMS::Key
     Properties:
       Description: Enterprise MDM & Data Insights 全リソース暗号化キー
-      EnableKeyRotation: true  # 年次自動ローテーション有効
+      EnableKeyRotation: true
       KeyPolicy:
         Version: "2012-10-17"
         Statement:
@@ -143,17 +132,13 @@ Resources:
             Effect: Allow
             Principal:
               Service: glue.amazonaws.com
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey
+            Action: [kms:Decrypt, kms:GenerateDataKey]
             Resource: "*"
           - Sid: AllowFirehoseService
             Effect: Allow
             Principal:
               Service: firehose.amazonaws.com
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey
+            Action: [kms:Decrypt, kms:GenerateDataKey]
             Resource: "*"
 
   MDMKMSKeyAlias:
@@ -166,19 +151,18 @@ Resources:
   # S3 バケット x3: Raw Zone / Staged Zone / Golden Zone（MDM）
   # ----------------------------------------------------------
 
-  # Raw Zone: CRM/ERP から取り込んだ生データをそのまま保管（変更禁止・原本保護）
+  # Raw Zone: CRM/ERP 生データ原本（変更禁止・180日後 Glacier 移行）
   RawZoneBucket:
     Type: AWS::S3::Bucket
     Properties:
-      # TODO: 実運用時に変更してください
-      BucketName: !Sub "${EnvironmentName}-mdm-raw-zone-${AWS::AccountId}"
+      BucketName: !Sub "${EnvironmentName}-mdm-raw-zone-${AWS::AccountId}"  # TODO: 実運用時に変更してください
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: aws:kms
               KMSMasterKeyID: !Ref MDMKMSKey
       VersioningConfiguration:
-        Status: Enabled  # 誤削除・誤上書き対策のためバージョニング有効
+        Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -189,16 +173,14 @@ Resources:
           - Id: ArchiveRawData
             Status: Enabled
             Transitions:
-              # 180日後に Glacier Instant Retrieval に移行（コスト削減）
-              - TransitionInDays: 180
-                StorageClass: GLACIER_IR  # TODO: 実運用時に保持ポリシーを調整してください
+              - TransitionInDays: 180  # TODO: 実運用時に保持ポリシーを調整してください
+                StorageClass: GLACIER_IR
 
   # Staged Zone: クレンジング・正規化済みデータ（Parquet 形式推奨）
   StagedZoneBucket:
     Type: AWS::S3::Bucket
     Properties:
-      # TODO: 実運用時に変更してください
-      BucketName: !Sub "${EnvironmentName}-mdm-staged-zone-${AWS::AccountId}"
+      BucketName: !Sub "${EnvironmentName}-mdm-staged-zone-${AWS::AccountId}"  # TODO: 実運用時に変更してください
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -211,20 +193,12 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      LifecycleConfiguration:
-        Rules:
-          - Id: TransitionStagedData
-            Status: Enabled
-            Transitions:
-              - TransitionInDays: 90
-                StorageClass: STANDARD_IA  # TODO: 実運用時に調整してください
 
-  # Golden Zone（MDM）: 名寄せ・統合済みのマスタレコード（Single Source of Truth）
+  # Golden Zone（MDM）: 名寄せ・統合済みマスタレコード（Single Source of Truth）
   GoldenZoneBucket:
     Type: AWS::S3::Bucket
     Properties:
-      # TODO: 実運用時に変更してください
-      BucketName: !Sub "${EnvironmentName}-mdm-golden-zone-${AWS::AccountId}"
+      BucketName: !Sub "${EnvironmentName}-mdm-golden-zone-${AWS::AccountId}"  # TODO: 実運用時に変更してください
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -238,12 +212,11 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
 
-  # Athena クエリ結果保存用バケット（アドホック分析の出力先）
+  # Athena クエリ結果保存バケット（30日自動削除）
   AthenaResultBucket:
     Type: AWS::S3::Bucket
     Properties:
-      # TODO: 実運用時に変更してください
-      BucketName: !Sub "${EnvironmentName}-mdm-athena-results-${AWS::AccountId}"
+      BucketName: !Sub "${EnvironmentName}-mdm-athena-results-${AWS::AccountId}"  # TODO: 実運用時に変更してください
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -258,7 +231,7 @@ Resources:
         Rules:
           - Id: ExpireAthenaResults
             Status: Enabled
-            ExpirationInDays: 30  # Athena 結果は 30 日で自動削除
+            ExpirationInDays: 30
 
   # ----------------------------------------------------------
   # Glue Database（MDM Data Catalog）
@@ -272,42 +245,40 @@ Resources:
         Description: Enterprise MDM データカタログ（Raw / Staged / Golden ゾーン統合管理）
 
   # ----------------------------------------------------------
-  # Glue Crawler（Raw Zone スキーマ自動検出）
+  # Glue Crawler（Raw Zone スキーマ自動検出・毎日01:00実行）
   # ----------------------------------------------------------
   RawZoneCrawler:
     Type: AWS::Glue::Crawler
     Properties:
       Name: !Sub "${EnvironmentName}-mdm-raw-crawler"
-      Description: Raw Zone（CRM/ERP 生データ）のスキーマを自動検出してカタログに登録
       Role: !GetAtt GlueServiceRole.Arn
       DatabaseName: !Ref MDMGlueDatabase
       Targets:
         S3Targets:
           - Path: !Sub "s3://${RawZoneBucket}/ingest/"
       Schedule:
-        ScheduleExpression: "cron(0 1 * * ? *)"  # TODO: 実運用時にクロールスケジュールを調整してください
+        ScheduleExpression: "cron(0 1 * * ? *)"  # TODO: 実運用時にスケジュールを調整してください
       SchemaChangePolicy:
         UpdateBehavior: UPDATE_IN_DATABASE
         DeleteBehavior: LOG
 
   # ----------------------------------------------------------
   # Glue ETL Job（クレンジング・名寄せ前処理: Raw → Staged）
-  # ----------------------------------------------------------
   # NOTE: 実際のスクリプトは S3 に格納し ScriptLocation で参照してください
+  # ----------------------------------------------------------
   MDMCleansingJob:
     Type: AWS::Glue::Job
     Properties:
       Name: !Sub "${EnvironmentName}-mdm-cleansing-job"
-      Description: CRM/ERP 生データのクレンジング・正規化・名寄せ前処理（Raw Zone → Staged Zone）
+      Description: CRM/ERP 生データのクレンジング・正規化・名寄せ前処理（Raw → Staged）
       Role: !GetAtt GlueServiceRole.Arn
       GlueVersion: "4.0"
       WorkerType: G.1X  # TODO: 実運用時にデータ量に合わせて変更してください（G.2X 等）
       NumberOfWorkers: !Ref GlueWorkerCount
-      Timeout: 120  # 分
-      # TODO: 実運用時に実際の ETL スクリプトパスに変更してください
+      Timeout: 120
       Command:
         Name: glueetl
-        ScriptLocation: !Sub "s3://${RawZoneBucket}/scripts/mdm_cleansing.py"
+        ScriptLocation: !Sub "s3://${RawZoneBucket}/scripts/mdm_cleansing.py"  # TODO: 実運用時に変更してください
         PythonVersion: "3"
       DefaultArguments:
         "--job-language": "python"
@@ -316,13 +287,11 @@ Resources:
         "--source-bucket": !Ref RawZoneBucket
         "--dest-bucket": !Ref StagedZoneBucket
         "--encryption-key": !Ref MDMKMSKey
-        # Entity Resolution (AWS Entity Resolution) との連携ポイント
-        # NOTE: AWS Entity Resolution はコンソールまたは SDK での設定が必要です。
-        #       ここで Staged Zone への出力後、Entity Resolution ジョブを呼び出して
-        #       一意エンティティ ID を付与し Golden Zone に書き戻す設計を推奨します。
+        # NOTE: AWS Entity Resolution との連携はこのジョブ後に実施
+        #       Staged Zone 出力 → Entity Resolution ワークフロー → Golden Zone へ書き戻し
         # TODO: 実運用時に Entity Resolution ワークフロー ARN を設定してください
 
-  # Glue ETL Job（Staged → Golden Zone: マッチング済みレコードをマスタ確定）
+  # Staged → Golden Zone: マッチング済みレコードをマスタ確定
   MDMGoldenJob:
     Type: AWS::Glue::Job
     Properties:
@@ -333,10 +302,9 @@ Resources:
       WorkerType: G.2X  # TODO: 実運用時に調整してください
       NumberOfWorkers: !Ref GlueWorkerCount
       Timeout: 180
-      # TODO: 実運用時に実際の ETL スクリプトパスに変更してください
       Command:
         Name: glueetl
-        ScriptLocation: !Sub "s3://${StagedZoneBucket}/scripts/mdm_golden_merge.py"
+        ScriptLocation: !Sub "s3://${StagedZoneBucket}/scripts/mdm_golden_merge.py"  # TODO: 実運用時に変更してください
         PythonVersion: "3"
       DefaultArguments:
         "--job-language": "python"
@@ -353,7 +321,7 @@ Resources:
     Type: AWS::Glue::DataQualityRuleset
     Properties:
       Name: !Sub "${EnvironmentName}-mdm-quality-rules"
-      Description: MDM パイプラインの品質ゲート（必須フィールド・重複チェック等）
+      Description: MDM パイプライン品質ゲート（必須フィールド・重複・完全性チェック）
       # TODO: 実運用時にデータ品質要件に合わせてルールを追加・調整してください
       Ruleset: |
         Rules = [
@@ -376,7 +344,6 @@ Resources:
       Admins:
         - DataLakePrincipalIdentifier: !Ref LakeFormationAdminArn  # TODO: 実運用時に変更してください
 
-  # Raw Zone を Lake Formation に登録（きめ細かいアクセス制御を適用）
   RawZoneLakeFormationResource:
     Type: AWS::LakeFormation::Resource
     Properties:
@@ -400,7 +367,7 @@ Resources:
       StreamEncryption:
         EncryptionType: KMS
         KeyId: !Ref MDMKMSKey
-      RetentionPeriodHours: 48  # TODO: 実運用時にデータ保持期間を調整してください（最大 8760 時間）
+      RetentionPeriodHours: 48  # TODO: 実運用時にデータ保持期間を調整してください
 
   # ----------------------------------------------------------
   # Kinesis Firehose（Stream → Raw Zone S3 への自動配信）
@@ -422,29 +389,16 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:GetBucketLocation
-                  - s3:ListBucket
+                Action: [s3:PutObject, s3:GetBucketLocation, s3:ListBucket]
                 Resource:
                   - !GetAtt RawZoneBucket.Arn
                   - !Sub "${RawZoneBucket.Arn}/*"
               - Effect: Allow
-                Action:
-                  - kinesis:GetRecords
-                  - kinesis:GetShardIterator
-                  - kinesis:DescribeStream
-                  - kinesis:ListShards
+                Action: [kinesis:GetRecords, kinesis:GetShardIterator, kinesis:DescribeStream, kinesis:ListShards]
                 Resource: !GetAtt CRMERPEventStream.Arn
               - Effect: Allow
-                Action:
-                  - kms:GenerateDataKey
-                  - kms:Decrypt
+                Action: [kms:GenerateDataKey, kms:Decrypt]
                 Resource: !GetAtt MDMKMSKey.Arn
-              - Effect: Allow
-                Action:
-                  - logs:PutLogEvents
-                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/kinesisfirehose/*"
 
   CRMERPFirehose:
     Type: AWS::KinesisFirehose::DeliveryStream
@@ -457,9 +411,9 @@ Resources:
       S3DestinationConfiguration:
         BucketARN: !GetAtt RawZoneBucket.Arn
         RoleARN: !GetAtt FirehoseDeliveryRole.Arn
-        # ソースシステム・日付でパーティション分割して後続クローラの効率を向上
-        Prefix: "ingest/source=!{partitionKeyFromQuery:source}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
-        ErrorOutputPrefix: "errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+        # ソースシステム・日付でパーティション分割（後続クローラの効率化）
+        Prefix: "ingest/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+        ErrorOutputPrefix: "errors/!{firehose:error-output-type}/"
         BufferingHints:
           SizeInMBs: 128  # TODO: 実運用時にバッファサイズを調整してください
           IntervalInSeconds: 300
@@ -467,16 +421,12 @@ Resources:
           KMSEncryptionConfig:
             AWSKMSKeyARN: !GetAtt MDMKMSKey.Arn
         CompressionFormat: GZIP
-        CloudWatchLoggingOptions:
-          Enabled: true
-          LogGroupName: !Ref MDMPipelineLogGroup
-          LogStreamName: "firehose-delivery"
 
   # ----------------------------------------------------------
-  # IAM Roles
+  # IAM Roles（最小権限原則に基づく 3 ロール構成）
   # ----------------------------------------------------------
 
-  # Glue 実行ロール（最小権限: Raw/Staged/Golden の読み書き + カタログ操作のみ）
+  # Glue 実行ロール（Raw/Staged/Golden の読み書き + カタログ操作）
   GlueServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -496,31 +446,19 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:PutObject
-                  - s3:DeleteObject
-                  - s3:ListBucket
+                Action: [s3:GetObject, s3:PutObject, s3:DeleteObject, s3:ListBucket]
                 Resource:
-                  - !Sub "${RawZoneBucket.Arn}/*"
-                  - !Sub "${StagedZoneBucket.Arn}/*"
-                  - !Sub "${GoldenZoneBucket.Arn}/*"
                   - !GetAtt RawZoneBucket.Arn
+                  - !Sub "${RawZoneBucket.Arn}/*"
                   - !GetAtt StagedZoneBucket.Arn
+                  - !Sub "${StagedZoneBucket.Arn}/*"
                   - !GetAtt GoldenZoneBucket.Arn
+                  - !Sub "${GoldenZoneBucket.Arn}/*"
               - Effect: Allow
-                Action:
-                  - kms:GenerateDataKey
-                  - kms:Decrypt
+                Action: [kms:GenerateDataKey, kms:Decrypt]
                 Resource: !GetAtt MDMKMSKey.Arn
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws-glue/*"
 
-  # Step Functions 実行ロール（Glue ジョブ起動・監視権限のみ付与）
+  # Step Functions 実行ロール（Glue ジョブ起動・監視 + SNS 通知）
   MDMStateMachineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -544,26 +482,17 @@ Resources:
                   - glue:BatchStopJobRun
                   - glue:StartCrawler
                   - glue:GetCrawler
-                  - glue:GetDataQualityRulesetEvaluationRun
                   - glue:StartDataQualityRulesetEvaluationRun
+                  - glue:GetDataQualityRulesetEvaluationRun
                 Resource: "*"
               - Effect: Allow
-                Action:
-                  - sns:Publish
+                Action: sns:Publish
                 Resource: !Ref MDMAlertTopic
               - Effect: Allow
-                Action:
-                  - xray:PutTraceSegments
-                  - xray:PutTelemetryRecords
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogDelivery
-                  - logs:PutLogEvents
-                  - logs:GetLogDelivery
+                Action: [xray:PutTraceSegments, xray:PutTelemetryRecords]
                 Resource: "*"
 
-  # Redshift Serverless 用 IAM ロール（Golden Zone 読み取り + Glue カタログ参照のみ）
+  # Redshift Serverless ロール（Golden Zone 読み取り + Glue カタログ参照のみ）
   RedshiftServerlessRole:
     Type: AWS::IAM::Role
     Properties:
@@ -581,26 +510,20 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:ListBucket
+                Action: [s3:GetObject, s3:ListBucket]
                 Resource:
                   - !GetAtt GoldenZoneBucket.Arn
                   - !Sub "${GoldenZoneBucket.Arn}/*"
               - Effect: Allow
-                Action:
-                  - kms:Decrypt
+                Action: kms:Decrypt
                 Resource: !GetAtt MDMKMSKey.Arn
               - Effect: Allow
-                Action:
-                  - glue:GetTable
-                  - glue:GetDatabase
-                  - glue:GetPartitions
+                Action: [glue:GetTable, glue:GetDatabase, glue:GetPartitions]
                 Resource: "*"
 
   # ----------------------------------------------------------
   # Step Functions StateMachine（MDM パイプライン オーケストレーション）
-  # フロー: Raw Crawl → Cleanse → Data Quality → Match → Golden → Alert
+  # フロー: Raw Crawl → Cleanse → Data Quality → Golden Merge → 完了/失敗通知
   # ----------------------------------------------------------
   MDMPipelineStateMachine:
     Type: AWS::StepFunctions::StateMachine
@@ -612,46 +535,32 @@ Resources:
         Enabled: true
       DefinitionString: !Sub |
         {
-          "Comment": "MDM パイプライン: Raw Crawl → Cleanse → Quality Gate → Match → Golden",
+          "Comment": "MDM パイプライン: Raw Crawl → Cleanse → Quality Gate → Golden",
           "StartAt": "CrawlRawZone",
           "States": {
             "CrawlRawZone": {
               "Type": "Task",
               "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
               "Parameters": { "Name": "${RawZoneCrawler}" },
-              "Next": "RunCleansingJob",
-              "Comment": "Raw Zone のスキーマを最新化してから ETL を起動"
+              "Next": "RunCleansingJob"
             },
             "RunCleansingJob": {
               "Type": "Task",
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": { "JobName": "${MDMCleansingJob}" },
               "Next": "DataQualityCheck",
-              "Retry": [
-                {
-                  "ErrorEquals": ["States.ALL"],
-                  "IntervalSeconds": 60,
-                  "MaxAttempts": 2,
-                  "BackoffRate": 2.0
-                }
-              ],
+              "Retry": [{ "ErrorEquals": ["States.ALL"], "IntervalSeconds": 60, "MaxAttempts": 2, "BackoffRate": 2.0 }],
               "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "NotifyFailure" }]
             },
             "DataQualityCheck": {
               "Type": "Task",
               "Resource": "arn:aws:states:::aws-sdk:glue:startDataQualityRulesetEvaluationRun",
               "Parameters": {
-                "DataSource": {
-                  "GlueTable": {
-                    "DatabaseName": "${MDMGlueDatabase}",
-                    "TableName": "staged_customers"
-                  }
-                },
+                "DataSource": { "GlueTable": { "DatabaseName": "${MDMGlueDatabase}", "TableName": "staged_customers" } },
                 "RulesetNames": ["${MDMDataQualityRuleset}"],
                 "Role": "${GlueServiceRole.Arn}"
               },
               "Next": "RunGoldenMergeJob",
-              "Comment": "品質ゲート: 基準を下回る場合はパイプラインを停止",
               "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "NotifyFailure" }]
             },
             "RunGoldenMergeJob": {
@@ -659,26 +568,16 @@ Resources:
               "Resource": "arn:aws:states:::glue:startJobRun.sync",
               "Parameters": { "JobName": "${MDMGoldenJob}" },
               "Next": "PipelineSucceeded",
-              "Retry": [
-                {
-                  "ErrorEquals": ["States.ALL"],
-                  "IntervalSeconds": 60,
-                  "MaxAttempts": 2,
-                  "BackoffRate": 2.0
-                }
-              ],
-              "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "NotifyFailure" }],
-              "Comment": "名寄せ・マッチング後のマスタレコードを Golden Zone に確定"
+              "Retry": [{ "ErrorEquals": ["States.ALL"], "IntervalSeconds": 60, "MaxAttempts": 2, "BackoffRate": 2.0 }],
+              "Catch": [{ "ErrorEquals": ["States.ALL"], "Next": "NotifyFailure" }]
             },
-            "PipelineSucceeded": {
-              "Type": "Succeed"
-            },
+            "PipelineSucceeded": { "Type": "Succeed" },
             "NotifyFailure": {
               "Type": "Task",
               "Resource": "arn:aws:states:::sns:publish",
               "Parameters": {
                 "TopicArn": "${MDMAlertTopic}",
-                "Message.$": "States.Format('MDM パイプライン失敗: {} - {}', $$.Execution.Name, $.Cause)"
+                "Message.$": "States.Format('MDM パイプライン失敗: {}', $$.Execution.Name)"
               },
               "Next": "PipelineFailed"
             },
@@ -691,16 +590,14 @@ Resources:
         }
 
   # ----------------------------------------------------------
-  # Redshift Serverless（分析・インサイト提供基盤）
+  # Redshift Serverless（分析インサイト提供基盤）
   # ----------------------------------------------------------
   RedshiftServerlessNamespace:
     Type: AWS::RedshiftServerless::Namespace
     Properties:
       NamespaceName: !Sub "${EnvironmentName}-mdm-namespace"
-      # TODO: 実運用時に変更してください（Redshift 管理者ユーザー名）
-      AdminUsername: "mdmadmin"
-      # TODO: 実運用時に Secrets Manager から取得するよう変更してください
-      AdminUserPassword: "MDMInsights2024!Change@Me"
+      AdminUsername: "mdmadmin"  # TODO: 実運用時に変更してください
+      AdminUserPassword: "MDMInsights2024!Change@Me"  # TODO: 実運用時に Secrets Manager から取得するよう変更してください
       DbName: !Sub "${EnvironmentName}_mdm_insights"
       KmsKeyId: !Ref MDMKMSKey
       IamRoles:
@@ -725,7 +622,7 @@ Resources:
   MDMAthenaWorkGroup:
     Type: AWS::Athena::WorkGroup
     Properties:
-      Name: !Sub "${EnvironmentName}-mdm-workgroup"
+      Name: !Sub "${EnvironmentName}-mdm-athena-workgroup"
       Description: MDM Golden Zone のアドホック分析用 Athena ワークグループ
       State: ENABLED
       WorkGroupConfiguration:
@@ -766,15 +663,13 @@ Resources:
       TreatMissingData: notBreaching
       AlarmActions:
         - !Ref MDMAlertTopic
-      OKActions:
-        - !Ref MDMAlertTopic
 
-  # Kinesis Stream IteratorAge アラーム（コンシューマー遅延監視）
+  # Kinesis IteratorAge アラーム（コンシューマー遅延検知）
   KinesisIteratorAgeAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${EnvironmentName}-mdm-kinesis-iterator-age"
-      AlarmDescription: Kinesis コンシューマーの遅延が閾値を超えた場合に通知（レコード滞留検知）
+      AlarmDescription: Kinesis コンシューマーの遅延が閾値超過（レコード滞留検知）
       Namespace: AWS/Kinesis
       MetricName: GetRecords.IteratorAgeMilliseconds
       Dimensions:
@@ -783,7 +678,7 @@ Resources:
       Statistic: Maximum
       Period: 60
       EvaluationPeriods: 3
-      Threshold: 60000  # TODO: 実運用時に適切な閾値（ミリ秒）に変更してください（現在1分）
+      Threshold: 60000  # TODO: 実運用時に適切な閾値（ms）に変更してください（現在1分）
       ComparisonOperator: GreaterThanOrEqualToThreshold
       TreatMissingData: notBreaching
       AlarmActions:
@@ -798,48 +693,39 @@ Resources:
       TopicName: !Sub "${EnvironmentName}-mdm-alert-topic"
       KmsMasterKeyId: !Ref MDMKMSKey
       Subscription:
-        # TODO: 実運用時に通知先メールアドレスを変更してください
         - Protocol: email
-          Endpoint: !Ref AlertEmail
+          Endpoint: !Ref AlertEmail  # TODO: 実運用時に通知先メールアドレスを変更してください
 
   # ----------------------------------------------------------
   # AppFlow（SaaS CRM/ERP 接続）
-  # NOTE: Salesforce・SAP 等の SaaS CRM/ERP との接続には AWS AppFlow を推奨します。
-  #       AppFlow の接続設定（ConnectorProfile）は OAuth 認証情報を含むため、
-  #       コンソールまたは AWS CLI での初期設定が必要です。
-  #       フロー定義後は AWS::AppFlow::Flow リソースで IaC 管理できます。
-  # TODO: 実運用時に AppFlow フロー定義を追加してください（ソース: Salesforce/SAP, 宛先: Raw Zone S3）
+  # NOTE: Salesforce/SAP 等との接続には AWS AppFlow を推奨。
+  #       OAuth 認証情報を含む ConnectorProfile はコンソール設定が必要。
+  #       設定後に AWS::AppFlow::Flow で IaC 管理可能。
+  # TODO: 実運用時に AppFlow フロー定義を追加してください（ソース: Salesforce/SAP, 宛先: Raw Zone）
   # ----------------------------------------------------------
 
   # ----------------------------------------------------------
   # AWS Entity Resolution（エンティティ解決・名寄せ）
-  # NOTE: AWS Entity Resolution はスキーママッピング・マッチングワークフローの
-  #       CloudFormation サポートが限定的です（2024年時点）。
-  #       以下の手順でコンソール/SDK から設定することを推奨します：
-  #       1. Schema Mapping: Staged Zone の顧客テーブルをマッピング定義
-  #       2. Matching Workflow: Rule-based または ML-based マッチング設定
-  #       3. Job 実行後に出力を Golden Zone に書き込む
-  # TODO: 実運用時に Entity Resolution のスキーママッピングとワークフローを設定してください
+  # NOTE: Schema Mapping / Matching Workflow の CFn サポートは限定的（2024年時点）。
+  #       コンソール/SDK での設定を推奨:
+  #       1. Schema Mapping: Staged Zone 顧客テーブルをマッピング
+  #       2. Matching Workflow: Rule-based または ML-based マッチング
+  #       3. 出力を Golden Zone に書き込み
+  # TODO: 実運用時に Entity Resolution ワークフローを設定してください
   # ----------------------------------------------------------
 
   # ----------------------------------------------------------
-  # Amazon Bedrock RAG（インサイト生成・自然言語クエリ）
-  # NOTE: Bedrock Knowledge Base（RAG）は Golden Zone のデータをベクトル化して
-  #       自然言語によるデータ問い合わせを実現します。
-  #       OpenSearch Serverless（ベクトルストア）との組み合わせを推奨します。
-  #       現時点では CloudFormation サポートが部分的なため、コンソール設定を推奨します。
-  # TODO: 実運用時に Bedrock Knowledge Base と OpenSearch Serverless の設定を追加してください
+  # Amazon Bedrock RAG（自然言語インサイト生成）
+  # NOTE: Knowledge Base（RAG）は Golden Zone データをベクトル化して
+  #       自然言語クエリを実現。OpenSearch Serverless との組み合わせを推奨。
+  #       CFn サポートが部分的なためコンソール設定を推奨。
+  # TODO: 実運用時に Bedrock Knowledge Base と OpenSearch Serverless を設定してください
   # ----------------------------------------------------------
 
   # ----------------------------------------------------------
-  # Amazon QuickSight（BIダッシュボード）
-  # NOTE: QuickSight はコンソールまたは API での初期セットアップが必要なため
-  #       CloudFormation での直接プロビジョニングは限定的です。
-  #       以下の手順でセットアップしてください：
-  #       1. QuickSight コンソールで Enterprise Edition を有効化
-  #       2. VPC Connection を設定（Redshift Serverless へのアクセス用）
-  #       3. Athena / Redshift をデータソースとして追加（Golden Zone を参照）
-  #       4. MDM マスタデータを SPICE にインポートしてダッシュボードを作成
+  # Amazon QuickSight（BI ダッシュボード）
+  # NOTE: コンソールで初期設定が必要（Enterprise Edition 有効化 → VPC Connection 設定
+  #       → Athena/Redshift をデータソース追加 → Golden Zone SPICE インポート）。
   # TODO: 実運用時に QuickSight VPC 接続設定とデータソース定義を追加してください
   # ----------------------------------------------------------
 
@@ -878,7 +764,7 @@ Outputs:
       Name: !Sub "${EnvironmentName}-MDMCRMERPEventStreamArn"
 
   FirehoseDeliveryStreamArn:
-    Description: Kinesis Firehose Delivery Stream ARN（Raw Zone への自動配信）
+    Description: Kinesis Firehose Delivery Stream ARN
     Value: !GetAtt CRMERPFirehose.Arn
 
   MDMPipelineStateMachineArn:
@@ -892,11 +778,11 @@ Outputs:
     Value: !Ref MDMAthenaWorkGroup
 
   RedshiftNamespaceName:
-    Description: Redshift Serverless Namespace 名（分析基盤）
+    Description: Redshift Serverless Namespace 名
     Value: !Ref RedshiftServerlessNamespace
 
   RedshiftWorkgroupName:
-    Description: Redshift Serverless Workgroup 名（分析基盤）
+    Description: Redshift Serverless Workgroup 名
     Value: !Ref RedshiftServerlessWorkgroup
 
   MDMAlertTopicArn:
