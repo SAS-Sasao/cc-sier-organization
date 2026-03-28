@@ -7,8 +7,8 @@ mode: direct
 started: "2026-03-28T21:30:00+09:00"
 completed: "2026-03-28T21:45:00+09:00"
 request: "エンタープライズアーキテクチャ（CRMとERPを使用している前提）でMDMをためられ、データをインサイトできるようなアーキテクトを考えてほしい"
-issue_number: null
-pr_number: null
+issue_number: 139
+pr_number: 138
 ---
 
 ## 実行計画
