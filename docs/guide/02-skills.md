@@ -230,6 +230,66 @@ https://{user}.github.io/{repo}/secretary/dashboard.html
 
 ---
 
+## /company-diagram
+
+AWS Diagram MCP Server を使い、AWSアーキテクチャ構成図をPNG生成してGitHub Pagesギャラリーに公開します。
+
+```
+構成図を描いて
+DWHのアーキテクチャ図を追加して
+```
+
+**必要に応じてヒアリング:**
+
+| # | 質問 | 例 |
+|---|------|-----|
+| Q1 | どの領域の構成図か | DWH, ネットワーク, アプリケーション |
+| Q2 | 含めたいAWSサービス | S3, Glue, Redshift 等（任意） |
+| Q3 | 図の名前 | `modern-data-lakehouse`（英語推奨） |
+
+**MCP ツール利用順序:**
+1. `list_icons` — 利用可能アイコンの確認
+2. `get_diagram_examples` — 構文の参考取得
+3. `generate_diagram` — Python diagrams DSL で PNG 生成
+
+**出力先:**
+- `docs/diagrams/{name}.png`（構成図画像）
+- `docs/diagrams/{name}.html`（詳細ページ）
+- `docs/diagrams/index.html`（一覧ページにカード追加）
+
+**注意:** ラベルは英語で記述（日本語はフォント未対応で文字化け）。日本語の解説は HTML ビューア側に記載。
+
+**前提条件:** GraphViz（`dot -V`）、uv、Python 3.10+ がインストール済みであること。
+
+詳細は [11 AWS構成図生成](11-diagram-generation.md) を参照。
+
+---
+
+## /company-digest-html
+
+日次ダイジェストのMarkdownファイルをHTMLに変換し、GitHub Pagesで閲覧可能な形式で公開します。
+
+```
+/company-digest-html
+```
+
+**データソース:** `.companies/{org-slug}/docs/daily-digest/*.md`
+
+**出力先:** `docs/daily-digest/index.html`（タブ切替SPAページ）
+
+**HTML機能:**
+- サマリーカード（総記事数、最新日付、ダイジェスト数、平均記事数/日）
+- 日付タブ（最新がデフォルト表示、クリックで過去分に切替）
+- URLハッシュ連動（`#2026-03-27` で特定日付に直リンク）
+- キーボードナビ（← → キーで日付切替）
+- ダークモード対応
+
+**Gitワークフロー:** `docs/` 配下を更新するためmainブランチに直接コミット（`/company-dashboard` と同じ運用）。
+
+詳細は [12 日次ダイジェスト](12-daily-digest.md) を参照。
+
+---
+
 ## Tips
 
 **Skill とSubagent の使い分け:**
