@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enterprise MDM &amp; Data Insights Architecture - IaC Source Code</title>
+<title>Enterprise MDM & Data Insights Architecture - IaC Source Code</title>
 <style>
 :root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
         --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
@@ -21,15 +21,19 @@ h1 { font-size:1.3rem; margin-bottom:8px; }
 .meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
 .badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
 .badge-pass { background:#d1fae5; color:#065f46; }
-@media (prefers-color-scheme: dark) { .badge-pass { background:#064e3b; color:#6ee7b7; } }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
 .code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
 .code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
-.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:monospace; }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
 .code-header .lines { color:var(--line-num); font-size:.78rem; }
 .code-scroll { overflow-x:auto; padding:16px 0; }
 .code-table { border-collapse:collapse; width:100%; }
-.code-table td { padding:0; vertical-align:top; font-family:monospace; font-size:.82rem; line-height:1.65; }
-.code-table .ln { width:1%%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
 .code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
 .hl-comment { color:var(--comment); font-style:italic; }
 .hl-key { color:var(--key); }
@@ -48,22 +52,24 @@ h1 { font-size:1.3rem; margin-bottom:8px; }
   <a href="./enterprise-mdm-insights.html" class="back-btn">&larr; 構成図に戻る</a>
   <div><a href="./enterprise-mdm-insights.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
 </div>
-<h1>Enterprise MDM &amp; Data Insights Architecture - CloudFormation Template</h1>
+<h1>Enterprise MDM & Data Insights Architecture - CloudFormation Template</h1>
 <div class="meta">
   <span>生成日: 2026-03-28</span>
   <span class="badge badge-pass">検証: Pass</span>
-  <span>797 行</span>
+  <span>796 行</span>
 </div>
 <div class="code-container">
   <div class="code-header">
     <span class="filename">enterprise-mdm-insights.yaml</span>
-    <span class="lines">797 lines</span>
+    <span class="lines">796 lines</span>
   </div>
   <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
 </div>
 <div class="info">
   <h2>CloudFormation テンプレートについて</h2>
-  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
 </div>
 <p class="updated">Powered by AWS IaC MCP Server</p>
 <script>

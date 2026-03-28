@@ -213,7 +213,15 @@ docs/diagrams/
 
 #### 3.4.5 コードビューアページ（{filename}-iac.html）
 
-スタンドアロンHTML（外部依存なし）でシンタックスハイライト付きのYAMLビューアを生成する。
+`references/generate-iac-viewer.py` を使用して生成する。
+
+```bash
+python3 .claude/skills/company-diagram/references/generate-iac-viewer.py \
+  docs/diagrams/{filename}.yaml "{タイトル}"
+```
+
+**重要**: bash ヒアドキュメント内でのインライン生成は禁止。
+JS正規表現の `$1`/`$2` がシェル変数展開されるため。必ず上記スクリプトを使用すること。
 
 構成要素:
 - ヘッダー: タイトル、生成日、検証ステータス
