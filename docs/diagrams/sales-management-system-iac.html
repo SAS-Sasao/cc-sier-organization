@@ -5,23 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sales Management System on AWS - IaC Source Code</title>
 <style>
-:root { --bg:#f8f9fa; --bg2:#fff; --bg3:#f1f3f5; --text:#1a1a2e; --blue:#4361ee; --green:#16a34a;
-        --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
-        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086;
-        --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
 @media (prefers-color-scheme: dark) {
-  :root { --bg:#0d1117; --bg2:#161b22; --bg3:#1c2128; --text:#e6edf3; --border:rgba(255,255,255,.08);
-          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
 .top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
 .back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
 .back-btn:hover { text-decoration:underline; }
-.actions { display:flex; gap:10px; }
-.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px;
-          text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
 .dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
 h1 { font-size:1.3rem; margin-bottom:8px; }
 .meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
 .badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
@@ -32,22 +31,18 @@ h1 { font-size:1.3rem; margin-bottom:8px; }
   .badge-fail { background:#7f1d1d; color:#fca5a5; }
 }
 .code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
-.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center;
-               border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
 .code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
 .code-header .lines { color:var(--line-num); font-size:.78rem; }
 .code-scroll { overflow-x:auto; padding:16px 0; }
 .code-table { border-collapse:collapse; width:100%; }
 .code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
-.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none;
-                  border-right:1px solid rgba(255,255,255,.06); }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
 .code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
-/* Syntax highlight classes */
 .hl-comment { color:var(--comment); font-style:italic; }
 .hl-key { color:var(--key); }
 .hl-str { color:var(--str); }
 .hl-kw { color:var(--kw); }
-.hl-val { color:var(--val); }
 .hl-bool { color:var(--bool); }
 .hl-ref { color:#f9e2af; }
 .info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
@@ -59,76 +54,65 @@ h1 { font-size:1.3rem; margin-bottom:8px; }
 <body>
 <div class="top-bar">
   <a href="./sales-management-system.html" class="back-btn">&larr; 構成図に戻る</a>
-  <div class="actions">
-    <a href="./sales-management-system.yaml" class="dl-btn" download>YAMLをダウンロード</a>
-  </div>
+  <div><a href="./sales-management-system.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
 </div>
-
 <h1>Sales Management System on AWS - CloudFormation Template</h1>
 <div class="meta">
   <span>生成日: 2026-03-28</span>
   <span class="badge badge-pass">検証: Pass</span>
   <span>449 行</span>
 </div>
-
 <div class="code-container">
   <div class="code-header">
     <span class="filename">sales-management-system.yaml</span>
-    <span class="lines">449 lines</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">449 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
   </div>
-  <div class="code-scroll">
-    <table class="code-table">
-      <tbody id="code-body">
-      </tbody>
-    </table>
-  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
 </div>
-
 <div class="info">
   <h2>CloudFormation テンプレートについて</h2>
   <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
   サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
   暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
 </div>
-
 <p class="updated">Powered by AWS IaC MCP Server</p>
-
 <script>
 const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: >\n  Sales Management System on AWS (\u8ca9\u58f2\u7ba1\u7406\u30b7\u30b9\u30c6\u30e0)\n  \u6708\u984d~20\u4e07\u5186\u30fb50-70\u540d\u5411\u3051\u3002CloudFront + ECS Fargate + Aurora Serverless v2 \u69cb\u6210\u3002\n\n# ============================================================\n# \u30d1\u30e9\u30e1\u30fc\u30bf\u5b9a\u7fa9\n# ============================================================\nParameters:\n  EnvironmentName:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, stg, prod]\n    Description: \u30c7\u30d7\u30ed\u30a4\u74b0\u5883 (dev / stg / prod)\n\n  VpcCidr:\n    Type: String\n    Default: '10.0.0.0/16'  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n    Description: VPC CIDR \u30d6\u30ed\u30c3\u30af\n\n  ContainerImage:\n    Type: String\n    Default: '123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/sales-api:latest'  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n    Description: \u30d0\u30c3\u30af\u30a8\u30f3\u30c9 API \u30b3\u30f3\u30c6\u30ca\u30a4\u30e1\u30fc\u30b8\n\n  AuroraMinCapacity:\n    Type: Number\n    Default: 0.5\n    Description: Aurora Serverless v2 \u6700\u5c0f ACU\n\n  AuroraMaxCapacity:\n    Type: Number\n    Default: 2\n    Description: Aurora Serverless v2 \u6700\u5927 ACU\n\n# ============================================================\n# \u30ea\u30bd\u30fc\u30b9\u5b9a\u7fa9\n# ============================================================\nResources:\n  # ----- \u30cd\u30c3\u30c8\u30ef\u30fc\u30af -----\n  VPC:\n    Type: AWS::EC2::VPC\n    Properties:\n      CidrBlock: !Ref VpcCidr\n      EnableDnsSupport: true\n      EnableDnsHostnames: true\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-sales-vpc'\n\n  PublicSubnet1:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: '10.0.1.0/24'\n      AvailabilityZone: !Select [0, !GetAZs '']\n      MapPublicIpOnLaunch: true\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-public-1'\n\n  PublicSubnet2:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: '10.0.2.0/24'\n      AvailabilityZone: !Select [1, !GetAZs '']\n      MapPublicIpOnLaunch: true\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-public-2'\n\n  PrivateSubnet1:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: '10.0.10.0/24'\n      AvailabilityZone: !Select [0, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-1'\n\n  PrivateSubnet2:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: '10.0.11.0/24'\n      AvailabilityZone: !Select [1, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-2'\n\n  InternetGateway:\n    Type: AWS::EC2::InternetGateway\n\n  IGWAttachment:\n    Type: AWS::EC2::VPCGatewayAttachment\n    Properties:\n      VpcId: !Ref VPC\n      InternetGatewayId: !Ref InternetGateway\n\n  NatEIP:\n    Type: AWS::EC2::EIP\n    Properties:\n      Domain: vpc\n\n  NatGateway:\n    Type: AWS::EC2::NatGateway\n    Properties:\n      AllocationId: !GetAtt NatEIP.AllocationId\n      SubnetId: !Ref PublicSubnet1\n\n  # ----- \u30bb\u30ad\u30e5\u30ea\u30c6\u30a3 -----\n  ALBSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: ALB Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 443\n          ToPort: 443\n          CidrIp: '0.0.0.0/0'\n\n  AppSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: ECS Fargate Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 8080\n          ToPort: 8080\n          SourceSecurityGroupId: !Ref ALBSecurityGroup\n\n  DBSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Aurora Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 5432\n          ToPort: 5432\n          SourceSecurityGroupId: !Ref AppSecurityGroup\n\n  # ----- Cognito \u8a8d\u8a3c -----\n  UserPool:\n    Type: AWS::Cognito::UserPool\n    Properties:\n      UserPoolName: !Sub '${EnvironmentName}-sales-users'\n      AutoVerifiedAttributes:\n        - email\n      Policies:\n        PasswordPolicy:\n          MinimumLength: 12\n          RequireLowercase: true\n          RequireNumbers: true\n          RequireSymbols: true\n          RequireUppercase: true\n      MfaConfiguration: OPTIONAL\n\n  UserPoolClient:\n    Type: AWS::Cognito::UserPoolClient\n    Properties:\n      UserPoolId: !Ref UserPool\n      ClientName: !Sub '${EnvironmentName}-sales-app'\n      GenerateSecret: false\n      ExplicitAuthFlows:\n        - ALLOW_USER_SRP_AUTH\n        - ALLOW_REFRESH_TOKEN_AUTH\n\n  # ----- S3 \u9759\u7684\u30db\u30b9\u30c6\u30a3\u30f3\u30b0 -----\n  SPABucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${EnvironmentName}-sales-spa-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n\n  FileBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${EnvironmentName}-sales-files-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n\n  # ----- CloudFront -----\n  CloudFrontOAC:\n    Type: AWS::CloudFront::OriginAccessControl\n    Properties:\n      OriginAccessControlConfig:\n        Name: !Sub '${EnvironmentName}-sales-oac'\n        OriginAccessControlOriginType: s3\n        SigningBehavior: always\n        SigningProtocol: sigv4\n\n  Distribution:\n    Type: AWS::CloudFront::Distribution\n    Properties:\n      DistributionConfig:\n        Enabled: true\n        DefaultRootObject: index.html\n        Origins:\n          - Id: S3Origin\n            DomainName: !GetAtt SPABucket.RegionalDomainName\n            OriginAccessControlId: !Ref CloudFrontOAC\n            S3OriginConfig:\n              OriginAccessIdentity: ''\n          - Id: ALBOrigin\n            DomainName: !GetAtt ALB.DNSName\n            CustomOriginConfig:\n              OriginProtocolPolicy: https-only\n        DefaultCacheBehavior:\n          TargetOriginId: S3Origin\n          ViewerProtocolPolicy: redirect-to-https\n          ForwardedValues:\n            QueryString: false\n        CacheBehaviors:\n          - PathPattern: '/api/*'\n            TargetOriginId: ALBOrigin\n            ViewerProtocolPolicy: https-only\n            AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]\n            ForwardedValues:\n              QueryString: true\n              Headers: ['Authorization']\n\n  # ----- ALB -----\n  ALB:\n    Type: AWS::ElasticLoadBalancingV2::LoadBalancer\n    Properties:\n      Name: !Sub '${EnvironmentName}-sales-alb'\n      Scheme: internet-facing\n      Type: application\n      SecurityGroups:\n        - !Ref ALBSecurityGroup\n      Subnets:\n        - !Ref PublicSubnet1\n        - !Ref PublicSubnet2\n\n  ALBTargetGroup:\n    Type: AWS::ElasticLoadBalancingV2::TargetGroup\n    Properties:\n      Name: !Sub '${EnvironmentName}-sales-tg'\n      Port: 8080\n      Protocol: HTTP\n      VpcId: !Ref VPC\n      TargetType: ip\n      HealthCheckPath: /health\n\n  ALBListener:\n    Type: AWS::ElasticLoadBalancingV2::Listener\n    Properties:\n      LoadBalancerArn: !Ref ALB\n      Port: 443\n      Protocol: HTTPS\n      Certificates:\n        - CertificateArn: 'arn:aws:acm:ap-northeast-1:123456789012:certificate/dummy'  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n      DefaultActions:\n        - Type: forward\n          TargetGroupArn: !Ref ALBTargetGroup\n\n  # ----- ECS Fargate -----\n  ECSCluster:\n    Type: AWS::ECS::Cluster\n    Properties:\n      ClusterName: !Sub '${EnvironmentName}-sales-cluster'\n      ClusterSettings:\n        - Name: containerInsights\n          Value: enabled\n\n  TaskExecutionRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: ecs-tasks.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy\n\n  TaskDefinition:\n    Type: AWS::ECS::TaskDefinition\n    Properties:\n      Family: !Sub '${EnvironmentName}-sales-api'\n      Cpu: '512'\n      Memory: '1024'\n      NetworkMode: awsvpc\n      RequiresCompatibilities: [FARGATE]\n      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn\n      ContainerDefinitions:\n        - Name: sales-api\n          Image: !Ref ContainerImage\n          PortMappings:\n            - ContainerPort: 8080\n          LogConfiguration:\n            LogDriver: awslogs\n            Options:\n              awslogs-group: !Ref LogGroup\n              awslogs-region: !Ref 'AWS::Region'\n              awslogs-stream-prefix: sales-api\n\n  ECSService:\n    Type: AWS::ECS::Service\n    DependsOn: ALBListener\n    Properties:\n      Cluster: !Ref ECSCluster\n      TaskDefinition: !Ref TaskDefinition\n      DesiredCount: 2\n      LaunchType: FARGATE\n      NetworkConfiguration:\n        AwsvpcConfiguration:\n          Subnets:\n            - !Ref PrivateSubnet1\n            - !Ref PrivateSubnet2\n          SecurityGroups:\n            - !Ref AppSecurityGroup\n      LoadBalancers:\n        - ContainerName: sales-api\n          ContainerPort: 8080\n          TargetGroupArn: !Ref ALBTargetGroup\n\n  # ----- Aurora Serverless v2 -----\n  DBSubnetGroup:\n    Type: AWS::RDS::DBSubnetGroup\n    Properties:\n      DBSubnetGroupDescription: Aurora Subnet Group\n      SubnetIds:\n        - !Ref PrivateSubnet1\n        - !Ref PrivateSubnet2\n\n  AuroraCluster:\n    Type: AWS::RDS::DBCluster\n    Properties:\n      Engine: aurora-postgresql\n      EngineVersion: '15.4'\n      DatabaseName: salesdb  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n      MasterUsername: admin  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n      ManageMasterUserPassword: true\n      ServerlessV2ScalingConfiguration:\n        MinCapacity: !Ref AuroraMinCapacity\n        MaxCapacity: !Ref AuroraMaxCapacity\n      DBSubnetGroupName: !Ref DBSubnetGroup\n      VpcSecurityGroupIds:\n        - !Ref DBSecurityGroup\n      StorageEncrypted: true\n      DeletionProtection: true\n\n  AuroraInstance:\n    Type: AWS::RDS::DBInstance\n    Properties:\n      DBClusterIdentifier: !Ref AuroraCluster\n      DBInstanceClass: db.serverless\n      Engine: aurora-postgresql\n\n  # ----- ECR -----\n  ECRRepository:\n    Type: AWS::ECR::Repository\n    Properties:\n      RepositoryName: !Sub '${EnvironmentName}-sales-api'\n      ImageScanningConfiguration:\n        ScanOnPush: true\n      EncryptionConfiguration:\n        EncryptionType: AES256\n\n  # ----- Secrets Manager -----\n  DBSecret:\n    Type: AWS::SecretsManager::Secret\n    Properties:\n      Name: !Sub '${EnvironmentName}/sales/db-credentials'\n      Description: Aurora DB \u63a5\u7d9a\u60c5\u5831\n      GenerateSecretString:\n        SecretStringTemplate: '{\"username\": \"admin\"}'\n        GenerateStringKey: password\n        PasswordLength: 32\n        ExcludeCharacters: '\"@/\\'\n\n  # ----- CloudWatch -----\n  LogGroup:\n    Type: AWS::Logs::LogGroup\n    Properties:\n      LogGroupName: !Sub '/ecs/${EnvironmentName}-sales-api'\n      RetentionInDays: 30\n\n  CPUAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub '${EnvironmentName}-sales-cpu-high'\n      MetricName: CPUUtilization\n      Namespace: AWS/ECS\n      Statistic: Average\n      Period: 300\n      EvaluationPeriods: 2\n      Threshold: 80\n      ComparisonOperator: GreaterThanThreshold\n      Dimensions:\n        - Name: ClusterName\n          Value: !Ref ECSCluster\n        - Name: ServiceName\n          Value: !GetAtt ECSService.Name\n      AlarmActions:\n        - !Ref AlarmTopic\n\n  AlarmTopic:\n    Type: AWS::SNS::Topic\n    Properties:\n      TopicName: !Sub '${EnvironmentName}-sales-alarms'\n      KmsMasterKeyId: alias/aws/sns\n\n# ============================================================\n# \u51fa\u529b\n# ============================================================\nOutputs:\n  CloudFrontDomain:\n    Description: CloudFront \u30c7\u30a3\u30b9\u30c8\u30ea\u30d3\u30e5\u30fc\u30b7\u30e7\u30f3 URL\n    Value: !GetAtt Distribution.DomainName\n\n  ALBEndpoint:\n    Description: ALB DNS \u540d\n    Value: !GetAtt ALB.DNSName\n\n  AuroraEndpoint:\n    Description: Aurora \u30af\u30e9\u30b9\u30bf\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !GetAtt AuroraCluster.Endpoint.Address\n\n  UserPoolId:\n    Description: Cognito User Pool ID\n    Value: !Ref UserPool\n\n  ECRRepositoryUri:\n    Description: ECR \u30ea\u30dd\u30b8\u30c8\u30ea URI\n    Value: !GetAtt ECRRepository.RepositoryUri\n";
-const lines = raw.split('\n');
-const tbody = document.getElementById('code-body');
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
 lines.forEach((line, i) => {
-  const tr = document.createElement('tr');
-  const lnTd = document.createElement('td');
-  lnTd.className = 'ln';
-  lnTd.textContent = i + 1;
-  const codeTd = document.createElement('td');
-  codeTd.className = 'code';
-  codeTd.innerHTML = highlight(line);
-  tr.appendChild(lnTd);
-  tr.appendChild(codeTd);
-  tbody.appendChild(tr);
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
 });
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
 function highlight(line) {
-  let h = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  // Comments
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
-  // Inline comment
   h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
-  // !Ref, !Sub, !GetAtt, !Select, !Join, !If, !Equals
   h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
-  // Intrinsic keys
-  h = h.replace(/\b(Ref|Fn::(?:Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Base64))\b/g, '<span class="hl-ref">$1</span>');
-  // Top-level keys
-  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/,
-    '$1<span class="hl-kw">$2</span>$3');
-  // Boolean
-  h = h.replace(/:\s*(true|false)\b/g, function(m, v) { return ': <span class="hl-bool">' + v + '</span>'; });
-  // Strings (quoted)
-  h = h.replace(/(&quot;[^&]*&quot;|'[^']*')/g, '<span class="hl-str">$1</span>');
-  // Resource type
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
   h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
-  // Keys (word followed by colon at start)
   h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
   return h;
 }
