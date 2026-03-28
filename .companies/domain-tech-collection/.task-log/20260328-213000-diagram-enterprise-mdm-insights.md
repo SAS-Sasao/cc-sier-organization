@@ -50,3 +50,14 @@ failure_reason: ""
 judge_comment: "CRM/ERPからMDM統合→インサイトまで一気通貫の参照アーキテクチャ。Entity Resolution名寄せ・Glue Data Quality品質ゲート・Lake Formationガバナンスの3層MDMコアが明確。Bedrock RAGによるAIインサイトも組み込み済み。AWS Knowledge MCPレビュー6/6 Pass。IaCテンプレート(910行)・コードビューアHTML・詳細ページ・一覧カードすべて生成済み。Subagent: cloud-engineer (IaC YAML生成)"
 judged_at: "2026-03-28T21:45:00+09:00"
 ```
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-28T21:34:37"
+```
