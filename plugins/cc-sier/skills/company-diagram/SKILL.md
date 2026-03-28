@@ -94,12 +94,35 @@ docs/diagrams/
 
 ### 詳細ページ（{filename}.html）の構成
 
-既存の詳細ページ（`storcon-dwh-architecture.html`）をテンプレートとして使用:
+既存の詳細ページ（`storcon-dwh-architecture.html`）をテンプレートとして使用。**以下5セクションは必須**:
+
+1. **凡例** — 構成図画像の直下に配置。Edge色ごとにフローの意味を日本語で説明（画像内は英語のため）
+2. **概要** — アーキテクチャの目的・背景・対象ユースケース
+3. **データフロー** — flow ステップ表示。複数パターンがあればバッジで分類
+4. **レイヤー構成** — テーブル形式（レイヤー / AWSサービス / 用途）
+5. **設計のポイント** — 重要な設計判断・トレードオフ・ベストプラクティス
+
+凡例セクションのHTML:
+```html
+/* CSS */
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+
+/* HTML（diagram-container 直後） */
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:{Edge色}"></span> {ラベル} — {日本語の説明}</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:{Edge色}"></span> {破線ラベル} — {説明}</div>
+  </div>
+</div>
+```
+
+共通要素:
 - ヘッダー: タイトル、タグ、生成日
 - 構成図画像（クリックでライトボックス拡大）
-- 概要セクション
-- データフローセクション（flow ステップ表示）
-- レイヤー構成テーブル
 - 「構成図一覧に戻る」リンク
 
 ## 5. タスクログと Issue 作成

@@ -29,6 +29,12 @@ h1 { font-size:1.4rem; margin-bottom:8px; }
 .diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
 .diagram-container img:hover { transform:scale(1.01); }
 .hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+/* Legend */
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+
 /* IaC Button */
 .iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
            color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
@@ -73,6 +79,17 @@ td { padding:10px 12px; border:1px solid var(--border); }
   <img src="./enterprise-mdm-insights.png" alt="Enterprise MDM & Data Insights Architecture" onclick="openLightbox(this.src)">
   <div class="hint">クリックで拡大表示</div>
   <div style="margin-top:16px"><a href="./enterprise-mdm-insights-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> SaaS — CRMデータ連携（AppFlow → Firehose）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> CDC — ERP/Legacy DB連携（DMS）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkorange"></span> MDM — マスターデータ統合パイプライン</div>
+    <div class="legend-item"><span class="legend-line" style="background:red"></span> Insight — 分析・BI（Redshift → QuickSight）</div>
+    <div class="legend-item"><span class="legend-line" style="background:purple"></span> AI — 生成AIインサイト（Bedrock RAG）</div>
+  </div>
 </div>
 
 <div class="section">

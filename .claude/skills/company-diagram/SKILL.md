@@ -282,12 +282,36 @@ docs/diagrams/
 
 ### 詳細ページ（{filename}.html）の構成
 
-既存の詳細ページをテンプレートとして使用。**以下4セクションは必須**:
+既存の詳細ページをテンプレートとして使用。**以下5セクションは必須**:
 
-1. **概要** — アーキテクチャの目的・背景・対象ユースケース
-2. **データフロー** — flow ステップ表示。複数パターンがあればバッジ（Sync/Async/Event等）で分類
-3. **レイヤー構成** — テーブル形式（レイヤー / AWSサービス / 用途）
-4. **設計のポイント** — このアーキテクチャの重要な設計判断・トレードオフ・ベストプラクティス（3〜5項目）
+1. **凡例** — 構成図画像の直下に配置。Edge色ごとにフローの意味を日本語で説明（画像内は英語のため）
+2. **概要** — アーキテクチャの目的・背景・対象ユースケース
+3. **データフロー** — flow ステップ表示。複数パターンがあればバッジ（Sync/Async/Event等）で分類
+4. **レイヤー構成** — テーブル形式（レイヤー / AWSサービス / 用途）
+5. **設計のポイント** — このアーキテクチャの重要な設計判断・トレードオフ・ベストプラクティス（3〜5項目）
+
+凡例セクションのHTML:
+```html
+/* CSS（<style>内に追加） */
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+
+/* HTML（diagram-container の直後、概要セクションの前に配置） */
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:{Edge色}"></span> {ラベル} — {日本語の説明}</div>
+    <!-- 破線の場合 -->
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:{Edge色}"></span> {ラベル} — {日本語の説明}</div>
+  </div>
+</div>
+```
+
+- Edge色はPythonコードの `Edge(color=...)` と同じCSS色名を使用（darkblue, darkgreen, purple, red, teal, darkorange, gray 等）
+- `style="bold"` のEdgeは実線（`.legend-line`）、`style="dashed"` のEdgeは破線（`.legend-dashed`）で表示
+- 画像内は英語のため、凡例で日本語の補足説明を提供する
 
 上記に加え、アーキテクチャ固有の補足セクション（コスト概算、レイテンシー特性、学習ポイント等）を必要に応じて追加する。
 
