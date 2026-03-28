@@ -48,3 +48,14 @@ failure_reason: ""
 judge_comment: "Data Fabric核心要素（Active Metadata/フェデレーテッドクエリ/ナレッジグラフ/セルフサービス）を網羅。AWS Knowledge MCPレビューで6/6 Pass。Data Lakehouseとの差分比較表も付加。Comprehend→Neptune連携の中間処理（Lambda等）が図では省略されている点のみ軽微な抽象化。"
 judged_at: "2026-03-28T20:45:00+09:00"
 ```
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-28T20:36:59"
+```
