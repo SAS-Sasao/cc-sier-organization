@@ -157,6 +157,20 @@ td { padding:10px 12px; border:1px solid var(--border); }
   </div>
 </div>
 
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. 業務ドメイン単位のマイクロサービス分割</strong><br>
+  発注・在庫・売上・人員の4ドメインで独立したサービスに分割。各サービスのスケーリング・デプロイ・障害影響範囲を独立させ、数万店舗の運用を安定化。</p>
+  <p><strong>2. Polyglot Persistence（Aurora + DynamoDB）</strong><br>
+  トランザクション整合性が必要な売上・発注データはAurora、高速な参照が求められる商品マスタはDynamoDBと、データ特性に応じてDBを使い分け。</p>
+  <p><strong>3. SQSによるサービス間の疎結合化</strong><br>
+  サービス間通信を直接呼び出しではなくSQSキュー経由に。一時的な障害やスパイクをバッファリングし、サービス間の依存関係を最小化。</p>
+  <p><strong>4. エッジ層でのセキュリティ多層防御</strong><br>
+  CloudFront（DDoS緩和）→ WAF（L7攻撃防御）→ Cognito（認証認可）の3段階でリクエストをフィルタリング。正当なリクエストのみがバックエンドに到達する設計。</p>
+  <p><strong>5. X-Rayによる分散トレーシング</strong><br>
+  マイクロサービス間のリクエストフローを可視化し、レイテンシーのボトルネックを特定。障害時の原因サービス特定が迅速に行える。</p>
+</div>
+
 <p class="updated">Powered by AWS Diagram MCP Server</p>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">

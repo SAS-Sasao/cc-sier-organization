@@ -150,6 +150,20 @@ td { padding:10px 12px; border:1px solid var(--border); }
   </table>
 </div>
 
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. フルサーバーレスによる運用負荷ゼロ</strong><br>
+  Lambda・DynamoDB・API Gateway・S3はすべてマネージドサービス。パッチ適用・スケーリング・可用性管理をAWSに委任し、開発チームはビジネスロジックに集中できる。</p>
+  <p><strong>2. CloudFrontによる静的/動的コンテンツの統合配信</strong><br>
+  SPAの静的ファイル（S3）とAPI（API Gateway）を同一ドメインから配信。CORSの問題を回避し、エッジキャッシュでグローバルに低レイテンシーを実現。</p>
+  <p><strong>3. DynamoDB Streams + EventBridgeによるイベント駆動</strong><br>
+  データ変更をDynamoDB Streamsでキャプチャし、EventBridge経由で後続処理に振り分け。ポーリング不要でリアルタイムな反応が可能。新しいイベントハンドラの追加も容易。</p>
+  <p><strong>4. SQS + Step Functionsによる非同期ワークフロー</strong><br>
+  重い処理（レポート生成・一括処理等）をSQSでデカップリングし、Step Functionsでオーケストレーション。API応答速度を犠牲にせず複雑な処理を実行。</p>
+  <p><strong>5. 従量課金による低コストスタート</strong><br>
+  全サービスが従量課金のため、トラフィックがない時間帯のコストはほぼゼロ。スタートアップの初期段階から大規模サービスまで、トラフィックに比例してコストが変動。</p>
+</div>
+
 <p class="updated">Powered by AWS Diagram MCP Server</p>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">

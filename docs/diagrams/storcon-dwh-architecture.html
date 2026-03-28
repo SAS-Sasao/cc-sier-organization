@@ -129,6 +129,18 @@ td { padding:10px 12px; border:1px solid var(--border); }
   </table>
 </div>
 
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. バッチとリアルタイムの二系統取り込み</strong><br>
+  ストコンDBからのバッチ移行（DMS）とPOSトランザクションのリアルタイム取得（Kinesis）を分離。それぞれのデータ特性（更新頻度・遅延許容度）に最適な取り込み方式を採用している。</p>
+  <p><strong>2. S3データレイクの3層構造（Raw / Processed / Curated）</strong><br>
+  データ品質を段階的に向上させることで、生データの保全と分析用データの品質担保を両立。障害時にRaw層から再処理が可能。</p>
+  <p><strong>3. Glue + Lake Formationによるガバナンス</strong><br>
+  ETL処理とメタデータ管理をGlueに集約し、Lake Formationで列レベルのアクセス制御を実現。コンプライアンス要件への対応が容易。</p>
+  <p><strong>4. Athena と Redshift の使い分け</strong><br>
+  アドホック分析はサーバーレスのAthena、定期的な大量集計はRedshiftと役割を分離。コストと性能のバランスを最適化。</p>
+</div>
+
 <p class="updated">Powered by AWS Diagram MCP Server</p>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">

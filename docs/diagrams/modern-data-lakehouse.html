@@ -156,6 +156,20 @@ td { padding:10px 12px; border:1px solid var(--border); }
   <p><strong>Gold層</strong>: ビジネスロジックを適用し、分析・BI向けに最適化。集計・結合済み。</p>
 </div>
 
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. Medallionアーキテクチャによるデータ品質の段階的向上</strong><br>
+  Bronze→Silver→Goldの3層で品質を段階的に上げることで、生データの保全（再処理可能性）と分析品質の両立を実現。各層の責務が明確で運用しやすい。</p>
+  <p><strong>2. GlueとEMR Sparkの使い分け</strong><br>
+  Bronze→SilverのクレンジングはマネージドのGlue ETL、Silver→Goldの複雑な集計・結合はEMR Sparkと役割を分離。処理特性に応じたコスト最適化が可能。</p>
+  <p><strong>3. Lake Formationによるきめ細かいアクセス制御</strong><br>
+  列レベル・行レベルのセキュリティポリシーを一元管理。部門ごと・ロールごとに参照可能なデータを制御でき、個人情報保護やコンプライアンスに対応。</p>
+  <p><strong>4. Redshift ServerlessとAthenaのハイブリッド分析</strong><br>
+  定常的な大量クエリはRedshift Serverless、探索的なアドホック分析はAthenaで処理。Redshiftは使わない時間帯に自動スケールダウンしてコストを削減。</p>
+  <p><strong>5. 3種類の取り込みパターン対応</strong><br>
+  バッチ（DMS）・ストリーミング（Kinesis）・ファイルアップロード（Step Functions）の3経路を設計。データソースの多様性に対応し、将来の拡張も容易。</p>
+</div>
+
 <p class="updated">Powered by AWS Diagram MCP Server</p>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">

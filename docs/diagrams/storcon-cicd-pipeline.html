@@ -142,6 +142,20 @@ td { padding:10px 12px; border:1px solid var(--border); }
   </table>
 </div>
 
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. 承認ゲート付きプロモーション</strong><br>
+  STG→PRD昇格時にSNS通知による人的承認を挟むことで、自動化の利便性と本番環境の安全性を両立。意図しないデプロイを防止。</p>
+  <p><strong>2. 環境分離（STG / PRD）</strong><br>
+  ステージングと本番でECS Fargate・RDSを完全に分離。同一パイプラインから同一イメージをデプロイすることで「STGで動いたがPRDで動かない」問題を排除。</p>
+  <p><strong>3. IaC（AWS CDK）によるインフラ管理</strong><br>
+  CloudFormationスタックをCDKで生成し、インフラの変更もコードレビュー対象に。環境差分の発生を防ぎ、再現性を担保。</p>
+  <p><strong>4. シークレット管理の一元化</strong><br>
+  Secrets ManagerでDB接続情報・APIキー等を集中管理し、コードやCI設定にシークレットをハードコードしない。IAM Roleベースの最小権限アクセス。</p>
+  <p><strong>5. 監査ログの自動取得</strong><br>
+  CloudTrailで全API操作を記録。パイプラインの「誰が・いつ・何を」デプロイしたかを追跡可能にし、コンプライアンス要件に対応。</p>
+</div>
+
 <p class="updated">Powered by AWS Diagram MCP Server</p>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
