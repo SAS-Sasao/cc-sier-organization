@@ -41,11 +41,11 @@ judged_at: "2026-03-27T14:40:00+09:00"
 
 ## reward
 ```yaml
-score: 0.958
+score: 1.0
 signals:
     completed: true
     artifacts_exist: true
     excessive_edits: false
     retry_detected: false
-evaluated_at: "2026-03-28T20:10:25"
+evaluated_at: "2026-03-28T20:15:31"
 ```

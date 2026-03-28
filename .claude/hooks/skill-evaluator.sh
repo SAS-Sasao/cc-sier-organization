@@ -100,25 +100,8 @@ evaluate_session() {
     fi
 
     [[ $score -lt 0 ]] && score=0
-    local process_score=$score
-
-    # judge.total が存在する場合、プロセス評価と成果物評価を統合
-    # 統合スコア = process(40%) + judge(60%) でより精密なスコアを算出
-    local judge_total=""
-    judge_total=$(grep -A10 '^## judge' "$task_file" 2>/dev/null \
-      | grep -E '^total:' | head -1 | awk '{print $2}')
-
     local normalized
-    if [[ -n "$judge_total" && "$judge_total" != "0" ]]; then
-      normalized=$(python3 -c "
-process = $process_score / 100
-judge = float('$judge_total')
-combined = process * 0.4 + judge * 0.6
-print(round(combined, 3))
-" 2>/dev/null || echo "0.$score")
-    else
-      normalized=$(python3 -c "print(round($process_score/100, 2))" 2>/dev/null || echo "0.$score")
-    fi
+    normalized=$(python3 -c "print(round($score/100, 2))" 2>/dev/null || echo "0.$score")
 
     local signals_yaml=""
     for sig in "${signals[@]}"; do
