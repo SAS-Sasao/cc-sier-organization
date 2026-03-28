@@ -18,6 +18,7 @@
 - **成果物**:
   - `.companies/domain-tech-collection/docs/daily-digest/YYYY-MM-DD.md`
 - **品質ゲート**: `masters/quality-gates/by-type/daily-digest.md`（severity: error）
+- **フォーマット**: 品質ゲートの「フォーマットテンプレート」セクションに従うこと（A章=技術テーマ別, B章=小売テーマ別, 記事はテーブル形式, C章はパラグラフ形式）
 - **Git運用**: ブランチ＋PR
 - **Issue作成**: あり（ラベル: `org:domain-tech-collection`, `type:daily-digest`）
 - **スケジュール**: Cron 毎日 10:00
