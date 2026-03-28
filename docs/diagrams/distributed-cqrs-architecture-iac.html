@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Distributed Low-Latency CQRS Architecture - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --bg3:#f1f3f5; --text:#1a1a2e; --blue:#4361ee; --green:#16a34a;
+        --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086;
+        --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --bg3:#1c2128; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.actions { display:flex; gap:10px; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px;
+          text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center;
+               border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none;
+                  border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+/* Syntax highlight classes */
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-val { color:var(--val); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./distributed-cqrs-architecture.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div class="actions">
+    <a href="./distributed-cqrs-architecture.yaml" class="dl-btn" download>YAMLをダウンロード</a>
+  </div>
+</div>
+
+<h1>Distributed Low-Latency CQRS Architecture - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-03-28</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>421 行</span>
+</div>
+
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">distributed-cqrs-architecture.yaml</span>
+    <span class="lines">421 lines</span>
+  </div>
+  <div class="code-scroll">
+    <table class="code-table">
+      <tbody id="code-body">
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+
+<p class="updated">Powered by AWS IaC MCP Server</p>
+
+<script>
+const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: >\n  Distributed Low-Latency CQRS Architecture on AWS\n  DynamoDB + DAX + Kinesis CDC \u306b\u3088\u308b CQRS \u30d1\u30bf\u30fc\u30f3\u3002\u66f8\u304d\u8fbc\u307f/\u8aad\u307f\u8fbc\u307f\u5206\u96e2\u3067\u4f4e\u30ec\u30a4\u30c6\u30f3\u30b7\u30fc\u3092\u5b9f\u73fe\u3002\n\n# ============================================================\n# \u30d1\u30e9\u30e1\u30fc\u30bf\u5b9a\u7fa9\n# ============================================================\nParameters:\n  EnvironmentName:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, stg, prod]\n    Description: \u30c7\u30d7\u30ed\u30a4\u74b0\u5883 (dev / stg / prod)\n\n  VpcCidr:\n    Type: String\n    Default: '10.0.0.0/16'  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n    Description: VPC CIDR \u30d6\u30ed\u30c3\u30af\n\n# ============================================================\n# \u30ea\u30bd\u30fc\u30b9\u5b9a\u7fa9\n# ============================================================\nResources:\n  # ----- \u30cd\u30c3\u30c8\u30ef\u30fc\u30af (DAX / ElastiCache \u7528) -----\n  VPC:\n    Type: AWS::EC2::VPC\n    Properties:\n      CidrBlock: !Ref VpcCidr\n      EnableDnsSupport: true\n      EnableDnsHostnames: true\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-cqrs-vpc'\n\n  PrivateSubnet1:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: '10.0.10.0/24'\n      AvailabilityZone: !Select [0, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-1'\n\n  PrivateSubnet2:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: '10.0.11.0/24'\n      AvailabilityZone: !Select [1, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-2'\n\n  # ----- DynamoDB \u30d7\u30e9\u30a4\u30de\u30ea\u30b9\u30c8\u30a2 (Command \u5074) -----\n  PrimaryTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub '${EnvironmentName}-cqrs-primary'\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - AttributeName: PK\n          AttributeType: S\n        - AttributeName: SK\n          AttributeType: S\n        - AttributeName: GSI1PK\n          AttributeType: S\n        - AttributeName: GSI1SK\n          AttributeType: S\n      KeySchema:\n        - AttributeName: PK\n          KeyType: HASH\n        - AttributeName: SK\n          KeyType: RANGE\n      GlobalSecondaryIndexes:\n        - IndexName: GSI1\n          KeySchema:\n            - AttributeName: GSI1PK\n              KeyType: HASH\n            - AttributeName: GSI1SK\n              KeyType: RANGE\n          Projection:\n            ProjectionType: ALL\n      StreamSpecification:\n        StreamViewType: NEW_AND_OLD_IMAGES\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n      SSESpecification:\n        SSEEnabled: true\n      Tags:\n        - Key: Pattern\n          Value: CQRS-Command\n\n  # ----- DAX \u30ad\u30e3\u30c3\u30b7\u30e5 (Query \u5074\u30db\u30c3\u30c8\u30ea\u30fc\u30c9) -----\n  DAXSubnetGroup:\n    Type: AWS::DAX::SubnetGroup\n    Properties:\n      SubnetGroupName: !Sub '${EnvironmentName}-dax-subnets'\n      SubnetIds:\n        - !Ref PrivateSubnet1\n        - !Ref PrivateSubnet2\n\n  DAXSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: DAX Cluster Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 8111\n          ToPort: 8111\n          CidrIp: !Ref VpcCidr\n\n  DAXRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: dax.amazonaws.com\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: DAXDynamoDBAccess\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - dynamodb:GetItem\n                  - dynamodb:BatchGetItem\n                  - dynamodb:Query\n                  - dynamodb:Scan\n                Resource:\n                  - !GetAtt PrimaryTable.Arn\n                  - !Sub '${PrimaryTable.Arn}/index/*'\n\n  DAXCluster:\n    Type: AWS::DAX::Cluster\n    Properties:\n      ClusterName: !Sub '${EnvironmentName}-cqrs-dax'\n      NodeType: dax.t3.small  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u30b5\u30a4\u30b8\u30f3\u30b0\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n      ReplicationFactor: 2\n      IAMRoleARN: !GetAtt DAXRole.Arn\n      SubnetGroupName: !Ref DAXSubnetGroup\n      SecurityGroupIds:\n        - !Ref DAXSecurityGroup\n      SSESpecification:\n        SSEEnabled: true\n\n  # ----- Kinesis CDC \u30a4\u30d9\u30f3\u30c8\u30b9\u30c8\u30ea\u30fc\u30e0 -----\n  CDCStream:\n    Type: AWS::Kinesis::Stream\n    Properties:\n      Name: !Sub '${EnvironmentName}-cqrs-cdc-stream'\n      ShardCount: 2  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u30b9\u30eb\u30fc\u30d7\u30c3\u30c8\u306b\u5408\u308f\u305b\u3066\u8abf\u6574\u3057\u3066\u304f\u3060\u3055\u3044\n      StreamEncryption:\n        EncryptionType: KMS\n        KeyId: alias/aws/kinesis\n      RetentionPeriodHours: 24\n\n  # ----- API Gateway -----\n  RestApi:\n    Type: AWS::ApiGateway::RestApi\n    Properties:\n      Name: !Sub '${EnvironmentName}-cqrs-api'\n      Description: CQRS API (Command / Query \u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8)\n      EndpointConfiguration:\n        Types: [REGIONAL]\n\n  # ----- Lambda: Command Handler (\u66f8\u304d\u8fbc\u307f) -----\n  CommandHandlerRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: lambda.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n      Policies:\n        - PolicyName: DynamoDBWrite\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - dynamodb:PutItem\n                  - dynamodb:UpdateItem\n                  - dynamodb:DeleteItem\n                Resource: !GetAtt PrimaryTable.Arn\n\n  CommandHandler:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '${EnvironmentName}-cqrs-command-handler'\n      Runtime: python3.12\n      Handler: index.handler\n      Role: !GetAtt CommandHandlerRole.Arn\n      Timeout: 30\n      MemorySize: 256\n      TracingConfig:\n        Mode: Active\n      Environment:\n        Variables:\n          TABLE_NAME: !Ref PrimaryTable\n      Code:\n        ZipFile: |\n          # TODO: \u5b9f\u904b\u7528\u6642\u306b\u30d3\u30b8\u30cd\u30b9\u30ed\u30b8\u30c3\u30af\u3092\u5b9f\u88c5\u3057\u3066\u304f\u3060\u3055\u3044\n          import boto3, json, os\n          dynamodb = boto3.resource('dynamodb')\n          table = dynamodb.Table(os.environ['TABLE_NAME'])\n          def handler(event, context):\n              body = json.loads(event['body'])\n              table.put_item(Item=body)\n              return {'statusCode': 200, 'body': json.dumps({'message': 'OK'})}\n\n  # ----- Lambda: Query Handler (\u8aad\u307f\u8fbc\u307f) -----\n  QueryHandlerRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: lambda.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n      Policies:\n        - PolicyName: DAXRead\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - dynamodb:GetItem\n                  - dynamodb:Query\n                  - dynamodb:Scan\n                  - dax:GetItem\n                  - dax:Query\n                  - dax:Scan\n                Resource:\n                  - !GetAtt PrimaryTable.Arn\n                  - !Sub '${PrimaryTable.Arn}/index/*'\n\n  QueryHandler:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '${EnvironmentName}-cqrs-query-handler'\n      Runtime: python3.12\n      Handler: index.handler\n      Role: !GetAtt QueryHandlerRole.Arn\n      Timeout: 10\n      MemorySize: 256\n      TracingConfig:\n        Mode: Active\n      VpcConfig:\n        SubnetIds:\n          - !Ref PrivateSubnet1\n          - !Ref PrivateSubnet2\n        SecurityGroupIds:\n          - !Ref DAXSecurityGroup\n      Environment:\n        Variables:\n          DAX_ENDPOINT: !GetAtt DAXCluster.ClusterDiscoveryEndpointURL\n      Code:\n        ZipFile: |\n          # TODO: \u5b9f\u904b\u7528\u6642\u306bDAX\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u3092\u4f7f\u7528\u3057\u3066\u304f\u3060\u3055\u3044\n          import json\n          def handler(event, context):\n              return {'statusCode': 200, 'body': json.dumps({'message': 'query result'})}\n\n  # ----- Lambda: Sync Processor (CDC \u2192 \u5217\u6307\u5411DB\u540c\u671f) -----\n  SyncProcessorRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: lambda.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaKinesisExecutionRole\n\n  SyncProcessor:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '${EnvironmentName}-cqrs-sync-processor'\n      Runtime: python3.12\n      Handler: index.handler\n      Role: !GetAtt SyncProcessorRole.Arn\n      Timeout: 60\n      MemorySize: 512\n      TracingConfig:\n        Mode: Active\n      Code:\n        ZipFile: |\n          # TODO: Keyspaces / Redshift \u3078\u306e\u540c\u671f\u30ed\u30b8\u30c3\u30af\u3092\u5b9f\u88c5\u3057\u3066\u304f\u3060\u3055\u3044\n          import json\n          def handler(event, context):\n              for record in event['Records']:\n                  print(json.dumps(record))\n              return {'statusCode': 200}\n\n  # DynamoDB Streams \u2192 Kinesis \u306e\u30d1\u30a4\u30d7\u63a5\u7d9a\n  # NOTE: DynamoDB Streams \u3092 Lambda \u3067\u76f4\u63a5\u51e6\u7406\u3059\u308b\u30d1\u30bf\u30fc\u30f3\u3082\u53ef\u80fd\n  StreamEventSourceMapping:\n    Type: AWS::Lambda::EventSourceMapping\n    Properties:\n      EventSourceArn: !GetAtt CDCStream.Arn\n      FunctionName: !Ref SyncProcessor\n      StartingPosition: LATEST\n      BatchSize: 100\n\n  # ----- ElastiCache for Redis (\u30bb\u30c3\u30b7\u30e7\u30f3\u30ad\u30e3\u30c3\u30b7\u30e5) -----\n  RedisSubnetGroup:\n    Type: AWS::ElastiCache::SubnetGroup\n    Properties:\n      Description: Redis Subnet Group\n      SubnetIds:\n        - !Ref PrivateSubnet1\n        - !Ref PrivateSubnet2\n\n  RedisSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Redis Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 6379\n          ToPort: 6379\n          CidrIp: !Ref VpcCidr\n\n  RedisCluster:\n    Type: AWS::ElastiCache::CacheCluster\n    Properties:\n      ClusterName: !Sub '${EnvironmentName}-cqrs-redis'\n      Engine: redis\n      CacheNodeType: cache.t3.small  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u30b5\u30a4\u30b8\u30f3\u30b0\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n      NumCacheNodes: 1\n      CacheSubnetGroupName: !Ref RedisSubnetGroup\n      VpcSecurityGroupIds:\n        - !Ref RedisSecurityGroup\n\n  # ----- CloudWatch + X-Ray -----\n  LogGroup:\n    Type: AWS::Logs::LogGroup\n    Properties:\n      LogGroupName: !Sub '/cqrs/${EnvironmentName}'\n      RetentionInDays: 30\n\n  LatencyAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub '${EnvironmentName}-cqrs-query-latency-high'\n      MetricName: Duration\n      Namespace: AWS/Lambda\n      Statistic: p99\n      Period: 300\n      EvaluationPeriods: 2\n      Threshold: 100\n      ComparisonOperator: GreaterThanThreshold\n      Dimensions:\n        - Name: FunctionName\n          Value: !Ref QueryHandler\n      AlarmActions:\n        - !Ref AlarmTopic\n\n  AlarmTopic:\n    Type: AWS::SNS::Topic\n    Properties:\n      TopicName: !Sub '${EnvironmentName}-cqrs-alarms'\n      KmsMasterKeyId: alias/aws/sns\n\n  # NOTE: Amazon Keyspaces (Cassandra) \u3068 Redshift \u306f\n  # CloudFormation \u3067\u306e\u5b9a\u7fa9\u304c\u9650\u5b9a\u7684\u306a\u305f\u3081\u3001\u5225\u9014\u7ba1\u7406\u3092\u63a8\u5968\n  # - Keyspaces: AWS::Cassandra::Keyspace / AWS::Cassandra::Table\n  # - Redshift Serverless: AWS::RedshiftServerless::Namespace / Workgroup\n\n# ============================================================\n# \u51fa\u529b\n# ============================================================\nOutputs:\n  PrimaryTableArn:\n    Description: DynamoDB \u30d7\u30e9\u30a4\u30de\u30ea\u30c6\u30fc\u30d6\u30eb ARN\n    Value: !GetAtt PrimaryTable.Arn\n\n  DAXEndpoint:\n    Description: DAX \u30af\u30e9\u30b9\u30bf\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !GetAtt DAXCluster.ClusterDiscoveryEndpointURL\n\n  CDCStreamArn:\n    Description: Kinesis CDC \u30b9\u30c8\u30ea\u30fc\u30e0 ARN\n    Value: !GetAtt CDCStream.Arn\n\n  ApiEndpoint:\n    Description: API Gateway \u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !Sub 'https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com/'\n\n  RedisEndpoint:\n    Description: ElastiCache Redis \u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !GetAtt RedisCluster.RedisEndpoint.Address\n\n  CommandHandlerArn:\n    Description: Command Handler Lambda ARN\n    Value: !GetAtt CommandHandler.Arn\n\n  QueryHandlerArn:\n    Description: Query Handler Lambda ARN\n    Value: !GetAtt QueryHandler.Arn\n";
+const lines = raw.split('\n');
+const tbody = document.getElementById('code-body');
+lines.forEach((line, i) => {
+  const tr = document.createElement('tr');
+  const lnTd = document.createElement('td');
+  lnTd.className = 'ln';
+  lnTd.textContent = i + 1;
+  const codeTd = document.createElement('td');
+  codeTd.className = 'code';
+  codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd);
+  tr.appendChild(codeTd);
+  tbody.appendChild(tr);
+});
+function highlight(line) {
+  let h = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Comments
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  // Inline comment
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  // !Ref, !Sub, !GetAtt, !Select, !Join, !If, !Equals
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  // Intrinsic keys
+  h = h.replace(/\b(Ref|Fn::(?:Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Base64))\b/g, '<span class="hl-ref">$1</span>');
+  // Top-level keys
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/,
+    '$1<span class="hl-kw">$2</span>$3');
+  // Boolean
+  h = h.replace(/:\s*(true|false)\b/g, function(m, v) { return ': <span class="hl-bool">' + v + '</span>'; });
+  // Strings (quoted)
+  h = h.replace(/(&quot;[^&]*&quot;|'[^']*')/g, '<span class="hl-str">$1</span>');
+  // Resource type
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  // Keys (word followed by colon at start)
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

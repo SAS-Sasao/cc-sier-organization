@@ -161,14 +161,85 @@ Fail 時のリトライフロー:
 - セルフチェック: {6観点の判定結果}
 ```
 
-### 3.4 生成後の配置
+### 3.4 IaCソースコード生成
 
-レビュー Pass 後に実行する。
+レビュー Pass 後、ダイアグラムの構成を CloudFormation YAML で実装する。
+
+#### 3.4.1 生成フロー
+
+```
+レビュー Pass
+  ↓
+CloudFormation YAML 生成
+  ├── Parameters: 環境差分（dev/stg/prod）をパラメータ化
+  ├── Resources: ダイアグラムの全AWSサービスを定義
+  ├── サンプルデータ: # TODO: 実運用時に変更 コメント付き
+  └── セキュリティ: 暗号化・最小権限・パブリックアクセスブロックをデフォルトON
+  ↓
+AWS IaC MCP Server で検証
+  ├── validate_cloudformation_template（構文・スキーマ検証）
+  └── check_cloudformation_template_compliance（セキュリティ・コンプライアンス検証）
+  ↓
+検証 Pass → コードビューアHTML生成 + 詳細ページにボタン追加
+検証 Fail → 指摘を修正して再検証（最大2回リトライ）
+```
+
+#### 3.4.2 CloudFormation YAML の規約
+
+- テンプレートフォーマット: `AWSTemplateFormatVersion: '2010-09-09'`
+- `Description` にアーキテクチャ名と概要を記載
+- `Parameters` セクションで環境名・VPC CIDR・アカウントID等をパラメータ化
+- サンプル値には `# TODO: 実運用時に変更してください` コメントを付与
+- 暗号化（KMS/SSE）をデフォルト有効
+- IAMロールは最小権限で定義
+- `Outputs` セクションで主要リソースのARN/エンドポイントを出力
+
+#### 3.4.3 IaC MCP Server による検証
+
+1. `validate_cloudformation_template` で構文・スキーマを検証
+2. `check_cloudformation_template_compliance` でセキュリティ規則を検証
+3. エラーがあれば修正して再検証（最大2回）
+4. 検証結果をタスクログの `## iac-validation` セクションに記録
+
+#### 3.4.4 成果物の配置
+
+```
+docs/diagrams/
+├── {filename}.yaml          ← CloudFormation テンプレート
+├── {filename}-iac.html      ← コードビューアページ（シンタックスハイライト付き）
+├── {filename}.html          ← 詳細ページ（「IaCソースコードを見る」ボタンを追加）
+└── {filename}.png
+```
+
+#### 3.4.5 コードビューアページ（{filename}-iac.html）
+
+スタンドアロンHTML（外部依存なし）でシンタックスハイライト付きのYAMLビューアを生成する。
+
+構成要素:
+- ヘッダー: タイトル、生成日、検証ステータス
+- YAMLコード表示（行番号付き、キーワードハイライト）
+- 「構成図に戻る」リンク
+- 「YAMLをダウンロード」リンク
+- ダークモード対応
+
+#### 3.4.6 詳細ページへのボタン追加
+
+既存の詳細ページ（{filename}.html）の構成図画像の下に以下のボタンを追加:
+
+```html
+<a href="./{filename}-iac.html" class="iac-btn">IaCソースコードを見る</a>
+```
+
+### 3.5 ファイル配置
+
+レビュー Pass + IaC生成後に実行する。
 
 ```
 1. generated-diagrams/{filename}.png → docs/diagrams/{filename}.png にコピー
-2. docs/diagrams/{filename}.html（詳細ページ）を新規作成
-3. docs/diagrams/index.html（一覧ページ）にカードを追記
+2. docs/diagrams/{filename}.yaml（CloudFormation テンプレート）を保存
+3. docs/diagrams/{filename}-iac.html（コードビューアページ）を新規作成
+4. docs/diagrams/{filename}.html（詳細ページ）を新規作成（IaCボタン付き）
+5. docs/diagrams/index.html（一覧ページ）にカードを追記
 ```
 
 ## 4. ページ構成（一覧 → 詳細）

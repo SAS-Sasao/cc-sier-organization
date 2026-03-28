@@ -1,0 +1,784 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Modern Data Lakehouse (Medallion Architecture) テンプレート
+  S3 (Bronze/Silver/Gold) + Kinesis + Glue + EMR + Lake Formation +
+  Athena + Redshift Serverless + Step Functions による
+  フルマネージドデータレイクハウス構成（教育・参照用）
+
+# ============================================================
+# Parameters
+# ============================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: デプロイ対象環境（dev / stg / prod）
+
+  # TODO: 実運用時に変更してください
+  VpcCIDR:
+    Type: String
+    Default: "10.1.0.0/16"
+    Description: Data Lakehouse VPC の CIDR ブロック
+
+  # TODO: 実運用時に変更してください
+  PrivateSubnet1CIDR:
+    Type: String
+    Default: "10.1.11.0/24"
+
+  # TODO: 実運用時に変更してください
+  PrivateSubnet2CIDR:
+    Type: String
+    Default: "10.1.12.0/24"
+
+  # TODO: 実運用時に変更してください（Kinesis シャード数はスループットに応じて調整）
+  KinesisShardCount:
+    Type: Number
+    Default: 2
+    MinValue: 1
+    MaxValue: 100
+
+  # TODO: 実運用時に変更してください（Glue Worker 数はデータ量に応じて調整）
+  GlueWorkerCount:
+    Type: Number
+    Default: 5
+
+  # TODO: 実運用時に変更してください（Redshift Serverless RPU の基本容量）
+  RedshiftBaseRPU:
+    Type: Number
+    Default: 8  # 最小値 8 RPU
+    MinValue: 8
+    MaxValue: 512
+
+  # TODO: 実運用時に変更してください（Lake Formation 管理者 IAM ユーザー/ロール ARN）
+  LakeFormationAdminArn:
+    Type: String
+    Default: "arn:aws:iam::123456789012:role/DataLakeAdmin"
+
+# ============================================================
+# Resources
+# ============================================================
+Resources:
+
+  # ----------------------------------------------------------
+  # VPC / ネットワーク定義（EMR / Redshift Serverless 用）
+  # ----------------------------------------------------------
+  DataLakeVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-datalake-vpc"
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DataLakeVPC
+      CidrBlock: !Ref PrivateSubnet1CIDR
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-datalake-private-subnet-1"
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DataLakeVPC
+      CidrBlock: !Ref PrivateSubnet2CIDR
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags:
+        - Key: Name
+          Value: !Sub "${EnvironmentName}-datalake-private-subnet-2"
+
+  # ----------------------------------------------------------
+  # KMS キー（全レイヤーの暗号化用）
+  # ----------------------------------------------------------
+  DataLakeKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Data Lakehouse 全レイヤー暗号化キー（Bronze/Silver/Gold/Redshift）
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowRootAccount
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+          - Sid: AllowGlueService
+            Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: "*"
+
+  DataLakeKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${EnvironmentName}-datalake"
+      TargetKeyId: !Ref DataLakeKMSKey
+
+  # ----------------------------------------------------------
+  # S3 バケット: Medallion Architecture（Bronze / Silver / Gold）
+  # ----------------------------------------------------------
+
+  # Bronze レイヤー: 生データをそのまま格納（変更禁止）
+  BronzeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # TODO: 実運用時に変更してください
+      BucketName: !Sub "${EnvironmentName}-datalake-bronze-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataLakeKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Transitions:
+              # 90日後に Glacier に移行してコスト削減
+              - TransitionInDays: 90
+                StorageClass: GLACIER  # TODO: 実運用時に保持ポリシーを調整してください
+
+  # Silver レイヤー: クレンジング済みデータ（Parquet形式推奨）
+  SilverBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # TODO: 実運用時に変更してください
+      BucketName: !Sub "${EnvironmentName}-datalake-silver-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataLakeKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Gold レイヤー: 集計済みビジネス指標（BI / ML 向け）
+  GoldBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # TODO: 実運用時に変更してください
+      BucketName: !Sub "${EnvironmentName}-datalake-gold-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataLakeKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Athena クエリ結果保存用バケット
+  AthenaResultBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # TODO: 実運用時に変更してください
+      BucketName: !Sub "${EnvironmentName}-datalake-athena-results-${AWS::AccountId}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DataLakeKMSKey
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireQueryResults
+            Status: Enabled
+            ExpirationInDays: 30  # Athena 結果は30日で削除
+
+  # ----------------------------------------------------------
+  # Kinesis Data Stream（リアルタイムストリーミング取り込み）
+  # ----------------------------------------------------------
+  StorConDataStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "${EnvironmentName}-storcon-data-stream"
+      ShardCount: !Ref KinesisShardCount
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !Ref DataLakeKMSKey
+      RetentionPeriodHours: 24  # TODO: 実運用時にデータ保持期間を調整してください
+
+  # ----------------------------------------------------------
+  # Kinesis Firehose（Stream → Bronze S3 への自動書き込み）
+  # ----------------------------------------------------------
+  FirehoseDeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-firehose-delivery-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FirehoseS3Policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetBucketLocation
+                Resource:
+                  - !GetAtt BronzeBucket.Arn
+                  - !Sub "${BronzeBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: !GetAtt StorConDataStream.Arn
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:Decrypt
+                Resource: !GetAtt DataLakeKMSKey.Arn
+
+  StorConFirehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub "${EnvironmentName}-storcon-firehose"
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt StorConDataStream.Arn
+        RoleARN: !GetAtt FirehoseDeliveryRole.Arn
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt BronzeBucket.Arn
+        RoleARN: !GetAtt FirehoseDeliveryRole.Arn
+        # データを日付パーティションで格納
+        Prefix: "raw/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+        ErrorOutputPrefix: "errors/!{firehose:error-output-type}/"
+        BufferingHints:
+          SizeInMBs: 128  # TODO: 実運用時にバッファサイズを調整してください
+          IntervalInSeconds: 300
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !GetAtt DataLakeKMSKey.Arn
+        CompressionFormat: GZIP
+
+  # ----------------------------------------------------------
+  # IAM Role: Glue 実行ロール
+  # ----------------------------------------------------------
+  GlueServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-glue-service-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: GlueS3LakePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub "${BronzeBucket.Arn}/*"
+                  - !Sub "${SilverBucket.Arn}/*"
+                  - !Sub "${GoldBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:Decrypt
+                Resource: !GetAtt DataLakeKMSKey.Arn
+
+  # ----------------------------------------------------------
+  # Glue Database（Medallion 各レイヤー用）
+  # ----------------------------------------------------------
+  BronzeGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub "${EnvironmentName}_bronze_db"
+        Description: Bronze レイヤー（生データ）のメタデータカタログ
+
+  SilverGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub "${EnvironmentName}_silver_db"
+        Description: Silver レイヤー（クレンジング済み）のメタデータカタログ
+
+  GoldGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub "${EnvironmentName}_gold_db"
+        Description: Gold レイヤー（集計済みビジネスデータ）のメタデータカタログ
+
+  # ----------------------------------------------------------
+  # Glue Crawler（各レイヤーのスキーマ自動検出）
+  # ----------------------------------------------------------
+  BronzeCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${EnvironmentName}-bronze-crawler"
+      Role: !GetAtt GlueServiceRole.Arn
+      DatabaseName: !Ref BronzeGlueDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${BronzeBucket}/raw/"
+      Schedule:
+        ScheduleExpression: "cron(0 1 * * ? *)"  # TODO: 実運用時にクロールスケジュールを調整してください
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+
+  SilverCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${EnvironmentName}-silver-crawler"
+      Role: !GetAtt GlueServiceRole.Arn
+      DatabaseName: !Ref SilverGlueDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${SilverBucket}/"
+      Schedule:
+        ScheduleExpression: "cron(30 1 * * ? *)"
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+
+  GoldCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${EnvironmentName}-gold-crawler"
+      Role: !GetAtt GlueServiceRole.Arn
+      DatabaseName: !Ref GoldGlueDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${GoldBucket}/"
+      Schedule:
+        ScheduleExpression: "cron(0 2 * * ? *)"
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+
+  # ----------------------------------------------------------
+  # Glue ETL Job（Bronze → Silver 変換）
+  # ----------------------------------------------------------
+  # NOTE: 実際のスクリプトは S3 に格納し ScriptLocation で参照してください
+  BronzeToSilverGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${EnvironmentName}-bronze-to-silver"
+      Description: Bronze レイヤーの生データをクレンジングして Silver に変換（Parquet形式）
+      Role: !GetAtt GlueServiceRole.Arn
+      GlueVersion: "4.0"
+      WorkerType: G.1X  # TODO: 実運用時にデータ量に合わせて変更してください（G.2X 等）
+      NumberOfWorkers: !Ref GlueWorkerCount
+      Timeout: 120  # 分
+      # TODO: 実運用時に実際の ETL スクリプトパスに変更してください
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${BronzeBucket}/scripts/bronze_to_silver.py"
+        PythonVersion: "3"
+      DefaultArguments:
+        "--job-language": "python"
+        "--enable-metrics": "true"
+        "--enable-continuous-cloudwatch-log": "true"
+        "--source-bucket": !Ref BronzeBucket
+        "--dest-bucket": !Ref SilverBucket
+        "--encryption-key": !Ref DataLakeKMSKey
+
+  # Glue ETL Job（Silver → Gold 集計）
+  SilverToGoldGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${EnvironmentName}-silver-to-gold"
+      Description: Silver レイヤーのデータをビジネス指標に集計して Gold に格納
+      Role: !GetAtt GlueServiceRole.Arn
+      GlueVersion: "4.0"
+      WorkerType: G.2X  # TODO: 実運用時に調整してください
+      NumberOfWorkers: !Ref GlueWorkerCount
+      Timeout: 180
+      # TODO: 実運用時に実際の ETL スクリプトパスに変更してください
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${SilverBucket}/scripts/silver_to_gold.py"
+        PythonVersion: "3"
+      DefaultArguments:
+        "--job-language": "python"
+        "--enable-metrics": "true"
+        "--enable-continuous-cloudwatch-log": "true"
+        "--source-bucket": !Ref SilverBucket
+        "--dest-bucket": !Ref GoldBucket
+        "--encryption-key": !Ref DataLakeKMSKey
+
+  # ----------------------------------------------------------
+  # EMR クラスター（Spark 処理用）
+  # NOTE: 大規模バッチ処理が必要な場合に使用。コスト管理のため
+  #       Step Functions から起動 → 処理完了後に自動終了する設計を推奨
+  # TODO: 実運用時は EMR on EKS または EMR Serverless も検討してください
+  # ----------------------------------------------------------
+  # EMRCluster:
+  #   Type: AWS::EMR::Cluster
+  #   Properties:
+  #     Name: !Sub "${EnvironmentName}-datalake-emr"
+  #     ReleaseLabel: emr-7.0.0
+  #     Applications:
+  #       - Name: Spark
+  #       - Name: Hadoop
+  #     Instances:
+  #       MasterInstanceGroup:
+  #         InstanceCount: 1
+  #         InstanceType: m5.xlarge  # TODO: 実運用時に変更してください
+  #       CoreInstanceGroup:
+  #         InstanceCount: 2  # TODO: 実運用時に変更してください
+  #         InstanceType: m5.xlarge
+  #     SecurityConfiguration: !Ref EMRSecurityConfig
+  #     AutoTerminationPolicy:
+  #       IdleTimeout: 3600  # 1時間アイドル後に自動終了
+
+  # ----------------------------------------------------------
+  # Lake Formation 設定（データアクセス制御）
+  # ----------------------------------------------------------
+  LakeFormationSettings:
+    Type: AWS::LakeFormation::DataLakeSettings
+    Properties:
+      Admins:
+        - DataLakePrincipalIdentifier: !Ref LakeFormationAdminArn  # TODO: 実運用時に変更してください
+
+  # Bronze バケットを Lake Formation に登録
+  BronzeLakeFormationResource:
+    Type: AWS::LakeFormation::Resource
+    Properties:
+      ResourceArn: !GetAtt BronzeBucket.Arn
+      UseServiceLinkedRole: true
+
+  SilverLakeFormationResource:
+    Type: AWS::LakeFormation::Resource
+    Properties:
+      ResourceArn: !GetAtt SilverBucket.Arn
+      UseServiceLinkedRole: true
+
+  GoldLakeFormationResource:
+    Type: AWS::LakeFormation::Resource
+    Properties:
+      ResourceArn: !GetAtt GoldBucket.Arn
+      UseServiceLinkedRole: true
+
+  # ----------------------------------------------------------
+  # Athena WorkGroup（クエリコスト管理）
+  # ----------------------------------------------------------
+  DataLakeAthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub "${EnvironmentName}-datalake-workgroup"
+      Description: Data Lakehouse 用 Athena ワークグループ（Gold レイヤークエリ）
+      State: ENABLED
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub "s3://${AthenaResultBucket}/results/"
+          EncryptionConfiguration:
+            EncryptionOption: SSE_KMS
+            KmsKey: !Ref DataLakeKMSKey
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+        BytesScannedCutoffPerQuery: 10737418240  # TODO: 実運用時に適切な上限に変更してください（現在10GB）
+
+  # ----------------------------------------------------------
+  # Redshift Serverless（高速 SQL 分析）
+  # ----------------------------------------------------------
+  RedshiftServerlessNamespace:
+    Type: AWS::RedshiftServerless::Namespace
+    Properties:
+      NamespaceName: !Sub "${EnvironmentName}-datalake-namespace"
+      # TODO: 実運用時に変更してください（Redshift 管理者ユーザー名）
+      AdminUsername: "admin"
+      # TODO: 実運用時に Secrets Manager から取得するよう変更してください
+      AdminUserPassword: "StorCon2024!Change@Me"
+      DbName: !Sub "${EnvironmentName}_datalake"
+      KmsKeyId: !Ref DataLakeKMSKey
+      IamRoles:
+        - !GetAtt RedshiftServerlessIAMRole.Arn
+
+  RedshiftServerlessWorkgroup:
+    Type: AWS::RedshiftServerless::Workgroup
+    Properties:
+      WorkgroupName: !Sub "${EnvironmentName}-datalake-workgroup"
+      NamespaceName: !Ref RedshiftServerlessNamespace
+      BaseCapacity: !Ref RedshiftBaseRPU
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !Ref RedshiftSecurityGroup
+      PubliclyAccessible: false  # プライベートサブネット配置、パブリックアクセス禁止
+
+  RedshiftSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Redshift Serverless セキュリティグループ
+      VpcId: !Ref DataLakeVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5439
+          ToPort: 5439
+          CidrIp: !Ref VpcCIDR  # VPC 内からのみ接続許可
+
+  RedshiftServerlessIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-redshift-serverless-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift-serverless.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RedshiftS3GoldAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt GoldBucket.Arn
+                  - !Sub "${GoldBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !GetAtt DataLakeKMSKey.Arn
+              - Effect: Allow
+                Action:
+                  - glue:GetTable
+                  - glue:GetDatabase
+                  - glue:GetPartitions
+                Resource: "*"
+
+  # ----------------------------------------------------------
+  # Step Functions（ETL パイプライン オーケストレーション）
+  # ----------------------------------------------------------
+  ETLStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${EnvironmentName}-etl-statemachine-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ETLOrchestrationPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:BatchStopJobRun
+                  - glue:StartCrawler
+                  - glue:GetCrawler
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: "*"
+
+  ETLPipelineStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub "${EnvironmentName}-datalake-etl-pipeline"
+      RoleArn: !GetAtt ETLStateMachineRole.Arn
+      StateMachineType: STANDARD
+      TracingConfiguration:
+        Enabled: true
+      DefinitionString: !Sub |
+        {
+          "Comment": "Data Lakehouse ETL パイプライン: Bronze → Silver → Gold",
+          "StartAt": "RunBronzeToSilver",
+          "States": {
+            "RunBronzeToSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "${BronzeToSilverGlueJob}"
+              },
+              "Next": "CrawlSilver",
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "IntervalSeconds": 60,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "ETLFailed"
+                }
+              ]
+            },
+            "CrawlSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+              "Parameters": {
+                "Name": "${SilverCrawler}"
+              },
+              "Next": "RunSilverToGold"
+            },
+            "RunSilverToGold": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "${SilverToGoldGlueJob}"
+              },
+              "Next": "CrawlGold",
+              "Retry": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "IntervalSeconds": 60,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 2.0
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": ["States.ALL"],
+                  "Next": "ETLFailed"
+                }
+              ]
+            },
+            "CrawlGold": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+              "Parameters": {
+                "Name": "${GoldCrawler}"
+              },
+              "Next": "ETLSucceeded"
+            },
+            "ETLSucceeded": {
+              "Type": "Succeed"
+            },
+            "ETLFailed": {
+              "Type": "Fail",
+              "Error": "ETLPipelineError",
+              "Cause": "Glue ジョブの実行に失敗しました。CloudWatch Logs を確認してください。"
+            }
+          }
+        }
+
+  # ----------------------------------------------------------
+  # QuickSight
+  # NOTE: QuickSight はコンソールまたは API での初期セットアップが必要なため
+  #       CloudFormation での直接プロビジョニングは限定的です。
+  #       以下の手順でセットアップしてください：
+  #       1. QuickSight コンソールで Enterprise Edition を有効化
+  #       2. VPC Connection を設定（Redshift Serverless へのアクセス用）
+  #       3. Athena / Redshift をデータソースとして追加
+  #       4. Gold レイヤーの Glue テーブルを SPICE にインポート
+  # TODO: 実運用時に QuickSight の VPC 接続設定とデータソース定義を追加してください
+  # ----------------------------------------------------------
+
+# ============================================================
+# Outputs
+# ============================================================
+Outputs:
+  BronzeBucketArn:
+    Description: Bronze レイヤー S3 バケット ARN
+    Value: !GetAtt BronzeBucket.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-BronzeBucketArn"
+
+  SilverBucketArn:
+    Description: Silver レイヤー S3 バケット ARN
+    Value: !GetAtt SilverBucket.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-SilverBucketArn"
+
+  GoldBucketArn:
+    Description: Gold レイヤー S3 バケット ARN
+    Value: !GetAtt GoldBucket.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-GoldBucketArn"
+
+  KinesisStreamArn:
+    Description: Kinesis Data Stream ARN（ストリーミングデータ取り込み口）
+    Value: !GetAtt StorConDataStream.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-KinesisStreamArn"
+
+  FirehoseDeliveryStreamArn:
+    Description: Kinesis Firehose Delivery Stream ARN
+    Value: !GetAtt StorConFirehose.Arn
+
+  ETLStateMachineArn:
+    Description: ETL パイプライン Step Functions ARN
+    Value: !Ref ETLPipelineStateMachine
+    Export:
+      Name: !Sub "${EnvironmentName}-ETLStateMachineArn"
+
+  AthenaWorkGroupName:
+    Description: Athena ワークグループ名
+    Value: !Ref DataLakeAthenaWorkGroup
+
+  RedshiftNamespaceName:
+    Description: Redshift Serverless Namespace 名
+    Value: !Ref RedshiftServerlessNamespace
+
+  RedshiftWorkgroupName:
+    Description: Redshift Serverless Workgroup 名
+    Value: !Ref RedshiftServerlessWorkgroup
+
+  DataLakeKMSKeyArn:
+    Description: Data Lake 暗号化 KMS キー ARN
+    Value: !GetAtt DataLakeKMSKey.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-DataLakeKMSKeyArn"

@@ -1,0 +1,612 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  [Serverless Web Application Architecture]
+  CloudFront + S3 による SPA ホスティング、API Gateway + Lambda による REST API、
+  DynamoDB によるデータ永続化、Cognito による認証、SQS/SNS による非同期処理を
+  組み合わせたフルサーバーレス Web アプリケーション構成。
+  教育・参照用テンプレート。実運用時は各パラメータを見直すこと。
+
+# ==============================================================================
+# パラメータ定義
+# ==============================================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev  # TODO: 実運用時に変更してください (dev / stg / prod)
+    AllowedValues:
+      - dev
+      - stg
+      - prod
+    Description: デプロイ環境名
+
+  ApplicationName:
+    Type: String
+    Default: myapp  # TODO: 実運用時に変更してください
+    Description: アプリケーション名（リソース命名に使用）
+
+  LambdaMemorySize:
+    Type: Number
+    Default: 256  # TODO: 実運用時にワークロードに合わせて調整してください
+    AllowedValues: [128, 256, 512, 1024, 2048]
+    Description: Lambda 関数のメモリサイズ (MB)
+
+  LambdaTimeout:
+    Type: Number
+    Default: 30  # TODO: 実運用時に変更してください（最大900秒）
+    Description: Lambda 関数のタイムアウト (秒)
+
+  DynamoDBBillingMode:
+    Type: String
+    Default: PAY_PER_REQUEST  # TODO: 高トラフィック時は PROVISIONED に変更を検討
+    AllowedValues:
+      - PAY_PER_REQUEST
+      - PROVISIONED
+    Description: DynamoDB の課金モード
+
+# ==============================================================================
+# リソース定義
+# ==============================================================================
+Resources:
+
+  # ----------------------------------------------------------------------------
+  # KMS キー（全リソースの暗号化に使用）
+  # ----------------------------------------------------------------------------
+  AppKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "${ApplicationName}-${EnvironmentName} アプリケーション共通 KMS キー"
+      EnableKeyRotation: true  # キーの自動ローテーションを有効化
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Application
+          Value: !Ref ApplicationName
+
+  AppKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${ApplicationName}-${EnvironmentName}"
+      TargetKeyId: !Ref AppKMSKey
+
+  # ----------------------------------------------------------------------------
+  # S3 バケット（SPA 静的ホスティング用）
+  # ----------------------------------------------------------------------------
+  SPAHostingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ApplicationName}-${EnvironmentName}-spa-${AWS::AccountId}"
+      # パブリックアクセスをすべてブロック（CloudFront OAC 経由でのみアクセス）
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # S3 マネージドキーで暗号化（KMS は CloudFront との連携で制約あり）
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  SPAHostingBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SPAHostingBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontOAC
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${SPAHostingBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
+  # ----------------------------------------------------------------------------
+  # CloudFront Distribution（SPA 配信）
+  # ----------------------------------------------------------------------------
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "${ApplicationName}-${EnvironmentName}-oac"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: !Sub "${ApplicationName}-${EnvironmentName} SPA Distribution"
+        Enabled: true
+        DefaultRootObject: index.html  # TODO: 実運用時に変更してください
+        HttpVersion: http2
+        # WAF WebACL を紐付け
+        WebACLId: !GetAtt WAFWebACL.Arn
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt SPAHostingBucket.RegionalDomainName
+            OriginAccessControlId: !Ref CloudFrontOAC
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https  # HTTP → HTTPS リダイレクト
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+          Compress: true
+        # SPA のフォールバック設定（404 → index.html）
+        CustomErrorResponses:
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # WAF WebACL（API Gateway に適用）
+  # ----------------------------------------------------------------------------
+  WAFWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-webacl"
+      Scope: REGIONAL  # API Gateway に適用するため REGIONAL
+      DefaultAction:
+        Allow: {}
+      Rules:
+        # AWS マネージドルール: 一般的な脅威をブロック
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSetMetric
+        # レートリミット: 同一 IP からの過剰リクエストをブロック
+        - Name: RateLimitRule
+          Priority: 2
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              Limit: 1000  # TODO: 実運用時にトラフィック量に合わせて調整してください
+              AggregateKeyType: IP
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimitRuleMetric
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub "${ApplicationName}${EnvironmentName}WebACL"
+
+  # ----------------------------------------------------------------------------
+  # Cognito User Pool（認証）
+  # ----------------------------------------------------------------------------
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${ApplicationName}-${EnvironmentName}-user-pool"
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12  # TODO: 実運用時にセキュリティポリシーに合わせてください
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+      # MFA 設定（本番環境では REQUIRED を推奨）
+      MfaConfiguration: OPTIONAL  # TODO: 実運用時は REQUIRED に変更を検討
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AutoVerifiedAttributes:
+        - email
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${ApplicationName}-${EnvironmentName}-app-client"
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false  # SPA からの利用のためシークレットなし
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AccessTokenValidity: 60    # TODO: 実運用時に変更してください（分単位）
+      IdTokenValidity: 60        # TODO: 実運用時に変更してください（分単位）
+      RefreshTokenValidity: 30   # TODO: 実運用時に変更してください（日単位）
+
+  # ----------------------------------------------------------------------------
+  # DynamoDB テーブル（メインデータ）
+  # ----------------------------------------------------------------------------
+  MainDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${ApplicationName}-${EnvironmentName}-main"
+      BillingMode: !Ref DynamoDBBillingMode
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      # GSI（検索パターン対応）
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      # KMS 暗号化を有効化
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref AppKMSKey
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # SQS キュー（非同期タスク処理）
+  # ----------------------------------------------------------------------------
+  # デッドレターキュー（処理失敗メッセージ格納）
+  TaskQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${ApplicationName}-${EnvironmentName}-task-dlq"
+      KmsMasterKeyId: !Ref AppKMSKey
+      MessageRetentionPeriod: 1209600  # 14日間保持（調査用）
+
+  TaskQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${ApplicationName}-${EnvironmentName}-task-queue"
+      KmsMasterKeyId: !Ref AppKMSKey
+      VisibilityTimeout: 300  # Lambda タイムアウトの6倍を推奨
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt TaskQueueDLQ.Arn
+        maxReceiveCount: 3  # TODO: 実運用時に変更してください
+
+  # ----------------------------------------------------------------------------
+  # SNS トピック（通知）
+  # ----------------------------------------------------------------------------
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${ApplicationName}-${EnvironmentName}-notifications"
+      KmsMasterKeyId: !Ref AppKMSKey
+      # TODO: 実運用時にサブスクリプション（メール等）を追加してください
+      # Subscriptions:
+      #   - Protocol: email
+      #     Endpoint: ops@example.com
+
+  # ----------------------------------------------------------------------------
+  # IAM ロール（Lambda 実行ロール・最小権限）
+  # ----------------------------------------------------------------------------
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ApplicationName}-${EnvironmentName}-lambda-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: LambdaAppPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # DynamoDB アクセス（最小権限）
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource:
+                  - !GetAtt MainDynamoDBTable.Arn
+                  - !Sub "${MainDynamoDBTable.Arn}/index/*"
+              # SQS アクセス
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt TaskQueue.Arn
+              # SNS 発行
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref NotificationTopic
+              # KMS 使用権限
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt AppKMSKey.Arn
+
+  # ----------------------------------------------------------------------------
+  # Lambda 関数（API ハンドラ）
+  # ----------------------------------------------------------------------------
+  APILambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ApplicationName}-${EnvironmentName}-api-handler"
+      Runtime: python3.12  # TODO: 実運用時に使用言語に合わせて変更してください
+      Handler: index.handler  # TODO: 実運用時に変更してください
+      Role: !GetAtt LambdaExecutionRole.Arn
+      MemorySize: !Ref LambdaMemorySize
+      Timeout: !Ref LambdaTimeout
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref EnvironmentName
+          TABLE_NAME: !Ref MainDynamoDBTable
+          QUEUE_URL: !Ref TaskQueue
+          SNS_TOPIC_ARN: !Ref NotificationTopic
+      # 環境変数を KMS で暗号化
+      KmsKeyArn: !GetAtt AppKMSKey.Arn
+      # X-Ray アクティブトレーシングを有効化
+      TracingConfig:
+        Mode: Active
+      # TODO: 実運用時はコードを S3 または ECR から取得するよう変更してください
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return {'statusCode': 200, 'body': 'Hello from Lambda'}
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # 非同期タスク処理 Lambda
+  AsyncLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ApplicationName}-${EnvironmentName}-async-handler"
+      Runtime: python3.12  # TODO: 実運用時に使用言語に合わせて変更してください
+      Handler: async_handler.handler  # TODO: 実運用時に変更してください
+      Role: !GetAtt LambdaExecutionRole.Arn
+      MemorySize: !Ref LambdaMemorySize
+      Timeout: 300  # SQS VisibilityTimeout の 1/6 以下に設定すること
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref EnvironmentName
+          TABLE_NAME: !Ref MainDynamoDBTable
+      KmsKeyArn: !GetAtt AppKMSKey.Arn
+      TracingConfig:
+        Mode: Active
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              for record in event['Records']:
+                  print(f"Processing: {record['body']}")
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # SQS → Lambda のイベントソースマッピング
+  SQSEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt TaskQueue.Arn
+      FunctionName: !GetAtt AsyncLambdaFunction.Arn
+      BatchSize: 10  # TODO: 実運用時に変更してください
+      Enabled: true
+
+  # ----------------------------------------------------------------------------
+  # API Gateway (REST API)
+  # ----------------------------------------------------------------------------
+  RestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-api"
+      Description: !Sub "${ApplicationName} REST API (${EnvironmentName})"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  APIItemsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref RestAPI
+      ParentId: !GetAtt RestAPI.RootResourceId
+      PathPart: items
+
+  APIItemsGETMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !Ref APIItemsResource
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref APIGatewayCognitoAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APILambdaFunction.Arn}/invocations"
+
+  # Cognito オーソライザー（JWT 検証）
+  APIGatewayCognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoAuthorizer
+      RestApiId: !Ref RestAPI
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !GetAtt CognitoUserPool.Arn
+
+  APIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - APIItemsGETMethod
+    Properties:
+      RestApiId: !Ref RestAPI
+      StageName: !Ref EnvironmentName
+
+  # WAF を API Gateway に関連付け
+  WAFAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/${RestAPI}/stages/${EnvironmentName}"
+      WebACLArn: !GetAtt WAFWebACL.Arn
+
+  LambdaAPIGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt APILambdaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RestAPI}/*/*"
+
+  # ----------------------------------------------------------------------------
+  # CloudWatch アラーム
+  # ----------------------------------------------------------------------------
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ApplicationName}-${EnvironmentName}-lambda-errors"
+      AlarmDescription: Lambda API ハンドラのエラー数が閾値を超えました
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref APILambdaFunction
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 5  # TODO: 実運用時に変更してください
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref NotificationTopic
+      TreatMissingData: notBreaching
+
+  DLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ApplicationName}-${EnvironmentName}-dlq-messages"
+      AlarmDescription: DLQ にメッセージが溜まっています。処理失敗を調査してください
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt TaskQueueDLQ.QueueName
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref NotificationTopic
+      TreatMissingData: notBreaching
+
+# ==============================================================================
+# 出力
+# ==============================================================================
+Outputs:
+  CloudFrontDomainName:
+    Description: CloudFront ディストリビューションのドメイン名
+    Value: !GetAtt CloudFrontDistribution.DomainName
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-cloudfront-domain"
+
+  CloudFrontDistributionId:
+    Description: CloudFront ディストリビューション ID
+    Value: !Ref CloudFrontDistribution
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-cloudfront-id"
+
+  SPABucketName:
+    Description: SPA ホスティング S3 バケット名
+    Value: !Ref SPAHostingBucket
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-spa-bucket"
+
+  APIEndpoint:
+    Description: API Gateway エンドポイント URL
+    Value: !Sub "https://${RestAPI}.execute-api.${AWS::Region}.amazonaws.com/${EnvironmentName}"
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-api-endpoint"
+
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref CognitoUserPool
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-user-pool-id"
+
+  CognitoUserPoolClientId:
+    Description: Cognito User Pool クライアント ID
+    Value: !Ref CognitoUserPoolClient
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-user-pool-client-id"
+
+  DynamoDBTableArn:
+    Description: DynamoDB メインテーブルの ARN
+    Value: !GetAtt MainDynamoDBTable.Arn
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-dynamodb-arn"
+
+  SQSTaskQueueUrl:
+    Description: SQS タスクキューの URL
+    Value: !Ref TaskQueue
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-sqs-url"
+
+  SNSNotificationTopicArn:
+    Description: SNS 通知トピックの ARN
+    Value: !Ref NotificationTopic
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-sns-arn"
+
+  KMSKeyArn:
+    Description: アプリケーション共通 KMS キーの ARN
+    Value: !GetAtt AppKMSKey.Arn
+    Export:
+      Name: !Sub "${ApplicationName}-${EnvironmentName}-kms-arn"

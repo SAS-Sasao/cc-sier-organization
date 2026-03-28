@@ -1,0 +1,807 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  [StoreCon DWH Architecture]
+  コンビニストコン（StoreCon）POS データを対象とした DWH 構成。
+  Kinesis によるリアルタイム POS データ取り込み、Glue による ETL 処理、
+  Redshift Cluster による分析 DWH、Athena による S3 クエリ、
+  Lake Formation によるデータガバナンスを組み合わせた構成。
+  QuickSight はリソースタイプ制約のためコメントで記載。
+  教育・参照用テンプレート。実運用時は各パラメータを見直すこと。
+
+# ==============================================================================
+# パラメータ定義
+# ==============================================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev  # TODO: 実運用時に変更してください (dev / stg / prod)
+    AllowedValues:
+      - dev
+      - stg
+      - prod
+    Description: デプロイ環境名
+
+  ProjectName:
+    Type: String
+    Default: storcon-dwh  # TODO: 実運用時に変更してください
+    Description: プロジェクト名（リソース命名に使用）
+
+  # VPC 設定
+  VpcCidr:
+    Type: String
+    Default: 10.1.0.0/16  # TODO: 実運用時にネットワーク設計に合わせて変更してください
+    Description: VPC CIDR ブロック
+
+  PrivateSubnet1Cidr:
+    Type: String
+    Default: 10.1.1.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートサブネット 1 の CIDR (AZ-a)
+
+  PrivateSubnet2Cidr:
+    Type: String
+    Default: 10.1.2.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートサブネット 2 の CIDR (AZ-c)
+
+  # POS データ取り込み設定
+  KinesisShardCount:
+    Type: Number
+    Default: 4  # TODO: 実運用時に店舗数・POS 台数に応じて調整してください
+    Description: Kinesis Data Stream のシャード数（POS 台数に比例）
+
+  # Redshift Cluster 設定
+  RedshiftNodeType:
+    Type: String
+    Default: dc2.large  # TODO: 実運用時にデータ量に合わせて変更してください
+    AllowedValues:
+      - dc2.large
+      - dc2.8xlarge
+      - ra3.xlplus
+      - ra3.4xlarge
+      - ra3.16xlarge
+    Description: Redshift ノードタイプ
+
+  RedshiftNumberOfNodes:
+    Type: Number
+    Default: 2  # TODO: 実運用時に変更してください（1ノードはシングルノード構成）
+    MinValue: 1
+    MaxValue: 128
+    Description: Redshift ノード数
+
+  RedshiftMasterUsername:
+    Type: String
+    Default: dwhadmin  # TODO: 実運用時に変更してください
+    NoEcho: false
+    Description: Redshift 管理者ユーザー名
+
+  # Glue ETL 設定
+  GlueWorkerType:
+    Type: String
+    Default: G.1X  # TODO: 実運用時にデータ量に合わせて変更してください
+    AllowedValues:
+      - Standard
+      - G.1X
+      - G.2X
+      - G.025X
+    Description: Glue ワーカータイプ
+
+  GlueWorkerCount:
+    Type: Number
+    Default: 5  # TODO: 実運用時に変更してください
+    Description: Glue ETL ジョブのワーカー数
+
+# ==============================================================================
+# リソース定義
+# ==============================================================================
+Resources:
+
+  # ----------------------------------------------------------------------------
+  # KMS キー（DWH データ暗号化）
+  # ----------------------------------------------------------------------------
+  DWHKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "${ProjectName}-${EnvironmentName} DWH データ暗号化 KMS キー"
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: Allow Redshift Glue Firehose to use the key
+            Effect: Allow
+            Principal:
+              Service:
+                - redshift.amazonaws.com
+                - glue.amazonaws.com
+                - firehose.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Project
+          Value: !Ref ProjectName
+
+  DWHKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${ProjectName}-${EnvironmentName}"
+      TargetKeyId: !Ref DWHKMSKey
+
+  # ----------------------------------------------------------------------------
+  # VPC（Redshift Cluster 配置用）
+  # ----------------------------------------------------------------------------
+  DWHVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-vpc"
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # プライベートサブネット（Redshift はパブリックサブネットに置かない）
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DWHVPC
+      CidrBlock: !Ref PrivateSubnet1Cidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-private-1a"
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref DWHVPC
+      CidrBlock: !Ref PrivateSubnet2Cidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-private-1c"
+
+  # Redshift 用セキュリティグループ
+  RedshiftSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Sub "${ProjectName} Redshift Cluster セキュリティグループ"
+      VpcId: !Ref DWHVPC
+      SecurityGroupIngress:
+        # VPC 内からのみ Redshift ポートへのアクセスを許可
+        - IpProtocol: tcp
+          FromPort: 5439
+          ToPort: 5439
+          CidrIp: !Ref VpcCidr
+          Description: VPC 内からの Redshift アクセス
+        # TODO: 実運用時は BIツール（QuickSight 等）の IP/SG に絞ること
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: 全アウトバウンドを許可
+      Tags:
+        - Key: Name
+          Value: !Sub "${ProjectName}-${EnvironmentName}-redshift-sg"
+
+  # Redshift Subnet Group
+  RedshiftSubnetGroup:
+    Type: AWS::Redshift::ClusterSubnetGroup
+    Properties:
+      Description: !Sub "${ProjectName} Redshift Subnet Group"
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # S3 バケット（データレイク 3 ゾーン）
+  # ----------------------------------------------------------------------------
+  # Raw ゾーン: POS データ生データ（Firehose 配信先）
+  RawZoneBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${EnvironmentName}-raw-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DWHKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      # POS 生データのライフサイクル管理
+      LifecycleConfiguration:
+        Rules:
+          - Id: RawPOSDataLifecycle
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90   # TODO: 実運用時にデータ保持要件に合わせて変更
+                StorageClass: STANDARD_IA
+              - TransitionInDays: 730  # 2年後に Glacier へ
+                StorageClass: GLACIER
+      Tags:
+        - Key: DataZone
+          Value: raw
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: DataClassification
+          Value: confidential  # POS データは機密扱い
+
+  # Processed ゾーン: クレンジング済みデータ
+  ProcessedZoneBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${EnvironmentName}-processed-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DWHKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: DataZone
+          Value: processed
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # Curated ゾーン: DWH ロード・BI 分析向け最終データ
+  CuratedZoneBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${ProjectName}-${EnvironmentName}-curated-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref DWHKMSKey
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: DataZone
+          Value: curated
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # Kinesis Data Stream（POS リアルタイム取り込み）
+  # ----------------------------------------------------------------------------
+  POSDataStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-pos-stream"
+      ShardCount: !Ref KinesisShardCount
+      # KMS 暗号化（POS データは機密）
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !Ref DWHKMSKey
+      RetentionPeriodHours: 48  # TODO: 実運用時に変更してください（障害対応バッファとして48時間推奨）
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: DataSource
+          Value: pos
+
+  # IAM ロール（Firehose 実行ロール）
+  FirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-firehose-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: FirehoseS3KMSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt RawZoneBucket.Arn
+                  - !Sub "${RawZoneBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kinesis:GetRecords
+                  - kinesis:GetShardIterator
+                  - kinesis:DescribeStream
+                  - kinesis:ListStreams
+                Resource: !GetAtt POSDataStream.Arn
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DWHKMSKey.Arn
+
+  # Kinesis Firehose（POS ストリーム → S3 Raw ゾーン）
+  POSFirehoseDeliveryStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub "${ProjectName}-${EnvironmentName}-pos-delivery"
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt POSDataStream.Arn
+        RoleARN: !GetAtt FirehoseRole.Arn
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt RawZoneBucket.Arn
+        RoleARN: !GetAtt FirehoseRole.Arn
+        # 店舗ID・日付でパーティション化
+        Prefix: 'pos-data/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/'
+        ErrorOutputPrefix: 'errors/!{firehose:error-output-type}/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/'
+        BufferingHints:
+          IntervalInSeconds: 60   # TODO: 実運用時に変更してください（リアルタイム性要件に応じて）
+          SizeInMBs: 64           # TODO: 実運用時に変更してください
+        CompressionFormat: GZIP
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !GetAtt DWHKMSKey.Arn
+
+  # ----------------------------------------------------------------------------
+  # Glue（データカタログ・ETL）
+  # ----------------------------------------------------------------------------
+  # Glue Data Catalog Database
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub "${ProjectName}_${EnvironmentName}"
+        Description: !Sub "StoreCon POS データカタログ (${EnvironmentName})"
+
+  # Glue IAM ロール
+  GlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-glue-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: GlueS3KMSPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt RawZoneBucket.Arn
+                  - !Sub "${RawZoneBucket.Arn}/*"
+                  - !GetAtt ProcessedZoneBucket.Arn
+                  - !Sub "${ProcessedZoneBucket.Arn}/*"
+                  - !GetAtt CuratedZoneBucket.Arn
+                  - !Sub "${CuratedZoneBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DWHKMSKey.Arn
+
+  # Glue Crawler（POS 生データのスキーマ検出）
+  POSDataCrawler:
+    Type: AWS::Glue::Crawler
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-pos-crawler"
+      Role: !GetAtt GlueRole.Arn
+      DatabaseName: !Ref GlueDatabase
+      Targets:
+        S3Targets:
+          - Path: !Sub "s3://${RawZoneBucket}/pos-data/"
+      # 日次スケジュール（深夜バッチ後に実行）
+      Schedule:
+        ScheduleExpression: cron(30 1 * * ? *)  # TODO: 実運用時にバッチスケジュールに合わせてください
+      SchemaChangePolicy:
+        UpdateBehavior: UPDATE_IN_DATABASE
+        DeleteBehavior: LOG
+      TablePrefix: pos_
+
+  # Glue ETL ジョブ（Raw → Processed 変換）
+  RawToProcessedJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-raw-to-processed"
+      Role: !GetAtt GlueRole.Arn
+      GlueVersion: '4.0'
+      WorkerType: !Ref GlueWorkerType
+      NumberOfWorkers: !Ref GlueWorkerCount
+      Command:
+        Name: glueetl
+        # TODO: 実運用時に実際のスクリプトをアップロードしてパスを指定してください
+        ScriptLocation: !Sub "s3://${RawZoneBucket}/scripts/raw_to_processed.py"
+        PythonVersion: '3'
+      DefaultArguments:
+        '--job-language': python
+        '--enable-metrics': 'true'
+        '--enable-continuous-cloudwatch-log': 'true'
+        '--enable-glue-datacatalog': 'true'
+        '--SOURCE_BUCKET': !Ref RawZoneBucket
+        '--TARGET_BUCKET': !Ref ProcessedZoneBucket
+        '--DATABASE_NAME': !Ref GlueDatabase
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Timeout: 180  # TODO: 実運用時に変更してください
+
+  # Glue ETL ジョブ（Processed → Curated 変換 + Redshift ロード用整形）
+  ProcessedToCuratedJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-processed-to-curated"
+      Role: !GetAtt GlueRole.Arn
+      GlueVersion: '4.0'
+      WorkerType: !Ref GlueWorkerType
+      NumberOfWorkers: !Ref GlueWorkerCount
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub "s3://${ProcessedZoneBucket}/scripts/processed_to_curated.py"
+        # TODO: 実運用時に実際のスクリプトをアップロードしてパスを指定してください
+        PythonVersion: '3'
+      DefaultArguments:
+        '--job-language': python
+        '--enable-metrics': 'true'
+        '--enable-continuous-cloudwatch-log': 'true'
+        '--SOURCE_BUCKET': !Ref ProcessedZoneBucket
+        '--TARGET_BUCKET': !Ref CuratedZoneBucket
+        '--DATABASE_NAME': !Ref GlueDatabase
+        '--REDSHIFT_CONNECTION': !Sub "${ProjectName}-${EnvironmentName}-redshift-conn"
+      ExecutionProperty:
+        MaxConcurrentRuns: 1
+      Timeout: 240  # TODO: 実運用時に変更してください
+
+  # ----------------------------------------------------------------------------
+  # Lake Formation 設定（データガバナンス）
+  # ----------------------------------------------------------------------------
+  LakeFormationDataLakeSettings:
+    Type: AWS::LakeFormation::DataLakeSettings
+    Properties:
+      Admins:
+        - DataLakePrincipalIdentifier: !GetAtt GlueRole.Arn
+
+  LakeFormationGluePermission:
+    Type: AWS::LakeFormation::Permissions
+    DependsOn: LakeFormationDataLakeSettings
+    Properties:
+      DataLakePrincipal:
+        DataLakePrincipalIdentifier: !GetAtt GlueRole.Arn
+      Resource:
+        DatabaseResource:
+          Name: !Ref GlueDatabase
+      Permissions:
+        - ALL
+      PermissionsWithGrantOption:
+        - ALL
+
+  # ----------------------------------------------------------------------------
+  # Athena WorkGroup（S3 クエリ）
+  # ----------------------------------------------------------------------------
+  AthenaWorkGroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-athena"
+      Description: StoreCon POS データ S3 クエリ用 WorkGroup
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub "s3://${CuratedZoneBucket}/athena-results/"
+          EncryptionConfiguration:
+            EncryptionOption: SSE_KMS
+            KmsKey: !Ref DWHKMSKey
+        # クエリスキャン量上限（コスト制御）
+        BytesScannedCutoffPerQuery: 10737418240  # TODO: 実運用時に変更してください（10 GB）
+        EnforceWorkGroupConfiguration: true
+        PublishCloudWatchMetricsEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+
+  # ----------------------------------------------------------------------------
+  # Redshift Cluster（分析 DWH）
+  # ----------------------------------------------------------------------------
+  # Redshift IAM ロール（S3 から COPY コマンドでデータ取り込み）
+  RedshiftRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${EnvironmentName}-redshift-role"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RedshiftS3GluePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt CuratedZoneBucket.Arn
+                  - !Sub "${CuratedZoneBucket.Arn}/*"
+              - Effect: Allow
+                Action:
+                  - glue:GetDatabase
+                  - glue:GetTable
+                  - glue:GetPartitions
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt DWHKMSKey.Arn
+
+  # Redshift パラメータグループ
+  RedshiftParameterGroup:
+    Type: AWS::Redshift::ClusterParameterGroup
+    Properties:
+      Description: !Sub "${ProjectName} Redshift パラメータグループ"
+      ParameterGroupFamily: redshift-1.0
+      Parameters:
+        # SSL を強制（平文通信禁止）
+        - ParameterName: require_ssl
+          ParameterValue: 'true'
+        # クエリ実行時間の上限（秒）
+        - ParameterName: statement_timeout
+          ParameterValue: '3600'  # TODO: 実運用時に変更してください
+
+  # Redshift Cluster
+  RedshiftCluster:
+    Type: AWS::Redshift::Cluster
+    Properties:
+      ClusterIdentifier: !Sub "${ProjectName}-${EnvironmentName}-cluster"
+      ClusterType: multi-node  # TODO: 1ノードの場合は single-node に変更してください
+      NodeType: !Ref RedshiftNodeType
+      NumberOfNodes: !Ref RedshiftNumberOfNodes
+      DBName: storcondwh  # TODO: 実運用時に変更してください
+      MasterUsername: !Ref RedshiftMasterUsername
+      MasterUserPassword: !Sub "{{resolve:ssm-secure:/${ProjectName}/${EnvironmentName}/redshift/master-password}}"
+      # TODO: 実運用時は Parameter Store に /storcon-dwh/{env}/redshift/master-password を登録してください
+      ClusterParameterGroupName: !Ref RedshiftParameterGroup
+      ClusterSubnetGroupName: !Ref RedshiftSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref RedshiftSecurityGroup
+      # KMS 暗号化
+      Encrypted: true
+      KmsKeyId: !Ref DWHKMSKey
+      # 自動スナップショット
+      AutomatedSnapshotRetentionPeriod: 7  # TODO: 実運用時に変更してください（日数）
+      # パブリックアクセス禁止
+      PubliclyAccessible: false
+      # 拡張 VPC ルーティングを有効化（COPY/UNLOAD トラフィックを VPC 内に限定）
+      EnhancedVpcRouting: true
+      IamRoles:
+        - !GetAtt RedshiftRole.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: Project
+          Value: !Ref ProjectName
+
+  # ----------------------------------------------------------------------------
+  # QuickSight 関連（コメント記載）
+  # ----------------------------------------------------------------------------
+  # NOTE: AWS CloudFormation は QuickSight のデータソース・データセット・分析・
+  #       ダッシュボードリソースの直接管理を部分的にしかサポートしていません。
+  #       以下のリソースは AWS CLI または QuickSight コンソールから設定してください。
+  #
+  # 1. QuickSight データソース（Redshift 接続）
+  #    - タイプ: REDSHIFT
+  #    - ホスト: ${RedshiftCluster.Endpoint.Address}
+  #    - ポート: 5439
+  #    - DB: storcondwh
+  #    - VPC 接続設定が必要
+  #
+  # 2. QuickSight データセット
+  #    - 日次売上サマリービュー（store_daily_sales）
+  #    - 商品別売上ランキング（product_ranking）
+  #    - 時間帯別来客数（hourly_traffic）
+  #
+  # 3. QuickSight ダッシュボード
+  #    - StoreCon KPI ダッシュボード（日次売上・在庫・来客数）
+  #    - 地域別パフォーマンス比較
+  #    - 異常検知アラートビュー
+  #
+  # QuickSight の VPC 接続:
+  #   aws quicksight create-vpc-connection \
+  #     --aws-account-id ${AWS::AccountId} \
+  #     --vpc-connection-id storcon-${EnvironmentName} \
+  #     --name "StoreCon DWH VPC Connection" \
+  #     --subnet-ids ${PrivateSubnet1} ${PrivateSubnet2} \
+  #     --security-group-ids ${RedshiftSecurityGroup}
+
+  # ----------------------------------------------------------------------------
+  # CloudWatch アラーム
+  # ----------------------------------------------------------------------------
+  # Kinesis ストリーム - 書き込みスロットリングアラーム
+  KinesisThrottleAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${EnvironmentName}-kinesis-throttle"
+      AlarmDescription: POS データストリームで書き込みスロットリングが発生しています。シャード数の増加を検討してください
+      MetricName: WriteProvisionedThroughputExceeded
+      Namespace: AWS/Kinesis
+      Dimensions:
+        - Name: StreamName
+          Value: !Ref POSDataStream
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 3
+      Threshold: 10  # TODO: 実運用時に変更してください
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+  # Redshift Cluster - CPU 使用率アラーム
+  RedshiftCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${EnvironmentName}-redshift-cpu"
+      AlarmDescription: Redshift Cluster の CPU 使用率が高い状態が続いています
+      MetricName: CPUUtilization
+      Namespace: AWS/Redshift
+      Dimensions:
+        - Name: ClusterIdentifier
+          Value: !Ref RedshiftCluster
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 4
+      Threshold: 80  # TODO: 実運用時に変更してください（%）
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+  # Redshift Cluster - ディスク使用率アラーム
+  RedshiftDiskAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${EnvironmentName}-redshift-disk"
+      AlarmDescription: Redshift Cluster のディスク使用率が閾値を超えました。ノード追加を検討してください
+      MetricName: PercentageDiskSpaceUsed
+      Namespace: AWS/Redshift
+      Dimensions:
+        - Name: ClusterIdentifier
+          Value: !Ref RedshiftCluster
+      Statistic: Average
+      Period: 3600
+      EvaluationPeriods: 2
+      Threshold: 75  # TODO: 実運用時に変更してください（%）
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+
+  # Glue ETL ジョブ失敗アラーム
+  GlueJobFailureAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${ProjectName}-${EnvironmentName}-glue-job-failure"
+      AlarmDescription: Glue ETL ジョブが失敗しました。DWH データ品質への影響を確認してください
+      MetricName: glue.ALL.jvm.heap.used
+      Namespace: Glue
+      Dimensions:
+        - Name: JobName
+          Value: !Ref RawToProcessedJob
+        - Name: JobRunId
+          Value: ALL
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: LessThanOrEqualToThreshold
+      TreatMissingData: breaching  # ジョブが実行されていない場合もアラーム
+
+# ==============================================================================
+# 出力
+# ==============================================================================
+Outputs:
+  RawZoneBucketName:
+    Description: Raw ゾーン（POS 生データ）S3 バケット名
+    Value: !Ref RawZoneBucket
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-raw-bucket"
+
+  ProcessedZoneBucketName:
+    Description: Processed ゾーン S3 バケット名
+    Value: !Ref ProcessedZoneBucket
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-processed-bucket"
+
+  CuratedZoneBucketName:
+    Description: Curated ゾーン（DWH ロード用）S3 バケット名
+    Value: !Ref CuratedZoneBucket
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-curated-bucket"
+
+  POSKinesisStreamArn:
+    Description: POS データ Kinesis Stream の ARN
+    Value: !GetAtt POSDataStream.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-pos-stream-arn"
+
+  FirehoseDeliveryStreamArn:
+    Description: Kinesis Firehose の ARN
+    Value: !GetAtt POSFirehoseDeliveryStream.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-firehose-arn"
+
+  GlueDatabaseName:
+    Description: Glue Data Catalog データベース名
+    Value: !Ref GlueDatabase
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-glue-db"
+
+  AthenaWorkGroupName:
+    Description: Athena WorkGroup 名
+    Value: !Ref AthenaWorkGroup
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-athena-wg"
+
+  RedshiftClusterEndpoint:
+    Description: Redshift Cluster エンドポイント
+    Value: !GetAtt RedshiftCluster.Endpoint.Address
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-redshift-endpoint"
+
+  RedshiftClusterPort:
+    Description: Redshift Cluster ポート
+    Value: !GetAtt RedshiftCluster.Endpoint.Port
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-redshift-port"
+
+  RedshiftClusterArn:
+    Description: Redshift Cluster の ARN
+    Value: !Sub "arn:aws:redshift:${AWS::Region}:${AWS::AccountId}:cluster:${RedshiftCluster}"
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-redshift-arn"
+
+  DWHKMSKeyArn:
+    Description: DWH データ暗号化 KMS キーの ARN
+    Value: !GetAtt DWHKMSKey.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-kms-arn"
+
+  VpcId:
+    Description: VPC ID
+    Value: !Ref DWHVPC
+    Export:
+      Name: !Sub "${ProjectName}-${EnvironmentName}-vpc-id"
