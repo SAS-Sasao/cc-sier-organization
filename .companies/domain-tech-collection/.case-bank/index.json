@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-29T12:07:04",
-  "case_count": 39,
+  "updated_at": "2026-03-29T13:40:34",
+  "case_count": 41,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -1353,6 +1353,66 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-29T11:45:00"
+      }
+    },
+    {
+      "id": "20260329-125754-drawio-proposal-automation-c4",
+      "state": {
+        "request_keywords": [
+          "SIer提案書自動化ツールのC4モデル",
+          "L1",
+          "System",
+          "Context",
+          "L2",
+          "Container",
+          "L3",
+          "Component"
+        ],
+        "request_head": "SIer提案書自動化ツールのC4モデル（L1 System Context / L2 Container / L3 Co",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/drawio/proposal-automation-c4.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260329-132734-drawio-modern-data-lakehouse",
+      "state": {
+        "request_keywords": [
+          "既存のAWS",
+          "Diagram",
+          "MCP版",
+          "Modern",
+          "Data",
+          "Lakehouse構成図をdraw.io編集可能な形式で再生成",
+          "AWS公式アイコン",
+          "mxgraph.aws4"
+        ],
+        "request_head": "既存のAWS Diagram MCP版 Modern Data Lakehouse構成図をdraw.io編集可能な形式で",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/drawio/modern-data-lakehouse.md"
+        ],
+        "started": ""
       }
     }
   ],
