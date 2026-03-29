@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>draw.io ダイアグラム一覧 - cc-sier-organization</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --purple:#8b5cf6; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.subtitle { color:var(--muted); font-size:.88rem; margin-bottom:24px; }
+.count { color:var(--muted); font-size:.82rem; margin-bottom:16px; }
+
+/* Search & Filter */
+.search-bar { margin-bottom:16px; }
+.search-input { width:100%; max-width:480px; padding:10px 16px; border:1px solid var(--border);
+                border-radius:8px; font-size:.9rem; background:var(--bg2); color:var(--text);
+                outline:none; transition:border-color .2s; }
+.search-input:focus { border-color:var(--blue); }
+.search-input::placeholder { color:var(--muted); }
+.filter-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.filter-btn { padding:4px 12px; border:1px solid var(--border); border-radius:16px;
+              font-size:.75rem; font-weight:600; cursor:pointer; background:var(--bg2);
+              color:var(--muted); transition:all .15s; }
+.filter-btn:hover { border-color:var(--blue); color:var(--blue); }
+.filter-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); }
+.no-results { display:none; padding:40px; text-align:center; color:var(--muted); font-size:.9rem; }
+
+/* Pagination */
+.pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:24px; flex-wrap:wrap; }
+.page-btn { min-width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center;
+            border:1px solid var(--border); border-radius:8px; background:var(--bg2); color:var(--text);
+            font-size:.85rem; cursor:pointer; transition:all .15s; text-decoration:none; }
+.page-btn:hover { border-color:var(--blue); color:var(--blue); }
+.page-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); pointer-events:none; }
+.page-btn.disabled { opacity:.35; pointer-events:none; }
+.page-info { font-size:.82rem; color:var(--muted); margin:0 8px; }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+        text-decoration:none; color:var(--text); overflow:hidden;
+        transition:box-shadow .2s, transform .15s; display:block; }
+.card:hover { box-shadow:0 6px 20px var(--shadow); transform:translateY(-2px); }
+.card-body { padding:20px 24px; }
+.card-icon { font-size:2rem; margin-bottom:8px; }
+.card-title { font-size:1rem; font-weight:600; margin-bottom:6px; }
+.card-meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.card-desc { font-size:.84rem; color:var(--muted); line-height:1.5; }
+.card-date { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.empty-state { text-align:center; padding:60px 20px; color:var(--muted); }
+.empty-state p { font-size:.9rem; margin-top:12px; }
+</style>
+</head>
+<body>
+<a href="../" class="back-btn">&larr; トップに戻る</a>
+<h1>draw.io ダイアグラム一覧</h1>
+<p class="subtitle">draw.io MCP Server で生成したER図・フローチャート・シーケンス図等</p>
+<p class="count"><span id="match-count">0</span> / 0 件のダイアグラム</p>
+
+<!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
+<div class="search-bar">
+  <input type="text" id="search-input" class="search-input" placeholder="タイトル・プロジェクト・種類・説明で検索...">
+</div>
+<div class="filter-tags" id="filter-tags"></div>
+<p class="no-results" id="no-results">該当するダイアグラムがありません</p>
+<!-- ▲ 検索・フィルタ ここまで -->
+
+<div class="grid">
+</div>
+
+<!-- ▼ ページネーション（カード追加時に編集不要） -->
+<div class="pagination" id="pagination"></div>
+<!-- ▲ ページネーション ここまで -->
+
+<div class="empty-state" id="empty-state">
+  <p style="font-size:2rem;">📊</p>
+  <p>まだダイアグラムがありません。<br><code>/company-drawio</code> で最初の図を作成しましょう。</p>
+</div>
+
+<p class="updated">Powered by draw.io MCP Server</p>
+
+<!-- ▼ 検索・フィルタ・ページネーション JavaScript（カード追加時に編集不要） -->
+<script>
+(function() {
+  var PER_PAGE = 20;
+  var currentPage = 1;
+  var input = document.getElementById('search-input');
+  var tagsContainer = document.getElementById('filter-tags');
+  var noResults = document.getElementById('no-results');
+  var matchCount = document.getElementById('match-count');
+  var paginationEl = document.getElementById('pagination');
+  var emptyState = document.getElementById('empty-state');
+  var allCards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var activeFilters = { project: '', type: '' };
+  var filtered = [];
+
+  // Hide empty state if cards exist
+  if (allCards.length > 0) emptyState.style.display = 'none';
+
+  // Build filter tag buttons from existing cards
+  var projects = [], types = [];
+  allCards.forEach(function(c) {
+    var p = c.querySelector('.tag-project');
+    var t = c.querySelector('.tag-type');
+    if (p && projects.indexOf(p.textContent) === -1) projects.push(p.textContent);
+    if (t && types.indexOf(t.textContent) === -1) types.push(t.textContent);
+  });
+
+  function createBtn(label, type) {
+    var btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.textContent = label;
+    btn.setAttribute('data-type', type);
+    btn.addEventListener('click', function() {
+      if (this.classList.contains('active')) {
+        this.classList.remove('active');
+        activeFilters[type] = '';
+      } else {
+        document.querySelectorAll('.filter-btn[data-type="' + type + '"]').forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+        activeFilters[type] = label;
+      }
+      currentPage = 1;
+      applyFilter();
+    });
+    return btn;
+  }
+
+  projects.forEach(function(p) { tagsContainer.appendChild(createBtn(p, 'project')); });
+  types.forEach(function(t) { tagsContainer.appendChild(createBtn(t, 'type')); });
+
+  function applyFilter() {
+    var query = input.value.toLowerCase();
+    filtered = allCards.filter(function(c) {
+      var text = c.textContent.toLowerCase();
+      var pTag = c.querySelector('.tag-project');
+      var tTag = c.querySelector('.tag-type');
+      var pMatch = !activeFilters.project || (pTag && pTag.textContent === activeFilters.project);
+      var tMatch = !activeFilters.type || (tTag && tTag.textContent === activeFilters.type);
+      var qMatch = !query || text.indexOf(query) !== -1;
+      return pMatch && tMatch && qMatch;
+    });
+    renderPage();
+  }
+
+  function renderPage() {
+    var total = filtered.length;
+    var totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    var start = (currentPage - 1) * PER_PAGE;
+    var end = start + PER_PAGE;
+    var pageItems = filtered.slice(start, end);
+
+    allCards.forEach(function(c) { c.style.display = 'none'; });
+    pageItems.forEach(function(c) { c.style.display = ''; });
+
+    if (total === 0) {
+      matchCount.textContent = '0';
+      noResults.style.display = allCards.length > 0 ? 'block' : 'none';
+    } else {
+      matchCount.textContent = (start + 1) + '-' + Math.min(end, total) + ' / ' + total;
+      noResults.style.display = 'none';
+    }
+
+    paginationEl.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    function addBtn(label, page, disabled, active) {
+      var btn = document.createElement('button');
+      btn.className = 'page-btn' + (active ? ' active' : '') + (disabled ? ' disabled' : '');
+      btn.textContent = label;
+      if (!disabled && !active) {
+        btn.addEventListener('click', function() {
+          currentPage = page;
+          renderPage();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      paginationEl.appendChild(btn);
+    }
+
+    addBtn('\u00AB', 1, currentPage === 1, false);
+    addBtn('\u2039', currentPage - 1, currentPage === 1, false);
+    var pages = [];
+    for (var i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== '...') {
+        pages.push('...');
+      }
+    }
+    pages.forEach(function(p) {
+      if (p === '...') {
+        var span = document.createElement('span');
+        span.className = 'page-info';
+        span.textContent = '...';
+        paginationEl.appendChild(span);
+      } else {
+        addBtn(String(p), p, false, p === currentPage);
+      }
+    });
+    addBtn('\u203A', currentPage + 1, currentPage === totalPages, false);
+    addBtn('\u00BB', totalPages, currentPage === totalPages, false);
+  }
+
+  input.addEventListener('input', function() { currentPage = 1; applyFilter(); });
+  applyFilter();
+})();
+</script>
+<!-- ▲ 検索・フィルタ・ページネーション JavaScript ここまで -->
+</body>
+</html>

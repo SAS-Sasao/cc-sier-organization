@@ -1115,6 +1115,14 @@ if Path("docs/diagrams/index.html").exists():
       <div class="org-label">アーキテクチャ図ギャラリー →</div>
     </a>'''
 
+# draw.ioダイアグラムページが存在すれば追加
+if Path("docs/drawio/index.html").exists():
+    cards += '''
+    <a href="./drawio/index.html" class="card" style="border:2px solid #8b5cf6;">
+      <div class="org-name">draw.io ダイアグラム</div>
+      <div class="org-label">ER図・フロー・シーケンス図 →</div>
+    </a>'''
+
 html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
