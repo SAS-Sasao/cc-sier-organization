@@ -118,36 +118,34 @@ docs/drawio/
 
 ### 5.3 ダイアグラム表示とアクションボタン
 
-詳細ページには **2つの機能** を配置する:
+詳細ページには **3つの機能** を配置する:
 
 1. **ページ内プレビュー** — Mermaid.js CDN でSVGレンダリング（すぐ確認用）
-2. **draw.io で編集ボタン** — MCPツール返却のエディタURL（修正用）
+2. **XMLダウンロードボタン** — `.drawio` ファイルをダウンロード（draw.ioアプリで編集用）
+3. **draw.io で編集ボタン** — MCPツール返却のエディタURL（ブラウザで直接編集用）
 
 ```html
-<!-- ページ内プレビュー: Mermaid.js で直接レンダリング -->
 <div class="diagram-container">
   <div class="diagram-render">
-    <pre class="mermaid">
-{Mermaidソースコード}
-    </pre>
+    <pre class="mermaid">{Mermaidソースコード}</pre>
   </div>
   <div class="diagram-actions">
+    <a href="./{filename}.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
     <a href="{MCPツールが返却したエディタURL}" class="edit-btn" target="_blank">draw.io で編集</a>
   </div>
 </div>
-
-<!-- ページ末尾に mermaid.js を読み込み -->
-<script type="module">
-import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
-</script>
 ```
 
 **ボタンの使い分け**:
-- ページを開くだけで図を確認できる（Mermaid.js レンダリング）
-- 修正が必要な場合は「draw.io で編集」ボタンからdraw.ioエディタを開く
+- ページを開くだけで図を確認できる（Mermaid.js プレビュー）
+- XMLダウンロード → draw.ioデスクトップアプリで開いて編集（DB形状等を維持）
+- draw.io で編集 → ブラウザのdraw.ioエディタで直接編集
 
-**draw.io エディタURL**: MCPツール（`open_drawio_mermaid` 等）の戻り値に含まれる
+**`.drawio` ファイルの保存**:
+- `open_drawio_xml` 使用時: XMLをそのまま `docs/drawio/{filename}.drawio` に保存
+- `open_drawio_mermaid` 使用時: Mermaidソースを `.md` に保存し、XMLエクスポートは任意
+
+**draw.io エディタURL**: MCPツールの戻り値に含まれる
 `https://app.diagrams.net/...#create=...` 形式のURLを使用する。
 
 **HTML内Mermaidソースの注意事項（文字化け防止）**:
