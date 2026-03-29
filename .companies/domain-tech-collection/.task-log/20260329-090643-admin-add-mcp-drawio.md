@@ -23,3 +23,14 @@ reward: null
 
 - `.mcp.json` — drawioサーバー追加
 - `masters/mcp-services.md` — drawioサービスエントリ追加
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-29T09:09:10"
+```
