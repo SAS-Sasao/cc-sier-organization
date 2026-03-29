@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIer提案書自動化ツール C4モデル - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>SIer 提案書自動化ツール C4モデル（L1/L2/L3）</h1>
+<div class="meta">
+  <span class="tag tag-project">提案書自動化</span>
+  <span class="tag tag-type" style="background:#ef4444;">C4モデル</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart TB
+    subgraph actors[" "]
+        SALES["営業担当者"]
+        PM["PM / 見積担当者"]
+    end
+    subgraph external["外部システム"]
+        SP["SharePoint 過去提案書・見積書"]
+        TALENT["タレマネシステム 人材・スキルDB"]
+        CCSIER["cc-sier / Claude Code 構成図自動生成"]
+        CLAUDE["Claude API LLM推論エンジン"]
+    end
+    subgraph system["提案書自動化システム"]
+        UI["提案書作成UI [Next.js SPA]"]
+        subgraph services["バックエンドサービス"]
+            INGEST["ナレッジ取込 SharePoint/MD解析・ベクトル化"]
+            DIAGRAM_SVC["構成図生成 cc-sier API連携"]
+            TEAM_SVC["体制提案 タレマネAPI連携"]
+        end
+        subgraph engine["見積エンジン [L3 Component展開]"]
+            RAG["類似案件検索 RAG Pipeline"]
+            GEN["概算生成 LLM+コンテキスト推論"]
+            GAP["乖離分析 提案額vs実費用"]
+            FB["精度フィードバック 学習ループ"]
+            TPL["テンプレート管理 出力フォーマット制御"]
+        end
+        subgraph data["データストア"]
+            COSTDB[("実績DB [PostgreSQL]")]
+            VECDB[("VectorDB [pgvector]")]
+            S3[("ドキュメントストア [S3]")]
+        end
+    end
+    SALES -->|提案書作成依頼| UI
+    PM -->|見積確認・承認| UI
+    UI --> INGEST
+    UI --> DIAGRAM_SVC
+    UI --> TEAM_SVC
+    UI -->|見積要求| RAG
+    INGEST --> SP
+    INGEST --> VECDB
+    INGEST --> S3
+    DIAGRAM_SVC --> CCSIER
+    TEAM_SVC --> TALENT
+    RAG --> VECDB
+    RAG --> GEN
+    GEN --> CLAUDE
+    GEN --> GAP
+    GEN --> TPL
+    GAP --> COSTDB
+    FB --> COSTDB
+    FB -.-> VECDB
+    TPL --> S3
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./proposal-automation-c4.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  SIer業務における提案書作成プロセスを自動化するシステムの全体像。
+  過去の提案書・見積書をSharePoint/MDファイルから取得し、VectorDBでナレッジ化。
+  RAGパイプラインで類似案件を検索し、実績DBとの乖離分析を組み合わせて
+  AIが精緻な見積概算を生成する。さらにcc-sierによる構成図自動生成、
+  タレントマネジメントシステム連携によるAI体制提案を統合した包括的なツール。
+</p>
+
+<div class="note">
+  <strong>C4レベル構成:</strong>
+  L1（System Context）= 利用者（営業・PM）と外部システム（SharePoint・タレマネ・cc-sier・Claude API）、
+  L2（Container）= UI・サービス層・データストア、
+  L3（Component）= 見積エンジン内部の5コンポーネント（RAG・概算生成・乖離分析・精度FB・テンプレート管理）
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>C4レベル</th><th>要素</th><th>種別</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="2">L1 Person</td><td>営業担当者</td><td>Person</td><td>提案書の作成を依頼する</td></tr>
+    <tr><td>PM / 見積担当者</td><td>Person</td><td>見積の確認・承認を行う</td></tr>
+    <tr><td rowspan="4">L1 External</td><td>SharePoint</td><td>External Service</td><td>過去の提案書・見積書を保管</td></tr>
+    <tr><td>タレマネシステム</td><td>External Service</td><td>人材・スキルDBを提供（体制提案の入力元）</td></tr>
+    <tr><td>cc-sier / Claude Code</td><td>External Service</td><td>AWSアーキテクチャ図・構成図を自動生成</td></tr>
+    <tr><td>Claude API</td><td>External Service</td><td>LLM推論エンジン（見積概算のAI生成）</td></tr>
+    <tr><td>L2 Container</td><td>提案書作成UI</td><td>Next.js SPA</td><td>提案書作成ダッシュボード・見積進捗管理</td></tr>
+    <tr><td rowspan="3">L2 Service</td><td>ナレッジ取込</td><td>Python</td><td>SharePoint/MD解析・ベクトル化・保存</td></tr>
+    <tr><td>構成図生成サービス</td><td>Python</td><td>cc-sier API連携によるAWS/アーキ図自動生成</td></tr>
+    <tr><td>体制提案サービス</td><td>Python</td><td>タレマネAPI連携・AIによるプロジェクト体制提案</td></tr>
+    <tr><td rowspan="5">L3 Component</td><td>類似案件検索</td><td>RAG Pipeline</td><td>過去案件をベクトル類似度で検索し見積根拠を抽出</td></tr>
+    <tr><td>概算生成</td><td>LLM + Prompt</td><td>類似案件実績＋乖離補正値からAIが精緻な見積を生成</td></tr>
+    <tr><td>乖離分析</td><td>Analytics</td><td>過去の提案額と実費用の差異を計算・傾向分析</td></tr>
+    <tr><td>精度フィードバック</td><td>Learning Loop</td><td>見積精度を記録しVectorDBナレッジを更新する学習ループ</td></tr>
+    <tr><td>テンプレート管理</td><td>Template Engine</td><td>見積書・提案書の出力フォーマット制御</td></tr>
+    <tr><td rowspan="3">L2 Data</td><td>実績DB</td><td>PostgreSQL</td><td>提案額・実費用・工数実績の管理</td></tr>
+    <tr><td>VectorDB</td><td>pgvector</td><td>見積ナレッジ・案件のベクトル埋め込み</td></tr>
+    <tr><td>ドキュメントストア</td><td>S3</td><td>提案書PDF・原本の保管</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>RAG + 乖離分析の二重補正</strong> — 単純なLLM推論ではなく、VectorDBから類似案件を検索（RAG）した上で、過去の提案額vs実費用の乖離率で補正をかける。これにより「見積が甘くなりがち」な傾向を定量的に是正できる。</li>
+  <li><strong>精度フィードバックによる継続学習</strong> — 案件完了後に実費用を記録し、見積との乖離を精度フィードバックコンポーネントが学習。VectorDBのナレッジも更新されるため、使うほど見積精度が向上するフライホイール設計。</li>
+  <li><strong>cc-sier連携による構成図自動化</strong> — 提案書に必要なAWS構成図やアーキテクチャ図を、cc-sier（Claude Code）のMCPサーバー経由で自動生成。手作業の図面作成工数を大幅に削減。</li>
+  <li><strong>タレマネ連携によるAI体制提案</strong> — タレントマネジメントシステムの人材・スキルDBと連携し、案件要件に最適なプロジェクト体制をAIが提案。PMの体制検討工数を削減しつつ、スキルマッチの精度を向上。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>

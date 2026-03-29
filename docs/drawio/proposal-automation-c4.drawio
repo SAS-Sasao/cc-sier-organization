@@ -1,0 +1,194 @@
+<mxGraphModel dx="1400" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1300" background="#FFFFFF">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+
+<mxCell id="title" value="SIer 提案書自動化ツール — C4 Model（L1 Context / L2 Container / L3 Component）" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="50" y="10" width="900" height="35" as="geometry"/>
+</mxCell>
+
+<mxCell id="legend-title" value="&lt;b&gt;凡例&lt;/b&gt;" style="text;html=1;fontSize=10;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1020" y="10" width="40" height="20" as="geometry"/>
+</mxCell>
+<mxCell id="leg1" value="" style="rounded=1;fillColor=#08427B;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1020" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg1t" value="Person" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1042" y="34" width="60" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg2" value="" style="rounded=1;fillColor=#438DD5;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1110" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg2t" value="Container" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1132" y="34" width="60" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg3" value="" style="rounded=1;fillColor=#85BBF0;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1200" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg3t" value="Component" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1222" y="34" width="65" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg4" value="" style="rounded=1;fillColor=#999999;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1295" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg4t" value="External" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1317" y="34" width="55" height="18" as="geometry"/>
+</mxCell>
+
+<!-- L1: Actors -->
+<mxCell id="actor-sales" value="&lt;b&gt;営業担当者&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;提案書の作成を依頼&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="180" y="65" width="180" height="55" as="geometry"/>
+</mxCell>
+<mxCell id="actor-pm" value="&lt;b&gt;PM / 見積担当者&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;見積の確認・承認&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="530" y="65" width="180" height="55" as="geometry"/>
+</mxCell>
+
+<!-- L1: External Systems -->
+<mxCell id="ext-sp" value="&lt;b&gt;SharePoint&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部サービス]&lt;br&gt;過去提案書・見積書&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="190" width="200" height="65" as="geometry"/>
+</mxCell>
+<mxCell id="ext-talent" value="&lt;b&gt;タレマネシステム&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部サービス]&lt;br&gt;人材・スキルDB&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="380" width="200" height="65" as="geometry"/>
+</mxCell>
+<mxCell id="ext-ccsier" value="&lt;b&gt;cc-sier / Claude Code&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部サービス]&lt;br&gt;構成図自動生成&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="530" width="200" height="65" as="geometry"/>
+</mxCell>
+<mxCell id="ext-claude" value="&lt;b&gt;Claude API&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部サービス]&lt;br&gt;LLM推論エンジン&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="750" width="200" height="65" as="geometry"/>
+</mxCell>
+
+<!-- System Boundary -->
+<mxCell id="sys-boundary" value="提案書自動化システム [Software System]" style="swimlane;startSize=30;fillColor=#EBF5FF;strokeColor=#438DD5;fontStyle=1;fontSize=12;fontColor=#438DD5;rounded=1;arcSize=6;swimlaneLine=0;container=1;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="150" width="1020" height="1100" as="geometry"/>
+</mxCell>
+
+<!-- L2: UI Layer -->
+<mxCell id="layer-ui" value="プレゼンテーション層" style="swimlane;startSize=24;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=10;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="50" width="960" height="100" as="geometry"/>
+</mxCell>
+<mxCell id="ui" value="&lt;b&gt;提案書作成UI&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Container: Next.js SPA]&lt;br&gt;提案書作成・見積ダッシュボード・進捗管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-ui">
+  <mxGeometry x="250" y="30" width="440" height="60" as="geometry"/>
+</mxCell>
+
+<!-- L2: Service Layer -->
+<mxCell id="layer-svc" value="サービス層" style="swimlane;startSize=24;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=10;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="180" width="960" height="110" as="geometry"/>
+</mxCell>
+<mxCell id="svc-ingest" value="&lt;b&gt;ナレッジ取込&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Container: Python]&lt;br&gt;SharePoint/MD解析&lt;br&gt;ベクトル化・保存&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-svc">
+  <mxGeometry x="30" y="28" width="200" height="72" as="geometry"/>
+</mxCell>
+<mxCell id="svc-diagram" value="&lt;b&gt;構成図生成サービス&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Container: Python]&lt;br&gt;cc-sier API連携&lt;br&gt;AWS/アーキ図の自動生成&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-svc">
+  <mxGeometry x="370" y="28" width="220" height="72" as="geometry"/>
+</mxCell>
+<mxCell id="svc-team" value="&lt;b&gt;体制提案サービス&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Container: Python]&lt;br&gt;タレマネAPI連携&lt;br&gt;AIによる体制提案&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-svc">
+  <mxGeometry x="730" y="28" width="200" height="72" as="geometry"/>
+</mxCell>
+
+<!-- L3: Estimation Engine -->
+<mxCell id="layer-engine" value="見積エンジン [Container: Python/FastAPI] — L3 Component 展開" style="swimlane;startSize=28;fillColor=#EFF6FF;strokeColor=#85BBF0;fontStyle=1;fontSize=11;fontColor=#3B82F6;rounded=1;arcSize=8;swimlaneLine=0;container=1;strokeWidth=2;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="320" width="960" height="290" as="geometry"/>
+</mxCell>
+<mxCell id="comp-rag" value="&lt;b&gt;類似案件検索&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Component: RAG Pipeline]&lt;br&gt;過去案件をベクトル類似度で検索&lt;br&gt;見積根拠となる類似実績を抽出&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-engine">
+  <mxGeometry x="30" y="40" width="270" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="comp-gen" value="&lt;b&gt;概算生成&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Component: LLM + Prompt]&lt;br&gt;類似案件の実績＋乖離補正値から&lt;br&gt;精緻な見積概算をAI生成&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-engine">
+  <mxGeometry x="350" y="40" width="270" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="comp-gap" value="&lt;b&gt;乖離分析&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Component: Analytics]&lt;br&gt;提案額 vs 実費用の差異を計算&lt;br&gt;乖離率・傾向分析&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-engine">
+  <mxGeometry x="30" y="170" width="270" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="comp-fb" value="&lt;b&gt;精度フィードバック&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Component: Learning Loop]&lt;br&gt;見積精度を記録し次回に反映&lt;br&gt;ベクトルDBのナレッジを更新&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-engine">
+  <mxGeometry x="350" y="170" width="270" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="comp-tpl" value="&lt;b&gt;テンプレート管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Component: Template Engine]&lt;br&gt;見積書・提案書のテンプレート&lt;br&gt;出力フォーマット制御&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-engine">
+  <mxGeometry x="700" y="100" width="230" height="80" as="geometry"/>
+</mxCell>
+
+<!-- L3 internal edges -->
+<mxCell id="e-rag-gen" value="類似案件データ" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-rag" target="comp-gen" parent="layer-engine">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-gen-gap" value="乖離補正依頼" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-gen" target="comp-gap" parent="layer-engine">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-gap-fb" value="精度データ" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-gap" target="comp-fb" parent="layer-engine">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-gen-tpl" value="テンプレート取得" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-gen" target="comp-tpl" parent="layer-engine">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- L2: Data Layer -->
+<mxCell id="layer-data" value="データストア" style="swimlane;startSize=24;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=10;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="640" width="960" height="120" as="geometry"/>
+</mxCell>
+<mxCell id="db-cost" value="&lt;b&gt;実績DB&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[PostgreSQL]&lt;br&gt;提案額・実費用・工数&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer-data">
+  <mxGeometry x="30" y="28" width="220" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="db-vec" value="&lt;b&gt;VectorDB&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[pgvector]&lt;br&gt;見積ナレッジ・案件ベクトル&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer-data">
+  <mxGeometry x="370" y="28" width="220" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="db-s3" value="&lt;b&gt;ドキュメントストア&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[S3]&lt;br&gt;提案書PDF・原本&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer-data">
+  <mxGeometry x="710" y="28" width="220" height="80" as="geometry"/>
+</mxCell>
+
+<!-- Annotation -->
+<mxCell id="note-l1" value="&lt;font style=&quot;font-size:10px;color:#08427B&quot;&gt;&lt;b&gt;[L1]&lt;/b&gt; System Context — 利用者と外部システム&lt;/font&gt;" style="text;html=1;fillColor=none;strokeColor=none;align=left;" vertex="1" parent="1">
+  <mxGeometry x="55" y="130" width="280" height="20" as="geometry"/>
+</mxCell>
+
+<!-- Cross-layer edges (straight lines) -->
+<mxCell id="e-sales-ui" value="提案書作成依頼" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-sales" target="ui" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-pm-ui" value="見積確認・承認" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-pm" target="ui" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ui-ingest" value="取込実行" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="ui" target="svc-ingest" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ui-diagram" value="構成図生成" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="ui" target="svc-diagram" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ui-team" value="体制提案要求" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="ui" target="svc-team" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ui-rag" value="見積要求" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="ui" target="comp-rag" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ingest-sp" value="過去見積取得" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="svc-ingest" target="ext-sp" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-diagram-cc" value="構成図API" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="svc-diagram" target="ext-ccsier" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-team-talent" value="人材API" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="svc-team" target="ext-talent" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-gen-claude" value="LLM推論" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-gen" target="ext-claude" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-rag-vec" value="ベクトル検索" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-rag" target="db-vec" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-gap-cost" value="実績照会" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-gap" target="db-cost" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-fb-cost" value="精度記録" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;dashed=1;endArrow=block;endFill=1;" edge="1" source="comp-fb" target="db-cost" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-fb-vec" value="ナレッジ更新" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;dashed=1;endArrow=block;endFill=1;" edge="1" source="comp-fb" target="db-vec" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-tpl-s3" value="テンプレート取得" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="comp-tpl" target="db-s3" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ingest-vec" value="ベクトル化・保存" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="svc-ingest" target="db-vec" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ingest-s3" value="原本保存" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="svc-ingest" target="db-s3" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+</root>
+</mxGraphModel>
