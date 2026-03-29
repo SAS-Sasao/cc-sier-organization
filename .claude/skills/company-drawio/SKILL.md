@@ -118,11 +118,10 @@ docs/drawio/
 
 ### 5.3 ダイアグラム表示とアクションボタン
 
-詳細ページには **3つの機能** を配置する:
+詳細ページには **2つの機能** を配置する:
 
 1. **ページ内プレビュー** — Mermaid.js CDN でSVGレンダリング（すぐ確認用）
 2. **XMLダウンロードボタン** — `.drawio` ファイルをダウンロード（draw.ioアプリで編集用）
-3. **draw.io で編集ボタン** — MCPツール返却のエディタURL（ブラウザで直接編集用）
 
 ```html
 <div class="diagram-container">
@@ -131,22 +130,17 @@ docs/drawio/
   </div>
   <div class="diagram-actions">
     <a href="./{filename}.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
-    <a href="{MCPツールが返却したエディタURL}" class="edit-btn" target="_blank">draw.io で編集</a>
   </div>
 </div>
 ```
 
 **ボタンの使い分け**:
 - ページを開くだけで図を確認できる（Mermaid.js プレビュー）
-- XMLダウンロード → draw.ioデスクトップアプリで開いて編集（DB形状等を維持）
-- draw.io で編集 → ブラウザのdraw.ioエディタで直接編集
+- XMLダウンロード → draw.ioデスクトップアプリやWeb版で開いて編集（DB形状等を維持）
 
 **`.drawio` ファイルの保存**:
 - `open_drawio_xml` 使用時: XMLをそのまま `docs/drawio/{filename}.drawio` に保存
-- `open_drawio_mermaid` 使用時: Mermaidソースを `.md` に保存し、XMLエクスポートは任意
-
-**draw.io エディタURL**: MCPツールの戻り値に含まれる
-`https://app.diagrams.net/...#create=...` 形式のURLを使用する。
+- `open_drawio_mermaid` 使用時: MCP呼び出し後、同等のXMLを `open_drawio_xml` でも生成し `.drawio` として保存すること
 
 **HTML内Mermaidソースの注意事項（文字化け防止）**:
 - `<pre class="mermaid">` 内には絵文字（🌙🌅☀️等）を使わない。`★` 等のASCII文字で代替する
