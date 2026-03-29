@@ -150,6 +150,12 @@ mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose'
 **draw.io エディタURL**: MCPツール（`open_drawio_mermaid` 等）の戻り値に含まれる
 `https://app.diagrams.net/...#create=...` 形式のURLを使用する。
 
+**HTML内Mermaidソースの注意事項（文字化け防止）**:
+- `<pre class="mermaid">` 内には絵文字（🌙🌅☀️等）を使わない。`★` 等のASCII文字で代替する
+- `\n`（改行エスケープ）を使わない。ノードテキストの区切りは半角スペースにする
+- `〜`（全角チルダ）は使用可。ただし `"` の代わりに `""`（ダブルクォート2つ）を使わない
+- draw.io MCP に渡すMermaidソース（.mdファイル）では絵文字・`\n` を自由に使ってよい。制約はHTML埋め込み時のみ
+
 ### 5.4 図の種類別アイコン
 
 カードに表示するアイコン（絵文字）:
