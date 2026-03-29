@@ -141,7 +141,10 @@ for md_file in sorted(task_log_dir.glob("*.md")):
 
     # --- Reward score ---
     reward_score = None
-    m = re.search(r'score:\s*([\d.]+)', text)
+    # Try frontmatter "reward:" first, then fallback to "score:"
+    m = re.search(r'^reward:\s*"?([\d.]+)"?\s*$', text, re.MULTILINE)
+    if not m:
+        m = re.search(r'score:\s*([\d.]+)', text)
     if m:
         try:
             reward_score = float(m.group(1))
