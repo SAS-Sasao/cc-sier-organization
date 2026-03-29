@@ -10,7 +10,7 @@ request: "drawio-mcp MCPサーバーを追加してほしい"
 subagent: "secretary"
 issue_number: null
 pr_number: null
-reward: null
+reward: 0.8
 ---
 
 ## 実行計画

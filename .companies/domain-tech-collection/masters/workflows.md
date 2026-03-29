@@ -61,3 +61,24 @@
 - **Issue作成**: あり
 - **平均報酬**: 1.00
 - **検出日**: 2026-03-23
+
+## wf-drawio-architecture
+
+- **名称**: draw.ioアーキテクチャ図生成（高報酬パターンから自動生成）
+- **トリガー**: 「draw.io」「C4モデル」「業務フロー」「ER図」「フローチャート」「シーケンス図」「データアーキテクチャ」「MDM」
+- **実行方式**: direct
+- **ロール**: secretary（/company-drawio Skill直接実行）
+- **ステップ**:
+  1. 依頼内容からダイアグラム種別を判定（C4/フロー/ER/アーキテクチャ）
+  2. 関連ドメイン知識ドキュメントを参照（docs/retail-domain/ 等）
+  3. /company-drawio Skill でダイアグラム生成（XML形式推奨）
+  4. エッジ貫通レビュースクリプトで品質チェック
+  5. ギャラリーページ・メタデータ更新
+- **成果物**:
+  - `.companies/domain-tech-collection/docs/drawio/`
+  - `docs/drawio/*.drawio` / `docs/drawio/*.html`
+- **品質チェック**: `review-drawio.js` によるエッジ貫通検出
+- **Git運用**: ブランチ＋PR
+- **Issue作成**: あり
+- **平均報酬**: 0.92
+- **検出日**: 2026-03-29
