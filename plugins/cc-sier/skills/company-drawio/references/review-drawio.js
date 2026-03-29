@@ -53,7 +53,13 @@ while ((match = cellRe.exec(xml)) !== null) {
   }
 
   if (isEdge && source && target) {
-    edges.push({ id, source, target, style });
+    // Parse waypoints from <Array as="points"><mxPoint x="..." y="..."/></Array>
+    const waypoints = [];
+    const wpMatches = inner.matchAll(/<mxPoint\s+x="([^"]*)"\s+y="([^"]*)"/g);
+    for (const wp of wpMatches) {
+      waypoints.push({ x: parseFloat(wp[1]), y: parseFloat(wp[2]) });
+    }
+    edges.push({ id, source, target, style, waypoints });
   } else if (w > 0 && h > 0) {
     nodes.set(id, { id, x, y, w, h, parent: parentId, value });
   }
@@ -147,6 +153,13 @@ for (const edge of edges) {
     excludeIds.add(nodes.get(tgtNode.parent).parent);
   }
 
+  // Build path segments: source -> wp1 -> wp2 -> ... -> target
+  const points = [{ x: src.cx, y: src.cy }];
+  if (edge.waypoints && edge.waypoints.length > 0) {
+    for (const wp of edge.waypoints) points.push({ x: wp.x, y: wp.y });
+  }
+  points.push({ x: tgt.cx, y: tgt.cy });
+
   for (const [nodeId, box] of boxes) {
     if (excludeIds.has(nodeId)) continue;
 
@@ -154,7 +167,16 @@ for (const edge of edges) {
     const style = getStyle(nodes.get(nodeId));
     if (/swimlane/.test(style)) continue;
 
-    if (segmentIntersectsBox(src.cx, src.cy, tgt.cx, tgt.cy, box)) {
+    // Check each segment of the path
+    let penetrates = false;
+    for (let s = 0; s < points.length - 1; s++) {
+      if (segmentIntersectsBox(points[s].x, points[s].y, points[s+1].x, points[s+1].y, box)) {
+        penetrates = true;
+        break;
+      }
+    }
+
+    if (penetrates) {
       const nodeVal = (nodes.get(nodeId)?.value || nodeId).replace(/&#xa;/g, " ").substring(0, 30);
       const srcVal = (nodes.get(edge.source)?.value || edge.source).replace(/&#xa;/g, " ").substring(0, 30);
       const tgtVal = (nodes.get(edge.target)?.value || edge.target).replace(/&#xa;/g, " ").substring(0, 30);
