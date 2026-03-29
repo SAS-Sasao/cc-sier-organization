@@ -57,3 +57,29 @@
   - `read_iac_documentation_page` — CDK/CFnドキュメントをMarkdown形式で取得
 - **参考ドキュメント**:
   - [公式ページ](https://awslabs.github.io/mcp/servers/aws-iac-mcp-server)
+
+## drawio
+
+- **サービス名**: Draw.io MCP Server
+- **提供元**: jgraph（draw.io公式）
+- **ステータス**: active
+- **連携部署**: [dept-secretary, dept-research]
+- **想定操作**: ER図・フローチャート・シーケンス図・ネットワーク図・C4モデル等の汎用図の生成。Mermaid記法・CSV・draw.io XMLの3形式に対応
+- **設定先**: .mcp.json（プロジェクトルート）
+- **認証**: 不要
+- **前提条件**: Node.js, npx
+- **トリガー**: ER図、フローチャート、シーケンス図、ネットワーク図、業務フロー図、C4モデル、draw.io
+- **提供ツール**:
+  - `open_drawio_mermaid` — Mermaid記法から図を生成（フローチャート・シーケンス図・状態遷移図向け）
+  - `open_drawio_csv` — CSVデータから図を生成（組織図・ネットワークトポロジ向け）
+  - `open_drawio_xml` — draw.io XMLから図を生成（アーキテクチャ図・インフラ構成図向け、最も精密なレイアウト制御）
+- **使い分けガイド**:
+  - シンプルなフロー・シーケンス図 → `open_drawio_mermaid`
+  - 階層構造・組織図 → `open_drawio_csv`
+  - 精密なレイアウト・AWS以外のインフラ図 → `open_drawio_xml`
+  - AWS構成図 → 引き続き `aws-diagram-mcp-server` を推奨（AWSアイコン対応）
+- **出力形式**: draw.ioエディタで直接開けるURL。エディタからPNG/SVG/PDFにエクスポート可能
+- **参考ドキュメント**:
+  - [GitHub](https://github.com/jgraph/drawio-mcp)
+  - [サーバーワークスBlog解説](https://blog.serverworks.co.jp/drawio-mcp-claude-code)
+  - [Zenn解説記事](https://zenn.dev/aya1357/articles/12f4ede03bc32c)
