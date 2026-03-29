@@ -61,11 +61,14 @@ docs/handover/data.json
 | `docs/handover/index.html` | ナレッジポータル（タブ式SPA） |
 | `docs/index.html` | トップページに緑枠カードを追加 |
 
-### 3.2 ポータル構成（5タブ）
+### 3.2 ポータル構成（8タブ）
 
 **全体年表タブ**: 全カテゴリの活動を時系列で表示。月ごとにグルーピング。
 **PJ業務タブ**: プロジェクト関連の成果物・タスク・Issue。
 **基盤構築タブ**: Skill追加・MCP導入・Hook設定・Agent変更の履歴テーブル。
+**組織管理タブ**: masters/ の変更、部署・ロール・ワークフロー関連の活動。
+**品質・学習タブ**: /company-evolve, Case Bank, 品質ゲート関連の活動。
+**壁打ちタブ**: ファイル生成を伴わない相談・検討・議論セッション。
 **判断履歴タブ**: feedback memoryと高reward Case Bankエントリの一覧。経緯・理由付き。
 **Tipsタブ**: Case Bank reward≥0.8 のナレッジ。暗黙知・注意事項。
 
