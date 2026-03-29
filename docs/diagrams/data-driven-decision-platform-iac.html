@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data-Driven Decision Platform on AWS - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./data-driven-decision-platform.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./data-driven-decision-platform.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>Data-Driven Decision Platform on AWS - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-03-29</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>339 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">data-driven-decision-platform.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">339 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Powered by AWS IaC MCP Server</p>
+<script>
+const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: >\n  Data-Driven Decision Platform - Core Infrastructure.\n  Sources (ERP/CRM/SKILL_HUB/SharePoint/Redmine) -> Ingestion (DMS/Firehose/Glue)\n  -> Storage (S3 DataLake / DynamoDB MDM / Redshift DWH)\n  -> Analytics (QuickSight / SageMaker / Bedrock) -> Business Users.\n\nParameters:\n  Environment:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, stg, prod]\n    Description: Deployment environment\n  ProjectName:\n    Type: String\n    Default: data-driven-platform\n    Description: Project identifier used in resource naming\n  RedshiftAdminUsername:\n    Type: String\n    Default: admin\n    Description: \"Redshift admin username. TODO: change for production\"\n  RedshiftAdminPassword:\n    Type: String\n    NoEcho: true\n    MinLength: 8\n    Description: \"Redshift admin password. TODO: use Secrets Manager in production\"\n\nResources:\n  # ============================================================\n  # Encryption - KMS\n  # ============================================================\n  PlatformKmsKey:\n    Type: AWS::KMS::Key\n    Properties:\n      Description: !Sub '${ProjectName} encryption key (${Environment})'\n      EnableKeyRotation: true\n      KeyPolicy:\n        Version: '2012-10-17'\n        Statement:\n          - Sid: RootAccess\n            Effect: Allow\n            Principal:\n              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'\n            Action: 'kms:*'\n            Resource: '*'\n\n  PlatformKmsAlias:\n    Type: AWS::KMS::Alias\n    Properties:\n      AliasName: !Sub 'alias/${ProjectName}-${Environment}'\n      TargetKeyId: !Ref PlatformKmsKey\n\n  # ============================================================\n  # S3 - Access Log Bucket\n  # ============================================================\n  LogBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${ProjectName}-logs-${Environment}-${AWS::AccountId}'\n      OwnershipControls:\n        Rules:\n          - ObjectOwnership: ObjectWriter\n      AccessControl: LogDeliveryWrite\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n      ObjectLockEnabled: true\n\n  # ============================================================\n  # Data Lake - S3 Raw Zone\n  # ============================================================\n  RawBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${ProjectName}-raw-${Environment}-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n              KMSMasterKeyID: !Ref PlatformKmsKey\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n      ObjectLockEnabled: true\n      LoggingConfiguration:\n        DestinationBucketName: !Ref LogBucket\n        LogFilePrefix: raw-bucket-logs/\n      # TODO: Add ReplicationConfiguration for cross-region DR in production\n\n  # ============================================================\n  # Data Lake - S3 Curated Zone\n  # ============================================================\n  CuratedBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${ProjectName}-curated-${Environment}-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n              KMSMasterKeyID: !Ref PlatformKmsKey\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n      ObjectLockEnabled: true\n      LoggingConfiguration:\n        DestinationBucketName: !Ref LogBucket\n        LogFilePrefix: curated-bucket-logs/\n      # TODO: Add ReplicationConfiguration for cross-region DR in production\n\n  # ============================================================\n  # MDM - DynamoDB Golden Record\n  # ============================================================\n  MdmTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub '${ProjectName}-mdm-${Environment}'\n      BillingMode: PAY_PER_REQUEST\n      SSESpecification:\n        SSEEnabled: true\n        SSEType: KMS\n        KMSMasterKeyId: !GetAtt PlatformKmsKey.Arn\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n      AttributeDefinitions:\n        - AttributeName: entity_type\n          AttributeType: S\n        - AttributeName: entity_id\n          AttributeType: S\n      KeySchema:\n        - AttributeName: entity_type\n          KeyType: HASH\n        - AttributeName: entity_id\n          KeyType: RANGE\n\n  # ============================================================\n  # Glue Data Catalog\n  # ============================================================\n  GlueDatabase:\n    Type: AWS::Glue::Database\n    Properties:\n      CatalogId: !Ref AWS::AccountId\n      DatabaseInput:\n        Name: !Sub '${ProjectName}_${Environment}'\n        Description: Data Catalog for Data-Driven Decision Platform\n\n  GlueRole:\n    Type: AWS::IAM::Role\n    Properties:\n      RoleName: !Sub '${ProjectName}-glue-${Environment}'\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: glue.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole\n        - !Ref GlueDataLakePolicy\n\n  GlueDataLakePolicy:\n    Type: AWS::IAM::ManagedPolicy\n    Properties:\n      ManagedPolicyName: !Sub '${ProjectName}-glue-datalake-${Environment}'\n      PolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Action: [s3:GetObject, s3:PutObject, s3:ListBucket, s3:DeleteObject]\n            Resource:\n              - !GetAtt RawBucket.Arn\n              - !Sub '${RawBucket.Arn}/*'\n              - !GetAtt CuratedBucket.Arn\n              - !Sub '${CuratedBucket.Arn}/*'\n          - Effect: Allow\n            Action: [kms:Decrypt, kms:Encrypt, kms:GenerateDataKey]\n            Resource: !GetAtt PlatformKmsKey.Arn\n\n  # ============================================================\n  # Kinesis Data Firehose - Ingestion\n  # ============================================================\n  FirehoseRole:\n    Type: AWS::IAM::Role\n    Properties:\n      RoleName: !Sub '${ProjectName}-firehose-${Environment}'\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: firehose.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - !Ref FirehoseS3Policy\n\n  FirehoseS3Policy:\n    Type: AWS::IAM::ManagedPolicy\n    Properties:\n      ManagedPolicyName: !Sub '${ProjectName}-firehose-s3-${Environment}'\n      PolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Action: [s3:PutObject, s3:GetBucketLocation, s3:ListBucket]\n            Resource:\n              - !GetAtt RawBucket.Arn\n              - !Sub '${RawBucket.Arn}/*'\n          - Effect: Allow\n            Action: [kms:Decrypt, kms:GenerateDataKey]\n            Resource: !GetAtt PlatformKmsKey.Arn\n\n  IngestionStream:\n    Type: AWS::KinesisFirehose::DeliveryStream\n    Properties:\n      DeliveryStreamName: !Sub '${ProjectName}-ingest-${Environment}'\n      DeliveryStreamType: DirectPut\n      ExtendedS3DestinationConfiguration:\n        BucketARN: !GetAtt RawBucket.Arn\n        RoleARN: !GetAtt FirehoseRole.Arn\n        Prefix: 'firehose/'\n        ErrorOutputPrefix: 'firehose-errors/'\n        BufferingHints:\n          IntervalInSeconds: 300\n          SizeInMBs: 5\n        EncryptionConfiguration:\n          KMSEncryptionConfig:\n            AWSKMSKeyARN: !GetAtt PlatformKmsKey.Arn\n\n  # ============================================================\n  # Redshift Serverless - DWH\n  # ============================================================\n  RedshiftRole:\n    Type: AWS::IAM::Role\n    Properties:\n      RoleName: !Sub '${ProjectName}-redshift-${Environment}'\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: redshift.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - !Ref RedshiftDataPolicy\n\n  RedshiftDataPolicy:\n    Type: AWS::IAM::ManagedPolicy\n    Properties:\n      ManagedPolicyName: !Sub '${ProjectName}-redshift-data-${Environment}'\n      PolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Action: [s3:GetObject, s3:ListBucket]\n            Resource:\n              - !GetAtt CuratedBucket.Arn\n              - !Sub '${CuratedBucket.Arn}/*'\n              - !GetAtt RawBucket.Arn\n              - !Sub '${RawBucket.Arn}/*'\n          - Effect: Allow\n            Action: [glue:GetDatabase, glue:GetTable, glue:GetTables]\n            Resource:\n              - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog'\n              - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${ProjectName}_${Environment}'\n              - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${ProjectName}_${Environment}/*'\n          - Effect: Allow\n            Action: kms:Decrypt\n            Resource: !GetAtt PlatformKmsKey.Arn\n\n  RedshiftNamespace:\n    Type: AWS::RedshiftServerless::Namespace\n    Properties:\n      NamespaceName: !Sub '${ProjectName}-${Environment}'\n      AdminUsername: !Ref RedshiftAdminUsername\n      AdminUserPassword: !Ref RedshiftAdminPassword\n      DbName: dataplatform\n      DefaultIamRoleArn: !GetAtt RedshiftRole.Arn\n      IamRoles:\n        - !GetAtt RedshiftRole.Arn\n\n  RedshiftWorkgroup:\n    Type: AWS::RedshiftServerless::Workgroup\n    Properties:\n      WorkgroupName: !Sub '${ProjectName}-wg-${Environment}'\n      NamespaceName: !GetAtt RedshiftNamespace.Namespace.NamespaceName\n      BaseCapacity: 32\n      PubliclyAccessible: false\n\n  # ============================================================\n  # TODO: Additional services (configure via console or separate stack)\n  # - AWS DMS: Replication instance + endpoints for ERP/CRM/SKILL_HUB\n  # - Amazon QuickSight: BI dashboards (Redshift data source)\n  # - Amazon SageMaker: ML training domain + notebook instance\n  # - Amazon Bedrock: GenAI/RAG knowledge base (S3 data source)\n  # - AWS Lake Formation: Fine-grained access control registration\n  # ============================================================\n\nOutputs:\n  RawBucketName:\n    Description: S3 Data Lake Raw Zone\n    Value: !Ref RawBucket\n  CuratedBucketName:\n    Description: S3 Data Lake Curated Zone\n    Value: !Ref CuratedBucket\n  LogBucketName:\n    Description: S3 Access Log Bucket\n    Value: !Ref LogBucket\n  MdmTableName:\n    Description: DynamoDB MDM Golden Record Table\n    Value: !Ref MdmTable\n  GlueDatabaseName:\n    Description: Glue Data Catalog Database\n    Value: !Ref GlueDatabase\n  RedshiftEndpoint:\n    Description: Redshift Serverless Endpoint\n    Value: !GetAtt RedshiftWorkgroup.Workgroup.Endpoint.Address\n  FirehoseStreamName:\n    Description: Kinesis Firehose Delivery Stream\n    Value: !Ref IngestionStream\n  KmsKeyArn:\n    Description: KMS Key ARN for platform encryption\n    Value: !GetAtt PlatformKmsKey.Arn\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>
