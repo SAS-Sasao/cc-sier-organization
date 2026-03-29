@@ -1,0 +1,104 @@
+<mxGraphModel dx="1200" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="920" background="#FFFFFF">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+
+<mxCell id="title" value="人材・パートナーデータ統合アーキテクチャ（C4 Container）" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="50" y="10" width="750" height="35" as="geometry"/>
+</mxCell>
+
+<mxCell id="actor-hr" value="&lt;b&gt;HR担当者&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;メンバー/パートナー&lt;br&gt;情報を登録・管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="325" y="55" width="200" height="60" as="geometry"/>
+</mxCell>
+
+<mxCell id="actor-pm" value="&lt;b&gt;PM / リソース管理者&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;人材調達・案件&lt;br&gt;マッチング&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="840" y="780" width="170" height="55" as="geometry"/>
+</mxCell>
+
+<mxCell id="layer1" value="ソースシステム層" style="swimlane;startSize=28;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=11;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="140" width="750" height="130" as="geometry"/>
+</mxCell>
+<mxCell id="app" value="&lt;b&gt;メンバー/パートナー&lt;br&gt;管理アプリ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[内製アプリケーション]&lt;br&gt;社員・パートナー情報の一元管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer1">
+  <mxGeometry x="35" y="38" width="290" height="75" as="geometry"/>
+</mxCell>
+<mxCell id="sp" value="&lt;b&gt;SharePoint&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部サービス]&lt;br&gt;契約書・スキルシート・経歴情報の管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer1">
+  <mxGeometry x="425" y="38" width="290" height="75" as="geometry"/>
+</mxCell>
+
+<mxCell id="layer2" value="データ統合層" style="swimlane;startSize=28;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=11;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="300" width="750" height="110" as="geometry"/>
+</mxCell>
+<mxCell id="mdm" value="&lt;b&gt;MDM&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[マスタデータ管理]&lt;br&gt;名寄せ・クレンジング・ゴールデンレコード生成&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1168BD;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer2">
+  <mxGeometry x="185" y="33" width="380" height="55" as="geometry"/>
+</mxCell>
+
+<mxCell id="layer3" value="データ蓄積層" style="swimlane;startSize=28;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=11;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="440" width="750" height="130" as="geometry"/>
+</mxCell>
+<mxCell id="lake" value="&lt;b&gt;データレイク&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[ストレージ]&lt;br&gt;生データ・履歴データの蓄積&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer3">
+  <mxGeometry x="35" y="33" width="290" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="dwh" value="&lt;b&gt;DWH&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[データウェアハウス]&lt;br&gt;構造化・集約データの蓄積&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer3">
+  <mxGeometry x="425" y="33" width="290" height="80" as="geometry"/>
+</mxCell>
+
+<mxCell id="layer4" value="分析・可視化層" style="swimlane;startSize=28;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=11;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="600" width="750" height="110" as="geometry"/>
+</mxCell>
+<mxCell id="bi" value="&lt;b&gt;BIツール&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[分析プラットフォーム]&lt;br&gt;人材稼働率・スキル分布等の可視化&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer4">
+  <mxGeometry x="35" y="33" width="310" height="55" as="geometry"/>
+</mxCell>
+
+<mxCell id="layer5" value="活用層" style="swimlane;startSize=28;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=11;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="740" width="750" height="120" as="geometry"/>
+</mxCell>
+<mxCell id="talent" value="&lt;b&gt;タレントマネジメントアプリ&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[活用アプリケーション]&lt;br&gt;調達可能人材・案件マッチングの分析・提示&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1168BD;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=20;" vertex="1" parent="layer5">
+  <mxGeometry x="175" y="30" width="400" height="65" as="geometry"/>
+</mxCell>
+
+<mxCell id="e1" value="人材情報を登録" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-hr" target="app" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e2" value="契約・経歴を管理" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-hr" target="sp" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e3" value="API連携" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="app" target="mdm" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e4" value="データ連携" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="sp" target="mdm" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e5" value="生データ蓄積" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#1168BD;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mdm" target="lake" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e6" value="マスタデータ同期" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#1168BD;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mdm" target="dwh" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e7" value="ETL / ELT" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="lake" target="dwh" parent="layer3">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e8" value="構造化データ" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="dwh" target="bi" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e9" value="分析インサイト" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="bi" target="talent" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e10" value="マスタデータAPI" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;dashed=1;" edge="1" source="dwh" target="talent" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<mxCell id="e11" value="人材検索・案件分析" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-pm" target="talent" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+</root>
+</mxGraphModel>

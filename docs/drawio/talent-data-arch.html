@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>人材・パートナーデータ統合アーキテクチャ - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>人材・パートナーデータ統合アーキテクチャ（C4 Container）</h1>
+<div class="meta">
+  <span class="tag tag-project">人材データ統合</span>
+  <span class="tag tag-type" style="background:#ef4444;">C4モデル</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart TB
+    subgraph actors[" "]
+        HR["HR担当者"]
+        PM["PM / リソース管理者"]
+    end
+    subgraph source["ソースシステム層"]
+        APP["メンバー/パートナー管理アプリ [内製]"]
+        SP["SharePoint [外部サービス]"]
+    end
+    subgraph integration["データ統合層"]
+        MDM["MDM [マスタデータ管理] 名寄せ・クレンジング・ゴールデンレコード生成"]
+    end
+    subgraph storage["データ蓄積層"]
+        LAKE[("データレイク 生データ・履歴")]
+        DWH[("DWH 構造化・集約データ")]
+    end
+    subgraph analytics["分析・可視化層"]
+        BI["BIツール [分析PF] 稼働率・スキル分布の可視化"]
+    end
+    subgraph usage["活用層"]
+        TALENT["タレントマネジメントアプリ 人材・案件マッチング分析・提示"]
+    end
+    HR -->|人材情報を登録| APP
+    HR -->|契約・経歴を管理| SP
+    APP -->|API連携| MDM
+    SP -->|データ連携| MDM
+    MDM -->|生データ蓄積| LAKE
+    MDM -->|マスタデータ同期| DWH
+    LAKE -->|ETL / ELT| DWH
+    DWH -->|構造化データ| BI
+    BI -->|分析インサイト| TALENT
+    DWH -.->|マスタデータAPI| TALENT
+    PM -->|人材検索・案件分析| TALENT
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./talent-data-arch.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  組織内メンバーや契約パートナーの情報を管理アプリ/SharePointで一元管理し、
+  MDM（マスタデータ管理）で名寄せ・クレンジングを行った上で、データレイク/DWHに蓄積。
+  BIツールで稼働率・スキル分布等を可視化し、タレントマネジメントアプリで
+  調達可能な人材や案件マッチングを分析・提示する、人材データ統合アーキテクチャの全体像。
+</p>
+
+<div class="note">
+  <strong>MDMの位置づけ:</strong> ソースシステムごとに異なるフォーマットで管理されている人材・パートナー情報を
+  名寄せ・クレンジングし、ゴールデンレコードとして統合する。これにより下流のDWH・BIで正確なスキル分析や
+  稼働率の可視化が可能になる。
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>層</th><th>コンポーネント</th><th>種別</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="2">アクター</td><td>HR担当者</td><td>Person</td><td>メンバー/パートナー情報の登録・更新を行う</td></tr>
+    <tr><td>PM / リソース管理者</td><td>Person</td><td>人材調達・案件マッチングを利用する</td></tr>
+    <tr><td rowspan="2">ソースシステム</td><td>メンバー/パートナー管理アプリ</td><td>内製Container</td><td>社員・パートナーの基本情報・スキル・稼働状況を一元管理</td></tr>
+    <tr><td>SharePoint</td><td>外部サービス</td><td>契約書・スキルシート・経歴書等のドキュメント管理</td></tr>
+    <tr><td>データ統合</td><td>MDM</td><td>Key Container</td><td>名寄せ・クレンジング・ゴールデンレコード生成</td></tr>
+    <tr><td rowspan="2">データ蓄積</td><td>データレイク</td><td>Storage</td><td>生データ・履歴データの大容量蓄積</td></tr>
+    <tr><td>DWH</td><td>Storage</td><td>構造化・集約データの高速クエリ対応ストレージ</td></tr>
+    <tr><td>分析・可視化</td><td>BIツール</td><td>Container</td><td>人材稼働率・スキル分布・パートナー評価等の可視化</td></tr>
+    <tr><td>活用</td><td>タレントマネジメントアプリ</td><td>Key Container</td><td>調達可能人材の検索・案件とのマッチング分析・提示</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>MDMによるデータ品質の担保</strong> — 管理アプリとSharePointで別々に管理される人材情報を、MDMで名寄せ・クレンジングすることで、データの重複や矛盾を排除してからDWHに投入する。</li>
+  <li><strong>データレイクとDWHの二系統</strong> — MDMから生データをデータレイクに蓄積（履歴・監査用途）しつつ、クレンジング済みデータをDWHに同期。ETL/ELTでデータレイクからDWHへの変換も行う二系統の蓄積設計。</li>
+  <li><strong>BIとタレマネの役割分離</strong> — BIツールは汎用的なデータ可視化・分析を担い、タレントマネジメントアプリは人材・案件マッチングに特化。BIのインサイトとDWHのマスタデータAPIの両方をタレマネに供給する構成。</li>
+  <li><strong>PM向けのエンドツーエンド設計</strong> — PMがタレントマネジメントアプリ1つで「どの人材が空いているか」「この案件に合うスキルセットは誰か」を即座に分析・提示できるよう、上流のデータパイプラインを一気通貫で設計。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>
