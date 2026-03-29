@@ -73,11 +73,18 @@ html = f'''<!DOCTYPE html>
 <title>Knowledge Portal - {org_slug}</title>
 <style>
 :root {{
-  --bg: #0f172a; --bg2: #1e293b; --bg3: #334155;
-  --text: #e2e8f0; --text2: #94a3b8; --text3: #64748b;
-  --accent: #38bdf8; --border: #475569;
+  --bg: #f8f9fa; --bg2: #fff; --bg3: #e9ecef;
+  --text: #1a1a2e; --text2: #6c757d; --text3: #adb5bd;
+  --accent: #4361ee; --border: rgba(0,0,0,.08);
   --project: #3b82f6; --platform: #8b5cf6; --organization: #f59e0b;
   --learning: #10b981; --discussion: #6b7280;
+}}
+@media (prefers-color-scheme: dark) {{
+  :root {{
+    --bg: #0d1117; --bg2: #161b22; --bg3: #21262d;
+    --text: #e6edf3; --text2: #8b949e; --text3: #484f58;
+    --accent: #58a6ff; --border: rgba(255,255,255,.08);
+  }}
 }}
 * {{ margin:0; padding:0; box-sizing:border-box; }}
 body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }}
@@ -89,7 +96,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
 .search-box:focus {{ outline:none; border-color:var(--accent); }}
 select {{ padding:8px 12px; border-radius:6px; border:1px solid var(--border); background:var(--bg3); color:var(--text); font-size:0.9rem; cursor:pointer; }}
 .stats {{ display:flex; gap:12px; padding:16px 24px; flex-wrap:wrap; }}
-.stat-card {{ background:var(--bg2); border-radius:8px; padding:12px 16px; min-width:120px; }}
+.stat-card {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:12px 16px; min-width:120px; }}
 .stat-num {{ font-size:1.5rem; font-weight:700; }}
 .stat-label {{ font-size:0.8rem; color:var(--text2); margin-top:2px; }}
 .tabs {{ display:flex; gap:0; padding:0 24px; background:var(--bg2); border-bottom:1px solid var(--border); overflow-x:auto; }}
@@ -97,7 +104,7 @@ select {{ padding:8px 12px; border-radius:6px; border:1px solid var(--border); b
 .tab:hover {{ color:var(--text); background:var(--bg3); }}
 .tab.active {{ color:var(--accent); border-bottom-color:var(--accent); }}
 .content {{ padding:24px; max-width:1200px; margin:0 auto; }}
-.entry {{ background:var(--bg2); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid var(--border); transition:transform 0.1s; }}
+.entry {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid var(--border); transition:transform 0.1s; }}
 .entry:hover {{ transform:translateX(4px); }}
 .entry[data-cat="project"] {{ border-left-color:var(--project); }}
 .entry[data-cat="platform"] {{ border-left-color:var(--platform); }}
@@ -109,7 +116,10 @@ select {{ padding:8px 12px; border-radius:6px; border:1px solid var(--border); b
 .entry-date {{ font-size:0.8rem; color:var(--text3); white-space:nowrap; }}
 .entry-meta {{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }}
 .badge {{ font-size:0.7rem; padding:2px 8px; border-radius:10px; background:var(--bg3); color:var(--text2); }}
-.badge.source {{ background:#1e3a5f; color:#60a5fa; }}
+.badge.source {{ background:#e0e7ff; color:#3730a3; }}
+@media (prefers-color-scheme: dark) {{
+  .badge.source {{ background:#1e3a5f; color:#60a5fa; }}
+}}
 .badge.cat {{ color:#fff; font-weight:500; }}
 .badge.cat-project {{ background:var(--project); }}
 .badge.cat-platform {{ background:var(--platform); }}
@@ -118,16 +128,19 @@ select {{ padding:8px 12px; border-radius:6px; border:1px solid var(--border); b
 .badge.cat-discussion {{ background:var(--discussion); }}
 .entry-files {{ margin-top:8px; font-size:0.8rem; color:var(--text3); }}
 .entry-files code {{ background:var(--bg3); padding:1px 4px; border-radius:3px; font-size:0.75rem; }}
-.decision {{ background:var(--bg2); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid #f59e0b; }}
+.decision {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid #f59e0b; }}
 .decision-title {{ font-weight:600; font-size:0.95rem; }}
 .decision-rule {{ margin-top:8px; font-size:0.85rem; color:var(--text); line-height:1.6; white-space:pre-wrap; }}
 .decision-reason {{ margin-top:8px; font-size:0.8rem; color:var(--text2); font-style:italic; }}
 .decision-source {{ margin-top:6px; font-size:0.75rem; color:var(--text3); }}
-.tip {{ background:var(--bg2); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid var(--learning); }}
+.tip {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid var(--learning); }}
 .tip-title {{ font-weight:600; font-size:0.95rem; }}
 .tip-content {{ margin-top:8px; font-size:0.85rem; color:var(--text); line-height:1.6; }}
 .tip-meta {{ display:flex; gap:8px; margin-top:8px; }}
-.reward-badge {{ font-size:0.75rem; padding:2px 8px; border-radius:10px; background:#065f46; color:#6ee7b7; font-weight:600; }}
+.reward-badge {{ font-size:0.75rem; padding:2px 8px; border-radius:10px; background:#d1fae5; color:#065f46; font-weight:600; }}
+@media (prefers-color-scheme: dark) {{
+  .reward-badge {{ background:#065f46; color:#6ee7b7; }}
+}}
 .month-group {{ margin-top:24px; }}
 .month-label {{ font-size:1.1rem; font-weight:600; color:var(--accent); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }}
 .empty {{ text-align:center; color:var(--text3); padding:60px 24px; font-size:0.95rem; }}
