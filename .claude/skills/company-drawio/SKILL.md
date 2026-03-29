@@ -171,9 +171,13 @@ task-id: `YYYYMMDD-HHMMSS-drawio-{name}`
 1. ブランチ: {org-slug}/feat/{YYYY-MM-DD}-add-drawio-{name}
 2. git add docs/drawio/ .companies/{org-slug}/
 3. コミット: feat: draw.io図を追加（{name}）[{org-slug}] by {operator}
-4. PR作成 → URL報告
+4. PR作成 → URL報告（PR本文に draw.io エディタURL を記載すること）
 5. main に戻る
 ```
+
+**PR本文に必ず含める項目**:
+- draw.io MCP ツール呼び出し時に返却されたエディタURL（`https://app.diagrams.net/...`）を `## draw.io エディタ` セクションとしてPR本文に記載する
+- レビュアーがワンクリックで図を確認・編集できるようにするため
 
 ## 8. GitHub Pages 連携
 
