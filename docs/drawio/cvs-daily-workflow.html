@@ -28,7 +28,12 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 .diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
                      padding:24px; margin-bottom:32px; text-align:center; }
 .diagram-container img { max-width:100%; height:auto; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
 .diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+.view-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+            color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.view-btn:hover { opacity:.85; }
 h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
 p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
 ul { padding-left:24px; margin-bottom:12px; }
@@ -55,11 +60,77 @@ tr:nth-child(even) td { background:var(--bg); }
 <p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
 
 <div class="diagram-container">
-  <p style="font-size:4rem; margin-bottom:16px;">📋</p>
-  <p style="font-size:1rem; font-weight:600; margin-bottom:12px;">コンビニ店舗スタッフの1日の作業フロー</p>
-  <p style="font-size:.85rem; color:var(--muted); margin-bottom:20px;">
-    5つの時間帯（深夜・朝・昼・午後・夕方〜夜）ごとに<br>発注・検品・廃棄・精算の業務プロセスを可視化
-  </p>
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart TD
+    subgraph midnight["&#x1F319; 深夜帯 00:00〜06:00"]
+        direction TB
+        M1["夜間スタッフ出勤\n引継ぎ受け"] --> M2["店内清掃\nトイレ・床・棚"]
+        M2 --> M3["デイリー品の廃棄処理\n弁当・おにぎり・サンド"]
+        M3 --> M4["ストコンで廃棄スキャ��登録\n廃棄区分: 期限廃棄"]
+        M4 --> M5["深夜便の納品受入\nハンディで検品スキャン"]
+        M5 --> M6["商品の品出し・前出��\n先入れ先出し(FIFO)"]
+        M6 --> M7["翌朝便���発注��認\nストコン��AI推奨数チェック"]
+        M7 --> M8["フライヤー清掃\n翌朝FF仕込み準備"]
+    end
+    subgraph morning["&#x1F305; 朝帯 06:00〜11:00"]
+        direction TB
+        A1["朝シフト出勤・引継ぎ"] --> A2["朝一便 納品受入\n※1日で最大量の入荷"]
+        A2 --> A3["検���: ハンディターミナルで\n全品スキャン・数量照合"]
+        A3 --> A4["弁当・おにぎり・サンドの\n品出し・陳列(FIFO)"]
+        A4 --> A5["カウンターFF準備\nコーヒーマシン・揚げ物投入"]
+        A5 --> A6["前日分 日次精算\n各レジの締め処理"]
+        A6 --> A7["現金実��・POS売上突合\n過不足を確認"]
+        A7 --> A8{"過不足あ��？"}
+        A8 -->|"差異あり"| A9["レジログ確認\n現金過不足として記録"]
+        A8 -->|"一致"| A10["ストコンで精算確定\nEOBデータ本部送信"]
+        A9 --> A10
+        A10 --> A11["店長・SVとデータ確認\n売上・廃棄ロス率レビュー"]
+    end
+    subgraph noon["☀️ 昼帯 11:00〜14:00"]
+        direction TB
+        N1["昼ピーク対���開始\n※最多来客時��帯"] --> N2["レジ対応（複数台稼働）\n決済: 現金/電子マネー/QR"]
+        N2 --> N3["昼便の納品受入・検品"]
+        N3 --> N4["弁当・飲料の緊急��充\n売れ筋の前出し"]
+        N4 --> N5["在庫確認・欠品チェック\nストコンで理論在庫照合"]
+        N5 --> N6{"欠品あり？"}
+        N6 -->|"Yes"| N7["ストコンで追加手動発注\n締め時刻前に送信"]
+        N6 -->|"No"| N8["棚の前出し・整理"]
+        N7 --> N8
+        N8 --> N9["カウンターFF補充\n揚げ物追加投入��コーヒー補充"]
+    end
+    subgraph afternoon["&#x1F324;&#xFE0F; 午後帯 14:00〜18:00"]
+        direction TB
+        P1["午後スタッフ交代\n引継ぎ"] --> P2["商品の品出し・前出し\n常温品・日用品の補充"]
+        P2 --> P3["棚割変更・POP設置\nプロモーション展開"]
+        P3 --> P4["消��期��チェック\nストコンの値引きアラート確認"]
+        P4 --> P5{"販売期限が近い商品？"}
+        P5 -->|"あり"| P6["値引きシール貼付\nまたは��子値引き設定"]
+        P5 -->|"なし"| P7["夕便の納品受入準備"]
+        P6 --> P7
+        P7 --> P8["カウンターFF\n時間超過品の廃棄登録"]
+        P8 --> P9["店内清掃・トイレ清掃"]
+    end
+    subgraph evening["&#x1F306; 夕方〜夜帯 18:00〜00:00"]
+        direction TB
+        E1["夕食需要ピーク対応"] --> E2["夕便の納品受入・検品"]
+        E2 --> E3["商品補充・品出し\n夕食向けデイリー品"]
+        E3 --> E4["⭐ 翌日分の発注作業\n��1日で最も重要な業務"]
+        E4 --> E5["ストコンでAI推奨発注数を表示\n販売実績・在庫・発注残を確認"]
+        E5 --> E6["天候・近隣イベント・曜日を考慮\n店長判断で推奨数を手動調整"]
+        E6 --> E7["発注��め時刻前に確定\nEOS経由で本部へ送信"]
+        E7 --> E8["閉店前の廃棄処理\nストコンで廃棄スキャン登録"]
+        E8 --> E9["カウンターFF片付け\n揚げ物・中華まん撤去"]
+        E9 --> E10["レジ点検・翌日準備"]
+        E10 --> E11["深夜スタッフへ引継ぎ"]
+    end
+    midnight --> morning
+    morning --> noon
+    noon --> afternoon
+    afternoon --> evening
+    evening --> midnight
+    </pre>
+  </div>
   <div class="diagram-actions">
     <a href="https://app.diagrams.net/?grid=0&pv=0&border=10&edit=_blank#create=%7B%22type%22%3A%22mermaid%22%2C%22compressed%22%3Atrue%2C%22data%22%3A%22vVptj9w0EP41keADUt5jf7SzidQPbBeKkPhY2qM9Ce7QtcDfxzOescd2drO7OpBOJWQTe96fZ8b57ffnfz58fv%2FytWrrnw5Vbdx%2Fw9%2BXv3799PL%2Bz8%2Fu8o%2FHj0%2BPnz5%2FrQZbtW211pVeKzVXWsOjy1jZqbJNtQyV6Ss9w4VVlVndr3Vddcb9s3SVcq%2FN9ej%2F3y0z5DvKv4%2BPLw8fvj4%2BP4Fo9sKD3zckVdxdV3qsdId7tpXVfLHiBf75Cz3AW8oJb%2FDCwgrD%2FIQKzPiz%2B20EPeGFplILPrdWeqI7uiFV2vq776puAYnaKJFbGB5174yVGtBUii7cWk4E3M1LpUhOJ4O%2FY2a6sJbWUkbcGSvjVDC7pnTyCOE6Fs5vOhWbhi3Qjxq19Loa1N5tDQbE3VVPBjQjmErXoGc0oMKYsAd2hpfbW9LwolbYFkVJlPSeG%2FgOr6P0vtqdVLsXaoeYEEYPK9OFE2za0jYNKXNgq8nXJwgYEF5Dktg2WKS03Myhp8BynaF8clHsMgwCWYNRy3d3le%2Bl8gMrX2ZqX9mFM8N72D3QV%2BognB8ifoDQNYMM2rXwTIgoacgxVoYYUXuG3FVykEqOMes05ttm9EaVfNb7JJ6SRHPB5fXPniE3KnRXMAYF7Zz%2BlLz5zfpmffvtvj6j1GdifSbwD6zv4%2BKw7TQIOYMedkZUcMe0eEdBSjt92GnXRr95Q1XKoEZOU7gYwbi25gXYkYYtqLjsQvXf03eS%2BqqkMGlOeRNCJFQovrDzuYKam2xd0WgWl1VovZkUBTOOWKcxYtxGeru2PDx9hDvnQfL55enx6VOOkWoQOX1IoHFMobFpXhkaTRPznnb33p5yIydBy0CYYM8ZNMyxz7TFlj16qI5RC%2Ba4tsi08KaFijXCj5RuXFPcDqqmYgZ3NKig1iThKUkV7OYU3zOukWBpuqhNVr%2BoVF9ZBAX5sAzqOtARxrsAhUbWGp9%2B11dNSRAoV4NdJlwQjQxYrfbNIUHU9ILY%2FMfoHlxIhtiv2wiWsATW4KuLrpFIaYaEJhgWEeiNFDHx57pVQUS17QrPt8Udtk5IzcyRkBtBa8QEZyMojSMYlHgsRvquvhI0jQBNQr2QZ0xKqHr5myOQUldXIIFbyGfAmUWAI4RVxl9bKAAJv3Dv1BwO7FTJIHd1kEBpBFA6M4FMGO%2Fa05wFE22EfyniwKant%2B%2Fw1w7UoBJlUBlDIvn8QK00B7B%2F7oAQMsZY8A7J4HZXBwl%2BLscnr8PlvRrYLubRinUZgXa6uJcKe00zJ%2FDExCHgebo6LDrDyzoB5typHVehFpfZph2lZ%2Fb0NCrN8QYDRMF9rSKz3rVyoXmAI4WlpI96NvVdPUKRCdEGPvwM2GB5y8GnpjT7W6IgDl0MNq%2FKEzgNUkIs9vCAafZ11TKinDaXmEGdPNsUHavGuIj19d3PqWPO6bHt%2FzLTJLcoWywZVBrDZ4n7hbY44I4Zoij3ULenZ0emyAItxBfEx4qirlz%2FFDXEzN6YrQX21r8yeztK9qYEVvS53Z08YGGfYQO4IUxBFFrYham7kIQqZ08aWwdH13zld2Fr%2FMYaa0KYqAT9M953bM8XiVI0rFuQVgr2VpOgKkgDqZCwySHYDvwWQesIbSw1PArWIkJWVJrW99GWgs3FlWbeRqjrVw%2Fxs%2F7w464Tj5IlHrvCUXd11RLvM7a5K4%2BkacdraJrmjBzRtToVdcIcHSE%2BPHmGSVPocIcsqTtugCcwr7JirfPN9K5KkpcdB9Hcz0SJ3WpA0IqKk9hxRqoh%2BbMg0ptd6619cqQtIIElFlhKeSPzPkqedhyZH2yqdCctOEYaheD4y8OXgIbH6S4wVBD11vvboJwjRoClttI3kdmsglv2jBaG6oNMNBnNhN7iZpDMdT4%2BR5WV6Pa6yLcvx3HebvXX09ijpIBu9wtPKvmkvrNJ2U7jC83FpjfTdiPv5S43O4UE96D1%2B9%2B%2BPrwIyA6jFphZSNQewGN%2BtOHKsUrhu8%2FgW70yfJ8Ep8rFkCl17lyix8rR09zKdHvnEjkin9r%2Fax7qTGoVATFETVpsKTN8%2BzgBe8kHGl6Uq0IjMbDE4FNX5C7KbflcSGGvDDQgDrZOb0%2FUUgDbnCDSeeDg3RAYZ5izZJ27aNiN7NwHYCfgJiZhu8pIAD%2F1Yl4%2FElGCJoNpW3I28PqQ5utdjdEXAs7HGbPyYAijU4v4lW%2Fuhk8S7U8Dox2q7WMq0pVS%2FwazCquVDojYb0X%2BtdB4iuhLfWMBswwbJzlDuWg0O%2BW2gtrtXTvzgFoFbzXIY32yBSq5yWYvbBzCm3vRXU9sa25S6uY1n6LmQFiHe4nvVfP3REg5AHJiXHhSYuxJ3YechJN5M4QTCzWIYcY156XF6eCushL8T7po1c8fLifg3J05YS7eugeTH%2F5%2B2Dz8GAmIKTyw2aAaVFO1Lz4ZYCjmh%2FgTgleD5qUp4hbbISorM42HXFQEFLuy6c5BeGlfKUPubw0XCZNLd54UFAAsKcA5msCNYGZFbHJCKdah8brua4NdlSRYLn2c3Phy2NbpAWA6zpZ2z89Me2yT8S2DxfX6MyiPCi2ftRzSAPL1k1elVmi%2FzC0SFZfhjo5s%2BxC31Fwe6%2FqBtoJuig6SkYuiLUpADiP2CYngkoZN1gWHn7YkcOsoKyS4mUQssmVexiT1vMxQT7QQI1AGDdAYDutCeMaHu9TagddaipcYGGw%2BaEyx7qtBnGPl41UMS9gPS6M5JLF16fDdb1N212gsmigPNN%2B%2BbDWJpYs4TCm%2FKLinQ98ehr%2FD5QaaGrnqaps8q5JhuKdD90zFF0kAlkAAPDHXKYxK0W%2F41umGfDwz7779k6JdtSVpWO6dGOAkAKo2c9NQ0PdGByFHcOJvsB66hw0Dn%2BUTT42m0C3xVxfydr9dWuRRx5Ic3GTD54mNG4BT1KAcI27moUtyjrI0YmSff2iVenm75w9RvtfmX0HOwjebUT7%2BQiV7kO7G53C2kj6Et%2BITcQSTPhbvx2eZGmYy010hHQtcm38B%22%7D" class="edit-btn" target="_blank">draw.io で編集</a>
   </div>
@@ -128,5 +199,9 @@ tr:nth-child(even) td { background:var(--bg); }
 </ul>
 
 <p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
 </body>
 </html>

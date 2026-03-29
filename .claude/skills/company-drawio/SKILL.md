@@ -116,20 +116,39 @@ docs/drawio/
 - 「draw.ioで編集」ボタン（エディタURLへのリンク）
 - 「一覧に戻る」リンク
 
-### 5.3 draw.io エディタリンク
+### 5.3 ダイアグラム表示とアクションボタン
 
-詳細ページの「draw.io で編集」ボタンには、**MCPツール呼び出し時に返却されたエディタURL**をそのまま使用する。
-このURLにはダイアグラムデータが埋め込まれているため、`.drawio` ファイルのホスティング不要でワンクリックで図を開ける。
+詳細ページには **2つの機能** を配置する:
+
+1. **ページ内プレビュー** — Mermaid.js CDN でSVGレンダリング（すぐ確認用）
+2. **draw.io で編集ボタン** — MCPツール返却のエディタURL（修正用）
 
 ```html
-<div class="diagram-actions">
-  <a href="{MCPツールが返却したエディタURL}" class="edit-btn" target="_blank">draw.io で編集</a>
+<!-- ページ内プレビュー: Mermaid.js で直接レンダリング -->
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+{Mermaidソースコード}
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="{MCPツールが返却したエディタURL}" class="edit-btn" target="_blank">draw.io で編集</a>
+  </div>
 </div>
+
+<!-- ページ末尾に mermaid.js を読み込み -->
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
 ```
 
-**重要**: `.drawio` ファイルへのリンクや `raw.githubusercontent.com` 経由のURLは使用しないこと。
-MCPツール（`open_drawio_mermaid` / `open_drawio_csv` / `open_drawio_xml`）の戻り値に含まれる
-`https://app.diagrams.net/...` 形式のURLを必ず使用する。
+**ボタンの使い分け**:
+- ページを開くだけで図を確認できる（Mermaid.js レンダリング）
+- 修正が必要な場合は「draw.io で編集」ボタンからdraw.ioエディタを開く
+
+**draw.io エディタURL**: MCPツール（`open_drawio_mermaid` 等）の戻り値に含まれる
+`https://app.diagrams.net/...#create=...` 形式のURLを使用する。
 
 ### 5.4 図の種類別アイコン
 
