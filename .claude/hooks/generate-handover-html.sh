@@ -193,6 +193,9 @@ tr:hover {{ background:var(--bg3); }}
   <div class="tab active" data-tab="timeline">全体年表</div>
   <div class="tab" data-tab="project">PJ業務</div>
   <div class="tab" data-tab="platform">基盤構築</div>
+  <div class="tab" data-tab="organization">組織管理</div>
+  <div class="tab" data-tab="learning">品質・学習</div>
+  <div class="tab" data-tab="discussion">壁打ち</div>
   <div class="tab" data-tab="decisions">判断履歴</div>
   <div class="tab" data-tab="tips">Tips</div>
 </div>
@@ -408,7 +411,7 @@ document.getElementById("monthFilter").addEventListener("change", (e) => {{
 // Hash routing
 function applyHash() {{
   const hash = window.location.hash.replace("#", "");
-  if (hash && ["timeline","project","platform","decisions","tips"].includes(hash)) {{
+  if (hash && ["timeline","project","platform","organization","learning","discussion","decisions","tips"].includes(hash)) {{
     currentTab = hash;
     document.querySelectorAll(".tab").forEach(t => {{
       t.classList.toggle("active", t.dataset.tab === currentTab);
