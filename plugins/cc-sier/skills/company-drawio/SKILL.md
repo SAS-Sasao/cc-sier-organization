@@ -116,23 +116,20 @@ docs/drawio/
 - 「draw.ioで編集」ボタン（エディタURLへのリンク）
 - 「一覧に戻る」リンク
 
-### 5.3 draw.io Viewer 埋め込み
+### 5.3 draw.io エディタリンク
 
-詳細ページにdraw.ioの図をインライン表示するには、以下のiframeを使用:
+詳細ページの「draw.io で編集」ボタンには、**MCPツール呼び出し時に返却されたエディタURL**をそのまま使用する。
+このURLにはダイアグラムデータが埋め込まれているため、`.drawio` ファイルのホスティング不要でワンクリックで図を開ける。
 
 ```html
-<div class="diagram-container">
-  <iframe src="https://viewer.diagrams.net/?tags={}&highlight=0000ff&nav=1&title={filename}.drawio#R{URLエンコードされたXML}"
-          width="100%" height="500" frameborder="0" style="border-radius:8px;"></iframe>
+<div class="diagram-actions">
+  <a href="{MCPツールが返却したエディタURL}" class="edit-btn" target="_blank">draw.io で編集</a>
 </div>
 ```
 
-**注意**: XMLが大きい場合はURLが長くなるため、.drawioファイルへのリンクで代替する:
-```html
-<div class="diagram-container">
-  <a href="./{filename}.drawio" class="edit-btn" target="_blank">draw.io で開く</a>
-</div>
-```
+**重要**: `.drawio` ファイルへのリンクや `raw.githubusercontent.com` 経由のURLは使用しないこと。
+MCPツール（`open_drawio_mermaid` / `open_drawio_csv` / `open_drawio_xml`）の戻り値に含まれる
+`https://app.diagrams.net/...` 形式のURLを必ず使用する。
 
 ### 5.4 図の種類別アイコン
 
