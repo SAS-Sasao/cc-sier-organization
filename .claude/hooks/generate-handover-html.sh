@@ -261,9 +261,10 @@ function renderEntry(e) {{
     if (e.metadata.commit_type) metaBadges += '<span class="badge">' + escHtml(e.metadata.commit_type) + '</span>';
   }}
   const hasDetail = e.description && e.description.trim().length > 0;
-  const toggleIcon = hasDetail ? '<span class="entry-toggle">&#9654;</span>' : '';
+  const toggleIcon = hasDetail ? '<span class="entry-toggle">&#9654;</span> ' : '';
   const detailDiv = hasDetail ? '<div class="entry-detail">' + escHtml(e.description) + '</div>' : '';
-  return '<div class="entry" data-cat="' + (e.category || "") + '"' + (hasDetail ? ' onclick="this.classList.toggle(\'open\')"' : '') + '>' +
+  const expandClass = hasDetail ? ' expandable' : '';
+  return '<div class="entry' + expandClass + '" data-cat="' + (e.category || "") + '">' +
     '<div class="entry-header">' +
       '<div class="entry-title">' + toggleIcon + escHtml(e.title || "") + '</div>' +
       '<div class="entry-date">' + escHtml(e.date || "") + '</div>' +
@@ -413,6 +414,12 @@ function applyHash() {{
   }}
 }}
 window.addEventListener("hashchange", applyHash);
+
+// Entry click-to-expand delegation
+document.getElementById("content").addEventListener("click", (ev) => {{
+  const entry = ev.target.closest(".entry.expandable");
+  if (entry) entry.classList.toggle("open");
+}});
 
 // Auto-refresh every 5 minutes
 setTimeout(() => location.reload(), 5 * 60 * 1000);
