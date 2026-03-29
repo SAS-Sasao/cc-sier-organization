@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>コンビニ店舗スタッフの1日の作業フロー - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --orange:#f59e0b; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:960px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { background:var(--orange); color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.edit-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--orange);
+            color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.edit-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; }
+.diagram-container img { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.ref-link { color:var(--blue); text-decoration:none; }
+.ref-link:hover { text-decoration:underline; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>コンビニ店舗スタッフの1日の作業フロー</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコンAWS移行</span>
+  <span class="tag tag-type">業務フロー</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <p style="font-size:4rem; margin-bottom:16px;">📋</p>
+  <p style="font-size:1rem; font-weight:600; margin-bottom:12px;">コンビニ店舗スタッフの1日の作業フロー</p>
+  <p style="font-size:.85rem; color:var(--muted); margin-bottom:20px;">
+    5つの時間帯（深夜・朝・昼・午後・夕方〜夜）ごとに<br>発注・検品・廃棄・精算の業務プロセスを可視化
+  </p>
+  <div class="diagram-actions">
+    <a href="https://www.drawio.com/?lightbox=1#Uhttps%3A%2F%2Fraw.githubusercontent.com%2FSAS-Sasao%2Fcc-sier-organization%2Fmain%2Fdocs%2Fdrawio%2Fcvs-daily-workflow.drawio" class="edit-btn" target="_blank">draw.io で開く</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  コンビニエンスストア店舗で働くスタッフの1日の作業を、時間帯別に整理した業務フローチャート。
+  ストアコンピューター（ストコン）を中心とした発注・検品・廃棄・精算の各業務プロセスと、
+  それらが1日のどの時間帯にどう組み込まれているかを可視化している。
+</p>
+
+<div class="note">
+  <strong>ポイント:</strong> 夕方〜夜帯の「翌日分の発注作業」が1日で最も重要な業務。
+  ストコンのAI推奨発注数をベースに、天候・イベント・曜日を考慮して店長が手動調整する。
+  熟練度によって廃棄ロスに2〜3倍の差が出ることもある。
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>時間帯</th><th>主要業務</th><th>ストコン操作</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>深夜帯（00:00〜06:00）</td>
+      <td>清掃、廃棄処理、深夜便検品、品出し、翌朝発注確認</td>
+      <td>廃棄スキャン登録、AI推奨発注数確認</td>
+    </tr>
+    <tr>
+      <td>朝帯（06:00〜11:00）</td>
+      <td>朝便納品（最大量）、検品、品出し、日次精算、SV確認</td>
+      <td>検品スキャン、日次精算・EOBデータ送信、現金突合</td>
+    </tr>
+    <tr>
+      <td>昼帯（11:00〜14:00）</td>
+      <td>昼ピーク対応、昼便検品、欠品対応</td>
+      <td>理論在庫照合、追加手動発注（欠品時）</td>
+    </tr>
+    <tr>
+      <td>午後帯（14:00〜18:00）</td>
+      <td>棚割変更、プロモ展開、値引き処理、FF廃棄</td>
+      <td>値引きアラート確認、電子値引き設定、FF廃棄登録</td>
+    </tr>
+    <tr>
+      <td>夕方〜夜帯（18:00〜00:00）</td>
+      <td>夕便検品、<strong>翌日発注（最重要）</strong>、廃棄処理、レジ点検</td>
+      <td>AI推奨発注数表示・手動調整・EOS送信、廃棄スキャン</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>時間帯ベースのサブグラフ構成</strong> — コンビニは24時間営業のため、深夜→朝→昼→午後→夜の5帯でサイクルを表現。各帯の業務が次の帯に引き継がれる循環構造を採用した。</li>
+  <li><strong>ストコン操作の明示</strong> — 各ステップでストコンが関与する箇所（廃棄スキャン、発注確認、精算、在庫照合等）を明記。AWS移行時に影響を受けるタッチポイントを特定しやすくしている。</li>
+  <li><strong>判断分岐の可視化</strong> — 日次精算の過不足チェック、昼帯の欠品判定、午後の値引き判定など、店舗スタッフが日常的に行う判断ポイントを分岐ノードで表現。</li>
+  <li><strong>発注業務の重要性を強調</strong> — 夕方〜夜帯の発注作業を星マーク付きで強調。AI推奨→手動調整→EOS送信の3段階フローを詳細化し、ストコンの中核機能であることを示した。</li>
+</ul>
+
+<h2>参考資料</h2>
+<ul>
+  <li><a class="ref-link" href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/retail-domain/convenience-business-processes.md">コンビニ主要業務プロセス詳細</a> — 発注3方式・廃棄管理・日次精算・検品</li>
+  <li><a class="ref-link" href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/retail-domain/convenience-industry-structure.md">コンビニ業界構造 深掘り調査</a> — 店舗運営の1日の流れ・サプライチェーン</li>
+  <li><a class="ref-link" href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/retail-domain/store-computer-domain-knowledge.md">ストアコンピューター ドメイン知識</a> — ストコンの機能一覧・用語集</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+</body>
+</html>
