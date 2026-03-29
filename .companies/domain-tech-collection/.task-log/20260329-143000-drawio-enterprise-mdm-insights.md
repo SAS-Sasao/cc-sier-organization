@@ -1,3 +1,11 @@
+---
+status: completed
+mode: direct
+subagent: secretary
+reward: 0.80
+judge_summary: "completeness 8/10, accuracy 8/10, clarity 8/10"
+---
+
 # タスクログ: draw.io Enterprise MDM & Data Insights（AWS公式アイコン版）
 
 - **task-id**: 20260329-143000-drawio-enterprise-mdm-insights

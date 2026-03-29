@@ -1,3 +1,11 @@
+---
+status: completed
+mode: direct
+subagent: secretary
+reward: 0.85
+judge_summary: "completeness 9/10, accuracy 8/10, clarity 9/10"
+---
+
 # タスクログ: コンビニ店舗スタッフの1日の作業フロー（draw.io）
 
 - **task-id**: 20260329-100000-drawio-cvs-daily-workflow

@@ -1,3 +1,11 @@
+---
+status: completed
+mode: direct
+subagent: secretary
+reward: 0.88
+judge_summary: "completeness 9/10, accuracy 9/10, clarity 8/10"
+---
+
 # タスクログ: draw.io C4モデル — SIer提案書自動化ツール
 
 - **task-id**: 20260329-125754-drawio-proposal-automation-c4

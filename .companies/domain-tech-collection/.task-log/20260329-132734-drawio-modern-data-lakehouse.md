@@ -1,3 +1,11 @@
+---
+status: completed
+mode: direct
+subagent: secretary
+reward: 0.85
+judge_summary: "completeness 9/10, accuracy 8/10, clarity 9/10"
+---
+
 # タスクログ: draw.io Modern Data Lakehouse AWS構成図
 
 - **task-id**: 20260329-132734-drawio-modern-data-lakehouse

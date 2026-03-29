@@ -1,3 +1,11 @@
+---
+status: completed
+mode: direct
+subagent: secretary
+reward: 0.83
+judge_summary: "completeness 8/10, accuracy 8/10, clarity 9/10"
+---
+
 # タスクログ: エンタープライズデータアーキテクチャ（MDM中心）
 
 - **task-id**: 20260329-110000-drawio-enterprise-data-arch

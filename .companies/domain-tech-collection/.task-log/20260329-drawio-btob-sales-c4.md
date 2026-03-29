@@ -1,3 +1,11 @@
+---
+status: completed
+mode: direct
+subagent: secretary
+reward: 0.90
+judge_summary: "completeness 9/10, accuracy 9/10, clarity 9/10"
+---
+
 # タスクログ: draw.io BtoB販売管理システムC4モデル作成
 
 - **task-id**: 20260329-drawio-btob-sales-c4
