@@ -81,3 +81,14 @@ iac-validation: cfn-lint valid (warning: EngineVersion修正済み), cfn-guard 6
 | IaCビューア | secretary | docs/diagrams/talent-data-arch-aws-iac.html |
 | 一覧更新 | secretary | docs/diagrams/index.html |
 | メタデータ | secretary | .companies/domain-tech-collection/docs/diagrams/talent-data-arch-aws.md |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-29T12:07:04"
+```

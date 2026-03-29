@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-29T10:06:22",
-  "case_count": 36,
+  "updated_at": "2026-03-29T12:07:04",
+  "case_count": 39,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -65,6 +65,22 @@
         "ドキュメント間リンクの必須化",
         "成果物ドキュメントで別ドキュメントを参照する場合は必ずMarkdownリンクを張ること",
         "パス表示だけはNG"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "層間エッジは直線、層内は隣接ノード間のみorthogonal。waypointではなくノード配置で貫通を回避する。",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_drawio_edge_style",
+      "how_to_apply": "- 層間エッジ（コンテナをまたぐ接続）→ edgeStyleを指定しない（直線）\n- 層内エッジ（同一コンテナ内の隣接ノード間）→ edgeStyle=orthogonalEdgeStyle\n- ノード配置で貫通を回避（接続先が隣接する並び順、分岐は2列配置、多対一は中央高さ配置）\n- SKILL.md セクション4.2.1 に明記済み",
+      "match_keywords": [
+        "draw.ioエッジ設計方針",
+        "直線＋配置で貫通回避",
+        "層間エッジは直線",
+        "層内は隣接ノード間のみorthogonal",
+        "waypointではなくノード配置で貫通を回避する"
       ]
     },
     {
@@ -1262,6 +1278,81 @@
           ".companies/domain-tech-collection/docs/drawio/cvs-daily-workflow.md"
         ],
         "started": ""
+      }
+    },
+    {
+      "id": "20260329-110000-drawio-enterprise-data-arch",
+      "state": {
+        "request_keywords": [
+          "ERP",
+          "販売管理",
+          "会計等の社内アプリケーションからMDMを通じてゴールデンレコードを抽出し",
+          "DWH/データレイク経由でBIツールでインサイトを得るエンタープライズデータアーキテクチャ図を作成",
+          "AWSな"
+        ],
+        "request_head": "ERP・販売管理・会計等の社内アプリケーションからMDMを通じてゴールデンレコードを抽出し、DWH/データレイク経由でB",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 0.95,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/drawio/enterprise-data-arch.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260329-113604-drawio-talent-data-arch",
+      "state": {
+        "request_keywords": [
+          "C4モデル",
+          "人材",
+          "パートナーデータ統合アーキテクチャ",
+          "管理アプリ/SharePoint→MDM→データレイク/DWH→BI→タレマネ"
+        ],
+        "request_head": "C4モデル 人材・パートナーデータ統合アーキテクチャ（管理アプリ/SharePoint→MDM→データレイク/DWH→B",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-29T11:36:04"
+      }
+    },
+    {
+      "id": "20260329-114500-diagram-talent-data-arch-aws",
+      "state": {
+        "request_keywords": [
+          "C4モデル",
+          "人材",
+          "パートナーデータ統合アーキテクチャ",
+          "をAWSサービスで具体化した構成図を作成"
+        ],
+        "request_head": "C4モデル（人材・パートナーデータ統合アーキテクチャ）をAWSサービスで具体化した構成図を作成",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-29T11:45:00"
       }
     }
   ],

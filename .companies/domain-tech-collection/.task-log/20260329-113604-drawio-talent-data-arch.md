@@ -71,3 +71,14 @@ pr_number: null
 | 詳細ページ | secretary | docs/drawio/talent-data-arch.html |
 | 一覧更新 | secretary | docs/drawio/index.html |
 | メタデータ | secretary | .companies/domain-tech-collection/docs/drawio/talent-data-arch.md |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-29T11:42:56"
+```
