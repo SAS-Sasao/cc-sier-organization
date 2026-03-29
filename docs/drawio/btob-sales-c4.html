@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BtoB販売管理システム C4モデル - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>BtoB 販売管理システム C4モデル（L1/L2/L3）</h1>
+<div class="meta">
+  <span class="tag tag-project">BtoB販売管理</span>
+  <span class="tag tag-type" style="background:#ef4444;">C4モデル</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart TB
+    subgraph actors[" "]
+        SALES["営業担当者"]
+        CUSTOMER["顧客企業 BtoB"]
+        ACCOUNTANT["経理担当者"]
+    end
+    subgraph external["外部システム"]
+        EXT_ACCT["会計システム 仕訳・売掛金連携"]
+        EXT_LOGI["物流システム 配送指示・追跡"]
+        EXT_PAY["決済サービス 口座振替・銀行API"]
+    end
+    subgraph system["BtoB販売管理システム"]
+        UI["販売管理UI [React SPA]"]
+        APIGW["API Gateway [Amazon API Gateway + ALB]"]
+        subgraph monolith["モジュラモノリス [Spring Boot / Kotlin on ECS Fargate]"]
+            subgraph row1["Core Bounded Contexts"]
+                CUST["顧客管理 BC:Customer 顧客マスタ・与信管理"]
+                ORDER["受注管理 BC:Order 見積・受注登録・承認"]
+                PROD["商品管理 BC:Product 商品マスタ・価格管理"]
+            end
+            subgraph row2["Supporting Bounded Contexts"]
+                INV["在庫管理 BC:Inventory 在庫照会・引当管理"]
+                SHIP["出荷管理 BC:Shipping 出荷指示・配送追跡"]
+                BILL["請求管理 BC:Billing 請求書作成・入金管理"]
+            end
+            subgraph shared["Shared Kernel"]
+                EVT["イベントバス [Amazon SQS] ドメインイベント非同期伝搬"]
+                AUTH["共通基盤 認証Cognito・認可・監査ログ"]
+            end
+        end
+        subgraph data["データストア"]
+            RDS[("Amazon RDS [PostgreSQL] Schema-per-Module分離")]
+            REDIS[("Amazon ElastiCache [Redis] セッション・在庫キャッシュ")]
+            S3[("Amazon S3 帳票PDF・添付ファイル")]
+        end
+    end
+    SALES -->|見積・受注| UI
+    CUSTOMER -->|発注・納品確認| UI
+    ACCOUNTANT -->|請求・入金| UI
+    UI --> APIGW
+    APIGW --> ORDER
+    APIGW -.-> CUST
+    APIGW -.-> PROD
+    ORDER --> CUST
+    ORDER --> PROD
+    ORDER -.->|出荷指示| SHIP
+    ORDER -.->|在庫引当| INV
+    SHIP --> INV
+    SHIP -.->|納品完了| BILL
+    BILL --> EXT_ACCT
+    SHIP --> EXT_LOGI
+    BILL --> EXT_PAY
+    EVT --> RDS
+    AUTH --> REDIS
+    BILL --> S3
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./btob-sales-c4.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  BtoB向け販売管理システムの概要アーキテクチャ。DDD（ドメイン駆動設計）の思想に基づき、
+  6つの境界コンテキスト（受注・顧客・商品・在庫・出荷・請求）をモジュラモノリスとして構成。
+  モジュール間はドメインイベント（Amazon SQS）による非同期通信とInternal APIによる同期照会で連携し、
+  将来のマイクロサービス移行に備えたSchema-per-Module分離を採用。
+  AWSクラウド上にECS Fargate、API Gateway、RDS PostgreSQL等で構築する。
+</p>
+
+<div class="note">
+  <strong>C4レベル構成:</strong>
+  L1（System Context）= 利用者（営業・顧客企業・経理）と外部システム（会計・物流・決済）、
+  L2（Container）= React SPA・API Gateway・モジュラモノリス・データストア、
+  L3（Bounded Context）= 6つのDDDモジュール（受注・顧客・商品・在庫・出荷・請求）＋Shared Kernel
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>C4レベル</th><th>要素</th><th>種別</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="3">L1 Person</td><td>営業担当者</td><td>Person</td><td>見積・受注の作成を行う</td></tr>
+    <tr><td>顧客企業 (BtoB)</td><td>Person</td><td>発注・納品確認を行う</td></tr>
+    <tr><td>経理担当者</td><td>Person</td><td>請求・入金管理を行う</td></tr>
+    <tr><td rowspan="3">L1 External</td><td>会計システム</td><td>External System</td><td>仕訳データ・売掛金の連携先</td></tr>
+    <tr><td>物流システム</td><td>External System</td><td>配送指示・追跡情報の連携先</td></tr>
+    <tr><td>決済サービス</td><td>External System</td><td>口座振替・銀行API経由の決済処理</td></tr>
+    <tr><td rowspan="2">L2 Container</td><td>販売管理UI</td><td>React SPA</td><td>受注ダッシュボード・在庫照会・請求管理画面</td></tr>
+    <tr><td>API Gateway</td><td>Amazon API Gateway + ALB</td><td>認証・レート制限・ルーティング</td></tr>
+    <tr><td rowspan="6">L3 BC Module</td><td>受注管理 (Order)</td><td>Bounded Context</td><td>見積・受注登録・承認・ステータス管理（中核ドメイン）</td></tr>
+    <tr><td>顧客管理 (Customer)</td><td>Bounded Context</td><td>顧客マスタ・与信管理・取引条件管理</td></tr>
+    <tr><td>商品管理 (Product)</td><td>Bounded Context</td><td>商品マスタ・価格管理・カテゴリ管理</td></tr>
+    <tr><td>在庫管理 (Inventory)</td><td>Bounded Context</td><td>在庫照会・引当管理・入出庫管理</td></tr>
+    <tr><td>出荷管理 (Shipping)</td><td>Bounded Context</td><td>出荷指示・配送追跡・納品管理</td></tr>
+    <tr><td>請求管理 (Billing)</td><td>Bounded Context</td><td>請求書作成・入金管理・売掛金管理</td></tr>
+    <tr><td rowspan="2">Shared Kernel</td><td>イベントバス</td><td>Amazon SQS</td><td>ドメインイベントの非同期伝搬・CQRS対応</td></tr>
+    <tr><td>共通基盤</td><td>Cross-Cutting</td><td>認証(Cognito)・認可・監査ログ・例外ハンドリング</td></tr>
+    <tr><td rowspan="3">L2 Data</td><td>Amazon RDS</td><td>PostgreSQL</td><td>Schema-per-Moduleでモジュール毎にスキーマ分離</td></tr>
+    <tr><td>Amazon ElastiCache</td><td>Redis</td><td>セッション管理・在庫キャッシュ</td></tr>
+    <tr><td>Amazon S3</td><td>Object Storage</td><td>帳票PDF・添付ファイルの保管</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>モジュラモノリス × DDD</strong> --- 6つの境界コンテキストを単一デプロイメントユニット（Spring Boot）内に配置。モジュール間はInternal APIとドメインイベント（SQS）で疎結合に通信し、将来の個別マイクロサービス抽出を可能にする。</li>
+  <li><strong>Schema-per-Module によるDB分離</strong> --- 共有PostgreSQL上でモジュール毎にスキーマを分離。マイクロサービス移行時にはスキーマ単位でDBを分割できるため、データ層の独立性を段階的に高められる。</li>
+  <li><strong>CQRS + ドメインイベント</strong> --- 受注確定→在庫引当→出荷指示→納品完了→請求生成の業務フローをドメインイベントで非同期連鎖。各モジュールは自律的に動作し、障害の局所化を実現。</li>
+  <li><strong>AWS マネージドサービス活用</strong> --- ECS Fargate（サーバーレスコンテナ）、API Gateway + ALB（認証・ルーティング）、Cognito（認証）、SQS（メッセージング）、CloudWatch + X-Ray（可観測性）を組み合わせ、運用負荷を最小化。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>
