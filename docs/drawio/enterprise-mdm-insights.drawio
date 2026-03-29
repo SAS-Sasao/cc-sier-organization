@@ -1,0 +1,262 @@
+<mxGraphModel dx="1900" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1050" background="#FFFFFF">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+
+<!-- Title -->
+<mxCell id="title" value="Enterprise MDM &amp; Data Insights Architecture" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;fontColor=#232F3E;" vertex="1" parent="1">
+  <mxGeometry x="350" y="5" width="600" height="30" as="geometry"/>
+</mxCell>
+<mxCell id="subtitle" value="CRM/ERP 分散データを MDM で統合し、分析インサイトを提供" style="text;html=1;fontSize=10;fontStyle=2;align=center;fillColor=none;strokeColor=none;fontColor=#5A6C86;" vertex="1" parent="1">
+  <mxGeometry x="400" y="30" width="500" height="18" as="geometry"/>
+</mxCell>
+
+<!-- Legend -->
+<mxCell id="leg-ing" value="" style="endArrow=none;html=1;strokeColor=#1E3A5F;strokeWidth=3;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="1340" y="17" as="sourcePoint"/><mxPoint x="1370" y="17" as="targetPoint"/></mxGeometry>
+</mxCell>
+<mxCell id="leg-ing-t" value="Ingestion" style="text;fontSize=9;fillColor=none;strokeColor=none;fontColor=#1E3A5F;" vertex="1" parent="1">
+  <mxGeometry x="1375" y="8" width="60" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg-mdm" value="" style="endArrow=none;html=1;strokeColor=#B7312C;strokeWidth=3;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="1450" y="17" as="sourcePoint"/><mxPoint x="1480" y="17" as="targetPoint"/></mxGeometry>
+</mxCell>
+<mxCell id="leg-mdm-t" value="MDM" style="text;fontSize=9;fillColor=none;strokeColor=none;fontColor=#B7312C;" vertex="1" parent="1">
+  <mxGeometry x="1485" y="8" width="40" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg-ana" value="" style="endArrow=none;html=1;strokeColor=#1565C0;strokeWidth=3;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="1540" y="17" as="sourcePoint"/><mxPoint x="1570" y="17" as="targetPoint"/></mxGeometry>
+</mxCell>
+<mxCell id="leg-ana-t" value="Analytics" style="text;fontSize=9;fillColor=none;strokeColor=none;fontColor=#1565C0;" vertex="1" parent="1">
+  <mxGeometry x="1575" y="8" width="55" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg-gov" value="" style="endArrow=none;html=1;strokeColor=#6A1B9A;strokeWidth=3;dashed=1;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry"><mxPoint x="1645" y="17" as="sourcePoint"/><mxPoint x="1675" y="17" as="targetPoint"/></mxGeometry>
+</mxCell>
+<mxCell id="leg-gov-t" value="Governance" style="text;fontSize=9;fillColor=none;strokeColor=none;fontColor=#6A1B9A;" vertex="1" parent="1">
+  <mxGeometry x="1680" y="8" width="70" height="18" as="geometry"/>
+</mxCell>
+
+<!-- AWS Cloud boundary -->
+<mxCell id="aws-cloud" value="AWS Cloud" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=1;container=0;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud_alt;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;" vertex="1" parent="1">
+  <mxGeometry x="210" y="55" width="1570" height="930" as="geometry"/>
+</mxCell>
+
+<!-- Section backgrounds -->
+<mxCell id="sec-ingest" value="取り込み" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontStyle=1;fontSize=10;fontColor=#6A1B9A;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="265" y="70" width="130" height="590" as="geometry"/>
+</mxCell>
+<mxCell id="sec-raw" value="Raw Zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FFCC80;fontStyle=1;fontSize=10;fontColor=#E65100;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="440" y="280" width="120" height="160" as="geometry"/>
+</mxCell>
+<mxCell id="sec-staged" value="Staged Zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#BDBDBD;fontStyle=1;fontSize=10;fontColor=#616161;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="700" y="280" width="120" height="160" as="geometry"/>
+</mxCell>
+<mxCell id="sec-mdm" value="MDM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#EF9A9A;fontStyle=1;fontSize=10;fontColor=#B71C1C;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="850" y="260" width="220" height="240" as="geometry"/>
+</mxCell>
+<mxCell id="sec-golden" value="Golden Zone (SSOT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#FFF176;fontStyle=1;fontSize=10;fontColor=#F57F17;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="1080" y="280" width="140" height="160" as="geometry"/>
+</mxCell>
+<mxCell id="sec-analytics" value="分析" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#90CAF9;fontStyle=1;fontSize=10;fontColor=#1565C0;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="1250" y="170" width="140" height="380" as="geometry"/>
+</mxCell>
+<mxCell id="sec-vis" value="可視化" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#A5D6A7;fontStyle=1;fontSize=10;fontColor=#1B5E20;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="1420" y="260" width="140" height="200" as="geometry"/>
+</mxCell>
+<mxCell id="sec-ai" value="生成AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#80DEEA;fontStyle=1;fontSize=10;fontColor=#00695C;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="530" width="130" height="190" as="geometry"/>
+</mxCell>
+<mxCell id="sec-gov" value="ガバナンス" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#CE93D8;fontStyle=1;fontSize=10;fontColor=#6A1B9A;verticalAlign=top;arcSize=8;opacity=50;" vertex="1" parent="1">
+  <mxGeometry x="430" y="730" width="870" height="140" as="geometry"/>
+</mxCell>
+
+<!-- Data Sources (outside cloud) -->
+<mxCell id="sec-source" value="データソース" style="text;html=1;fontSize=11;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#5A6C86;align=center;" vertex="1" parent="1">
+  <mxGeometry x="30" y="105" width="140" height="20" as="geometry"/>
+</mxCell>
+<mxCell id="src-crm" value="Salesforce&lt;br&gt;CRM" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#5A6C86;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.traditional_server;" vertex="1" parent="1">
+  <mxGeometry x="76" y="200" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="src-erp" value="SAP /&lt;br&gt;Legacy DB" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#5A6C86;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.traditional_server;" vertex="1" parent="1">
+  <mxGeometry x="76" y="420" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Ingestion Layer -->
+<mxCell id="appflow" value="Amazon&lt;br&gt;AppFlow" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.appflow;" vertex="1" parent="1">
+  <mxGeometry x="301" y="130" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="eventbridge" value="Amazon&lt;br&gt;EventBridge" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;" vertex="1" parent="1">
+  <mxGeometry x="301" y="260" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="firehose" value="Kinesis&lt;br&gt;Data Firehose" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.kinesis_data_firehose;" vertex="1" parent="1">
+  <mxGeometry x="301" y="390" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="dms" value="AWS DMS&lt;br&gt;(CDC)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.database_migration_service;" vertex="1" parent="1">
+  <mxGeometry x="301" y="530" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Storage: Raw Zone -->
+<mxCell id="s3-raw" value="S3&lt;br&gt;Raw Zone" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.bucket;" vertex="1" parent="1">
+  <mxGeometry x="476" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Processing: Glue ETL -->
+<mxCell id="glue-etl" value="AWS Glue&lt;br&gt;ETL" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue;" vertex="1" parent="1">
+  <mxGeometry x="591" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Storage: Staged Zone -->
+<mxCell id="s3-staged" value="S3&lt;br&gt;Staged Zone" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.bucket;" vertex="1" parent="1">
+  <mxGeometry x="736" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- MDM Processing -->
+<mxCell id="ann-mdm1" value="ファジーマッチング" style="text;html=1;fontSize=8;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#B71C1C;align=center;" vertex="1" parent="1">
+  <mxGeometry x="858" y="310" width="90" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="entity-res" value="AWS Entity&lt;br&gt;Resolution" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.entity_resolution;" vertex="1" parent="1">
+  <mxGeometry x="880" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="ann-mdm2" value="DQDL品質ゲート" style="text;html=1;fontSize=8;fontStyle=2;fillColor=none;strokeColor=none;fontColor=#B71C1C;align=center;" vertex="1" parent="1">
+  <mxGeometry x="978" y="310" width="90" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="glue-dq" value="Glue Data&lt;br&gt;Quality" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue_data_quality;" vertex="1" parent="1">
+  <mxGeometry x="1000" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Storage: Golden Zone -->
+<mxCell id="s3-golden" value="S3&lt;br&gt;Golden Zone" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#3F8624;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=1;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.bucket;" vertex="1" parent="1">
+  <mxGeometry x="1116" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Analytics -->
+<mxCell id="redshift" value="Redshift&lt;br&gt;Serverless" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.redshift;" vertex="1" parent="1">
+  <mxGeometry x="1296" y="240" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="athena" value="Amazon&lt;br&gt;Athena" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.athena;" vertex="1" parent="1">
+  <mxGeometry x="1296" y="440" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Visualization -->
+<mxCell id="quicksight" value="Amazon&lt;br&gt;QuickSight" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.quicksight;" vertex="1" parent="1">
+  <mxGeometry x="1466" y="340" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- AI -->
+<mxCell id="bedrock" value="Amazon&lt;br&gt;Bedrock (RAG)" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#01A88D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.bedrock;" vertex="1" parent="1">
+  <mxGeometry x="1160" y="600" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Orchestration -->
+<mxCell id="ann-orch" value="オーケストレーション" style="text;html=1;fontSize=9;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#E7157B;align=center;" vertex="1" parent="1">
+  <mxGeometry x="530" y="580" width="120" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="step-fn" value="Step&lt;br&gt;Functions" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.step_functions;" vertex="1" parent="1">
+  <mxGeometry x="580" y="600" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- Governance Layer -->
+<mxCell id="glue-catalog" value="Glue&lt;br&gt;Data Catalog" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue_data_catalog;" vertex="1" parent="1">
+  <mxGeometry x="520" y="790" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="lake-formation" value="Lake&lt;br&gt;Formation" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lake_formation;" vertex="1" parent="1">
+  <mxGeometry x="700" y="790" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="kms" value="AWS&lt;br&gt;KMS" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.key_management_service;" vertex="1" parent="1">
+  <mxGeometry x="920" y="790" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="cloudwatch" value="Amazon&lt;br&gt;CloudWatch" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch;" vertex="1" parent="1">
+  <mxGeometry x="1100" y="790" width="48" height="48" as="geometry"/>
+</mxCell>
+<mxCell id="cloudtrail" value="AWS&lt;br&gt;CloudTrail" style="outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudtrail;" vertex="1" parent="1">
+  <mxGeometry x="1260" y="790" width="48" height="48" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: Source to Ingestion (gray) -->
+<mxCell id="e-crm-af" value="" style="html=1;strokeColor=#5A6C86;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="src-crm" target="appflow" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-erp-dms" value="" style="html=1;strokeColor=#5A6C86;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="src-erp" target="dms" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: Ingestion chain (dark blue) -->
+<mxCell id="e-af-eb" value="" style="html=1;strokeColor=#1E3A5F;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="appflow" target="eventbridge" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-eb-fh" value="" style="html=1;strokeColor=#1E3A5F;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="eventbridge" target="firehose" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-dms-raw" value="" style="html=1;strokeColor=#1E3A5F;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="dms" target="s3-raw" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-fh-raw" value="" style="html=1;strokeColor=#1E3A5F;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="firehose" target="s3-raw" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: Processing (dark blue) -->
+<mxCell id="e-raw-etl" value="" style="html=1;strokeColor=#1E3A5F;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="s3-raw" target="glue-etl" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-etl-stg" value="" style="html=1;strokeColor=#1E3A5F;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="glue-etl" target="s3-staged" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: MDM flow (red) -->
+<mxCell id="e-stg-er" value="名寄せ" style="html=1;strokeColor=#B7312C;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#B7312C;" edge="1" source="s3-staged" target="entity-res" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-er-dq" value="品質Gate" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#B7312C;strokeWidth=2;endArrow=block;endFill=1;fontSize=9;fontColor=#B7312C;" edge="1" source="entity-res" target="glue-dq" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-dq-gld" value="" style="html=1;strokeColor=#B7312C;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="glue-dq" target="s3-golden" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: Analytics (blue) -->
+<mxCell id="e-gld-rs" value="" style="html=1;strokeColor=#1565C0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="s3-golden" target="redshift" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-gld-ath" value="" style="html=1;strokeColor=#1565C0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="s3-golden" target="athena" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-rs-qs" value="" style="html=1;strokeColor=#1565C0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="redshift" target="quicksight" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-ath-qs" value="" style="html=1;strokeColor=#1565C0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="athena" target="quicksight" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGE: Golden to Bedrock (exit bottom to avoid Athena) -->
+<mxCell id="e-gld-br" value="RAG" style="html=1;strokeColor=#01A88D;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;fontColor=#01A88D;" edge="1" source="s3-golden" target="bedrock" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: Governance (purple dashed) -->
+<mxCell id="e-etl-cat" value="スキーマ登録" style="html=1;strokeColor=#6A1B9A;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=9;fontColor=#6A1B9A;" edge="1" source="glue-etl" target="glue-catalog" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-er-cat" value="" style="html=1;strokeColor=#6A1B9A;strokeWidth=2;endArrow=block;endFill=1;dashed=1;" edge="1" source="entity-res" target="glue-catalog" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-cat-lf" value="メタデータ" style="html=1;strokeColor=#6A1B9A;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=9;fontColor=#6A1B9A;" edge="1" source="glue-catalog" target="lake-formation" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-lf-ath" value="アクセス制御" style="html=1;strokeColor=#6A1B9A;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=9;fontColor=#6A1B9A;" edge="1" source="lake-formation" target="athena" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-lf-rs" value="アクセス制御" style="html=1;strokeColor=#6A1B9A;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=9;fontColor=#6A1B9A;" edge="1" source="lake-formation" target="redshift" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- EDGES: Orchestration (pink dashed) -->
+<mxCell id="e-sfn-etl" value="パイプライン制御" style="html=1;strokeColor=#E7157B;strokeWidth=2;endArrow=block;endFill=1;dashed=1;fontSize=9;fontColor=#E7157B;" edge="1" source="step-fn" target="glue-etl" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-sfn-er" value="" style="html=1;strokeColor=#E7157B;strokeWidth=2;endArrow=block;endFill=1;dashed=1;" edge="1" source="step-fn" target="entity-res" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+</root>
+</mxGraphModel>
