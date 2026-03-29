@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data-Driven Decision Platform on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-db { background:#3b82f6; color:#fff; }
+.badge-stream { background:#0d9488; color:#fff; }
+.badge-raw { background:#22c55e; color:#fff; }
+.badge-master { background:#8b5cf6; color:#fff; }
+.badge-bi { background:#ea580c; color:#fff; }
+.badge-ai { background:#ef4444; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Data-Driven Decision Platform on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">データ基盤</span>
+  <span class="tag tag-area">Data Platform / MDM</span>
+  <span>生成日: 2026-03-29</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./data-driven-decision-platform.png" alt="Data-Driven Decision Platform on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./data-driven-decision-platform-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> DB Repl. --- ERP/CRM/SKILL_HUB からの DB レプリケーション（DMS）</div>
+    <div class="legend-item"><span class="legend-line" style="background:teal"></span> API Stream --- SharePoint/Redmine からのストリーム取り込み（Firehose）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> Raw Data --- Glue ETL によるデータレイク書き込み</div>
+    <div class="legend-item"><span class="legend-line" style="background:purple"></span> Master Data --- MDM ゴールデンレコード連携</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkorange"></span> Structured --- DWH から BI/ML への構造化データ</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:teal"></span> Unstructured --- データレイクから ML への非構造化データ</div>
+    <div class="legend-item"><span class="legend-line" style="background:red"></span> AI --- SageMaker/Bedrock からユーザーへの分析結果</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>社内の複数システム（ERP、CRM、SKILL_HUB、SharePoint、Redmine）から情報を収集し、AWSのマネージドサービスでデータ統合・蓄積・分析を行い、経営者・マーケティング・営業がデータドリブンな意思決定を行える基盤です。</p>
+  <p>SKILL_HUBは社内マスタデータ管理WebApp（SmartHR連携/Backlog連携/RDB+VectorDB）で、生成AI対応のVectorDBを搭載。AWS DMS でデータベースレベルのレプリケーション、Kinesis Data Firehose でドキュメント/チケット系のストリーム取り込みを行い、Glue ETL で変換後にS3データレイクとDynamoDB MDMに振り分けます。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-db">DB Repl.</span> ERP / CRM / SKILL_HUB → データ取り込み</h3>
+  <div class="flow">
+    <span class="flow-step">ERP / CRM / SKILL_HUB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS DMS (DB Replication)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS Glue ETL</span>
+  </div>
+
+  <h3><span class="badge badge-stream">Stream</span> SharePoint / Redmine → ストリーム取り込み</h3>
+  <div class="flow">
+    <span class="flow-step">SharePoint / Redmine</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Data Firehose</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS Glue ETL</span>
+  </div>
+
+  <h3><span class="badge badge-raw">Raw</span> データレイク蓄積</h3>
+  <div class="flow">
+    <span class="flow-step">AWS Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Raw/Curated Zone</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lake Formation</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift DWH</span>
+  </div>
+
+  <h3><span class="badge badge-master">Master</span> MDM ゴールデンレコード</h3>
+  <div class="flow">
+    <span class="flow-step">AWS Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB (Golden Record)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue Data Catalog</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift DWH</span>
+  </div>
+
+  <h3><span class="badge badge-bi">BI</span> 構造化データ分析</h3>
+  <div class="flow">
+    <span class="flow-step">Redshift DWH</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight BI</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">経営者 / マーケティング</span>
+  </div>
+
+  <h3><span class="badge badge-ai">AI</span> AI/ML 予測分析</h3>
+  <div class="flow">
+    <span class="flow-step">Redshift + S3</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SageMaker ML Pipeline</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Bedrock GenAI/RAG</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">マーケティング / 営業</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <thead><tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2">データ取り込み</td><td>AWS DMS</td><td>ERP/CRM/SKILL_HUBからのDBレプリケーション</td></tr>
+      <tr><td>Kinesis Data Firehose</td><td>SharePoint/Redmineからのストリーム取り込み</td></tr>
+      <tr><td>ETL</td><td>AWS Glue ETL</td><td>データ変換・クレンジング・振り分け</td></tr>
+      <tr><td rowspan="3">データレイク</td><td>Amazon S3 (Raw/Curated)</td><td>生データ・加工済みデータの永続化</td></tr>
+      <tr><td>AWS Lake Formation</td><td>データガバナンス・Fine-grained ACL</td></tr>
+      <tr><td>Glue Data Catalog</td><td>メタデータ管理・スキーマレジストリ</td></tr>
+      <tr><td>MDM</td><td>Amazon DynamoDB</td><td>マスタデータのゴールデンレコード管理</td></tr>
+      <tr><td>DWH</td><td>Amazon Redshift Serverless</td><td>構造化データの分析用ウェアハウス</td></tr>
+      <tr><td rowspan="3">分析・AI/ML</td><td>Amazon QuickSight</td><td>BIダッシュボード・定型レポート</td></tr>
+      <tr><td>Amazon SageMaker</td><td>ML学習・推論パイプライン</td></tr>
+      <tr><td>Amazon Bedrock</td><td>GenAI/RAG による自然言語インサイト</td></tr>
+      <tr><td>暗号化</td><td>AWS KMS</td><td>全データストアの暗号化キー管理</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul style="padding-left:24px;">
+    <li style="margin-bottom:12px;"><strong>サーバーレス中心</strong> --- Glue, Firehose, Redshift Serverless, DynamoDB (PAY_PER_REQUEST) を採用し、運用負荷とコストを最小化。ワークロード変動に自動スケール。</li>
+    <li style="margin-bottom:12px;"><strong>2系統のデータ取り込み</strong> --- RDB系ソース（ERP/CRM/SKILL_HUB）はDMSでCDCレプリケーション、ドキュメント/チケット系（SharePoint/Redmine）はFirehoseでストリーム取り込み。ソース特性に応じた最適な取り込みパターン。</li>
+    <li style="margin-bottom:12px;"><strong>MDMとデータレイクの並行パイプライン</strong> --- Glue ETLからS3データレイク（Raw→Curated）とDynamoDB MDM（ゴールデンレコード）に並行書き込み。両者がRedshift DWHに合流し、品質担保された構造化分析を実現。</li>
+    <li style="margin-bottom:12px;"><strong>KMS一元暗号化</strong> --- 全データストア（S3, DynamoDB, Redshift, Firehose）を共通KMSキーで暗号化。Lake FormationでFine-grained ACLを実現し、セキュリティとガバナンスを統一管理。</li>
+    <li style="margin-bottom:12px;"><strong>BI + GenAI のデュアル分析</strong> --- QuickSightで定量的BIダッシュボード、Bedrock GenAI/RAGで自然言語によるインサイト提供。経営層にはBI、マーケ/営業にはAI予測という利用者特性に応じた分析チャネル。</li>
+  </ul>
+</div>
+
+<p class="updated">Generated by /company-diagram &mdash; AWS Diagram MCP Server + AWS Knowledge MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="">
+</div>
+<script>
+function openLightbox(src){var l=document.getElementById('lightbox');document.getElementById('lightbox-img').src=src;l.classList.add('active');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('active');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox();});
+</script>
+</body>
+</html>

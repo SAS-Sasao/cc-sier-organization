@@ -1,0 +1,339 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Data-Driven Decision Platform - Core Infrastructure.
+  Sources (ERP/CRM/SKILL_HUB/SharePoint/Redmine) -> Ingestion (DMS/Firehose/Glue)
+  -> Storage (S3 DataLake / DynamoDB MDM / Redshift DWH)
+  -> Analytics (QuickSight / SageMaker / Bedrock) -> Business Users.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: Deployment environment
+  ProjectName:
+    Type: String
+    Default: data-driven-platform
+    Description: Project identifier used in resource naming
+  RedshiftAdminUsername:
+    Type: String
+    Default: admin
+    Description: "Redshift admin username. TODO: change for production"
+  RedshiftAdminPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    Description: "Redshift admin password. TODO: use Secrets Manager in production"
+
+Resources:
+  # ============================================================
+  # Encryption - KMS
+  # ============================================================
+  PlatformKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub '${ProjectName} encryption key (${Environment})'
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: RootAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+
+  PlatformKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${ProjectName}-${Environment}'
+      TargetKeyId: !Ref PlatformKmsKey
+
+  # ============================================================
+  # S3 - Access Log Bucket
+  # ============================================================
+  LogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-logs-${Environment}-${AWS::AccountId}'
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: ObjectWriter
+      AccessControl: LogDeliveryWrite
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      ObjectLockEnabled: true
+
+  # ============================================================
+  # Data Lake - S3 Raw Zone
+  # ============================================================
+  RawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-raw-${Environment}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref PlatformKmsKey
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      ObjectLockEnabled: true
+      LoggingConfiguration:
+        DestinationBucketName: !Ref LogBucket
+        LogFilePrefix: raw-bucket-logs/
+      # TODO: Add ReplicationConfiguration for cross-region DR in production
+
+  # ============================================================
+  # Data Lake - S3 Curated Zone
+  # ============================================================
+  CuratedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-curated-${Environment}-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref PlatformKmsKey
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      ObjectLockEnabled: true
+      LoggingConfiguration:
+        DestinationBucketName: !Ref LogBucket
+        LogFilePrefix: curated-bucket-logs/
+      # TODO: Add ReplicationConfiguration for cross-region DR in production
+
+  # ============================================================
+  # MDM - DynamoDB Golden Record
+  # ============================================================
+  MdmTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${ProjectName}-mdm-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt PlatformKmsKey.Arn
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: entity_type
+          AttributeType: S
+        - AttributeName: entity_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: entity_type
+          KeyType: HASH
+        - AttributeName: entity_id
+          KeyType: RANGE
+
+  # ============================================================
+  # Glue Data Catalog
+  # ============================================================
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub '${ProjectName}_${Environment}'
+        Description: Data Catalog for Data-Driven Decision Platform
+
+  GlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-glue-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+        - !Ref GlueDataLakePolicy
+
+  GlueDataLakePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub '${ProjectName}-glue-datalake-${Environment}'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: [s3:GetObject, s3:PutObject, s3:ListBucket, s3:DeleteObject]
+            Resource:
+              - !GetAtt RawBucket.Arn
+              - !Sub '${RawBucket.Arn}/*'
+              - !GetAtt CuratedBucket.Arn
+              - !Sub '${CuratedBucket.Arn}/*'
+          - Effect: Allow
+            Action: [kms:Decrypt, kms:Encrypt, kms:GenerateDataKey]
+            Resource: !GetAtt PlatformKmsKey.Arn
+
+  # ============================================================
+  # Kinesis Data Firehose - Ingestion
+  # ============================================================
+  FirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-firehose-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: firehose.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref FirehoseS3Policy
+
+  FirehoseS3Policy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub '${ProjectName}-firehose-s3-${Environment}'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: [s3:PutObject, s3:GetBucketLocation, s3:ListBucket]
+            Resource:
+              - !GetAtt RawBucket.Arn
+              - !Sub '${RawBucket.Arn}/*'
+          - Effect: Allow
+            Action: [kms:Decrypt, kms:GenerateDataKey]
+            Resource: !GetAtt PlatformKmsKey.Arn
+
+  IngestionStream:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub '${ProjectName}-ingest-${Environment}'
+      DeliveryStreamType: DirectPut
+      ExtendedS3DestinationConfiguration:
+        BucketARN: !GetAtt RawBucket.Arn
+        RoleARN: !GetAtt FirehoseRole.Arn
+        Prefix: 'firehose/'
+        ErrorOutputPrefix: 'firehose-errors/'
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 5
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !GetAtt PlatformKmsKey.Arn
+
+  # ============================================================
+  # Redshift Serverless - DWH
+  # ============================================================
+  RedshiftRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-redshift-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Ref RedshiftDataPolicy
+
+  RedshiftDataPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub '${ProjectName}-redshift-data-${Environment}'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: [s3:GetObject, s3:ListBucket]
+            Resource:
+              - !GetAtt CuratedBucket.Arn
+              - !Sub '${CuratedBucket.Arn}/*'
+              - !GetAtt RawBucket.Arn
+              - !Sub '${RawBucket.Arn}/*'
+          - Effect: Allow
+            Action: [glue:GetDatabase, glue:GetTable, glue:GetTables]
+            Resource:
+              - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:catalog'
+              - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:database/${ProjectName}_${Environment}'
+              - !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:table/${ProjectName}_${Environment}/*'
+          - Effect: Allow
+            Action: kms:Decrypt
+            Resource: !GetAtt PlatformKmsKey.Arn
+
+  RedshiftNamespace:
+    Type: AWS::RedshiftServerless::Namespace
+    Properties:
+      NamespaceName: !Sub '${ProjectName}-${Environment}'
+      AdminUsername: !Ref RedshiftAdminUsername
+      AdminUserPassword: !Ref RedshiftAdminPassword
+      DbName: dataplatform
+      DefaultIamRoleArn: !GetAtt RedshiftRole.Arn
+      IamRoles:
+        - !GetAtt RedshiftRole.Arn
+
+  RedshiftWorkgroup:
+    Type: AWS::RedshiftServerless::Workgroup
+    Properties:
+      WorkgroupName: !Sub '${ProjectName}-wg-${Environment}'
+      NamespaceName: !GetAtt RedshiftNamespace.Namespace.NamespaceName
+      BaseCapacity: 32
+      PubliclyAccessible: false
+
+  # ============================================================
+  # TODO: Additional services (configure via console or separate stack)
+  # - AWS DMS: Replication instance + endpoints for ERP/CRM/SKILL_HUB
+  # - Amazon QuickSight: BI dashboards (Redshift data source)
+  # - Amazon SageMaker: ML training domain + notebook instance
+  # - Amazon Bedrock: GenAI/RAG knowledge base (S3 data source)
+  # - AWS Lake Formation: Fine-grained access control registration
+  # ============================================================
+
+Outputs:
+  RawBucketName:
+    Description: S3 Data Lake Raw Zone
+    Value: !Ref RawBucket
+  CuratedBucketName:
+    Description: S3 Data Lake Curated Zone
+    Value: !Ref CuratedBucket
+  LogBucketName:
+    Description: S3 Access Log Bucket
+    Value: !Ref LogBucket
+  MdmTableName:
+    Description: DynamoDB MDM Golden Record Table
+    Value: !Ref MdmTable
+  GlueDatabaseName:
+    Description: Glue Data Catalog Database
+    Value: !Ref GlueDatabase
+  RedshiftEndpoint:
+    Description: Redshift Serverless Endpoint
+    Value: !GetAtt RedshiftWorkgroup.Workgroup.Endpoint.Address
+  FirehoseStreamName:
+    Description: Kinesis Firehose Delivery Stream
+    Value: !Ref IngestionStream
+  KmsKeyArn:
+    Description: KMS Key ARN for platform encryption
+    Value: !GetAtt PlatformKmsKey.Arn
