@@ -1,0 +1,235 @@
+<mxGraphModel dx="1400" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1500" background="#FFFFFF">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+
+<!-- Title and Subtitle -->
+<mxCell id="title" value="BtoB 販売管理システム — C4 Model（L1 Context / L2 Container / L3 Bounded Context）" style="text;html=1;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="50" y="10" width="1000" height="35" as="geometry"/>
+</mxCell>
+<mxCell id="subtitle" value="&lt;font style=&quot;font-size:11px;color:#666666&quot;&gt;モジュラモノリス × DDD × サービスベースアーキテクチャ on AWS&lt;/font&gt;" style="text;html=1;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="50" y="40" width="1000" height="20" as="geometry"/>
+</mxCell>
+
+<!-- Legend -->
+<mxCell id="legend-title" value="&lt;b&gt;凡例&lt;/b&gt;" style="text;html=1;fontSize=10;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="10" width="40" height="20" as="geometry"/>
+</mxCell>
+<mxCell id="leg1" value="" style="rounded=1;fillColor=#08427B;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1120" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg1t" value="Person" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1142" y="34" width="55" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg2" value="" style="rounded=1;fillColor=#438DD5;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1205" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg2t" value="Container" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1227" y="34" width="55" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg3" value="" style="rounded=1;fillColor=#85BBF0;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1290" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg3t" value="BC Module" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1312" y="34" width="60" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg4" value="" style="rounded=1;fillColor=#999999;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1380" y="35" width="16" height="16" as="geometry"/>
+</mxCell>
+<mxCell id="leg4t" value="External" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1402" y="34" width="55" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg5-line" value="" style="endArrow=block;endFill=1;strokeColor=#438DD5;strokeWidth=2;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="1120" y="64" as="sourcePoint"/>
+    <mxPoint x="1160" y="64" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+<mxCell id="leg5t" value="同期" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1165" y="55" width="40" height="18" as="geometry"/>
+</mxCell>
+<mxCell id="leg6-line" value="" style="endArrow=block;endFill=1;strokeColor=#438DD5;strokeWidth=2;dashed=1;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="1230" y="64" as="sourcePoint"/>
+    <mxPoint x="1270" y="64" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+<mxCell id="leg6t" value="非同期イベント" style="text;html=1;fontSize=9;align=left;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+  <mxGeometry x="1275" y="55" width="80" height="18" as="geometry"/>
+</mxCell>
+
+<!-- L1: Actors -->
+<mxCell id="actor-sales" value="&lt;b&gt;営業担当者&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;見積・受注の作成&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="130" y="70" width="180" height="55" as="geometry"/>
+</mxCell>
+<mxCell id="actor-customer" value="&lt;b&gt;顧客企業 (BtoB)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;発注・納品確認&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="450" y="70" width="180" height="55" as="geometry"/>
+</mxCell>
+<mxCell id="actor-accountant" value="&lt;b&gt;経理担当者&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;請求・入金管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#08427B;fontColor=#FFFFFF;strokeColor=none;fontSize=12;arcSize=30;" vertex="1" parent="1">
+  <mxGeometry x="770" y="70" width="180" height="55" as="geometry"/>
+</mxCell>
+
+<!-- L1: External Systems (positioned below billing row to clear all module edges) -->
+<mxCell id="ext-accounting" value="&lt;b&gt;会計システム&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部システム]&lt;br&gt;仕訳・売掛金連携&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1310" y="720" width="200" height="65" as="geometry"/>
+</mxCell>
+<mxCell id="ext-logistics" value="&lt;b&gt;物流システム&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部システム]&lt;br&gt;配送指示・追跡&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1310" y="830" width="200" height="65" as="geometry"/>
+</mxCell>
+<mxCell id="ext-payment" value="&lt;b&gt;決済サービス&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[外部システム]&lt;br&gt;口座振替・銀行API&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#999999;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="1">
+  <mxGeometry x="1310" y="1000" width="200" height="65" as="geometry"/>
+</mxCell>
+
+<!-- System Boundary -->
+<mxCell id="sys-boundary" value="BtoB販売管理システム [Software System]" style="swimlane;startSize=30;fillColor=#EBF5FF;strokeColor=#438DD5;fontStyle=1;fontSize=12;fontColor=#438DD5;rounded=1;arcSize=6;swimlaneLine=0;container=1;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+  <mxGeometry x="50" y="155" width="1210" height="1000" as="geometry"/>
+</mxCell>
+
+<!-- L2: Presentation Layer -->
+<mxCell id="layer-ui" value="プレゼンテーション層" style="swimlane;startSize=24;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=10;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="45" width="1150" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="ui" value="&lt;b&gt;販売管理UI&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Container: React SPA]&lt;br&gt;受注ダッシュボード・在庫照会・請求管理画面&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-ui">
+  <mxGeometry x="355" y="26" width="440" height="55" as="geometry"/>
+</mxCell>
+
+<!-- L2: API Gateway Layer -->
+<mxCell id="layer-api" value="APIゲートウェイ層" style="swimlane;startSize=24;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=10;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="160" width="1150" height="85" as="geometry"/>
+</mxCell>
+<mxCell id="api-gw" value="&lt;b&gt;API Gateway&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Container: Amazon API Gateway + ALB]&lt;br&gt;認証・レート制限・ルーティング&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-api">
+  <mxGeometry x="355" y="26" width="440" height="50" as="geometry"/>
+</mxCell>
+
+<!-- L3: Modular Monolith DDD Bounded Contexts -->
+<mxCell id="layer-modules" value="モジュラモノリス [Container: Spring Boot / Kotlin on ECS Fargate] — L3 Bounded Context 展開" style="swimlane;startSize=28;fillColor=#EFF6FF;strokeColor=#85BBF0;fontStyle=1;fontSize=11;fontColor=#3B82F6;rounded=1;arcSize=8;swimlaneLine=0;container=1;strokeWidth=2;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="270" width="1150" height="450" as="geometry"/>
+</mxCell>
+
+<!-- Row 1: Core BC -->
+<mxCell id="mod-customer" value="&lt;b&gt;顧客管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[BC: Customer]&lt;br&gt;顧客マスタ・与信管理&lt;br&gt;取引条件管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-modules">
+  <mxGeometry x="20" y="40" width="340" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="mod-order" value="&lt;b&gt;受注管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[BC: Order]&lt;br&gt;見積・受注登録・承認&lt;br&gt;受注ステータス管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-modules">
+  <mxGeometry x="405" y="40" width="340" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="mod-product" value="&lt;b&gt;商品管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[BC: Product]&lt;br&gt;商品マスタ・価格管理&lt;br&gt;カテゴリ・属性管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-modules">
+  <mxGeometry x="790" y="40" width="340" height="90" as="geometry"/>
+</mxCell>
+
+<!-- Row 2: Supporting BC -->
+<mxCell id="mod-inventory" value="&lt;b&gt;在庫管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[BC: Inventory]&lt;br&gt;在庫照会・引当管理&lt;br&gt;入出庫管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-modules">
+  <mxGeometry x="20" y="170" width="340" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="mod-shipping" value="&lt;b&gt;出荷管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[BC: Shipping]&lt;br&gt;出荷指示・配送追跡&lt;br&gt;納品管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-modules">
+  <mxGeometry x="405" y="170" width="340" height="90" as="geometry"/>
+</mxCell>
+<mxCell id="mod-billing" value="&lt;b&gt;請求管理&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[BC: Billing]&lt;br&gt;請求書作成・入金管理&lt;br&gt;売掛金管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85BBF0;fontColor=#1a1a2e;strokeColor=none;fontSize=11;arcSize=20;" vertex="1" parent="layer-modules">
+  <mxGeometry x="790" y="170" width="340" height="90" as="geometry"/>
+</mxCell>
+
+<!-- Shared Kernel (auth narrowed to w=350 to clear vertical edges) -->
+<mxCell id="shared-event" value="&lt;b&gt;モジュール間イベントバス&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Shared Kernel: Amazon SQS]&lt;br&gt;ドメインイベントの非同期伝搬・CQRS対応&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;fontColor=#1e40af;strokeColor=#93C5FD;fontSize=11;arcSize=20;strokeWidth=1;dashed=1;" vertex="1" parent="layer-modules">
+  <mxGeometry x="20" y="310" width="545" height="65" as="geometry"/>
+</mxCell>
+<mxCell id="shared-auth" value="&lt;b&gt;共通基盤&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Shared Kernel: Cross-Cutting]&lt;br&gt;認証(Cognito)・認可・監査ログ&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;fontColor=#1e40af;strokeColor=#93C5FD;fontSize=11;arcSize=20;strokeWidth=1;dashed=1;" vertex="1" parent="layer-modules">
+  <mxGeometry x="585" y="310" width="350" height="65" as="geometry"/>
+</mxCell>
+
+<!-- L3 Internal edges (intra-layer: orthogonalEdgeStyle) -->
+<mxCell id="e-order-customer" value="顧客照会" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-order" target="mod-customer" parent="layer-modules">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-order-product" value="商品・価格照会" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-order" target="mod-product" parent="layer-modules">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-shipping-inventory" value="出庫連携" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-shipping" target="mod-inventory" parent="layer-modules">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-shipping-billing" value="納品完了" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;dashed=1;endArrow=block;endFill=1;" edge="1" source="mod-shipping" target="mod-billing" parent="layer-modules">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- Cross-row async (straight for cross-row) -->
+<mxCell id="e-order-shipping" value="出荷指示" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;dashed=1;endArrow=block;endFill=1;" edge="1" source="mod-order" target="mod-shipping" parent="layer-modules">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-order-inventory" value="在庫引当" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#85BBF0;strokeWidth=2;dashed=1;endArrow=block;endFill=1;" edge="1" source="mod-order" target="mod-inventory" parent="layer-modules">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- L2: Data Layer -->
+<mxCell id="layer-data" value="データストア" style="swimlane;startSize=24;fillColor=#F5F5F5;strokeColor=#CCCCCC;fontStyle=1;fontSize=10;fontColor=#666666;rounded=1;arcSize=8;swimlaneLine=0;container=1;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="745" width="1150" height="120" as="geometry"/>
+</mxCell>
+<mxCell id="db-rds" value="&lt;b&gt;Amazon RDS&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[PostgreSQL]&lt;br&gt;Schema-per-Module分離&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer-data">
+  <mxGeometry x="20" y="28" width="340" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="db-redis" value="&lt;b&gt;Amazon ElastiCache&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Redis]&lt;br&gt;セッション・在庫キャッシュ&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer-data">
+  <mxGeometry x="405" y="28" width="340" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="db-s3" value="&lt;b&gt;Amazon S3&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;[Object Storage]&lt;br&gt;帳票PDF・添付ファイル&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#438DD5;fontColor=#FFFFFF;strokeColor=none;fontSize=11;size=10;boundedLbl=1;" vertex="1" parent="layer-data">
+  <mxGeometry x="790" y="28" width="340" height="80" as="geometry"/>
+</mxCell>
+
+<!-- Notes -->
+<mxCell id="note-ddd" value="&lt;font style=&quot;font-size:10px&quot;&gt;&lt;b&gt;DDD設計方針:&lt;/b&gt;&lt;br&gt;&#8226; 各BCは独立したドメインモデルを保持&lt;br&gt;&#8226; BC間通信はドメインイベント(SQS)＋Internal API&lt;br&gt;&#8226; Schema-per-Module でDB分離（将来のMS化に対応）&lt;br&gt;&#8226; 共通基盤(Shared Kernel)は最小限に抑制&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFF3CD;strokeColor=#FFC107;fontSize=10;size=14;align=left;spacingLeft=10;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="30" y="890" width="545" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="note-aws" value="&lt;font style=&quot;font-size:10px&quot;&gt;&lt;b&gt;AWS インフラ構成:&lt;/b&gt;&lt;br&gt;&#8226; ECS Fargate (コンテナ実行)&lt;br&gt;&#8226; API Gateway + ALB (ルーティング)&lt;br&gt;&#8226; Cognito (認証) / CloudWatch + X-Ray (監視)&lt;br&gt;&#8226; SQS (非同期メッセージング)&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFF3CD;strokeColor=#FFC107;fontSize=10;size=14;align=left;spacingLeft=10;" vertex="1" parent="sys-boundary">
+  <mxGeometry x="605" y="890" width="545" height="80" as="geometry"/>
+</mxCell>
+
+<!-- Cross-layer edges (straight, no edgeStyle) -->
+
+<!-- Actors to UI -->
+<mxCell id="e-sales-ui" value="見積・受注" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-sales" target="ui" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-customer-ui" value="発注・納品確認" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-customer" target="ui" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-accountant-ui" value="請求・入金" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#08427B;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="actor-accountant" target="ui" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- UI to API GW -->
+<mxCell id="e-ui-apigw" value="HTTP/REST" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="ui" target="api-gw" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- API GW to Modules -->
+<mxCell id="e-apigw-order" value="APIルーティング" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="api-gw" target="mod-order" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-apigw-customer" value="" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=1;endArrow=block;endFill=1;dashed=1;" edge="1" source="api-gw" target="mod-customer" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-apigw-product" value="" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=1;endArrow=block;endFill=1;dashed=1;" edge="1" source="api-gw" target="mod-product" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- External system edges (straight, downward to avoid crossing modules) -->
+<mxCell id="e-billing-accounting" value="仕訳連携" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-billing" target="ext-accounting" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-shipping-logistics" value="配送指示" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-shipping" target="ext-logistics" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-billing-payment" value="決済連携" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#999999;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-billing" target="ext-payment" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+<!-- Data access edges (straight, vertical alignment) -->
+<mxCell id="e-event-rds" value="ドメインデータ" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="shared-event" target="db-rds" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-auth-redis" value="セッション" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="shared-auth" target="db-redis" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e-billing-s3" value="帳票保存" style="html=1;fontSize=9;fontColor=#666666;strokeColor=#438DD5;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="mod-billing" target="db-s3" parent="1">
+  <mxGeometry relative="1" as="geometry"/>
+</mxCell>
+
+</root>
+</mxGraphModel>
