@@ -1123,6 +1123,14 @@ if Path("docs/drawio/index.html").exists():
       <div class="org-label">ER図・フロー・シーケンス図 →</div>
     </a>'''
 
+# ナレッジポータルが存在すれば追加
+if Path("docs/handover/index.html").exists():
+    cards += '''
+    <a href="./handover/index.html" class="card" style="border:2px solid #10b981;">
+      <div class="org-name">ナレッジポータル</div>
+      <div class="org-label">全活動履歴・判断履歴・Tips →</div>
+    </a>'''
+
 html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
