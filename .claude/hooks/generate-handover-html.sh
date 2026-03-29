@@ -88,6 +88,8 @@ html = f'''<!DOCTYPE html>
 }}
 * {{ margin:0; padding:0; box-sizing:border-box; }}
 body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }}
+.back-btn {{ display:inline-block; color:var(--accent); text-decoration:none; font-size:.88rem; margin:16px 0 0 24px; }}
+.back-btn:hover {{ text-decoration:underline; }}
 .header {{ background: var(--bg2); border-bottom: 1px solid var(--border); padding: 20px 24px; }}
 .header h1 {{ font-size: 1.4rem; font-weight: 600; }}
 .header .subtitle {{ color: var(--text2); font-size: 0.85rem; margin-top: 4px; }}
@@ -157,6 +159,7 @@ tr:hover {{ background:var(--bg3); }}
 </head>
 <body>
 
+<a href="../" class="back-btn">&larr; トップに戻る</a>
 <div class="header">
   <h1>Knowledge Portal</h1>
   <div class="subtitle">{org_slug} | Generated: {now} | {total} entries</div>
