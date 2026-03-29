@@ -82,9 +82,11 @@ function absCoords(node) {
     const p = nodes.get(cur.parent);
     ax += p.x;
     ay += p.y;
-    // swimlane startSize offset
-    if (p.value && /swimlane/.test(getStyle(p))) {
-      ay += 30; // default startSize
+    // swimlane startSize offset (parse actual value from style)
+    const pStyle = getStyle(p);
+    if (p.value && /swimlane/.test(pStyle)) {
+      const ssMatch = pStyle.match(/startSize=(\d+)/);
+      ay += ssMatch ? parseInt(ssMatch[1], 10) : 30;
     }
     cur = p;
   }
@@ -177,14 +179,17 @@ for (const edge of edges) {
     }
 
     if (penetrates) {
-      const nodeVal = (nodes.get(nodeId)?.value || nodeId).replace(/&#xa;/g, " ").substring(0, 30);
-      const srcVal = (nodes.get(edge.source)?.value || edge.source).replace(/&#xa;/g, " ").substring(0, 30);
-      const tgtVal = (nodes.get(edge.target)?.value || edge.target).replace(/&#xa;/g, " ").substring(0, 30);
+      const nodeVal = (nodes.get(nodeId)?.value || nodeId).replace(/&#xa;/g, " ").replace(/<[^>]*>/g, "").substring(0, 30);
+      const srcVal = (nodes.get(edge.source)?.value || edge.source).replace(/&#xa;/g, " ").replace(/<[^>]*>/g, "").substring(0, 30);
+      const tgtVal = (nodes.get(edge.target)?.value || edge.target).replace(/&#xa;/g, " ").replace(/<[^>]*>/g, "").substring(0, 30);
       issues.push({
         edge: edge.id,
         from: srcVal,
         to: tgtVal,
         penetrates: nodeVal,
+        srcBox: srcBox,
+        tgtBox: tgtBox,
+        hitBox: box,
       });
     }
   }
@@ -197,9 +202,25 @@ if (issues.length === 0) {
 } else {
   console.log(`WARN: ${issues.length} edge penetration issue(s) detected:\n`);
   for (const issue of issues) {
+    const s = issue.srcBox, t = issue.tgtBox, h = issue.hitBox;
     console.log(`  Edge [${issue.edge}]: "${issue.from}" -> "${issue.to}"`);
-    console.log(`    penetrates node: "${issue.penetrates}"\n`);
+    console.log(`    penetrates node: "${issue.penetrates}"`);
+    console.log(`    src  abs: (${s.x}, ${s.y}) ${s.w}x${s.h}  center: (${s.x + s.w/2}, ${s.y + s.h/2})`);
+    console.log(`    tgt  abs: (${t.x}, ${t.y}) ${t.w}x${t.h}  center: (${t.x + t.w/2}, ${t.y + t.h/2})`);
+    console.log(`    hit  abs: (${h.x}, ${h.y}) ${h.w}x${h.h}  center: (${h.x + h.w/2}, ${h.y + h.h/2})`);
+    // Suggest fix direction
+    const sc = { x: s.x + s.w/2, y: s.y + s.h/2 };
+    const tc = { x: t.x + t.w/2, y: t.y + t.h/2 };
+    const hc = { x: h.x + h.w/2, y: h.y + h.h/2 };
+    if (tc.x > hc.x + h.w/2) {
+      console.log(`    fix: move target DOWN (increase y) so edge passes below hit node (bottom=${h.y + h.h})`);
+    } else if (tc.y > hc.y + h.h/2) {
+      console.log(`    fix: move target RIGHT (increase x) so edge passes right of hit node (right=${h.x + h.w})`);
+    } else {
+      console.log(`    fix: reposition nodes to increase gap between source-target path and hit node`);
+    }
+    console.log("");
   }
-  console.log("Suggestion: Increase node spacing or add explicit waypoints to avoid penetration.");
+  console.log("Note: absolute coords include swimlane startSize offsets (parsed from style).");
   process.exit(1);
 }
