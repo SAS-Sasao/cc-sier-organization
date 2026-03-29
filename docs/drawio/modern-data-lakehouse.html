@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modern Data Lakehouse on AWS (draw.io) - ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.ref-link { display:inline-block; margin-top:12px; padding:8px 16px; background:#f3e5f5; color:#6a1b9a;
+            border-radius:8px; text-decoration:none; font-size:.85rem; font-weight:600; }
+.ref-link:hover { background:#e1bee7; }
+@media (prefers-color-scheme: dark) { .ref-link { background:#4a148c; color:#ce93d8; } .ref-link:hover { background:#6a1b9a; } }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>Modern Data Lakehouse on AWS（draw.io編集版）</h1>
+<div class="meta">
+  <span class="tag tag-project">技術ドメイン収集</span>
+  <span class="tag tag-type" style="background:#ef4444;">C4モデル</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart LR
+    subgraph sources["データソース"]
+        DB["On-Prem DB"]
+        STREAM["Streaming Events"]
+        FILE["File Upload"]
+    end
+    subgraph aws["AWS Cloud"]
+        subgraph ingest["取り込み"]
+            DMS["AWS DMS CDC"]
+            KDS["Kinesis Data Streams"]
+            KDF["Kinesis Firehose"]
+            SFN["Step Functions"]
+        end
+        subgraph medallion["Medallion Architecture"]
+            S3B["S3 Bronze Raw"]
+            GLUE["Glue ETL"]
+            S3S["S3 Silver Cleaned"]
+            EMR["EMR Spark"]
+            S3G["S3 Gold Aggregated"]
+        end
+        subgraph analytics["分析"]
+            ATHENA["Amazon Athena"]
+            RS["Redshift Serverless"]
+        end
+        QS["Amazon QuickSight"]
+        subgraph governance["ガバナンス"]
+            CATALOG["Glue Data Catalog"]
+            LF["Lake Formation"]
+        end
+    end
+    DB --> DMS --> S3B
+    STREAM --> KDS --> KDF --> S3B
+    FILE --> SFN --> S3B
+    S3B --> GLUE --> S3S --> EMR --> S3G
+    S3G --> ATHENA --> QS
+    S3G --> RS --> QS
+    GLUE -.-> CATALOG
+    EMR -.-> CATALOG
+    CATALOG -.-> LF
+    LF -.-> ATHENA
+    LF -.-> RS
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./modern-data-lakehouse.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<div class="note">
+  <strong>AWS公式アイコン対応:</strong> .drawioファイルにはAWS Architecture Icons（mxgraph.aws4）を使用しています。
+  draw.ioデスクトップアプリまたはWeb版で開くとAWS公式アイコンが表示されます。
+</div>
+
+<a href="../diagrams/modern-data-lakehouse.html" class="ref-link">AWS Diagram MCP版（PNG画像+IaCコード）を見る</a>
+
+<h2>概要</h2>
+<p>
+  Medallionアーキテクチャ（Bronze/Silver/Gold）による段階的なデータ品質向上を実現する
+  モダンデータレイクハウスの参照構成図。バッチ（DMS）、ストリーミング（Kinesis）、
+  ファイルアップロード（Step Functions）の3つの取り込みパターンに対応し、
+  Glue ETL / EMR Sparkによる処理パイプラインを経て、Athena / Redshift Serverlessで分析。
+</p>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>データソース</td><td>On-Prem DB / Streaming / File</td><td>3種類の取り込みパターン</td></tr>
+    <tr><td>取り込み（Batch）</td><td>AWS DMS</td><td>CDC差分レプリケーション</td></tr>
+    <tr><td>取り込み（Realtime）</td><td>Kinesis Data Streams + Firehose</td><td>ストリーミング取得・S3配信</td></tr>
+    <tr><td>取り込み（File）</td><td>Step Functions</td><td>ファイルアップロードオーケストレーション</td></tr>
+    <tr><td>Bronze</td><td>Amazon S3</td><td>生データ保持（スキーマオンリード）</td></tr>
+    <tr><td>ETL処理</td><td>AWS Glue ETL</td><td>Bronze→Silverのクレンジング</td></tr>
+    <tr><td>Silver</td><td>Amazon S3</td><td>クレンジング・型変換・重複排除済み</td></tr>
+    <tr><td>Spark処理</td><td>Amazon EMR</td><td>Silver→Goldの集計・結合</td></tr>
+    <tr><td>Gold</td><td>Amazon S3</td><td>ビジネスロジック適用済み（分析最適化）</td></tr>
+    <tr><td>カタログ</td><td>Glue Data Catalog</td><td>スキーマ・パーティション管理</td></tr>
+    <tr><td>ガバナンス</td><td>Lake Formation</td><td>列/行レベルのアクセス制御</td></tr>
+    <tr><td>アドホック分析</td><td>Amazon Athena</td><td>サーバーレスSQLクエリ</td></tr>
+    <tr><td>DWH分析</td><td>Redshift Serverless</td><td>高性能DWHクエリ・定期レポート</td></tr>
+    <tr><td>可視化</td><td>Amazon QuickSight</td><td>BIダッシュボード</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>Medallionアーキテクチャ</strong> — Bronze→Silver→Goldの3層で品質を段階的に向上。生データの保全と分析品質を両立。</li>
+  <li><strong>GlueとEMR Sparkの使い分け</strong> — クレンジングはマネージドのGlue、複雑な集計はEMR Spark。処理特性に応じたコスト最適化。</li>
+  <li><strong>Lake Formationによるガバナンス</strong> — 列/行レベルのセキュリティポリシーを一元管理。コンプライアンス対応。</li>
+  <li><strong>Athena + Redshiftのハイブリッド分析</strong> — アドホック分析はAthena、定常的な大量クエリはRedshift Serverless。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server (AWS Architecture Icons)</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>
