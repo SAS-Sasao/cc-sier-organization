@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>データドリブン意思決定基盤 UMLコンポーネント図 - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>データドリブン意思決定基盤 UML コンポーネント図</h1>
+<div class="meta">
+  <span class="tag tag-project">データ基盤</span>
+  <span class="tag tag-type" style="background:#ef4444;">C4モデル</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+graph TD
+    subgraph SRC["データソース"]
+        ERP["ERP<br>会計・販売・在庫"]
+        CRM["CRM<br>顧客・商談管理"]
+        SKILL["SKILL_HUB<br>マスタデータ管理 WebApp<br>RDB+VectorDB 生成AI<br>SmartHR/Backlog連携"]
+        SP["SharePoint<br>ドキュメント管理"]
+        RM["Redmine<br>チケット管理"]
+    end
+    subgraph INT["データ収集・統合"]
+        ETL["ETL / データ連携基盤"]
+    end
+    subgraph STR["データ蓄積"]
+        MDM["MDM<br>マスタデータ管理"]
+        DWH["DWH<br>データウェアハウス"]
+        DL["データレイク<br>Raw/非構造化データ"]
+    end
+    subgraph ANA["分析・活用"]
+        BI["BIツール<br>ダッシュボード・レポート"]
+        AI["AI/MLエンジン<br>予測分析・NLP"]
+    end
+    subgraph USR["利用者 データドリブン意思決定"]
+        EXEC["経営者・PM・管理職<br>KPI・戦略立案"]
+        MKT["マーケティング部<br>顧客分析・施策最適化"]
+        SALES["営業部<br>リードスコアリング"]
+    end
+    ERP --> ETL
+    CRM --> ETL
+    SKILL --> ETL
+    SP --> ETL
+    RM --> ETL
+    ETL --> MDM
+    ETL --> DWH
+    ETL --> DL
+    MDM -->|マスタ| DWH
+    DL -->|ETL| DWH
+    DWH -->|構造化データ| BI
+    DWH -->|特徴量| AI
+    DL -->|非構造化データ| AI
+    BI -->|ダッシュボード| EXEC
+    BI -->|レポート| MKT
+    AI -->|顧客分析| MKT
+    AI -->|予測・スコアリング| SALES
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./data-driven-decision-arch.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  社内の複数システム（ERP、CRM、SKILL_HUB、SharePoint、Redmine）から情報を収集し、
+  ETL/データ連携基盤を経由してMDM・データレイク・DWHへ蓄積。
+  BIツールとAI/MLエンジンで分析し、経営者・PM・管理職、マーケティング部、営業部が
+  データドリブンな意思決定を行える仕組みを5層のUMLコンポーネント図として表現。
+</p>
+
+<div class="note">
+  <strong>SKILL_HUB について:</strong>
+  社内のマスタデータ管理Webアプリケーション。SmartHRと連携して社員情報を同期し、
+  Backlogと連携してプロジェクト管理情報を統合。リレーショナルDB（マスタ管理）と
+  VectorDB（生成AI用途）の2種類のデータストアを使用。
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>レイヤー</th><th>要素</th><th>種別</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="5">データソース</td><td>ERP</td><td>External System</td><td>会計・販売・在庫データの提供元</td></tr>
+    <tr><td>CRM</td><td>External System</td><td>顧客情報・商談データの提供元</td></tr>
+    <tr><td>SKILL_HUB</td><td>WebApp</td><td>マスタデータ管理（RDB+VectorDB）、SmartHR/Backlog連携</td></tr>
+    <tr><td>SharePoint</td><td>External System</td><td>ドキュメント・ナレッジの提供元</td></tr>
+    <tr><td>Redmine</td><td>External System</td><td>チケット・プロジェクト情報の提供元</td></tr>
+    <tr><td>データ収集・統合</td><td>ETL/データ連携基盤</td><td>Integration</td><td>各ソースからの抽出・変換・ロード処理</td></tr>
+    <tr><td rowspan="3">データ蓄積</td><td>MDM</td><td>Master Data Mgmt</td><td>マスタデータの品質管理・ゴールデンレコード生成</td></tr>
+    <tr><td>DWH</td><td>Data Warehouse</td><td>構造化データの集約・分析用モデル</td></tr>
+    <tr><td>データレイク</td><td>Data Lake</td><td>Raw/非構造化データの一元保管</td></tr>
+    <tr><td rowspan="2">分析・活用</td><td>BIツール</td><td>BI Platform</td><td>ダッシュボード・定型レポートの生成</td></tr>
+    <tr><td>AI/MLエンジン</td><td>AI/ML</td><td>予測分析・自然言語処理・リードスコアリング</td></tr>
+    <tr><td rowspan="3">利用者</td><td>経営者・PM・管理職</td><td>Person</td><td>KPIモニタリング・戦略立案</td></tr>
+    <tr><td>マーケティング部</td><td>Person</td><td>顧客分析・施策最適化</td></tr>
+    <tr><td>営業部</td><td>Person</td><td>リードスコアリング・売上予測</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>5層アーキテクチャ</strong> --- データソース→収集・統合→蓄積→分析→利用者の5層構成。各層の責務を明確に分離し、コンポーネント単位での入れ替え・拡張を容易にする。</li>
+  <li><strong>MDMによるマスタデータ品質担保</strong> --- 複数ソースからの重複・不整合をMDMで統合し、ゴールデンレコードをDWHへ供給。データドリブン意思決定の品質基盤となる。</li>
+  <li><strong>データレイク＋DWHのハイブリッド蓄積</strong> --- 構造化データはDWHで分析最適化、非構造化データ（ドキュメント・チケット）はデータレイクに保管しAI/MLで活用。VectorDBとの連携で生成AI対応も可能。</li>
+  <li><strong>SKILL_HUBの中核的位置づけ</strong> --- SmartHR（社員情報）とBacklog（PJ管理）を統合するWebApp。RDBでマスタ管理、VectorDBで生成AIナレッジ検索を実現する社内データハブ。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>
