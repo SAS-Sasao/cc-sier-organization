@@ -64,3 +64,14 @@ AWS実装版構成図を生成。
 | completeness | 9/10 | 全5層15サービスを網羅、IaCも生成 |
 | accuracy | 8/10 | 全統合パターンをAWS公式ドキュメントで検証済 |
 | clarity | 9/10 | 色分けEdge+凡例+データフロー+レイヤー表で明確 |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-29T21:06:12"
+```

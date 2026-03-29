@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-29T13:40:34",
-  "case_count": 41,
+  "updated_at": "2026-03-29T21:18:02",
+  "case_count": 45,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -81,6 +81,22 @@
         "層間エッジは直線",
         "層内は隣接ノード間のみorthogonal",
         "waypointではなくノード配置で貫通を回避する"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "draw.io XML設計時にswimlane startSizeの絶対座標オフセットを考慮する必須ルール",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_drawio_swimlane_offset",
+      "how_to_apply": "- 絶対Y = ノードy + Σ(親y + 親startSize) で計算\n- C4/多層図では外部システムをモジュール行より**下方**に配置（右横配置は貫通不可避）\n- Shared Kernelの幅は右列モジュールの左端より狭くし、垂直エッジの通り道を確保\n- レビュースクリプトの出力に絶対座標が表示されるので、初回の検出結果をもとに修正する",
+      "match_keywords": [
+        "drawio",
+        "swimlane座標オフセット",
+        "draw.io",
+        "XML設計時にswimlane",
+        "startSizeの絶対座標オフセットを考慮する必須ルール"
       ]
     },
     {
@@ -1192,7 +1208,7 @@
         "mode": "agent-teams",
         "artifact_count": 1
       },
-      "reward": 0.2,
+      "reward": 0.8,
       "judge": {
         "completeness": 1.8,
         "accuracy": 1.6,
@@ -1205,7 +1221,11 @@
           ".companies/domain-tech-collection/docs/daily-digest/2026-03-29.md"
         ],
         "started": "2026-03-29T08:40:57+09:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n=== [PHONE]57-daily-digest.md ===\nstatus: completed\nmode: agent-teams\nrequest: \"日次ダイジェストの巡回作業を行って\"\nsubagent: \"secretary, tech-researche"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260329-090643-admin-add-mcp-drawio",
@@ -1249,7 +1269,13 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-29T09:30:00+09:00"
-      }
+      },
+      "conversation_context": [
+        "Base directory for this skill: /home/sasao020211/cc-sier-organization/.claude/skills/company-drawio\n\n# draw.io ダイアグラム生成 Skill\n\ndraw.io MCP Server（`@dr",
+        "Base directory for this skill: /home/sasao020211/cc-sier-organization/.claude/skills/company-drawio\n\n# draw.io ダイアグラム生成 Skill\n\ndraw.io MCP Server（`@dr",
+        "Base directory for this skill: /home/sasao020211/cc-sier-organization/.claude/skills/company-drawio\n\n# draw.io ダイアグラム生成 Skill\n\ndraw.io MCP Server（`@dr"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260329-100000-drawio-cvs-daily-workflow",
@@ -1356,6 +1382,36 @@
       }
     },
     {
+      "id": "20260329-120000-drawio-data-driven-decision-arch",
+      "state": {
+        "request_keywords": [
+          "UML方式で",
+          "ERP",
+          "CRM",
+          "SKILL_HUB",
+          "SharePoint",
+          "Redmineから情報を収集し",
+          "MDM",
+          "データレイク"
+        ],
+        "request_head": "UML方式で、ERP・CRM・SKILL_HUB・SharePoint・Redmineから情報を収集し、\nMDM・データ",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/drawio/data-driven-decision-arch.md"
+        ],
+        "started": ""
+      }
+    },
+    {
       "id": "20260329-125754-drawio-proposal-automation-c4",
       "state": {
         "request_keywords": [
@@ -1386,6 +1442,37 @@
       }
     },
     {
+      "id": "20260329-130000-diagram-data-driven-decision-platform",
+      "state": {
+        "request_keywords": [
+          "さっき作ったデータドリブンのAWS構成図を作成して"
+        ],
+        "request_head": "さっき作ったデータドリブンのAWS構成図を作成して",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.8,
+        "accuracy": 1.6,
+        "clarity": 1.8,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-29T13:00:00"
+      },
+      "conversation_context": [
+        "さっき作ったデータドリブンのAWS構成図を作成して"
+      ],
+      "conversation_enriched": true
+    },
+    {
       "id": "20260329-132734-drawio-modern-data-lakehouse",
       "state": {
         "request_keywords": [
@@ -1414,41 +1501,98 @@
         ],
         "started": ""
       }
+    },
+    {
+      "id": "20260329-143000-drawio-enterprise-mdm-insights",
+      "state": {
+        "request_keywords": [
+          "既存のPython",
+          "Diagrams版",
+          "enterprise-mdm-insights",
+          "をdraw.io",
+          "XML形式",
+          "AWS公式アイコン付き",
+          "で再作成"
+        ],
+        "request_head": "既存のPython Diagrams版 enterprise-mdm-insights をdraw.io XML形式（A",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/drawio/enterprise-mdm-insights.md"
+        ],
+        "started": ""
+      }
+    },
+    {
+      "id": "20260329-drawio-btob-sales-c4",
+      "state": {
+        "request_keywords": [
+          "BtoB向け販売管理システムの概要アーキテクチャをC4モデルで作成",
+          "サービスベースアーキテクチャ",
+          "DDD",
+          "モジュラモノリス",
+          "AWS",
+          "を想定"
+        ],
+        "request_head": "BtoB向け販売管理システムの概要アーキテクチャをC4モデルで作成。\nサービスベースアーキテクチャ（DDD × モジュラ",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/drawio/btob-sales-c4.md"
+        ],
+        "started": ""
+      }
     }
   ],
   "frequent_phrases": [
     {
       "phrase": "以外のローカルブランチ削除して",
+      "count": 4
+    },
+    {
+      "phrase": "汎用ダイアグラムを生成して",
       "count": 3
     },
     {
-      "phrase": "に記載出来ていない機能について追記して",
-      "count": 2
-    },
-    {
-      "phrase": "の仕事を仮想組織として",
-      "count": 2
-    },
-    {
-      "phrase": "使うほど賢くなる継続学習機能を内蔵して",
+      "phrase": "公式アイコン使い作図して",
       "count": 2
     },
     {
       "phrase": "アーキテクチャ構成図を生成して",
       "count": 2
+    },
+    {
+      "phrase": "要約してレポートを生成",
+      "count": 2
     }
   ],
   "intent_patterns": [
     {
-      "intent": "1.私がまだ生成していない分野のダイアグラムでおすすめの領域を見繕って対応",
-      "full": "1.私がまだ生成していない分野のダイアグラムでおすすめの領域を見繕って対応してほしい。\n2.任せる！\n3.英語名で任せる！",
-      "date": "2026-03-28"
+      "intent": "提案Dをやってみたいかなぁ！出来ればポータルサイト側に見える化出来る形を構成",
+      "full": "提案Dをやってみたいかなぁ！出来ればポータルサイト側に見える化出来る形を構成したいんだけど可能かな？",
+      "date": "2026-03-29"
     },
     {
-      "intent": "ダイアグラム生成する際にテンプレシートに必ず以下を含めるように",
-      "full": "ダイアグラム生成する際にテンプレシートに必ず以下を含めるようにしてほしい。\n概要\nデータフロー\nレイヤー構成\n設計のポイント\n※その他は生成するアーキテクチャに必要な情報を含める\n※現状含まれていない",
-      "date": "2026-03-28"
+      "intent": "ごめんあと他のページと同様にトップに戻るボタンは配置",
+      "full": "ごめんあと他のページと同様にトップに戻るボタンは配置してほしい",
+      "date": "2026-03-29"
     }
   ],
-  "conversation_enriched_at": "2026-03-28T19:56:04"
+  "conversation_enriched_at": "2026-03-29T21:15:37"
 }
