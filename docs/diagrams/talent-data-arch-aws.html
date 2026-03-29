@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talent Data Integration on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-register { background:#3b82f6; color:#fff; }
+.badge-cdc { background:#22c55e; color:#fff; }
+.badge-etl { background:#8b5cf6; color:#fff; }
+.badge-analytics { background:#f97316; color:#fff; }
+.badge-app { background:#06b6d4; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Talent Data Integration on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">人材データ統合</span>
+  <span class="tag tag-area">MDM / Analytics</span>
+  <span>生成日: 2026-03-29</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./talent-data-arch-aws.png" alt="Talent Data Integration on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./talent-data-arch-aws-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> Register / Search Talent - ユーザー操作（データ登録・検索）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> CDC / Events - データ変更キャプチャ・イベント連携</div>
+    <div class="legend-item"><span class="legend-line" style="background:purple"></span> Raw / Curated - MDMからストレージへのデータ出力</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkorange"></span> Query - 分析クエリ・データ取得</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:darkorange"></span> Data API - Redshift Data APIによる直接データアクセス</div>
+    <div class="legend-item"><span class="legend-line" style="background:teal"></span> Embed - QuickSight埋め込み分析</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:gray"></span> SP Webhook - SharePoint外部連携（EventBridge経由）</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>組織内メンバーや契約パートナーの情報を管理アプリ（Aurora PostgreSQL）とSharePointで一元管理し、DMS（CDC）で変更データをキャプチャ。Step Functionsで処理を制御し、Glue ETLで名寄せ・クレンジング（MDM）を実施した上で、S3データレイク/Redshift Serverless（DWH）に蓄積します。</p>
+  <p>QuickSightで人材稼働率・スキル分布等を可視化し、Talent API（Lambda）がRedshift Data APIとQuickSight埋め込みの両方からデータを取得して、PM/リソース管理者に調達可能人材・案件マッチングを提示します。</p>
+  <p>C4モデル（人材・パートナーデータ統合アーキテクチャ）のAWSサービス実装版として設計しています。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-register">Register</span> メンバー情報の登録</h3>
+  <div class="flow">
+    <span class="flow-step">HR Manager</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway + Cognito</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (Member API)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora PostgreSQL</span>
+  </div>
+
+  <h3><span class="badge badge-cdc">CDC</span> 変更データの取り込み</h3>
+  <div class="flow">
+    <span class="flow-step">Aurora PostgreSQL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DMS (CDC)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Step Functions</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL (MDM)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">SharePoint</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EventBridge</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Step Functions</span>
+  </div>
+
+  <h3><span class="badge badge-etl">ETL</span> データ蓄積</h3>
+  <div class="flow">
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Data Lake (Raw)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lake Formation</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift Serverless (Curated)</span>
+  </div>
+
+  <h3><span class="badge badge-analytics">Analytics</span> 分析・可視化</h3>
+  <div class="flow">
+    <span class="flow-step">Redshift Serverless</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (Talent API)</span>
+  </div>
+
+  <h3><span class="badge badge-app">App</span> タレントマネジメント</h3>
+  <div class="flow">
+    <span class="flow-step">PM / Resource Mgr</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway + Cognito</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (Talent API)</span>
+    <span class="flow-arrow">&larr;</span>
+    <span class="flow-step">Redshift Data API / QuickSight Embed</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <thead>
+      <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="2">認証</td><td>Amazon Cognito</td><td>ユーザー認証・JWT発行</td></tr>
+      <tr><td>API Gateway (Cognito Authorizer)</td><td>API認証・レート制限</td></tr>
+      <tr><td rowspan="3">ソースシステム</td><td>Lambda (Member API)</td><td>メンバー/パートナー情報CRUD</td></tr>
+      <tr><td>Aurora PostgreSQL Serverless v2</td><td>メンバーDB（トランザクション）</td></tr>
+      <tr><td>EventBridge</td><td>SharePoint webhook受信</td></tr>
+      <tr><td rowspan="4">MDM・データ統合</td><td>DMS (CDC)</td><td>Aurora変更データキャプチャ</td></tr>
+      <tr><td>Step Functions</td><td>MDMパイプライン制御</td></tr>
+      <tr><td>Glue ETL</td><td>名寄せ・クレンジング・重複排除</td></tr>
+      <tr><td>Glue Data Catalog</td><td>メタデータ管理・スキーマ検出</td></tr>
+      <tr><td rowspan="3">データ蓄積</td><td>S3 (Data Lake)</td><td>生データ・履歴データ（KMS暗号化）</td></tr>
+      <tr><td>Lake Formation</td><td>データガバナンス・アクセス制御</td></tr>
+      <tr><td>Redshift Serverless</td><td>構造化DWH（クエリ最適化）</td></tr>
+      <tr><td rowspan="2">分析・アプリ</td><td>QuickSight</td><td>BIダッシュボード・埋め込み分析</td></tr>
+      <tr><td>Lambda (Talent API)</td><td>人材検索・案件マッチングAPI</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. DMSによるリアルタイムCDC</strong> &mdash; Aurora PostgreSQLの論理レプリケーションをDMSでキャプチャし、バッチETLではなくニアリアルタイムでMDM処理に連携。人材情報の変更が即座にDWHに反映される設計。</p>
+  <p><strong>2. サーバーレスファーストの選定</strong> &mdash; Aurora Serverless v2、Redshift Serverless、Lambda を中心に据え、アイドル時のコストを最小化。人材管理のような業務時間帯に偏ったワークロードに最適。</p>
+  <p><strong>3. Cognito + API Gatewayによる統一認証</strong> &mdash; HR向けMember APIとPM向けTalent APIの両方をCognito Authorizerで保護。ユーザープール1つでロールベースの権限分離が可能。</p>
+  <p><strong>4. QuickSight Embed + Redshift Data APIのデュアルアクセス</strong> &mdash; Talent APIはQuickSightの埋め込みダッシュボード（ビジュアル分析）とRedshift Data API（プログラマティッククエリ）の両方を活用し、PM向けに豊富な分析インターフェースを提供。</p>
+</div>
+
+<p class="updated">Generated by /company-diagram &mdash; AWS Diagram MCP Server + AWS Knowledge MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+<script>
+function openLightbox(s){var l=document.getElementById('lightbox');document.getElementById('lightbox-img').src=s;l.classList.add('active');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('active');}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLightbox();});
+</script>
+</body>
+</html>

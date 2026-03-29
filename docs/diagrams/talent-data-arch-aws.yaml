@@ -1,0 +1,558 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Talent Data Integration Architecture on AWS.
+  Member/Partner data flows through MDM (DMS CDC + Glue ETL) into
+  Data Lake (S3) and DWH (Redshift Serverless), analyzed via QuickSight
+  and served through Talent Management App.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+  ProjectName:
+    Type: String
+    Default: talent-data
+  VpcCidr:
+    Type: String
+    Default: '10.0.0.0/16'  # TODO: Adjust for production
+  PrivateSubnet1Cidr:
+    Type: String
+    Default: '10.0.1.0/24'
+  PrivateSubnet2Cidr:
+    Type: String
+    Default: '10.0.2.0/24'
+  AuroraMinCapacity:
+    Type: Number
+    Default: 0.5
+  AuroraMaxCapacity:
+    Type: Number
+    Default: 4
+  RedshiftBaseCapacity:
+    Type: Number
+    Default: 8
+
+Resources:
+  # ===========================================================
+  # Networking
+  # ===========================================================
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-vpc'
+
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet1Cidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-private-1'
+
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnet2Cidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-private-2'
+
+  # ===========================================================
+  # Authentication - Amazon Cognito
+  # ===========================================================
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${ProjectName}-${Environment}-users'
+      AutoVerifiedAttributes: [email]
+      MfaConfiguration: 'OFF'  # TODO: Enable MFA for production
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${ProjectName}-${Environment}-app'
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  # ===========================================================
+  # Source Systems - Aurora PostgreSQL (Member DB)
+  # ===========================================================
+  AuroraSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-aurora-creds'
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "dbadmin"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludePunctuation: true
+
+  AuroraSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Aurora PostgreSQL subnet group
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  AuroraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Aurora PostgreSQL
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref DmsSecurityGroup
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Sub '${ProjectName}-${Environment}-member-db'
+      Engine: aurora-postgresql
+      EngineVersion: '16.6'
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !Ref AuroraMinCapacity
+        MaxCapacity: !Ref AuroraMaxCapacity
+      MasterUsername: !Sub '{{resolve:secretsmanager:${AuroraSecret}:SecretString:username}}'
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${AuroraSecret}:SecretString:password}}'
+      DBSubnetGroupName: !Ref AuroraSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref AuroraSecurityGroup
+      StorageEncrypted: true
+      EnableHttpEndpoint: true
+      DeletionProtection: true
+
+  AuroraInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+
+  # ===========================================================
+  # Source Systems - EventBridge (SharePoint Integration)
+  # ===========================================================
+  SharePointEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-sharepoint'
+
+  SharePointEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName: !Ref SharePointEventBus
+      EventPattern:
+        source:
+          - sharepoint.integration
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt MdmStateMachine.Arn
+          Id: MdmOrchestration
+          RoleArn: !GetAtt EventBridgeSfRole.Arn
+
+  EventBridgeSfRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: StartStateMachine
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !GetAtt MdmStateMachine.Arn
+
+  # ===========================================================
+  # MDM - DMS (CDC from Aurora)
+  # ===========================================================
+  DmsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: DMS Replication Instance
+      VpcId: !Ref VPC
+
+  DmsReplicationSubnetGroup:
+    Type: AWS::DMS::ReplicationSubnetGroup
+    Properties:
+      ReplicationSubnetGroupDescription: DMS subnet group
+      ReplicationSubnetGroupIdentifier: !Sub '${ProjectName}-${Environment}-dms'
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+
+  DmsReplicationInstance:
+    Type: AWS::DMS::ReplicationInstance
+    Properties:
+      ReplicationInstanceIdentifier: !Sub '${ProjectName}-${Environment}-cdc'
+      ReplicationInstanceClass: dms.t3.medium  # TODO: Adjust for production
+      AllocatedStorage: 50
+      ReplicationSubnetGroupIdentifier: !Ref DmsReplicationSubnetGroup
+      VpcSecurityGroupIds:
+        - !GetAtt DmsSecurityGroup.GroupId
+      PubliclyAccessible: false
+      EngineVersion: '3.5.3'
+
+  # ===========================================================
+  # MDM - Step Functions (Orchestration)
+  # ===========================================================
+  MdmStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub '${ProjectName}-${Environment}-mdm-orchestration'
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "MDM Orchestration: Cleansing, Dedup, Load",
+          "StartAt": "RunGlueETL",
+          "States": {
+            "RunGlueETL": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "${GlueEtlJob}"
+              },
+              "End": true
+            }
+          }
+        }
+
+  StepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: GlueJobAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - glue:StartJobRun
+                  - glue:GetJobRun
+                  - glue:GetJobRuns
+                Resource: !Sub 'arn:aws:glue:${AWS::Region}:${AWS::AccountId}:job/${ProjectName}-${Environment}-mdm-etl'
+
+  # ===========================================================
+  # MDM - Glue ETL & Data Catalog
+  # ===========================================================
+  GlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub '${ProjectName}_${Environment}_catalog'
+        Description: Talent data integration catalog
+
+  GlueEtlJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-mdm-etl'
+      Role: !GetAtt GlueRole.Arn
+      GlueVersion: '4.0'
+      WorkerType: G.1X
+      NumberOfWorkers: 2  # TODO: Adjust for production
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub 's3://${DataLakeBucket}/scripts/mdm-etl.py'
+        PythonVersion: '3'
+      DefaultArguments:
+        '--TempDir': !Sub 's3://${DataLakeBucket}/temp/'
+        '--job-bookmark-option': job-bookmark-enable
+        '--enable-metrics': 'true'
+
+  GlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: DataLakeAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt DataLakeBucket.Arn
+                  - !Sub '${DataLakeBucket.Arn}/*'
+
+  # ===========================================================
+  # Data Storage - S3 Data Lake
+  # ===========================================================
+  DataLakeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${ProjectName}-${Environment}-data-lake-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveOldData
+            Status: Enabled
+            Transitions:
+              - StorageClass: STANDARD_IA
+                TransitionInDays: 90
+              - StorageClass: GLACIER
+                TransitionInDays: 365
+
+  DataLakeBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref DataLakeBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnforceSSLOnly
+            Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt DataLakeBucket.Arn
+              - !Sub '${DataLakeBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  # ===========================================================
+  # Data Storage - Redshift Serverless
+  # ===========================================================
+  RedshiftSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-redshift-creds'
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "rsadmin"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludePunctuation: true
+
+  RedshiftNamespace:
+    Type: AWS::RedshiftServerless::Namespace
+    Properties:
+      NamespaceName: !Sub '${ProjectName}-${Environment}-ns'
+      AdminUsername: rsadmin  # TODO: Change for production
+      AdminUserPassword: !Sub '{{resolve:secretsmanager:${RedshiftSecret}:SecretString:password}}'
+      DbName: talentdw
+      DefaultIamRoleArn: !GetAtt RedshiftRole.Arn
+      IamRoles:
+        - !GetAtt RedshiftRole.Arn
+
+  RedshiftSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Redshift Serverless
+      VpcId: !Ref VPC
+
+  RedshiftWorkgroup:
+    Type: AWS::RedshiftServerless::Workgroup
+    Properties:
+      WorkgroupName: !Sub '${ProjectName}-${Environment}-wg'
+      NamespaceName: !Sub '${ProjectName}-${Environment}-ns'
+      BaseCapacity: !Ref RedshiftBaseCapacity
+      PubliclyAccessible: false
+      SubnetIds:
+        - !Ref PrivateSubnet1
+        - !Ref PrivateSubnet2
+      SecurityGroupIds:
+        - !GetAtt RedshiftSecurityGroup.GroupId
+    DependsOn: RedshiftNamespace
+
+  RedshiftRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3ReadAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource:
+                  - !GetAtt DataLakeBucket.Arn
+                  - !Sub '${DataLakeBucket.Arn}/*'
+
+  # ===========================================================
+  # Application - Member API (Lambda + API Gateway)
+  # ===========================================================
+  MemberApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-member-api'
+      Runtime: python3.12
+      Handler: index.handler
+      MemorySize: 256
+      Timeout: 30
+      Role: !GetAtt MemberApiFunctionRole.Arn
+      Environment:
+        Variables:
+          DB_SECRET_ARN: !Ref AuroraSecret
+          DB_CLUSTER_ARN: !GetAtt AuroraCluster.DBClusterArn
+      Code:
+        ZipFile: |
+          # TODO: Replace with actual application code
+          def handler(event, context):
+              return {'statusCode': 200, 'body': 'Member API'}
+
+  MemberApiFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: AuroraDataApi
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rds-data:ExecuteStatement
+                  - rds-data:BatchExecuteStatement
+                Resource: !GetAtt AuroraCluster.DBClusterArn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref AuroraSecret
+
+  MemberApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-member-api'
+      Description: Member/Partner management API
+
+  # ===========================================================
+  # Application - Talent API (Lambda + API Gateway)
+  # ===========================================================
+  TalentApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-talent-api'
+      Runtime: python3.12
+      Handler: index.handler
+      MemorySize: 256
+      Timeout: 30
+      Role: !GetAtt TalentApiFunctionRole.Arn
+      Environment:
+        Variables:
+          REDSHIFT_WORKGROUP: !Sub '${ProjectName}-${Environment}-wg'
+          REDSHIFT_DATABASE: talentdw
+      Code:
+        ZipFile: |
+          # TODO: Replace with actual application code
+          def handler(event, context):
+              return {'statusCode': 200, 'body': 'Talent API'}
+
+  TalentApiFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: RedshiftDataApi
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - redshift-data:ExecuteStatement
+                  - redshift-data:GetStatementResult
+                  - redshift-data:DescribeStatement
+                Resource: '*'
+              - Effect: Allow
+                Action: redshift-serverless:GetCredentials
+                Resource: !Sub 'arn:aws:redshift-serverless:${AWS::Region}:${AWS::AccountId}:workgroup/*'
+
+  TalentApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-talent-api'
+      Description: Talent management and matching API
+
+Outputs:
+  CognitoUserPoolId:
+    Value: !Ref CognitoUserPool
+  MemberApiUrl:
+    Value: !Sub 'https://${MemberApi}.execute-api.${AWS::Region}.amazonaws.com/'
+  TalentApiUrl:
+    Value: !Sub 'https://${TalentApi}.execute-api.${AWS::Region}.amazonaws.com/'
+  DataLakeBucket:
+    Value: !Ref DataLakeBucket
+  RedshiftWorkgroup:
+    Value: !Sub '${ProjectName}-${Environment}-wg'
+  AuroraEndpoint:
+    Value: !GetAtt AuroraCluster.Endpoint.Address
