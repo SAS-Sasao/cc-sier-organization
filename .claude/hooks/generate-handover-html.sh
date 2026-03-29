@@ -104,8 +104,12 @@ select {{ padding:8px 12px; border-radius:6px; border:1px solid var(--border); b
 .tab:hover {{ color:var(--text); background:var(--bg3); }}
 .tab.active {{ color:var(--accent); border-bottom-color:var(--accent); }}
 .content {{ padding:24px; max-width:1200px; margin:0 auto; }}
-.entry {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid var(--border); transition:transform 0.1s; }}
+.entry {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:12px; border-left:4px solid var(--border); transition:transform 0.1s; cursor:pointer; }}
 .entry:hover {{ transform:translateX(4px); }}
+.entry-toggle {{ font-size:0.75rem; color:var(--text3); margin-left:8px; transition:transform 0.2s; display:inline-block; }}
+.entry.open .entry-toggle {{ transform:rotate(90deg); }}
+.entry-detail {{ display:none; margin-top:12px; padding:12px; background:var(--bg); border-radius:6px; border:1px solid var(--border); font-size:0.82rem; color:var(--text2); line-height:1.7; white-space:pre-wrap; word-break:break-word; max-height:400px; overflow-y:auto; }}
+.entry.open .entry-detail {{ display:block; }}
 .entry[data-cat="project"] {{ border-left-color:var(--project); }}
 .entry[data-cat="platform"] {{ border-left-color:var(--platform); }}
 .entry[data-cat="organization"] {{ border-left-color:var(--organization); }}
@@ -253,16 +257,20 @@ function renderEntry(e) {{
   metaBadges += '<span class="badge source">' + escHtml(sourceLabel) + '</span>';
   if (e.metadata) {{
     if (e.metadata.subagent) metaBadges += '<span class="badge">' + escHtml(e.metadata.subagent) + '</span>';
-    if (e.metadata.reward != null) metaBadges += '<span class="badge" style="background:#065f46;color:#6ee7b7">reward: ' + e.metadata.reward.toFixed(2) + '</span>';
+    if (e.metadata.reward != null) metaBadges += '<span class="badge" style="background:#d1fae5;color:#065f46">reward: ' + e.metadata.reward.toFixed(2) + '</span>';
     if (e.metadata.commit_type) metaBadges += '<span class="badge">' + escHtml(e.metadata.commit_type) + '</span>';
   }}
-  return '<div class="entry" data-cat="' + (e.category || "") + '">' +
+  const hasDetail = e.description && e.description.trim().length > 0;
+  const toggleIcon = hasDetail ? '<span class="entry-toggle">&#9654;</span>' : '';
+  const detailDiv = hasDetail ? '<div class="entry-detail">' + escHtml(e.description) + '</div>' : '';
+  return '<div class="entry" data-cat="' + (e.category || "") + '"' + (hasDetail ? ' onclick="this.classList.toggle(\'open\')"' : '') + '>' +
     '<div class="entry-header">' +
-      '<div class="entry-title">' + escHtml(e.title || "") + '</div>' +
+      '<div class="entry-title">' + toggleIcon + escHtml(e.title || "") + '</div>' +
       '<div class="entry-date">' + escHtml(e.date || "") + '</div>' +
     '</div>' +
     '<div class="entry-meta">' + metaBadges + '</div>' +
     files +
+    detailDiv +
   '</div>';
 }}
 

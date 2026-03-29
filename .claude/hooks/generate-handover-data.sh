@@ -131,12 +131,19 @@ try:
         words = re.findall(r'[a-zA-Z\-]{3,}', subject)
         tags = list(set(w.lower() for w in words[:5]))
 
+        # Build detail description for git entries
+        detail_lines = [f"Author: {author}", f"Commit: {commit_hash[:7]}"]
+        if changed_files:
+            detail_lines.append(f"Changed files ({len(changed_files)}):")
+            for cf in changed_files[:15]:
+                detail_lines.append(f"  - {cf}")
+
         entry = {
             "id": next_id(),
             "date": date,
             "category": category,
             "title": safe_json_str(subject),
-            "description": "",
+            "description": safe_json_str("\n".join(detail_lines)),
             "source": "git-log",
             "source_ref": commit_hash[:7],
             "tags": tags,
@@ -210,12 +217,50 @@ if task_log_dir.exists():
             elif "admin" in mode.lower() if mode else False:
                 category = "organization"
 
+            # Build detail from task-log content
+            detail_lines = []
+            if subagent:
+                detail_lines.append(f"Subagent: {subagent}")
+            if mode:
+                detail_lines.append(f"Mode: {mode}")
+            if reward is not None:
+                detail_lines.append(f"Reward: {reward}")
+            if judge_total is not None:
+                detail_lines.append(f"Judge Total: {judge_total}")
+            if artifacts:
+                detail_lines.append("Artifacts:")
+                for a in artifacts:
+                    detail_lines.append(f"  - {a}")
+
+            # Extract request section from task-log
+            request_lines = []
+            in_request = False
+            for line in text.splitlines():
+                if "## リクエスト" in line or "## request" in line.lower():
+                    in_request = True
+                    continue
+                elif line.startswith("## "):
+                    in_request = False
+                elif in_request and line.strip():
+                    request_lines.append(line.strip())
+            if request_lines:
+                detail_lines.append("Request:")
+                for rl in request_lines[:10]:
+                    detail_lines.append(f"  {rl}")
+
+            # Extract judge comment
+            judge_comment = ""
+            jc_match = re.search(r'\*\*comment\*\*:\s*(.+)', text)
+            if jc_match:
+                judge_comment = jc_match.group(1).strip()
+                detail_lines.append(f"Judge: {judge_comment}")
+
             entry = {
                 "id": next_id(),
                 "date": date,
                 "category": category,
                 "title": safe_json_str(title) or fname,
-                "description": "",
+                "description": safe_json_str("\n".join(detail_lines)),
                 "source": "task-log",
                 "source_ref": f.name,
                 "tags": [t for t in [subagent, mode] if t],
@@ -292,16 +337,27 @@ if conv_log_dir.exists():
                 if is_discussion:
                     category = "discussion"
 
-            summary = "; ".join(human_lines[:5]) if human_lines else fname
-            if len(summary) > 200:
-                summary = summary[:200] + "..."
+            summary = "; ".join(human_lines[:3]) if human_lines else fname
+            if len(summary) > 120:
+                summary = summary[:120] + "..."
+
+            # Build detail with all human utterances
+            detail_lines = []
+            if session_stats.get("human_count"):
+                detail_lines.append(f"Human: {session_stats['human_count']} messages")
+            if session_stats.get("tool_count"):
+                detail_lines.append(f"Tools: {session_stats['tool_count']} executions")
+            if human_lines:
+                detail_lines.append("Conversation:")
+                for hl in human_lines[:20]:
+                    detail_lines.append(f"  - {hl}")
 
             entry = {
                 "id": next_id(),
                 "date": date,
                 "category": category,
                 "title": safe_json_str(summary[:100]),
-                "description": safe_json_str(summary),
+                "description": safe_json_str("\n".join(detail_lines)),
                 "source": "conversation-log",
                 "source_ref": f.name,
                 "tags": [],
