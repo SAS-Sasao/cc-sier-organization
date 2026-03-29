@@ -1,0 +1,128 @@
+<mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="900">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="title" value="&lt;font style=&quot;font-size:16px&quot;&gt;&lt;b&gt;データドリブン意思決定基盤 &amp;mdash; UML コンポーネント図&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fillColor=none;strokeColor=none;fontSize=16;" vertex="1" parent="1">
+      <mxGeometry x="200" y="5" width="700" height="35" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="L1" value="&lt;b&gt;データソース&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#dbeafe;strokeColor=#3b82f6;fontStyle=0;fontSize=13;rounded=1;arcSize=6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="50" width="1060" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="erp" value="&lt;b&gt;ERP&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;&amp;laquo;system&amp;raquo;&lt;br/&gt;会計・販売・在庫&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563eb;fontColor=#ffffff;strokeColor=#1e40af;arcSize=15;" vertex="1" parent="L1">
+      <mxGeometry x="20" y="47" width="140" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="crm" value="&lt;b&gt;CRM&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;&amp;laquo;system&amp;raquo;&lt;br/&gt;顧客・商談管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563eb;fontColor=#ffffff;strokeColor=#1e40af;arcSize=15;" vertex="1" parent="L1">
+      <mxGeometry x="215" y="47" width="140" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="skill" value="&lt;b&gt;SKILL_HUB&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;&amp;laquo;WebApp&amp;raquo; マスタデータ管理&lt;br/&gt;RDB + VectorDB（生成AI）&lt;br/&gt;SmartHR連携 / Backlog連携&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e40af;fontColor=#ffffff;strokeColor=#1e3a5f;arcSize=10;" vertex="1" parent="L1">
+      <mxGeometry x="411" y="35" width="240" height="95" as="geometry"/>
+    </mxCell>
+    <mxCell id="sp" value="&lt;b&gt;SharePoint&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;&amp;laquo;system&amp;raquo;&lt;br/&gt;ドキュメント管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563eb;fontColor=#ffffff;strokeColor=#1e40af;arcSize=15;" vertex="1" parent="L1">
+      <mxGeometry x="705" y="47" width="140" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm" value="&lt;b&gt;Redmine&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;&amp;laquo;system&amp;raquo;&lt;br/&gt;チケット管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2563eb;fontColor=#ffffff;strokeColor=#1e40af;arcSize=15;" vertex="1" parent="L1">
+      <mxGeometry x="900" y="47" width="140" height="65" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="L2" value="&lt;b&gt;データ収集・統合&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#fef3c7;strokeColor=#f59e0b;fontStyle=0;fontSize=13;rounded=1;arcSize=6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="250" width="1060" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="etl" value="&lt;b&gt;ETL / データ連携基盤&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f59e0b;fontColor=#ffffff;strokeColor=#d97706;arcSize=30;" vertex="1" parent="L2">
+      <mxGeometry x="150" y="35" width="760" height="35" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="L3" value="&lt;b&gt;データ蓄積&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#dcfce7;strokeColor=#22c55e;fontStyle=0;fontSize=13;rounded=1;arcSize=6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="370" width="1060" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="mdm" value="&lt;b&gt;MDM&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;マスタデータ管理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;fontColor=#ffffff;strokeColor=#15803d;arcSize=15;" vertex="1" parent="L3">
+      <mxGeometry x="70" y="40" width="200" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="dwh" value="&lt;b&gt;DWH&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;データウェアハウス&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;fontColor=#ffffff;strokeColor=#15803d;arcSize=15;" vertex="1" parent="L3">
+      <mxGeometry x="380" y="40" width="200" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="dl" value="&lt;b&gt;データレイク&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Raw / 非構造化データ&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#16a34a;fontColor=#ffffff;strokeColor=#15803d;arcSize=15;" vertex="1" parent="L3">
+      <mxGeometry x="720" y="40" width="200" height="55" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="L4" value="&lt;b&gt;分析・活用&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#ede9fe;strokeColor=#8b5cf6;fontStyle=0;fontSize=13;rounded=1;arcSize=6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="520" width="1060" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="bi" value="&lt;b&gt;BIツール&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;ダッシュボード・レポート&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;fontColor=#ffffff;strokeColor=#6d28d9;arcSize=15;" vertex="1" parent="L4">
+      <mxGeometry x="140" y="40" width="250" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="aiml" value="&lt;b&gt;AI / ML エンジン&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;予測分析・自然言語処理&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7c3aed;fontColor=#ffffff;strokeColor=#6d28d9;arcSize=15;" vertex="1" parent="L4">
+      <mxGeometry x="570" y="40" width="250" height="55" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="L5" value="&lt;b&gt;利用者（データドリブン意思決定）&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#ffedd5;strokeColor=#f97316;fontStyle=0;fontSize=13;rounded=1;arcSize=6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="20" y="670" width="1060" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="exec" value="&lt;b&gt;経営者・PM・管理職&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;KPI・戦略立案&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ea580c;fontColor=#ffffff;strokeColor=#c2410c;arcSize=15;" vertex="1" parent="L5">
+      <mxGeometry x="70" y="40" width="230" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="mkt" value="&lt;b&gt;マーケティング部&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;顧客分析・施策最適化&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ea580c;fontColor=#ffffff;strokeColor=#c2410c;arcSize=15;" vertex="1" parent="L5">
+      <mxGeometry x="390" y="40" width="200" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="sales" value="&lt;b&gt;営業部&lt;/b&gt;&lt;hr size=&quot;1&quot;/&gt;&lt;font style=&quot;font-size:10px&quot;&gt;リードスコアリング・予測&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ea580c;fontColor=#ffffff;strokeColor=#c2410c;arcSize=15;" vertex="1" parent="L5">
+      <mxGeometry x="720" y="40" width="200" height="55" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e1" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="erp" target="etl" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="crm" target="etl" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="skill" target="etl" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="sp" target="etl" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="rm" target="etl" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e6" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="etl" target="mdm" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="etl" target="dwh" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="strokeColor=#64748b;endArrow=block;endFill=1;" edge="1" source="etl" target="dl" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e9" value="マスタ" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#15803d;fontColor=#15803d;fontSize=9;endArrow=block;endFill=1;" edge="1" source="mdm" target="dwh" parent="L3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="ETL" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#15803d;fontColor=#15803d;fontSize=9;endArrow=block;endFill=1;" edge="1" source="dl" target="dwh" parent="L3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e11" value="構造化データ" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="dwh" target="bi" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="特徴量" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="dwh" target="aiml" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="非構造化データ" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="dl" target="aiml" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e14" value="ダッシュボード" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="bi" target="exec" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15" value="レポート" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="bi" target="mkt" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e16" value="顧客分析" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="aiml" target="mkt" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e17" value="予測・スコアリング" style="strokeColor=#64748b;fontColor=#64748b;fontSize=9;endArrow=block;endFill=1;" edge="1" source="aiml" target="sales" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
