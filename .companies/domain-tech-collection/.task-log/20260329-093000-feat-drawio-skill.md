@@ -26,3 +26,14 @@ reward: null
 - `docs/drawio/index.html` — ギャラリーページ（検索・フィルタ・ページネーション付き）
 - `docs/index.html` — ポータルに紫枠カード追加
 - `.claude/hooks/generate-dashboard.sh` — ダッシュボード再生成時のdrawioカード維持
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-03-29T09:23:36"
+```

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>エンタープライズデータアーキテクチャ（MDM中心） - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.edit-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--red);
+            color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.edit-btn:hover { opacity:.85; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>エンタープライズデータアーキテクチャ（MDM中心）</h1>
+<div class="meta">
+  <span class="tag tag-project">汎用アーキテクチャ</span>
+  <span class="tag tag-type" style="background:#ef4444;">C4モデル</span>
+</div>
+<p class="date">作成日: 2026-03-29 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart LR
+    subgraph sources["ソースシステム層"]
+        direction TB
+        ERP["ERP 基幹業務"]
+        SALES["販売管理システム"]
+        ACCT["会計システム"]
+        HR["人事給与システム"]
+        CRM["CRM 顧客管理"]
+        SCM["SCM サプライチェーン"]
+        EC["EC / Web アプリ"]
+        LEGACY["レガシーシステム"]
+    end
+    subgraph integration["データ統合層"]
+        direction TB
+        CDC["CDC / Change Data Capture"]
+        ETL["ETL / ELT パイプライン"]
+        API["API Gateway リアルタイム連携"]
+        MQ["メッセージキュー"]
+    end
+    subgraph mdm["MDM マスタデータ管理"]
+        direction TB
+        MATCH["名寄せ・照合エンジン"]
+        GOLDEN["★ゴールデンレコード 信頼できる唯一の情報源"]
+        QUALITY["データ品質管理"]
+        GOVERN["データガバナンス ポリシー管理"]
+        CATALOG["データカタログ メタデータ管理"]
+    end
+    subgraph platform["データプラットフォーム層"]
+        direction TB
+        DWH["データウェアハウス 構造化データ"]
+        LAKE["データレイク 非構造化・半構造化"]
+        MART["データマート 部門別最適化"]
+        STREAM["ストリーム処理 リアルタイム分析"]
+    end
+    subgraph analytics["分析・可視化層"]
+        direction TB
+        BI["BIツール ダッシュボード・レポート"]
+        ADHOC["アドホック分析 セルフサービスBI"]
+        ML["ML / AI 予測分析・最適化"]
+        ALERT["アラート・通知 閾値監視"]
+    end
+    subgraph consumers["利用者"]
+        direction TB
+        EXEC["経営層 意思決定"]
+        DEPT["部門担当者 業務改善"]
+        DS["データサイエンティスト 高度分析"]
+        SYS["外部システム API連携"]
+    end
+    ERP --> CDC
+    SALES --> CDC
+    ACCT --> ETL
+    HR --> ETL
+    CRM --> API
+    SCM --> MQ
+    EC --> API
+    LEGACY --> ETL
+    CDC --> MATCH
+    ETL --> MATCH
+    API --> MATCH
+    MQ --> MATCH
+    MATCH --> GOLDEN
+    GOLDEN --> QUALITY
+    QUALITY --> GOVERN
+    GOLDEN --> CATALOG
+    GOLDEN --> DWH
+    GOLDEN --> LAKE
+    DWH --> MART
+    LAKE --> STREAM
+    DWH --> BI
+    MART --> BI
+    LAKE --> ADHOC
+    STREAM --> ALERT
+    LAKE --> ML
+    BI --> EXEC
+    BI --> DEPT
+    ADHOC --> DS
+    ML --> DS
+    ALERT --> DEPT
+    ML --> SYS
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./enterprise-data-arch.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+    <a href="https://app.diagrams.net/?grid=0&pv=0&border=10&edit=_blank#create=%7B%22type%22%3A%22xml%22%2C%22compressed%22%3Atrue%2C%22data%22%3A%227V1dk5u4Ev0t94HHpMynxSP4I5WqTG1qJ1V79%2BmWDLJNBRsvZnbG%2B%2BtXEggEEgZs8MDkzqaygLHs6XPUfbppKYq%2BOLx9ieFp%2FxT5KFT0lTJzFG1G%2FuiLOIqS0iX2wuFtgcIQHwe%2Boi8VjVzXFG3d7maV3jw7wRgdE9n7hSH%2B8%2BkTPniOXmIPkYPLOUGHMz5aRMcEBkcU42N8T6uPP8de%2BgX%2BhuELSq8pK10BmuIu6YGuuAt2xWYH8%2FIV%2FMfKDpyZsjIVV1UcIx34nFzCbODza3AI4RGfuecExslz8A95RcffzN0GYbiIwiimt%2Bo%2BRGDr0Rvj6CfiXrE8gDZb8g786z5ng6vsPB1R1fH5PoqDf4hJwuwGL7cPOw9DeDoHGfoE%2BRKZKVCcoLdaeOgl0biFib%2Bg6ICS%2BILPs1EySGeX9NTITl8DP9lng4Ls2h4Hu332SRZ7HzynF3b5yLUEw9czkFvhj%2BKTgP%2Fq9%2B%2BKZmFTv0FiEwynvVZch%2BJqU8gtxTEVZ0muAFexbQHpOHo5%2BsjPDP26DxL0fIIeefUVTzAR7%2B12q3lSvH1rY5lWW3AyPvcOjyGBxxwcnTMM0VkyP4HiaopjE%2Fs7OjlezRVnpTgqObBnZDbyALaYsx8KQHVmjgVB6HmJBECDOFXbIUg6QAHgF8RoPppZto%2FlCDnU6dED7OXwzHLxdLPoFYzZ6peeYpo%2BminmxQcBv8XvTyV4bOIbnTl1mNhPSh3mR4JHn41mdp09EZ7nxZNk9pjZXLHnbNIwvYm1ZBafVHZlXhan%2BED%2FYBBao5lhSMwRVgt6%2Bxr%2F%2FQfaiGA6mgCm87HwMfTRTLEQ7aB3kQSx1PAsfcsPXG7y%2FMpBzLAfN8Vq0vivxwTtYpgE0RGffYMXmr3fkskHx2RXRwFQ8ZYY3HUmaHCmThK8GRWhPSTuSPVNNJfha1tzHVoTS9xBmTGqLK5aUsYMr3t80S0vlvyMXuzhcUdqREuYQEIreEpeYiTCu4cncniKIw%2Bdz%2B0mcgugzymos88z0BYjxuJuMKlmCSVTApIuAckaHCOUhGLo%2FPEtj52rbz%2BqHhiHTLUqe64oIons%2BWhwquPBE54CAU%2Fn%2B1d84QtM0Cu8iGhi3VORRI7LOeEymqR6aivY6Tg6qbJht%2ByKsumj4Tui%2BXr4q1ZFqSyW6gw9VwiqrI7jsNK5Y8qVlq3YS8VesdC7oGAvSJ3114NffyD8NSrsaYnz0bvU18EXs1wy6mpNoM8KfDqFvPIoZd2g0SplimxAseTeQaNtgYfkGnwDTMOcTUujmRVVb4l00mYSOplgeHcCE28v8SjprKfPT5y1AlLvryp27lFouRGYWckqVedijg0KDVByQP2pghZMucFtZJOloxRv1njmME6jAeRdFProKEFZU2xAQMRvy%2BAxylM8lwL87NeraXt%2BJX8Xmf0cGXIXYxCXQZyFTYREdrvKamUqZRwdEqRP9QzCvqycPWM3r0jkIR9iUnrOaIZokUCEaVjvfTJ2eZcwOPoo1mv4tUnrBd82zG9soPdzR6sIv70k%2BL3M4WS0UrXe3Zc6KE3baNe5hKfDO6O%2FXmAYJLVlInn8wSxJq66A8JBo2aYnjTrlCS99pWPnGc283mV1Ly41M%2BNhDkqTPeCSeajh64O7CP%2B%2BMg91BXi%2BYshBChylGnNsCQOWZQaUS47Nz16YN9mjN7iLjv3HKjxLB6VCWZHopqTOKK0amUNTwYNYskUdC4UpFypZq86yHHxlJkl71ertLQVuHRf8yHs5UFjaBZYRs6PsKIwHSpma%2FCerD34PYbKNyOPUm3KgE357Z2KJxa08xda5vMlkLLTL4%2FTXcGYi4BsyfgBto1sTq1uDWdkDAZFi8pzIuJ9jDSzxX2UZUaP3scoPfrlyGhDuqYQki7wJuKy0QvkCFoptXfvY9xS4N3CxFZHYBL0rmMm8lSyWDS9oQ%2FgT3eBviuehBjtYy4tzTcRxaRqFsyqiiupv%2Fj%2BVuvSAvQ%2BXDjg63BK7VkJuDipcIowDlFQWzbJNcgupC9OKL0gL%2FmrWzTkJwjyOIJo9GoJgcyAo1njL5VxOseS5b0WoYDKROFWbPHd%2BXET5RArDFmEjM9i9hb8WNLih8NcLKQy1ZTY1nF52jjC8JIF366oLeAxldRgBylKYWdNqHSD0IREoD0U9iN8WTTkTEr%2FqrNK1IVG%2F0vUWD1C%2FG%2FH5sfuV%2BQ5ZeVhwECAvxeQVmDyByjsoF0JYklRpiurOUhbFatzI4W1Hlkh93sBz4H0OyTMz5P8vRh7JzH0CgUrA9S%2FsqJ%2BmsJtUCptnvQteWZPYfHDyQH8f1S7XKvIhFovyx0k5U5y1LF4IHYBuOfJw6bdrVpliF3VATOT7K7g9tQf2grzaugV38LrdQewjeiraiJyvJRTTJQuAPrYBdJpfiSzdZWi3qmwzoDfU3W6DV62oy7bpx%2FDwwhDV5R%2B8EhSKX7ncdFniadNHNPaaBINKUovZQDtOSHpq0Ltc2mjCJEU7j78N4Xk%2FhclslNHWZSpAVgPrIZeokY1YKp5fDii%2BVTZiSSVbDZhmlDZF1KDJJn2eC8y7JKFJ%2FpNhZ9GfFpKQnHPvS39GJhX1CkvG1OCL3iQLL7K2bUCdOpnSfAZQKnpiOUlKo7TqQBSeRe5Kl%2FE6K%2BIn2s33E%2BZra2ffTJpWSDKidwNTb%2BwQsYeZ7g04%2Bugk8%2B1iacgi9cO078JdUmWVT%2BRyObu8%2BJqEcIOWICgjgCQV%2FFjIqpIWr3eCVuaPrzxUqFnzxteiK01dOlt%2Bo9FYLVSbPjjUMo32PlCfL%2FLYi5EjVZh8NvMped0iqpwGpHe8ueO3exb1rhBWsihdtspKk2DYg8yuEV4rf4fwoOTFfN8UqrmqC7DaKjGkCiAh%2FBlMDUVxso9wigTDVXH1ylYm6WBkhBIU5%2FS7psOzjTqwbtshhg9bAnSrDIpRiH%2F1v8sfO6Ci0R5tNm4HjUkbTmyOG9hwxcYVvN3y9UxTsZuohQa2G9tMYtJWEzPHga2W7%2BHAmy1fbDUVs4kllKG9mycxG1vDNBWrzR8eSr0PwDVR%2BQ9sNX6TgVE7t2YNWNF8qRBM14C1F4CzPgAoFt%2FRV%2F7IFLLW0mv6EiZza47GgkijLXtR0%2FfZMqfx1G3Zi8S%2Bz5a5M526LXtR3ffZkkXzkZuy2emm%2FjXArjfGFuviarVeXG3R5n8TDIXJeST4tX9jgaLRnL1428qCqqvG463EW6%2B0Im0y5uvFwXYxX8lMZfYV67omY75efGof7CsthRqL%2Bdr60Uy0cit2WrtTtrXCYO4UvQXJf5W0WE2O%2F1RIc4eenS1JlXjGTi4K%2F4D3JhzzBSVjwbARgH4dcFsA5kMBUKzDGAsCzbOImzi3SBK9lyBQ6ai%2Favyc5WUhyLqGxmL5RsP14v67GK5gJ285vp1%2FLLbrxNosAPCd6K3Zy3peegLhJkEt5fNmYkU4oxdP3oXNxYyftN0e7j7lXoBrqJ6M6R7uQHlXWTJe0bM6GeP18jjwft4dJlcyL8WZNPTw3aytQw9ryrsPgaJ1%2FJbQs5FUJ4tey7Fg0mjJXmJPpRG7s92K3sbJ2K2X2NPFblyUKZnuPDHD9RJ5uhjuIHkkMzmr9RJyOtGtiMsTn6m9tKHcS7i873MsZqsJ1j%2BCJKR9jS1DcZLeT76MZMmRuLUk2%2FKgWPlXtym1RlcZNO7oolVfynfNLTqe872j2O67pE022%2B%2BQbq9KNy9Mm%2BHxyECv36EwQW9kheo%2BOeQ7RHHrVYBkPQsMg90RH3uIVIjwBdItG3gwdLIXDoHvU9LJWnIz0%2Fa%2BZMWobO3ziXUicO21pmxdUw%2BLm2uotw6jVzJwHNP%2Fh3CDulTTtvjtqpyJ1zffYItRHW79Mv6IlUYYZItx%2FjoF1AoFNBkF%2BEbrY3QUPU52sbL2yaY%2FA7LCqrDCarsLrn4%2FK7jr3D%2BSmd1X%2Bvc0%2FwU%3D%22%7D" class="edit-btn" target="_blank">draw.io で編集</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  ERP・販売管理・会計・人事・CRM等の社内アプリケーションからMDM（マスタデータ管理）を通じて
+  ゴールデンレコード（信頼できる唯一の情報源）を抽出し、データウェアハウス・データレイクを経由して
+  BIツールでインサイトを得る、エンタープライズデータアーキテクチャの全体像。
+  特定のクラウドサービスに依存しない抽象的な構成図として設計している。
+</p>
+
+<div class="note">
+  <strong>MDMの役割:</strong> 複数のソースシステムに散在するマスタデータ（顧客、商品、仕入先等）を
+  名寄せ・照合エンジンで統合し、ゴールデンレコードとして一元管理する。これによりデータの重複・矛盾を排除し、
+  下流のDWH・BIで正確な分析が可能になる。
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>層</th><th>コンポーネント</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="8">ソースシステム</td><td>ERP</td><td>基幹業務（受発注・在庫・生産管理）</td></tr>
+    <tr><td>販売管理</td><td>売上・請求・入金管理</td></tr>
+    <tr><td>会計システム</td><td>財務会計・管理会計</td></tr>
+    <tr><td>人事給与</td><td>従業員マスタ・勤怠・給与</td></tr>
+    <tr><td>CRM</td><td>顧客情報・営業活動・問合せ管理</td></tr>
+    <tr><td>SCM</td><td>サプライチェーン・調達・物流</td></tr>
+    <tr><td>EC / Web</td><td>ECサイト・Webアプリケーション</td></tr>
+    <tr><td>レガシー</td><td>既存の基幹系・オフコン等</td></tr>
+    <tr><td rowspan="4">データ統合</td><td>CDC</td><td>変更データキャプチャ（リアルタイム差分抽出）</td></tr>
+    <tr><td>ETL / ELT</td><td>バッチ型データ変換・転送パイプライン</td></tr>
+    <tr><td>API Gateway</td><td>リアルタイムAPI連携基盤</td></tr>
+    <tr><td>メッセージキュー</td><td>非同期イベント駆動型データ連携</td></tr>
+    <tr><td rowspan="5">MDM</td><td>名寄せ・照合</td><td>複数ソースのレコードを照合・統合するエンジン</td></tr>
+    <tr><td>ゴールデンレコード</td><td>信頼できる唯一の情報源（Single Source of Truth）</td></tr>
+    <tr><td>データ品質管理</td><td>整合性チェック・欠損値補完・バリデーション</td></tr>
+    <tr><td>データガバナンス</td><td>ポリシー管理・アクセス制御・監査ログ</td></tr>
+    <tr><td>データカタログ</td><td>メタデータ管理・データリネージ・検索</td></tr>
+    <tr><td rowspan="4">データプラットフォーム</td><td>DWH</td><td>構造化データの集約・スタースキーマ等</td></tr>
+    <tr><td>データレイク</td><td>非構造化・半構造化データの蓄積</td></tr>
+    <tr><td>データマート</td><td>部門別に最適化されたサブセット</td></tr>
+    <tr><td>ストリーム処理</td><td>リアルタイムイベント分析</td></tr>
+    <tr><td rowspan="4">分析・可視化</td><td>BIツール</td><td>ダッシュボード・定型レポート</td></tr>
+    <tr><td>アドホック分析</td><td>セルフサービスBI・探索的分析</td></tr>
+    <tr><td>ML / AI</td><td>予測分析・最適化・異常検知</td></tr>
+    <tr><td>アラート</td><td>閾値監視・自動通知</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>MDMを中核に据えた設計</strong> — 全てのソースシステムのデータがMDM層を経由することで、ゴールデンレコードの品質が下流の分析精度を左右する構造を明示。</li>
+  <li><strong>データ統合パターンの多様性</strong> — CDC（リアルタイム差分）、ETL（バッチ）、API（同期）、メッセージキュー（非同期）の4パターンを配置し、ソースシステムの特性に応じた統合方式を選択可能にしている。</li>
+  <li><strong>データプラットフォームの二層構造</strong> — DWH（構造化・高速クエリ）とデータレイク（非構造化・大容量）を並列配置し、データマート・ストリーム処理で用途別に最適化する設計。</li>
+  <li><strong>利用者ペルソナの明示</strong> — 経営層（意思決定）、部門担当者（業務改善）、データサイエンティスト（高度分析）、外部システム（API連携）の4種のペルソナを配置し、各分析ツールとの対応関係を可視化。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>

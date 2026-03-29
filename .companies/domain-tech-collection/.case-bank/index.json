@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-28T23:23:11",
-  "case_count": 32,
+  "updated_at": "2026-03-29T10:06:22",
+  "case_count": 36,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -35,6 +35,22 @@
         "wf",
         "daily",
         "digest実行時にSubagentのツール制約とソースリンク欠落で2回手戻りが発生した教訓"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "日次ダイジェストはテーブル形式・テーマ別分類で統一。ソース別・リスト形式は不可。",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_digest_format",
+      "how_to_apply": "日次ダイジェスト生成時は必ず品質ゲート `masters/quality-gates/by-type/daily-digest.md` の「フォーマットテンプレート」セクションを参照してからダイジェストを生成すること。",
+      "match_keywords": [
+        "日次ダイジェストのフォーマット統一",
+        "日次ダイジェストはテーブル形式",
+        "テーマ別分類で統一",
+        "ソース別",
+        "リスト形式は不可"
       ]
     },
     {
@@ -82,6 +98,23 @@
         "カスタムプロンプトにLLM",
         "as",
         "Judge評価ステップを明示的に含めること"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "HTML内の<pre class=\"mermaid\">に絵文字や\\nを書くと文字化けする。ASCII文字・スペース区切りに統一すること。",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_mermaid_html_encoding",
+      "how_to_apply": "- `<pre class=\"mermaid\">` 内では絵文字を使わず `★` 等のASCII文字で代替\n- `\\n` を使わずノードテキストの区切りは半角スペースにする\n- draw.io MCP用 .md ファイルでは絵文字・`\\n` は自由に使ってよい（制約はHTML埋め込み時のみ）\n- SKILL.md のセクション 5.3 にも同じルールを明記済み",
+      "match_keywords": [
+        "Mermaid",
+        "HTML埋め込み時の文字化け防止",
+        "HTML内の<pre",
+        "class=\"mermaid\">に絵文字や\\nを書くと文字化けする",
+        "ASCII文字",
+        "スペース区切りに統一すること"
       ]
     },
     {
@@ -1127,6 +1160,108 @@
           ".companies/domain-tech-collection/docs/diagrams/ai-dev-knowledge-platform.md"
         ],
         "started": "2026-03-28T23:16:20+09:00"
+      }
+    },
+    {
+      "id": "20260329-084057-daily-digest",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェストの巡回作業を行って"
+        ],
+        "request_head": "日次ダイジェストの巡回作業を行って",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 0.2,
+      "judge": {
+        "completeness": 1.8,
+        "accuracy": 1.6,
+        "clarity": 1.8,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-03-29.md"
+        ],
+        "started": "2026-03-29T08:40:57+09:00"
+      }
+    },
+    {
+      "id": "20260329-090643-admin-add-mcp-drawio",
+      "state": {
+        "request_keywords": [
+          "drawio-mcp",
+          "MCPサーバーを追加してほしい"
+        ],
+        "request_head": "drawio-mcp MCPサーバーを追加してほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-29T09:06:43+09:00"
+      }
+    },
+    {
+      "id": "20260329-093000-feat-drawio-skill",
+      "state": {
+        "request_keywords": [
+          "draw.io",
+          "MCPを使用してダイアグラムを作成しポータルにアップする仕組みをSKILL化"
+        ],
+        "request_head": "draw.io MCPを使用してダイアグラムを作成しポータルにアップする仕組みをSKILL化",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-29T09:30:00+09:00"
+      }
+    },
+    {
+      "id": "20260329-100000-drawio-cvs-daily-workflow",
+      "state": {
+        "request_keywords": [
+          "コンビニの店舗で働く人の一日の作業フローをdraw.ioで作成",
+          "過去に調査したドメイン知識の資料",
+          "convenience-business-processes.md",
+          "convenience-indu"
+        ],
+        "request_head": "コンビニの店舗で働く人の一日の作業フローをdraw.ioで作成。過去に調査したドメイン知識の資料（convenience",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 4
+      },
+      "reward": 0.85,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/convenience-business-processes.md",
+          ".companies/domain-tech-collection/docs/retail-domain/convenience-industry-structure.md",
+          ".companies/domain-tech-collection/docs/retail-domain/store-computer-domain-knowledge.md",
+          ".companies/domain-tech-collection/docs/drawio/cvs-daily-workflow.md"
+        ],
+        "started": ""
       }
     }
   ],
