@@ -201,6 +201,29 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>API Gateway</td><td>Command / Query API</td><td>$3-10 (450-1,500円)</td><td>$10-50 (1,500-7,500円)</td></tr>
+    <tr><td>Lambda</td><td>Command / Query ハンドラ</td><td>$0-5 (0-750円)</td><td>$5-50 (750-7,500円)</td></tr>
+    <tr><td>DynamoDB</td><td>Command Store (On-Demand)</td><td>$5-20 (750-3,000円)</td><td>$20-100 (3,000-15,000円)</td></tr>
+    <tr><td>DAX</td><td>DynamoDBキャッシュ</td><td>$30-40 (4,500-6,000円)</td><td>$60-120 (9,000-18,000円)</td></tr>
+    <tr><td>ElastiCache (Redis)</td><td>Query Side キャッシュ</td><td>$25-50 (3,750-7,500円)</td><td>$90-180 (13,500-27,000円)</td></tr>
+    <tr><td>DynamoDB Streams</td><td>イベントソース</td><td>$0-5 (0-750円)</td><td>$5-20 (750-3,000円)</td></tr>
+    <tr><td>Kinesis Data Streams</td><td>イベントパイプライン (1-2 shard)</td><td>$15-30 (2,250-4,500円)</td><td>$30-60 (4,500-9,000円)</td></tr>
+    <tr><td>Amazon Keyspaces</td><td>Read Model Store</td><td>$10-30 (1,500-4,500円)</td><td>$30-100 (4,500-15,000円)</td></tr>
+    <tr><td>Redshift</td><td>分析用 (Serverless)</td><td>$50-150 (7,500-22,500円)</td><td>$200-500 (30,000-75,000円)</td></tr>
+    <tr><td>CloudFront</td><td>エッジキャッシュ</td><td>$1-5 (150-750円)</td><td>$20-50 (3,000-7,500円)</td></tr>
+    <tr><td>Route 53</td><td>DNS + ヘルスチェック</td><td>$1-2 (150-300円)</td><td>$2-5 (300-750円)</td></tr>
+    <tr><td>CloudWatch + X-Ray</td><td>監視 + トレーシング</td><td>$10-20 (1,500-3,000円)</td><td>$20-40 (3,000-6,000円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$150-367 (約22,500-55,050円)</td><td>$492-1,275 (約73,800-191,250円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev=100万リクエスト/月、Prod=1,000万リクエスト/月。CQRS Read/Write比率は8:2想定。DynamoDB Global Tables使用時はリージョンあたり追加。</p>
+  <p><strong>コスト最適化</strong>: DAXキャッシュヒット率を80%以上に維持しDynamoDB読取コスト削減。Redshiftは業務時間帯のみ利用。DynamoDB Reserved Capacityで最大75%削減。</p>
+</div>
+
+<div class="section">
   <h2>設計のポイント</h2>
   <p><strong>CQRSによる書き込み/読み込みの分離</strong>: コマンド（書き込み）とクエリ（読み込み）を別々のデータストアで最適化。書き込みはDynamoDBで一貫性を保証し、読み込みはDAX/Keyspaces/Redshiftで用途に応じた最適なレイテンシーを提供します。</p>
   <p><strong>列指向DBの使い分け</strong>: Amazon Keyspaces（Cassandra互換）はワイドカラム型で、パーティションキーによる高速な範囲クエリに適します。Redshiftはカラムナストレージで大量データの集計・分析に最適。用途に応じて2つの列指向DBを使い分けることで、OLTPとOLAPの両方をカバーします。</p>

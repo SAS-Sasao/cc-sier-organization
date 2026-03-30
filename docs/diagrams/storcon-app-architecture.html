@@ -182,6 +182,28 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>ECS Fargate</td><td>4マイクロサービス (各0.5vCPU, 1GB)</td><td>$40 (6,000円)</td><td>$80-160 (12,000-24,000円)</td></tr>
+    <tr><td>ALB</td><td>アプリケーションLB</td><td>$20 (3,000円)</td><td>$25-50 (3,750-7,500円)</td></tr>
+    <tr><td>API Gateway</td><td>外部API</td><td>$3-10 (450-1,500円)</td><td>$10-50 (1,500-7,500円)</td></tr>
+    <tr><td>Aurora</td><td>PostgreSQL (0.5-4 ACU)</td><td>$50-100 (7,500-15,000円)</td><td>$200-400 (30,000-60,000円)</td></tr>
+    <tr><td>DynamoDB</td><td>On-Demand (セッション等)</td><td>$5-10 (750-1,500円)</td><td>$10-50 (1,500-7,500円)</td></tr>
+    <tr><td>ElastiCache (Redis)</td><td>キャッシュ</td><td>$25-50 (3,750-7,500円)</td><td>$90-180 (13,500-27,000円)</td></tr>
+    <tr><td>SQS</td><td>非同期メッセージング</td><td>$0-2 (0-300円)</td><td>$2-10 (300-1,500円)</td></tr>
+    <tr><td>CloudFront + WAF</td><td>CDN + セキュリティ</td><td>$11-20 (1,650-3,000円)</td><td>$25-65 (3,750-9,750円)</td></tr>
+    <tr><td>Cognito</td><td>認証</td><td>$0 (無料枠内)</td><td>$0-25 (0-3,750円)</td></tr>
+    <tr><td>S3</td><td>静的アセット</td><td>$2-3 (300-450円)</td><td>$3-5 (450-750円)</td></tr>
+    <tr><td>CloudWatch + X-Ray</td><td>監視 + トレーシング</td><td>$10-20 (1,500-3,000円)</td><td>$20-40 (3,000-6,000円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$166-275 (約24,900-41,250円)</td><td>$465-1,035 (約69,750-155,250円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev=各サービス1タスク、Prod=各サービス2タスク（冗長化）。コンビニ50店舗規模想定。</p>
+  <p><strong>コスト最適化</strong>: Fargate Savings Plansで最大50%削減。ElastiCacheはReserved Nodesで最大55%削減。Dev環境は夜間スケジュール停止で40%削減可。</p>
+</div>
+
+<div class="section">
   <h2>設計のポイント</h2>
   <p><strong>1. 業務ドメイン単位のマイクロサービス分割</strong><br>
   発注・在庫・売上・人員の4ドメインで独立したサービスに分割。各サービスのスケーリング・デプロイ・障害影響範囲を独立させ、数万店舗の運用を安定化。</p>

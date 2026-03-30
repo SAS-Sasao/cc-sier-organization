@@ -173,6 +173,28 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>API Gateway</td><td>REST API</td><td>$3-10 (450-1,500円)</td><td>$10-50 (1,500-7,500円)</td></tr>
+    <tr><td>Lambda</td><td>複数関数</td><td>$0-5 (0-750円)</td><td>$5-50 (750-7,500円)</td></tr>
+    <tr><td>DynamoDB</td><td>On-Demand</td><td>$5-20 (750-3,000円)</td><td>$20-100 (3,000-15,000円)</td></tr>
+    <tr><td>CloudFront</td><td>CDN配信</td><td>$1-5 (150-750円)</td><td>$20-50 (3,000-7,500円)</td></tr>
+    <tr><td>S3</td><td>SPA + ストレージ</td><td>$2-3 (300-450円)</td><td>$3-5 (450-750円)</td></tr>
+    <tr><td>Cognito</td><td>ユーザー認証</td><td>$0 (無料枠内)</td><td>$0-25 (0-3,750円)</td></tr>
+    <tr><td>WAF</td><td>基本ルール</td><td>$10-15 (1,500-2,250円)</td><td>$10-15 (1,500-2,250円)</td></tr>
+    <tr><td>SQS / SNS</td><td>メッセージング</td><td>$0-2 (0-300円)</td><td>$2-10 (300-1,500円)</td></tr>
+    <tr><td>Step Functions</td><td>ワークフロー</td><td>$1-5 (150-750円)</td><td>$5-25 (750-3,750円)</td></tr>
+    <tr><td>CloudWatch</td><td>ログ + メトリクス</td><td>$5-10 (750-1,500円)</td><td>$10-20 (1,500-3,000円)</td></tr>
+    <tr><td>Route 53</td><td>DNS</td><td>$1 (150円)</td><td>$1 (150円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$28-80 (約4,200-12,000円)</td><td>$86-351 (約12,900-52,650円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev=100万リクエスト/月、Prod=1,000万リクエスト/月。Lambda 128MB-512MB。DynamoDB On-Demand。</p>
+  <p><strong>コスト最適化</strong>: サーバーレス構成のため従量課金が基本。DynamoDBのReserved Capacityで最大75%削減可。CloudFrontキャッシュヒット率向上でオリジン呼び出しを削減。</p>
+</div>
+
+<div class="section">
   <h2>設計のポイント</h2>
   <p><strong>1. フルサーバーレスによる運用負荷ゼロ</strong><br>
   Lambda・DynamoDB・API Gateway・S3はすべてマネージドサービス。パッチ適用・スケーリング・可用性管理をAWSに委任し、開発チームはビジネスロジックに集中できる。</p>

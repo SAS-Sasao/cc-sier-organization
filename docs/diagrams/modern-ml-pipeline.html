@@ -187,6 +187,29 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>SageMaker Studio</td><td>開発環境 (ml.t3.medium)</td><td>$30-60 (4,500-9,000円)</td><td>$30-60 (4,500-9,000円)</td></tr>
+    <tr><td>SageMaker Training</td><td>学習ジョブ (ml.m5.xlarge)</td><td>$20-80 (3,000-12,000円)</td><td>$80-400 (12,000-60,000円)</td></tr>
+    <tr><td>SageMaker Endpoint</td><td>推論エンドポイント (ml.m5.large)</td><td>$50-100 (7,500-15,000円)</td><td>$100-300 (15,000-45,000円)</td></tr>
+    <tr><td>SageMaker Model Registry</td><td>モデル管理</td><td>$0-1 (0-150円)</td><td>$1-3 (150-450円)</td></tr>
+    <tr><td>S3</td><td>学習データ + モデル成果物</td><td>$5-20 (750-3,000円)</td><td>$20-80 (3,000-12,000円)</td></tr>
+    <tr><td>Glue ETL</td><td>特徴量エンジニアリング</td><td>$10-50 (1,500-7,500円)</td><td>$50-200 (7,500-30,000円)</td></tr>
+    <tr><td>EMR</td><td>大規模データ前処理</td><td>$30-80 (4,500-12,000円)</td><td>$80-300 (12,000-45,000円)</td></tr>
+    <tr><td>Step Functions</td><td>MLパイプライン</td><td>$1-5 (150-750円)</td><td>$5-20 (750-3,000円)</td></tr>
+    <tr><td>AWS Batch</td><td>バッチ推論</td><td>$10-30 (1,500-4,500円)</td><td>$30-100 (4,500-15,000円)</td></tr>
+    <tr><td>Bedrock</td><td>生成AI活用</td><td>$10-50 (1,500-7,500円)</td><td>$50-200 (7,500-30,000円)</td></tr>
+    <tr><td>EventBridge + SNS</td><td>モデルイベント・通知</td><td>$0-2 (0-300円)</td><td>$2-5 (300-750円)</td></tr>
+    <tr><td>CloudWatch</td><td>モデル監視 + メトリクス</td><td>$10-20 (1,500-3,000円)</td><td>$20-40 (3,000-6,000円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$176-498 (約26,400-74,700円)</td><td>$468-1,708 (約70,200-256,200円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev=週次学習・テストデータ50GB、Prod=日次学習・データ500GB。SageMaker Endpointは24/7稼働。GPU利用時は別途費用。</p>
+  <p><strong>コスト最適化</strong>: SageMaker Spot Trainingで学習コスト最大90%削減。推論エンドポイントのAuto Scalingでアイドル時のコスト削減。EMR SpotインスタンスでETLバッチ処理のコスト最適化。Bedrock Batch APIでバッチ推論50%削減。</p>
+</div>
+
+<div class="section">
   <h2>MLOps のポイント</h2>
   <p><strong>Step Functions によるパイプライン自動化</strong>: 特徴量生成 → モデル学習 → 評価 → Model Registry 登録 → エンドポイントデプロイの一連のフローを自動化。手動介入なしで継続的な再学習が可能です。</p>
   <p><strong>Model Registry による承認ワークフロー</strong>: 学習済みモデルを Model Registry に登録し、「Approved」ステータスのモデルのみを本番デプロイ。データサイエンティストとMLエンジニアの責務を分離できます。</p>

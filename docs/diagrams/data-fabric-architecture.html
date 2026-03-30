@@ -173,6 +173,33 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>AWS DMS</td><td>DB連携</td><td>$20-40 (3,000-6,000円)</td><td>$40-80 (6,000-12,000円)</td></tr>
+    <tr><td>Kinesis Data Streams</td><td>ストリーミング (2-4 shard)</td><td>$30-60 (4,500-9,000円)</td><td>$60-150 (9,000-22,500円)</td></tr>
+    <tr><td>Kinesis Data Firehose</td><td>S3配信</td><td>$5-15 (750-2,250円)</td><td>$15-60 (2,250-9,000円)</td></tr>
+    <tr><td>AppFlow</td><td>SaaS連携</td><td>$1-5 (150-750円)</td><td>$5-20 (750-3,000円)</td></tr>
+    <tr><td>EventBridge</td><td>イベント統合</td><td>$0-2 (0-300円)</td><td>$2-10 (300-1,500円)</td></tr>
+    <tr><td>S3</td><td>データレイク (500GB-2TB)</td><td>$12-50 (1,800-7,500円)</td><td>$50-200 (7,500-30,000円)</td></tr>
+    <tr><td>Glue ETL + Crawlers</td><td>データ変換・カタログ化</td><td>$15-60 (2,250-9,000円)</td><td>$60-300 (9,000-45,000円)</td></tr>
+    <tr><td>Lake Formation</td><td>ガバナンス</td><td>$0 (無料)</td><td>$0 (無料)</td></tr>
+    <tr><td>Athena</td><td>データ仮想化クエリ</td><td>$5-30 (750-4,500円)</td><td>$30-100 (4,500-15,000円)</td></tr>
+    <tr><td>Redshift Serverless</td><td>DWH</td><td>$50-150 (7,500-22,500円)</td><td>$200-600 (30,000-90,000円)</td></tr>
+    <tr><td>EMR</td><td>大規模バッチ</td><td>$30-80 (4,500-12,000円)</td><td>$80-300 (12,000-45,000円)</td></tr>
+    <tr><td>Neptune</td><td>ナレッジグラフ</td><td>$50-100 (7,500-15,000円)</td><td>$100-300 (15,000-45,000円)</td></tr>
+    <tr><td>Comprehend</td><td>NLP処理</td><td>$10-30 (1,500-4,500円)</td><td>$30-100 (4,500-15,000円)</td></tr>
+    <tr><td>SageMaker</td><td>ML推論</td><td>$50-100 (7,500-15,000円)</td><td>$100-300 (15,000-45,000円)</td></tr>
+    <tr><td>API Gateway</td><td>データサービスAPI</td><td>$3-10 (450-1,500円)</td><td>$10-30 (1,500-4,500円)</td></tr>
+    <tr><td>CloudWatch</td><td>監視</td><td>$10-20 (1,500-3,000円)</td><td>$20-40 (3,000-6,000円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$291-752 (約43,650-112,800円)</td><td>$802-2,590 (約120,300-388,500円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev=500GBテストデータ、Prod=2TB。複数データソース（RDB/NoSQL/SaaS/ストリーム）の統合。Neptuneはdb.r5.large想定。</p>
+  <p><strong>コスト最適化</strong>: EMR SpotインスタンスでETLバッチコスト90%削減。S3 Lifecycle PolicyでCold→Glacier移行。Athena Federated Queryで不要なデータコピーを削減。Neptune最小インスタンスで開始し需要に応じてスケール。</p>
+</div>
+
+<div class="section">
   <h2>設計のポイント</h2>
   <p><strong>1. Active Metadata Layer がファブリックの核心</strong><br>
   Glue Crawlers が S3 全ゾーンを自動スキャンしてスキーマを検出、Glue Data Catalog に統合メタデータとして登録。Lake Formation がカタログ全体のアクセス制御を一元管理する。この3層がデータファブリックの「織物（fabric）」の役割を果たし、分散データを論理的に統合する。</p>
