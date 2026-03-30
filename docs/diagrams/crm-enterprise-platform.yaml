@@ -1,0 +1,1505 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CRM基幹システム on AWS - エンタープライズCRMプラットフォーム
+  VPC/VPN/ALB/WAF/ECS Fargate/Aurora PostgreSQL Serverless v2/
+  FSx for Windows/AWS Batch/Lambda/SES/S3/SecretsManager/KMS/CloudWatch
+
+# ==============================================================================
+# Parameters
+# ==============================================================================
+Parameters:
+
+  Environment:
+    Type: String
+    Default: dev  # TODO: 実運用時に変更してください
+    AllowedValues:
+      - dev
+      - prod
+    Description: デプロイ環境（dev / prod）
+
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16  # TODO: 実運用時に変更してください
+    Description: VPC CIDR ブロック
+    AllowedPattern: "^(\\d{1,3}\\.){3}\\d{1,3}/\\d{1,2}$"
+
+  PublicSubnetACidr:
+    Type: String
+    Default: 10.0.0.0/24  # TODO: 実運用時に変更してください
+    Description: パブリックサブネット AZ-a CIDR
+
+  PublicSubnetCCidr:
+    Type: String
+    Default: 10.0.1.0/24  # TODO: 実運用時に変更してください
+    Description: パブリックサブネット AZ-c CIDR
+
+  PrivateAppSubnetACidr:
+    Type: String
+    Default: 10.0.10.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートアプリサブネット AZ-a CIDR
+
+  PrivateAppSubnetCCidr:
+    Type: String
+    Default: 10.0.11.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートアプリサブネット AZ-c CIDR
+
+  PrivateDataSubnetACidr:
+    Type: String
+    Default: 10.0.20.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートデータサブネット AZ-a CIDR
+
+  PrivateDataSubnetCCidr:
+    Type: String
+    Default: 10.0.21.0/24  # TODO: 実運用時に変更してください
+    Description: プライベートデータサブネット AZ-c CIDR
+
+  CustomerGatewayIp:
+    Type: String
+    Default: 203.0.113.10  # TODO: 実運用時にオンプレミス側のグローバルIPに変更してください
+    Description: Customer Gateway のパブリック IP アドレス
+    AllowedPattern: "^(\\d{1,3}\\.){3}\\d{1,3}$"
+
+  VpnBgpAsn:
+    Type: Number
+    Default: 65000  # TODO: 実運用時に変更してください
+    Description: Customer Gateway の BGP ASN
+
+  ContainerImage:
+    Type: String
+    Default: 123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/crm-app:latest  # TODO: 実運用時に変更してください
+    Description: ECS タスクで使用するコンテナイメージ URI
+
+  SesEmailIdentity:
+    Type: String
+    Default: no-reply@example.com  # TODO: 実運用時に変更してください
+    Description: SES で使用する送信元メールアドレス
+
+  BatchJobImage:
+    Type: String
+    Default: 123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/crm-batch:latest  # TODO: 実運用時に変更してください
+    Description: AWS Batch ジョブで使用するコンテナイメージ URI
+
+  AuroraMinCapacity:
+    Type: Number
+    Default: 0.5
+    Description: Aurora Serverless v2 最小 ACU（0.5 単位）
+
+  AuroraMaxCapacity:
+    Type: Number
+    Default: 8  # TODO: 実運用時に負荷に合わせて調整してください
+    Description: Aurora Serverless v2 最大 ACU
+
+# ==============================================================================
+# Conditions
+# ==============================================================================
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
+# ==============================================================================
+# Resources
+# ==============================================================================
+Resources:
+
+  # ============================================================
+  # KMS カスタマーマネージドキー
+  # ============================================================
+  CrmKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: CRM基幹システム共通 KMS キー
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableRootAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: "*"
+          - Sid: AllowCloudWatchLogs
+            Effect: Allow
+            Principal:
+              Service: !Sub logs.${AWS::Region}.amazonaws.com
+            Action:
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey*
+              - kms:DescribeKey
+            Resource: "*"
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Project
+          Value: crm-enterprise-platform
+
+  CrmKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/crm-${Environment}
+      TargetKeyId: !Ref CrmKmsKey
+
+  # ============================================================
+  # VPC・ネットワーク
+  # ============================================================
+  CrmVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-vpc
+        - Key: Environment
+          Value: !Ref Environment
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-igw
+
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref CrmVpc
+      InternetGatewayId: !Ref InternetGateway
+
+  # --- パブリックサブネット ---
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CrmVpc
+      CidrBlock: !Ref PublicSubnetACidr
+      AvailabilityZone: !Sub ${AWS::Region}a
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-public-a
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CrmVpc
+      CidrBlock: !Ref PublicSubnetCCidr
+      AvailabilityZone: !Sub ${AWS::Region}c
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-public-c
+
+  # --- プライベートアプリサブネット ---
+  PrivateAppSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CrmVpc
+      CidrBlock: !Ref PrivateAppSubnetACidr
+      AvailabilityZone: !Sub ${AWS::Region}a
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-app-a
+
+  PrivateAppSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CrmVpc
+      CidrBlock: !Ref PrivateAppSubnetCCidr
+      AvailabilityZone: !Sub ${AWS::Region}c
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-app-c
+
+  # --- プライベートデータサブネット ---
+  PrivateDataSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CrmVpc
+      CidrBlock: !Ref PrivateDataSubnetACidr
+      AvailabilityZone: !Sub ${AWS::Region}a
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-data-a
+
+  PrivateDataSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref CrmVpc
+      CidrBlock: !Ref PrivateDataSubnetCCidr
+      AvailabilityZone: !Sub ${AWS::Region}c
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-data-c
+
+  # --- NAT Gateway (Multi-AZ) ---
+  NatEipA:
+    Type: AWS::EC2::EIP
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-nat-eip-a
+
+  NatEipC:
+    Type: AWS::EC2::EIP
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-nat-eip-c
+
+  NatGatewayA:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      AllocationId: !GetAtt NatEipA.AllocationId
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-nat-a
+
+  NatGatewayC:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      AllocationId: !GetAtt NatEipC.AllocationId
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-nat-c
+
+  # --- ルートテーブル ---
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CrmVpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-public-rt
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetCRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateAppRouteTableA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CrmVpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-app-rt-a
+
+  PrivateAppRouteA:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateAppRouteTableA
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayA
+
+  PrivateAppSubnetARouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetA
+      RouteTableId: !Ref PrivateAppRouteTableA
+
+  PrivateAppRouteTableC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CrmVpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-app-rt-c
+
+  PrivateAppRouteC:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateAppRouteTableC
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGatewayC
+
+  PrivateAppSubnetCRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetC
+      RouteTableId: !Ref PrivateAppRouteTableC
+
+  PrivateDataRouteTableA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CrmVpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-data-rt-a
+
+  PrivateDataSubnetARouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDataSubnetA
+      RouteTableId: !Ref PrivateDataRouteTableA
+
+  PrivateDataRouteTableC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref CrmVpc
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-private-data-rt-c
+
+  PrivateDataSubnetCRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDataSubnetC
+      RouteTableId: !Ref PrivateDataRouteTableC
+
+  # ============================================================
+  # Site-to-Site VPN
+  # ============================================================
+  VpnGateway:
+    Type: AWS::EC2::VPNGateway
+    Properties:
+      Type: ipsec.1
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-vgw
+
+  VpnGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref CrmVpc
+      VpnGatewayId: !Ref VpnGateway
+
+  CustomerGateway:
+    Type: AWS::EC2::CustomerGateway
+    Properties:
+      Type: ipsec.1
+      BgpAsn: !Ref VpnBgpAsn
+      IpAddress: !Ref CustomerGatewayIp
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-cgw
+
+  VpnConnection:
+    Type: AWS::EC2::VPNConnection
+    Properties:
+      Type: ipsec.1
+      VpnGatewayId: !Ref VpnGateway
+      CustomerGatewayId: !Ref CustomerGateway
+      StaticRoutesOnly: false
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-vpn
+
+  VpnRoutePropagationPrivateA:
+    Type: AWS::EC2::VPNGatewayRoutePropagation
+    DependsOn: VpnGatewayAttachment
+    Properties:
+      RouteTableIds:
+        - !Ref PrivateAppRouteTableA
+        - !Ref PrivateAppRouteTableC
+        - !Ref PrivateDataRouteTableA
+        - !Ref PrivateDataRouteTableC
+      VpnGatewayId: !Ref VpnGateway
+
+  # ============================================================
+  # セキュリティグループ
+  # ============================================================
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB セキュリティグループ（HTTPS のみ許可）
+      VpcId: !Ref CrmVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS from Internet
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: HTTP redirect from Internet
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-alb-sg
+
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Fargate タスク セキュリティグループ
+      VpcId: !Ref CrmVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+          Description: From ALB
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-ecs-sg
+
+  AuroraSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Aurora PostgreSQL セキュリティグループ
+      VpcId: !Ref CrmVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref EcsSecurityGroup
+          Description: From ECS
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BatchSecurityGroup
+          Description: From Batch
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-aurora-sg
+
+  FsxSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: FSx for Windows File Server セキュリティグループ
+      VpcId: !Ref CrmVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 445
+          ToPort: 445
+          SourceSecurityGroupId: !Ref EcsSecurityGroup
+          Description: SMB from ECS
+        - IpProtocol: tcp
+          FromPort: 5985
+          ToPort: 5985
+          SourceSecurityGroupId: !Ref EcsSecurityGroup
+          Description: WinRM from ECS
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-fsx-sg
+
+  BatchSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: AWS Batch Fargate セキュリティグループ
+      VpcId: !Ref CrmVpc
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-batch-sg
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Lambda Mail Processor セキュリティグループ
+      VpcId: !Ref CrmVpc
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-lambda-sg
+
+  # ============================================================
+  # WAF WebACL
+  # ============================================================
+  WafWebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub crm-${Environment}-waf
+      Scope: REGIONAL
+      DefaultAction:
+        Allow: {}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub crm-${Environment}-waf-metric
+      Rules:
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 0
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSetMetric
+        - Name: AWSManagedRulesSQLiRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesSQLiRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesSQLiRuleSetMetric
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          Priority: 2
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSetMetric
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # ALB (Application Load Balancer)
+  # ============================================================
+  AlbTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub crm-${Environment}-tg
+      Protocol: HTTP
+      Port: 8080
+      TargetType: ip
+      VpcId: !Ref CrmVpc
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub crm-${Environment}-alb
+      Scheme: internet-facing
+      Type: application
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetC
+      LoadBalancerAttributes:
+        - Key: deletion_protection.enabled
+          Value: !If [IsProd, "true", "false"]
+        - Key: access_logs.s3.enabled
+          Value: "false"  # TODO: 実運用時にアクセスログを有効化してください
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  AlbListenerHttp:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: redirect
+          RedirectConfig:
+            Protocol: HTTPS
+            Port: "443"
+            StatusCode: HTTP_301
+
+  # HTTPS リスナー: ACM 証明書 ARN が必要なため、本番利用時に追加してください
+  # AlbListenerHttps:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     LoadBalancerArn: !Ref ApplicationLoadBalancer
+  #     Port: 443
+  #     Protocol: HTTPS
+  #     SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+  #     Certificates:
+  #       - CertificateArn: arn:aws:acm:ap-northeast-1:ACCOUNT:certificate/XXXX  # TODO: 実運用時に変更してください
+  #     DefaultActions:
+  #       - Type: forward
+  #         TargetGroupArn: !Ref AlbTargetGroup
+
+  WafAlbAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Ref ApplicationLoadBalancer
+      WebACLArn: !GetAtt WafWebAcl.Arn
+
+  # ============================================================
+  # ECS Cluster / Task Definition / Service
+  # ============================================================
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub crm-${Environment}-cluster
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  EcsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub crm-${Environment}-ecs-task-exec-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: EcsSecretsAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                  - kms:Decrypt
+                Resource:
+                  - !Ref DbCredentialsSecret
+                  - !GetAtt CrmKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  EcsTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub crm-${Environment}-ecs-task-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: EcsTaskPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub ${BackupBucket.Arn}/*
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - kms:GenerateDataKey
+                  - kms:Decrypt
+                Resource: !GetAtt CrmKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  EcsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/crm-${Environment}
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt CrmKmsKey.Arn
+
+  EcsTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub crm-${Environment}-task
+      Cpu: "512"       # 0.5 vCPU
+      Memory: "1024"   # 1 GB
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt EcsTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt EcsTaskRole.Arn
+      ContainerDefinitions:
+        - Name: crm-app
+          Image: !Ref ContainerImage
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          Environment:
+            - Name: ENVIRONMENT
+              Value: !Ref Environment
+          Secrets:
+            - Name: DB_SECRET
+              ValueFrom: !Ref DbCredentialsSecret
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref EcsLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          ReadonlyRootFilesystem: true
+          LinuxParameters:
+            InitProcessEnabled: true
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  EcsService:
+    Type: AWS::ECS::Service
+    DependsOn: AlbListenerHttp
+    Properties:
+      ServiceName: !Sub crm-${Environment}-service
+      Cluster: !Ref EcsCluster
+      TaskDefinition: !Ref EcsTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      PlatformVersion: LATEST
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+            - !Ref PrivateAppSubnetA
+            - !Ref PrivateAppSubnetC
+          SecurityGroups:
+            - !Ref EcsSecurityGroup
+      LoadBalancers:
+        - ContainerName: crm-app
+          ContainerPort: 8080
+          TargetGroupArn: !Ref AlbTargetGroup
+      DeploymentConfiguration:
+        MinimumHealthyPercent: 100
+        MaximumPercent: 200
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # Aurora PostgreSQL Serverless v2
+  # ============================================================
+  AuroraSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Aurora PostgreSQL サブネットグループ
+      SubnetIds:
+        - !Ref PrivateDataSubnetA
+        - !Ref PrivateDataSubnetC
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  AuroraClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Aurora PostgreSQL クラスターパラメータグループ
+      Family: aurora-postgresql16
+      Parameters:
+        log_statement: all
+        log_min_duration_statement: "1000"  # 1秒以上のクエリをログ記録
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: !If [IsProd, Retain, Delete]
+    Properties:
+      DBClusterIdentifier: !Sub crm-${Environment}-aurora
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      EngineVersion: "16.4"
+      DatabaseName: crmdb
+      MasterUsername: !Sub "{{resolve:secretsmanager:${DbCredentialsSecret}:SecretString:username}}"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${DbCredentialsSecret}:SecretString:password}}"
+      DBSubnetGroupName: !Ref AuroraSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref AuroraSecurityGroup
+      DBClusterParameterGroupName: !Ref AuroraClusterParameterGroup
+      StorageEncrypted: true
+      KmsKeyId: !GetAtt CrmKmsKey.Arn
+      BackupRetentionPeriod: !If [IsProd, 35, 7]
+      PreferredBackupWindow: 17:00-18:00     # JST 02:00-03:00
+      PreferredMaintenanceWindow: sun:18:00-sun:19:00  # JST 日曜 03:00-04:00
+      DeletionProtection: !If [IsProd, true, false]
+      EnableCloudwatchLogsExports:
+        - postgresql
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !Ref AuroraMinCapacity
+        MaxCapacity: !Ref AuroraMaxCapacity
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  AuroraWriterInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub crm-${Environment}-aurora-writer
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+      EnablePerformanceInsights: true
+      PerformanceInsightsKMSKeyId: !GetAtt CrmKmsKey.Arn
+      PerformanceInsightsRetentionPeriod: !If [IsProd, 731, 7]
+      MonitoringInterval: 60
+      MonitoringRoleArn: !GetAtt RdsMonitoringRole.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  AuroraReaderInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub crm-${Environment}-aurora-reader
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      PubliclyAccessible: false
+      EnablePerformanceInsights: true
+      PerformanceInsightsKMSKeyId: !GetAtt CrmKmsKey.Arn
+      PerformanceInsightsRetentionPeriod: !If [IsProd, 731, 7]
+      MonitoringInterval: 60
+      MonitoringRoleArn: !GetAtt RdsMonitoringRole.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  RdsMonitoringRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub crm-${Environment}-rds-monitoring-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: monitoring.rds.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
+
+  # ============================================================
+  # FSx for Windows File Server
+  # ============================================================
+  FsxFileSystem:
+    Type: AWS::FSx::FileSystem
+    Properties:
+      FileSystemType: WINDOWS
+      StorageCapacity: 32
+      StorageType: SSD
+      SubnetIds:
+        - !Ref PrivateDataSubnetA
+        - !Ref PrivateDataSubnetC
+      SecurityGroupIds:
+        - !Ref FsxSecurityGroup
+      WindowsConfiguration:
+        DeploymentType: MULTI_AZ_1
+        PreferredSubnetId: !Ref PrivateDataSubnetA
+        ThroughputCapacity: 8  # TODO: 実運用時に負荷に合わせて調整してください
+        AutomaticBackupRetentionDays: !If [IsProd, 35, 7]
+        DailyAutomaticBackupStartTime: "17:00"  # JST 02:00
+        WeeklyMaintenanceStartTime: "0:17:00"    # JST 日曜 02:00
+        CopyTagsToBackups: true
+      KmsKeyId: !GetAtt CrmKmsKey.Arn
+      Tags:
+        - Key: Name
+          Value: !Sub crm-${Environment}-fsx
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # AWS Batch (Fargate Compute Environment)
+  # ============================================================
+  BatchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub crm-${Environment}-batch-service-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: batch.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+
+  BatchJobExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub crm-${Environment}-batch-job-exec-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: BatchJobPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub ${BackupBucket.Arn}/*
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DbCredentialsSecret
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !GetAtt CrmKmsKey.Arn
+
+  BatchComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeEnvironmentName: !Sub crm-${Environment}-batch-ce
+      Type: MANAGED
+      State: ENABLED
+      ComputeResources:
+        Type: FARGATE
+        MaxvCpus: 16  # TODO: 実運用時に最大同時実行数に合わせて調整してください
+        Subnets:
+          - !Ref PrivateAppSubnetA
+          - !Ref PrivateAppSubnetC
+        SecurityGroupIds:
+          - !Ref BatchSecurityGroup
+      ServiceRole: !GetAtt BatchServiceRole.Arn
+      Tags:
+        Environment: !Ref Environment
+
+  BatchJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      JobQueueName: !Sub crm-${Environment}-job-queue
+      State: ENABLED
+      Priority: 1
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref BatchComputeEnvironment
+      Tags:
+        Environment: !Ref Environment
+
+  BatchJobDefinition:
+    Type: AWS::Batch::JobDefinition
+    Properties:
+      JobDefinitionName: !Sub crm-${Environment}-batch-job
+      Type: container
+      PlatformCapabilities:
+        - FARGATE
+      ContainerProperties:
+        Image: !Ref BatchJobImage
+        ExecutionRoleArn: !GetAtt BatchJobExecutionRole.Arn
+        ResourceRequirements:
+          - Type: VCPU
+            Value: "1"
+          - Type: MEMORY
+            Value: "2048"
+        NetworkConfiguration:
+          AssignPublicIp: DISABLED
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref BatchLogGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: batch
+      Tags:
+        Environment: !Ref Environment
+
+  BatchLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /batch/crm-${Environment}
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt CrmKmsKey.Arn
+
+  # ============================================================
+  # Lambda (Mail Processor) + SES
+  # ============================================================
+  LambdaMailProcessorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub crm-${Environment}-lambda-mail-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: LambdaMailPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DbCredentialsSecret
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:GenerateDataKey
+                Resource: !GetAtt CrmKmsKey.Arn
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/crm-${Environment}-mail-processor:*
+
+  LambdaMailProcessorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/crm-${Environment}-mail-processor
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt CrmKmsKey.Arn
+
+  LambdaMailProcessor:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub crm-${Environment}-mail-processor
+      Description: CRM メール送受信処理 Lambda
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt LambdaMailProcessorRole.Arn
+      Timeout: 300
+      MemorySize: 256
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          SES_FROM_EMAIL: !Ref SesEmailIdentity
+          SECRET_ARN: !Ref DbCredentialsSecret
+      VpcConfig:
+        SubnetIds:
+          - !Ref PrivateAppSubnetA
+          - !Ref PrivateAppSubnetC
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+      Code:
+        ZipFile: |
+          # TODO: 実運用時に実際の Lambda コードに置き換えてください
+          import json
+          def handler(event, context):
+              print(json.dumps(event))
+              return {"statusCode": 200, "body": "OK"}
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  SesEmailIdentityResource:
+    Type: AWS::SES::EmailIdentity
+    Properties:
+      EmailIdentity: !Ref SesEmailIdentity
+
+  # ============================================================
+  # S3 バックアップバケット
+  # ============================================================
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub crm-${Environment}-backup-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !GetAtt CrmKmsKey.Arn
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToIA
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 30
+                StorageClass: STANDARD_IA
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 365
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  BackupBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackupBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyNonSSL
+            Effect: Deny
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !GetAtt BackupBucket.Arn
+              - !Sub ${BackupBucket.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+
+  # ============================================================
+  # Secrets Manager
+  # ============================================================
+  DbCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub crm/${Environment}/db-credentials
+      Description: Aurora PostgreSQL 接続情報
+      KmsKeyId: !GetAtt CrmKmsKey.Arn
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "crmadmin"}'  # TODO: 実運用時に変更してください
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  DbSecretAuroraAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref DbCredentialsSecret
+      TargetId: !Ref AuroraCluster
+      TargetType: AWS::RDS::DBCluster
+
+  # ============================================================
+  # CloudWatch Alarms
+  # ============================================================
+  AlarmSnsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub crm-${Environment}-alarms
+      KmsMasterKeyId: !GetAtt CrmKmsKey.Arn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ALB 5xx エラー率アラーム
+  AlbAlarm5xx:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub crm-${Environment}-alb-5xx
+      AlarmDescription: ALB 5xx エラー率が閾値超過
+      Namespace: AWS/ApplicationELB
+      MetricName: HTTPCode_Target_5XX_Count
+      Dimensions:
+        - Name: LoadBalancer
+          Value: !GetAtt ApplicationLoadBalancer.LoadBalancerFullName
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 5
+      Threshold: 10
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmSnsTopic
+
+  # ECS CPU 使用率アラーム
+  EcsAlarmCpuHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub crm-${Environment}-ecs-cpu-high
+      AlarmDescription: ECS CPU 使用率が 80% 超過
+      Namespace: AWS/ECS
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref EcsCluster
+        - Name: ServiceName
+          Value: !GetAtt EcsService.Name
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmSnsTopic
+
+  # ECS メモリ使用率アラーム
+  EcsAlarmMemoryHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub crm-${Environment}-ecs-memory-high
+      AlarmDescription: ECS メモリ使用率が 80% 超過
+      Namespace: AWS/ECS
+      MetricName: MemoryUtilization
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref EcsCluster
+        - Name: ServiceName
+          Value: !GetAtt EcsService.Name
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 80
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmSnsTopic
+
+  # Aurora フリーメモリアラーム
+  AuroraAlarmFreeMemory:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub crm-${Environment}-aurora-free-memory
+      AlarmDescription: Aurora フリーメモリが 256MB 未満
+      Namespace: AWS/RDS
+      MetricName: FreeableMemory
+      Dimensions:
+        - Name: DBClusterIdentifier
+          Value: !Ref AuroraCluster
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 268435456  # 256 MB in bytes
+      ComparisonOperator: LessThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmSnsTopic
+
+  # Lambda エラーアラーム
+  LambdaAlarmErrors:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub crm-${Environment}-lambda-mail-errors
+      AlarmDescription: Lambda Mail Processor のエラー発生
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref LambdaMailProcessor
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlarmSnsTopic
+
+# ==============================================================================
+# Outputs
+# ==============================================================================
+Outputs:
+
+  VpcId:
+    Description: VPC ID
+    Value: !Ref CrmVpc
+    Export:
+      Name: !Sub ${AWS::StackName}-VpcId
+
+  PublicSubnetAId:
+    Description: パブリックサブネット AZ-a ID
+    Value: !Ref PublicSubnetA
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnetAId
+
+  PublicSubnetCId:
+    Description: パブリックサブネット AZ-c ID
+    Value: !Ref PublicSubnetC
+    Export:
+      Name: !Sub ${AWS::StackName}-PublicSubnetCId
+
+  PrivateAppSubnetAId:
+    Description: プライベートアプリサブネット AZ-a ID
+    Value: !Ref PrivateAppSubnetA
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateAppSubnetAId
+
+  PrivateAppSubnetCId:
+    Description: プライベートアプリサブネット AZ-c ID
+    Value: !Ref PrivateAppSubnetC
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateAppSubnetCId
+
+  PrivateDataSubnetAId:
+    Description: プライベートデータサブネット AZ-a ID
+    Value: !Ref PrivateDataSubnetA
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateDataSubnetAId
+
+  PrivateDataSubnetCId:
+    Description: プライベートデータサブネット AZ-c ID
+    Value: !Ref PrivateDataSubnetC
+    Export:
+      Name: !Sub ${AWS::StackName}-PrivateDataSubnetCId
+
+  AlbDnsName:
+    Description: ALB DNS 名
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+    Export:
+      Name: !Sub ${AWS::StackName}-AlbDnsName
+
+  AlbArn:
+    Description: ALB ARN
+    Value: !Ref ApplicationLoadBalancer
+    Export:
+      Name: !Sub ${AWS::StackName}-AlbArn
+
+  WafWebAclArn:
+    Description: WAF WebACL ARN
+    Value: !GetAtt WafWebAcl.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-WafWebAclArn
+
+  EcsClusterArn:
+    Description: ECS クラスター ARN
+    Value: !GetAtt EcsCluster.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-EcsClusterArn
+
+  EcsServiceName:
+    Description: ECS サービス名
+    Value: !GetAtt EcsService.Name
+    Export:
+      Name: !Sub ${AWS::StackName}-EcsServiceName
+
+  AuroraClusterEndpoint:
+    Description: Aurora クラスター Writer エンドポイント
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-AuroraWriterEndpoint
+
+  AuroraClusterReaderEndpoint:
+    Description: Aurora クラスター Reader エンドポイント
+    Value: !GetAtt AuroraCluster.ReadEndpoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-AuroraReaderEndpoint
+
+  AuroraClusterArn:
+    Description: Aurora クラスター ARN
+    Value: !Sub arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${AuroraCluster}
+    Export:
+      Name: !Sub ${AWS::StackName}-AuroraClusterArn
+
+  FsxFileSystemId:
+    Description: FSx ファイルシステム ID
+    Value: !Ref FsxFileSystem
+    Export:
+      Name: !Sub ${AWS::StackName}-FsxFileSystemId
+
+  BatchJobQueueArn:
+    Description: AWS Batch ジョブキュー ARN
+    Value: !Ref BatchJobQueue
+    Export:
+      Name: !Sub ${AWS::StackName}-BatchJobQueueArn
+
+  BatchJobDefinitionArn:
+    Description: AWS Batch ジョブ定義 ARN
+    Value: !Ref BatchJobDefinition
+    Export:
+      Name: !Sub ${AWS::StackName}-BatchJobDefinitionArn
+
+  LambdaMailProcessorArn:
+    Description: Lambda Mail Processor ARN
+    Value: !GetAtt LambdaMailProcessor.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-LambdaMailProcessorArn
+
+  BackupBucketName:
+    Description: S3 バックアップバケット名
+    Value: !Ref BackupBucket
+    Export:
+      Name: !Sub ${AWS::StackName}-BackupBucketName
+
+  BackupBucketArn:
+    Description: S3 バックアップバケット ARN
+    Value: !GetAtt BackupBucket.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-BackupBucketArn
+
+  DbCredentialsSecretArn:
+    Description: DB 認証情報 Secret ARN
+    Value: !Ref DbCredentialsSecret
+    Export:
+      Name: !Sub ${AWS::StackName}-DbCredentialsSecretArn
+
+  KmsKeyArn:
+    Description: CRM 共通 KMS キー ARN
+    Value: !GetAtt CrmKmsKey.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-KmsKeyArn
+
+  KmsKeyId:
+    Description: CRM 共通 KMS キー ID
+    Value: !Ref CrmKmsKey
+    Export:
+      Name: !Sub ${AWS::StackName}-KmsKeyId
+
+  AlarmSnsTopicArn:
+    Description: CloudWatch アラーム通知 SNS トピック ARN
+    Value: !Ref AlarmSnsTopic
+    Export:
+      Name: !Sub ${AWS::StackName}-AlarmSnsTopicArn
+
+  VpnGatewayId:
+    Description: VPN Gateway ID
+    Value: !Ref VpnGateway
+    Export:
+      Name: !Sub ${AWS::StackName}-VpnGatewayId
+
+  CustomerGatewayId:
+    Description: Customer Gateway ID
+    Value: !Ref CustomerGateway
+    Export:
+      Name: !Sub ${AWS::StackName}-CustomerGatewayId
