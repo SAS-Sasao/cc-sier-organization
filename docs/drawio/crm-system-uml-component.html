@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM基幹システム UMLコンポーネント図 - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>CRM基幹システム UMLコンポーネント図</h1>
+<div class="meta">
+  <span class="tag tag-project">CRM基幹</span>
+  <span class="tag tag-type" style="background:#ef4444;">UMLコンポーネント</span>
+</div>
+<p class="date">作成日: 2026-03-30 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+graph TD
+    subgraph CL["Client Layer"]
+        USR["CRM Users"]
+        VPC["VPN Client"]
+        VGW["VPN Gateway"]
+    end
+    subgraph ES["Edge Security Layer"]
+        WAF["WAF Firewall"]
+        LB["Load Balancer L7"]
+        TLS["TLS Certificate"]
+    end
+    subgraph APP["Application Layer"]
+        AA["App Server AZ-a"]
+        AC["App Server AZ-c"]
+        BT["Batch Server"]
+        ML["Mail Server SMTP"]
+        MQ["Message Queue"]
+        API["REST API"]
+    end
+    subgraph DT["Data Layer"]
+        DBW[("RDBMS Primary PostgreSQL")]
+        DBR[("RDBMS Replica Read Only")]
+        FS[("File Server Windows SMB")]
+        OBJ[("Object Storage Backup")]
+        CA{{"Cache Session"}}
+    end
+    subgraph OPS["Operations Layer"]
+        MON["Monitoring"]
+        SEC["Secret Manager"]
+        KEY["Key Management"]
+        AUD["Audit Log"]
+    end
+    USR --> VPC --> VGW
+    VGW --> WAF --> LB
+    LB --> TLS
+    LB --> AA
+    LB --> AC
+    AC --> BT
+    BT --> ML
+    ML --> MQ
+    AA -->|Write| DBW
+    AC -->|Read| DBR
+    DBW -.->|Replication| DBR
+    BT --> FS
+    ML --> OBJ
+    MQ --> CA
+    DBW -.-> MON
+    DBR -.-> SEC
+    FS -.-> KEY
+    OBJ -.-> AUD
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./crm-system-uml-component.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>CRM基幹システムをクラウド上で運用するための、ベンダー非依存のUMLコンポーネント図。AWS / Azure / GCP いずれのクラウドでも実装可能な抽象レイヤーで設計している。5層のレイヤー構成（Client / Edge Security / Application / Data / Operations）でMulti-AZ冗長化・VPN閉域接続・読み書き分離DBを実現する。</p>
+<p>データ層ではDB（シリンダー図形）・ファイルサーバー（シリンダー図形）・キャッシュ（六角形）を UML標準の図形で表現し、各レイヤーの役割を視覚的に明確化している。</p>
+
+<h2>構成要素</h2>
+<table>
+  <tr><th>要素</th><th>図形</th><th>レイヤー</th><th>説明</th></tr>
+  <tr><td>CRM Users</td><td>UML Actor</td><td>Client</td><td>CRM利用者（社内ユーザー）</td></tr>
+  <tr><td>VPN Client / Gateway</td><td>Rectangle</td><td>Client</td><td>IPsec VPN経由の閉域接続</td></tr>
+  <tr><td>WAF</td><td>Rectangle (赤)</td><td>Edge Security</td><td>SQLi/XSS/DDoS防御</td></tr>
+  <tr><td>Load Balancer</td><td>Rectangle (黄)</td><td>Edge Security</td><td>L7負荷分散（Multi-AZ）</td></tr>
+  <tr><td>App Server (AZ-a/c)</td><td>UML Component</td><td>Application</td><td>CRMアプリケーション（冗長2AZ）</td></tr>
+  <tr><td>Batch Server</td><td>UML Component</td><td>Application</td><td>ETL・レポート・データエクスポート</td></tr>
+  <tr><td>Mail Server</td><td>UML Component</td><td>Application</td><td>SMTP送信（通知・一括メール）</td></tr>
+  <tr><td>Message Queue</td><td>Rectangle (黄)</td><td>Application</td><td>非同期処理キュー</td></tr>
+  <tr><td>REST API</td><td>Rectangle (緑)</td><td>Application</td><td>内部API（マイクロサービス連携用）</td></tr>
+  <tr><td>RDBMS Primary</td><td>Cylinder</td><td>Data</td><td>PostgreSQL Writer（マスタデータ）</td></tr>
+  <tr><td>RDBMS Replica</td><td>Cylinder</td><td>Data</td><td>PostgreSQL Reader（読み取り専用）</td></tr>
+  <tr><td>File Server</td><td>Cylinder</td><td>Data</td><td>Windows SMBファイル共有</td></tr>
+  <tr><td>Object Storage</td><td>Cylinder</td><td>Data</td><td>バックアップ・ログ長期保存</td></tr>
+  <tr><td>Cache</td><td>Hexagon</td><td>Data</td><td>セッション・クエリキャッシュ</td></tr>
+  <tr><td>Monitoring / Secret / Key / Audit</td><td>Rectangle (紫)</td><td>Operations</td><td>運用基盤（監視・認証情報・暗号化・監査）</td></tr>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>クラウドベンダー非依存</strong>: AWS/Azure/GCPの固有サービス名を使わず、汎用的な名称（RDBMS、Load Balancer、Object Storage等）で記述。クラウド選定前の提案段階で使える。</li>
+  <li><strong>UML図形による役割の明確化</strong>: DB・ストレージはシリンダー、アプリケーションはコンポーネント図形、キャッシュは六角形で表現し、図形を見るだけで要素の性質がわかる。</li>
+  <li><strong>5層レイヤーで責務分離</strong>: Client→Edge→App→Data→Opsの5層構成で、各層の責務を明確に分離。セキュリティ境界・スケーリング単位・運用責任が一目で把握できる。</li>
+  <li><strong>Multi-AZ・読み書き分離</strong>: App ServerをAZ-a/AZ-cに冗長配置し、DBはWriter/Readerを分離。単一障害点の排除と読み取り性能の向上を両立。</li>
+</ul>
+
+<p class="updated">Powered by draw.io MCP Server</p>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose'});</script>
+</body>
+</html>
