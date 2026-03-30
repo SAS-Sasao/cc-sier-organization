@@ -206,7 +206,22 @@ ADRフォーマットに従って意思決定を記録すること
 
 ---
 
-## 3. Agent Teams 編成の判断基準
+## 3. subagent_type 選定ガイド
+
+Agent起動時の `subagent_type` はツール権限に直結する。タスクに必要なツールに応じて適切な型を選定すること。
+
+| ツール要件 | 推奨 subagent_type | 理由 |
+|-----------|-------------------|------|
+| WebFetch（URL巡回・Web取得） | `general-purpose` | 専用型にはWebFetchなし |
+| WebSearch（Web検索） | `general-purpose` | 同上 |
+| Bash + ファイル操作のみ | 専用型（`tech-researcher` 等） | 軽量で安全 |
+| コード探索・読取のみ | `Explore` | 読取専用で高速 |
+
+**重要ルール**: WebFetch / WebSearch が必要なタスクをteammateに委譲する場合は、必ず `subagent_type: "general-purpose"` を指定する。専用型（tech-researcher, retail-domain-researcher 等）はWebFetchツールを持たないため失敗する。
+
+プロンプトの冒頭で「あなたは{ロール名}です。」と役割を明示すれば、general-purpose型でも専用型と同等の品質でタスクを遂行できる。
+
+## 4. Agent Teams 編成の判断基準
 
 | 条件 | 判断 |
 |------|------|
@@ -217,7 +232,7 @@ ADRフォーマットに従って意思決定を記録すること
 | 小規模・定型作業 | 秘書が直接対応 |
 | COST_AWARENESS = conservative | 明示指示がない限り Subagent |
 
-## 4. コスト管理の注意
+## 5. コスト管理の注意
 
 Agent Teams はトークン消費が約15倍になります（公式ドキュメント参照）。
 `masters/organization.md` の `COST_AWARENESS` 設定を確認し、適切な実行方式を選択してください。

@@ -7,8 +7,9 @@
 - **実行方式**: agent-teams
 - **チーム構成**:
   - team-lead: secretary（統合・ダイジェスト生成）
-  - teammate: tech-researcher（技術スタック系ソースの巡回）
-  - teammate: retail-domain-researcher（小売ドメイン系ソースの巡回）
+  - teammate: tech-researcher（技術スタック系ソースの巡回）**subagent_type: general-purpose**
+  - teammate: retail-domain-researcher（小売ドメイン系ソースの巡回）**subagent_type: general-purpose**
+- **WebFetch注意**: 両teammateはWebFetchが必要なため、Agent起動時に `subagent_type: "general-purpose"` を指定すること。専用型（tech-researcher / retail-domain-researcher）はWebFetchツールを持たない。
 - **入力**: `.companies/domain-tech-collection/docs/info-source-master.md`
 - **ステップ**:
   1. `info-source-master.md` の優先度「高」ソースを中心に WebFetch で巡回
