@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-03-29T21:18:02",
-  "case_count": 45,
+  "updated_at": "2026-03-31T08:24:41",
+  "case_count": 49,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -228,6 +228,23 @@
       ]
     },
     {
+      "subagent": "secretary",
+      "failure_reason": "タスクログのstatus/reward/modeはYAMLフロントマター形式で記述必須。マークダウンリスト形式だとCase Bankパーサーが検出不可。rewardフィールドはfrontmatter内",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "feedback_tasklog_frontmatter_format",
+      "how_to_apply": "タスクログ作成時は以下のフロントマターを必ず先頭に置く:\n```yaml\n---\nstatus: completed\nmode: direct\nsubagent: secretary\nreward: 0.85\njudge_summary: \"completeness 9/10, accuracy 8/10, clarity 9/10\"\n---\n```\n- フィールド名は英語小文字（`status`",
+      "match_keywords": [
+        "タスクログは必ずYAMLフロントマターで統一",
+        "パーサーとの整合性",
+        "タスクログのstatus/reward/modeはYAMLフロントマター形式で記述必須",
+        "マークダウンリスト形式だとCase",
+        "Bankパーサーが検出不可",
+        "rewardフィールドはfrontmatter内にreward:で記述する"
+      ]
+    },
+    {
       "subagent": "tech-researcher",
       "failure_reason": "タスクログの委譲先にagent名を英字で記載しないと、rebuild-case-bank.shがSubagent名を検出できずダッシュボードのレーダーチャートに反映されない",
       "count": 1,
@@ -275,7 +292,7 @@
         "mode": "agent-teams",
         "artifact_count": 3
       },
-      "reward": 1.0,
+      "reward": null,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -301,7 +318,7 @@
         "mode": "subagent",
         "artifact_count": 1
       },
-      "reward": 1.0,
+      "reward": null,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -329,7 +346,7 @@
         "mode": "agent-teams",
         "artifact_count": 1
       },
-      "reward": 1.0,
+      "reward": null,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -350,7 +367,7 @@
         "mode": "",
         "artifact_count": 0
       },
-      "reward": 1.0,
+      "reward": null,
       "judge": null,
       "outcome": {
         "files_written": [],
@@ -374,7 +391,7 @@
         "mode": "",
         "artifact_count": 1
       },
-      "reward": 1.0,
+      "reward": null,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -494,15 +511,7 @@
         "artifact_count": 0
       },
       "reward": 1.0,
-      "judge": {
-        "completeness": 8.0,
-        "accuracy": 7.0,
-        "clarity": 9.0,
-        "total": 0.8,
-        "failure_reason": "",
-        "judge_comment": "8ソース巡回し主要トピックを網羅。AWSは更新なしだが正しく報告。ハイライト表とカテゴリ分けが明瞭。ソースURLの一部が実リンクでなくドメイン名のみの箇所あり。",
-        "judged_at": "2026-03-25T21:30:23+09:00"
-      },
+      "judge": null,
       "outcome": {
         "files_written": [],
         "started": "2026-03-25T19:25:16"
@@ -526,15 +535,7 @@
         "artifact_count": 0
       },
       "reward": 1.0,
-      "judge": {
-        "completeness": 8.0,
-        "accuracy": 8.0,
-        "clarity": 9.0,
-        "total": 0.83,
-        "failure_reason": "",
-        "judge_comment": "3チェーン(セブン/ファミマ/ローソン)のクラウド移行状況を比較表付きで網羅。POS連携アーキテクチャの技術詳細が実践的。Strangler Figパターン等の設計パターン言及もPM視点で有用。",
-        "judged_at": "2026-03-25T21:30:23+09:00"
-      },
+      "judge": null,
       "outcome": {
         "files_written": [],
         "started": "2026-03-25T19:25:16"
@@ -559,15 +560,7 @@
         "artifact_count": 3
       },
       "reward": 0.8,
-      "judge": {
-        "completeness": 9.0,
-        "accuracy": 8.0,
-        "clarity": 10.0,
-        "total": 0.9,
-        "failure_reason": "",
-        "judge_comment": "PM体制(PMO/機能PM/ベンダーPM)の整理が明確。W1必読リストはWBS全タスクを網羅しドキュメント有無を正確に把握。ストコン案件に当てはめた体制イメージが実践的。管理帳票テンプレートは参画後即活用可能。",
-        "judged_at": "2026-03-25T21:30:23+09:00"
-      },
+      "judge": null,
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/secretary/learning-notes/wbs-4-1-1-migration-pm-overview.md",
@@ -594,15 +587,7 @@
         "artifact_count": 0
       },
       "reward": 1.0,
-      "judge": {
-        "completeness": 9.0,
-        "accuracy": 8.0,
-        "clarity": 9.0,
-        "total": 0.87,
-        "failure_reason": "",
-        "judge_comment": "DMS/MGN/Transit Gateway等7サービスの設定詳細が実践的。カットオーバー5段階手順は時刻付きで具体的。学習ロードマップMust/Should/Nice-to-haveの3段階整理がPM視点で有用。AWS公式ドキュメントリンク30+件収録。MCP活用で情報の信頼性が高い。",
-        "judged_at": "2026-03-25T21:30:23+09:00"
-      },
+      "judge": null,
       "outcome": {
         "files_written": [],
         "started": "2026-03-25T20:51:58"
@@ -657,11 +642,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-26T08:06:29"
-      },
-      "conversation_context": [
-        "```tool_result\nSession 51aa8a5e (08:14-09:18):\n  - A\n  - 毎日の情報収集作業を実施したい\n  - OKマージした！\n  - main以外のローカルブランチ削除した？\n  - OK！\n  - OK！\n  - OK本日のtodo整理したい\n  - "
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260326-083011-storcon-diagram-memo",
@@ -692,12 +673,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-26T08:30:11"
-      },
-      "conversation_context": [
-        "```tool_result\n46-| WBS | タスク | 担当 | 期間 | 時間 | リソース | 成果物 | ステータス |\n47-|-----|-------|------|------|------|---------|--------|----------|\n48:| 2.1.1 |",
-        "```tool_result\n    45→\n    46→| WBS | タスク | 担当 | 期間 | 時間 | リソース | 成果物 | ステータス |\n    47→|-----|-------|------|------|------|---------|--------|--------"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260326-120000-storcon-aws-modernization-analytics",
@@ -719,6 +695,7 @@
         "completeness": 0.8,
         "accuracy": 0.8,
         "clarity": 1.0,
+        "total": 0.87,
         "failure_reason": "",
         "judge_comment": ""
       },
@@ -739,16 +716,8 @@
         "mode": "",
         "artifact_count": 3
       },
-      "reward": 0.8,
-      "judge": {
-        "completeness": 9.0,
-        "accuracy": 8.0,
-        "clarity": 9.0,
-        "total": 0.87,
-        "failure_reason": "",
-        "judge_comment": "3本とも依頼スコープを網羅し構造化されている。W2自学の工程B（読んで理解する）への橋渡し資料として十分な品質",
-        "judged_at": "2026-03-26T19:45:00+09:00"
-      },
+      "reward": null,
+      "judge": null,
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/retail-domain/convenience-business-processes.md",
@@ -770,16 +739,8 @@
         "mode": "",
         "artifact_count": 1
       },
-      "reward": 0.8,
-      "judge": {
-        "completeness": 9.0,
-        "accuracy": 9.0,
-        "clarity": 10.0,
-        "total": 0.93,
-        "failure_reason": "",
-        "judge_comment": "4サービスすべてで概念整理(Mermaid図)+ストコン案件での活用+ハンズオン手順+SAA対策+チェックリストを網羅。PM視点とSAA対策の区分が明確で、学習者が迷わない構成。模擬問題4問も実践的でストコン案件に即した出題。既存資料への相互リンクも適切",
-        "judged_at": "2026-03-26T19:55:00+09:00"
-      },
+      "reward": null,
+      "judge": null,
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/research/aws-basics-handson-roadmap.md"
@@ -817,11 +778,7 @@
           ".companies/domain-tech-collection/docs/daily-digest/2026-03-27.md"
         ],
         "started": "2026-03-27T08:46:45+09:00"
-      },
-      "conversation_context": [
-        "```tool_result\n     1→---\n     2→org: domain-tech-collection\n     3→status: in-progress\n     4→mode: agent-teams\n     5→started: 2026-03-27T08:46:45+0"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260327-140105-pm-skill-map",
@@ -912,11 +869,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-27T19:21:16+09:00"
-      },
-      "conversation_context": [
-        "```tool_result\nUser has answered your questions: \"どの領域のAWS構成図を作成しますか？\"=\"モダンなデータレイクハウス構成を学びたい。\" user notes: モダンなデータレイクハウス構成を学びたい。. You can now continue"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260327-195117-diagram-modern-ml-pipeline",
@@ -945,11 +898,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-27T19:51:17+09:00"
-      },
-      "conversation_context": [
-        "```tool_result\nUser has answered your questions: \"どの領域のAWS構成図を作成しますか？\"=\"データウェアハウスで集めたデータをMLする為のアーキテクチャ。モダンな構成を提案してほしい\" user notes: データウェアハウスで集めたデータをML"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260327-200121-diagram-sales-management-system",
@@ -980,11 +929,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-27T20:01:21+09:00"
-      },
-      "conversation_context": [
-        "```tool_result\nUser has answered your questions: \"どの領域のAWS構成図を作成しますか？\"=\"毎月のAWS費用20万程度のアプリケーション運用を行うための構成図を考えてほしい。アプリケーションは販売管理システムで利用者数50～70人程。CI/CDはg"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260327-202408-diagram-distributed-cqrs",
@@ -1029,7 +974,7 @@
         "mode": "agent-teams",
         "artifact_count": 0
       },
-      "reward": 1.0,
+      "reward": 0.95,
       "judge": {
         "completeness": 1.0,
         "accuracy": 0.8,
@@ -1041,11 +986,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-28T10:00:00"
-      },
-      "conversation_context": [
-        "毎日の情報収集を行いたい。"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260328-160000-diagram-serverless-web-app",
@@ -1179,11 +1120,12 @@
         "mode": "direct",
         "artifact_count": 1
       },
-      "reward": 1.0,
+      "reward": 0.9,
       "judge": {
-        "completeness": 1.8,
-        "accuracy": 1.8,
-        "clarity": 1.8,
+        "completeness": 0.9,
+        "accuracy": 0.9,
+        "clarity": 0.9,
+        "total": 0.9,
         "failure_reason": "",
         "judge_comment": ""
       },
@@ -1210,9 +1152,10 @@
       },
       "reward": 0.8,
       "judge": {
-        "completeness": 1.8,
-        "accuracy": 1.6,
-        "clarity": 1.8,
+        "completeness": 0.9,
+        "accuracy": 0.8,
+        "clarity": 0.9,
+        "total": 0.87,
         "failure_reason": "",
         "judge_comment": ""
       },
@@ -1221,11 +1164,7 @@
           ".companies/domain-tech-collection/docs/daily-digest/2026-03-29.md"
         ],
         "started": "2026-03-29T08:40:57+09:00"
-      },
-      "conversation_context": [
-        "```tool_result\n=== [PHONE]57-daily-digest.md ===\nstatus: completed\nmode: agent-teams\nrequest: \"日次ダイジェストの巡回作業を行って\"\nsubagent: \"secretary, tech-researche"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260329-090643-admin-add-mcp-drawio",
@@ -1269,13 +1208,7 @@
       "outcome": {
         "files_written": [],
         "started": "2026-03-29T09:30:00+09:00"
-      },
-      "conversation_context": [
-        "Base directory for this skill: /home/sasao020211/cc-sier-organization/.claude/skills/company-drawio\n\n# draw.io ダイアグラム生成 Skill\n\ndraw.io MCP Server（`@dr",
-        "Base directory for this skill: /home/sasao020211/cc-sier-organization/.claude/skills/company-drawio\n\n# draw.io ダイアグラム生成 Skill\n\ndraw.io MCP Server（`@dr",
-        "Base directory for this skill: /home/sasao020211/cc-sier-organization/.claude/skills/company-drawio\n\n# draw.io ダイアグラム生成 Skill\n\ndraw.io MCP Server（`@dr"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260329-100000-drawio-cvs-daily-workflow",
@@ -1295,7 +1228,14 @@
         "artifact_count": 4
       },
       "reward": 0.85,
-      "judge": null,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 1.0,
+        "clarity": 0.8,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/retail-domain/convenience-business-processes.md",
@@ -1324,8 +1264,15 @@
         "mode": "direct",
         "artifact_count": 1
       },
-      "reward": 0.95,
-      "judge": null,
+      "reward": 0.83,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 0.8,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/drawio/enterprise-data-arch.md"
@@ -1351,7 +1298,14 @@
         "artifact_count": 0
       },
       "reward": 1.0,
-      "judge": null,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 1.0,
+        "clarity": 0.8,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
       "outcome": {
         "files_written": [],
         "started": "2026-03-29T11:36:04"
@@ -1375,7 +1329,14 @@
         "artifact_count": 0
       },
       "reward": 1.0,
-      "judge": null,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 0.8,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
       "outcome": {
         "files_written": [],
         "started": "2026-03-29T11:45:00"
@@ -1402,7 +1363,7 @@
         "mode": "direct",
         "artifact_count": 1
       },
-      "reward": null,
+      "reward": 0.82,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -1428,12 +1389,19 @@
         "org_slug": "domain-tech-collection"
       },
       "action": {
-        "subagent": "",
-        "mode": "",
+        "subagent": "secretary",
+        "mode": "direct",
         "artifact_count": 1
       },
-      "reward": null,
-      "judge": null,
+      "reward": 0.88,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 0.8,
+        "clarity": 0.8,
+        "total": 0.8,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/drawio/proposal-automation-c4.md"
@@ -1455,22 +1423,19 @@
         "mode": "direct",
         "artifact_count": 0
       },
-      "reward": 1.0,
+      "reward": 0.85,
       "judge": {
-        "completeness": 1.8,
-        "accuracy": 1.6,
-        "clarity": 1.8,
+        "completeness": 0.9,
+        "accuracy": 0.8,
+        "clarity": 0.9,
+        "total": 0.87,
         "failure_reason": "",
         "judge_comment": ""
       },
       "outcome": {
         "files_written": [],
         "started": "2026-03-29T13:00:00"
-      },
-      "conversation_context": [
-        "さっき作ったデータドリブンのAWS構成図を作成して"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260329-132734-drawio-modern-data-lakehouse",
@@ -1489,12 +1454,19 @@
         "org_slug": "domain-tech-collection"
       },
       "action": {
-        "subagent": "",
-        "mode": "",
+        "subagent": "secretary",
+        "mode": "direct",
         "artifact_count": 1
       },
-      "reward": null,
-      "judge": null,
+      "reward": 0.85,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 0.8,
+        "clarity": 0.8,
+        "total": 0.8,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
       "outcome": {
         "files_written": [
           ".companies/domain-tech-collection/docs/drawio/modern-data-lakehouse.md"
@@ -1518,11 +1490,11 @@
         "org_slug": "domain-tech-collection"
       },
       "action": {
-        "subagent": "",
-        "mode": "",
+        "subagent": "secretary",
+        "mode": "direct",
         "artifact_count": 1
       },
-      "reward": null,
+      "reward": 0.8,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -1546,11 +1518,11 @@
         "org_slug": "domain-tech-collection"
       },
       "action": {
-        "subagent": "",
-        "mode": "",
+        "subagent": "secretary",
+        "mode": "direct",
         "artifact_count": 1
       },
-      "reward": null,
+      "reward": 0.9,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -1558,41 +1530,127 @@
         ],
         "started": ""
       }
+    },
+    {
+      "id": "20260330-091150-daily-digest",
+      "state": {
+        "request_keywords": [
+          "ニュース巡回対応をしてほしい"
+        ],
+        "request_head": "ニュース巡回対応をしてほしい。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "tech-researcher,retail-domain-researcher,secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.85,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "total": 0.86,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-30T09:11:50"
+      }
+    },
+    {
+      "id": "20260330-201511-diagram-crm-enterprise-platform",
+      "state": {
+        "request_keywords": [
+          "CRM基幹システム用アーキテクチャ構成図",
+          "マルチAZ",
+          "アプリ/DB/バッチ/メール/ファイルサーバー",
+          "Windows",
+          "プライベートサブネット",
+          "VPN接続",
+          "DBはAurora"
+        ],
+        "request_head": "CRM基幹システム用アーキテクチャ構成図。マルチAZ、アプリ/DB/バッチ/メール/ファイルサーバー（Windows）、",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "cloud-engineer,secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.9,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.8,
+        "clarity": 0.8,
+        "total": 0.86,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-30T20:15:11"
+      }
+    },
+    {
+      "id": "20260330-203814-drawio-crm-system-uml",
+      "state": {
+        "request_keywords": [
+          "CRM基幹システムのUMLコンポーネント図",
+          "クラウド非依存",
+          "DB用図形使用",
+          "レイヤー構成明確化"
+        ],
+        "request_head": "CRM基幹システムのUMLコンポーネント図。クラウド非依存、DB用図形使用、レイヤー構成明確化。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.92,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "total": 0.94,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-30T20:38:14"
+      }
+    },
+    {
+      "id": "20260331-080200-daily-digest",
+      "state": {
+        "request_keywords": [
+          "日次ニュース巡回対応"
+        ],
+        "request_head": "日次ニュース巡回対応",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "tech-researcher,retail-domain-researcher,secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.87,
+      "judge": {
+        "completeness": 0.8,
+        "accuracy": 0.8,
+        "clarity": 1.0,
+        "total": 0.87,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-03-31T08:02:00"
+      }
     }
-  ],
-  "frequent_phrases": [
-    {
-      "phrase": "以外のローカルブランチ削除して",
-      "count": 4
-    },
-    {
-      "phrase": "汎用ダイアグラムを生成して",
-      "count": 3
-    },
-    {
-      "phrase": "公式アイコン使い作図して",
-      "count": 2
-    },
-    {
-      "phrase": "アーキテクチャ構成図を生成して",
-      "count": 2
-    },
-    {
-      "phrase": "要約してレポートを生成",
-      "count": 2
-    }
-  ],
-  "intent_patterns": [
-    {
-      "intent": "提案Dをやってみたいかなぁ！出来ればポータルサイト側に見える化出来る形を構成",
-      "full": "提案Dをやってみたいかなぁ！出来ればポータルサイト側に見える化出来る形を構成したいんだけど可能かな？",
-      "date": "2026-03-29"
-    },
-    {
-      "intent": "ごめんあと他のページと同様にトップに戻るボタンは配置",
-      "full": "ごめんあと他のページと同様にトップに戻るボタンは配置してほしい",
-      "date": "2026-03-29"
-    }
-  ],
-  "conversation_enriched_at": "2026-03-29T21:15:37"
+  ]
 }
