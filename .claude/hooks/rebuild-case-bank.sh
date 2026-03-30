@@ -176,15 +176,31 @@ for md_file in sorted(task_log_dir.glob("*.md")):
         if m:
             judge_data['judged_at'] = m.group(1).strip()
     # Format 2: Markdown table (| 軸 | スコア | コメント |)
+    # Format 3: Bullet list (- completeness: 4/5 — ...)
+    # Format 4: H3 heading (### completeness: 4/5)
     if judge_data is None:
-        judge_block = re.search(r'## judge\b(.*?)(?=\n## |\n---|\Z)', text, re.DOTALL)
+        judge_block = re.search(r'## judge\b(.*?)(?=\n## [^#]|\n---|\Z)', text, re.DOTALL)
         if judge_block:
             jtext = judge_block.group(1)
-            # Parse table rows: | completeness | 4 | ... | or | completeness | 4/5 | ... |
             scores = {}
-            for row in re.finditer(r'\|\s*(completeness|accuracy|clarity)\s*\|\s*([\d.]+)(?:\s*/\s*\d+)?\s*\|', jtext, re.IGNORECASE):
-                scores[row.group(1).lower()] = float(row.group(2))
-            # Parse total: **総合スコア**: 4.3 / 5.0 or **総合**: **4.3/5.0**
+            maxes = {}
+            AXES = ['completeness', 'accuracy', 'clarity']
+            # Table rows: | completeness | 9/10 | ... |
+            for row in re.finditer(r'\|\s*(completeness|accuracy|clarity)\s*\|\s*([\d.]+)(?:\s*/\s*(\d+))?\s*\|', jtext, re.IGNORECASE):
+                axis = row.group(1).lower()
+                scores[axis] = float(row.group(2))
+                maxes[axis] = float(row.group(3)) if row.group(3) else 0
+            # Bullet list: - completeness: 4/5 — ...
+            for row in re.finditer(r'[-*]\s*(completeness|accuracy|clarity)\s*[:：]\s*([\d.]+)\s*/\s*(\d+)', jtext, re.IGNORECASE):
+                axis = row.group(1).lower()
+                scores[axis] = float(row.group(2))
+                maxes[axis] = float(row.group(3))
+            # H3 heading: ### completeness: 4/5
+            for row in re.finditer(r'###\s*(completeness|accuracy|clarity)\s*[:：]\s*([\d.]+)\s*/\s*(\d+)', jtext, re.IGNORECASE):
+                axis = row.group(1).lower()
+                scores[axis] = float(row.group(2))
+                maxes[axis] = float(row.group(3))
+            # Parse total: **総合スコア**: 4.3 / 5.0 or **総合**: 4.3/5
             total_m = re.search(r'総合[^:]*[:：]\s*\*{0,2}([\d.]+)\s*/\s*([\d.]+)', jtext)
             if total_m:
                 raw_total = float(total_m.group(1))
@@ -192,13 +208,22 @@ for md_file in sorted(task_log_dir.glob("*.md")):
                 scores['total'] = round(raw_total / max_total, 2) if max_total > 0 else raw_total
             if scores:
                 judge_data = {}
-                for key in ['completeness', 'accuracy', 'clarity']:
+                for key in AXES:
                     if key in scores:
-                        # Normalize 1-5 scale to 0.0-1.0 scale
                         val = scores[key]
-                        judge_data[key] = round(val / 5.0, 2) if val > 1.0 else val
+                        max_val = maxes.get(key, 0)
+                        # Normalize using actual denominator (5 or 10)
+                        if val > 1.0:
+                            divisor = max_val if max_val > 0 else (10.0 if val > 5.0 else 5.0)
+                            judge_data[key] = round(val / divisor, 2)
+                        else:
+                            judge_data[key] = val
                 if 'total' in scores:
                     judge_data['total'] = scores['total']
+                # Auto-calculate total if not explicitly present
+                if 'total' not in judge_data and len([k for k in AXES if k in judge_data]) >= 2:
+                    axis_vals = [judge_data[k] for k in AXES if k in judge_data]
+                    judge_data['total'] = round(sum(axis_vals) / len(axis_vals), 2)
                 judge_data.setdefault('failure_reason', '')
                 judge_data.setdefault('judge_comment', '')
 

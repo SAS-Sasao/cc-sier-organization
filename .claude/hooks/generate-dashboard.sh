@@ -186,25 +186,34 @@ if case_bank.exists():
             j = c.get("judge")
             if not j or not isinstance(j, dict):
                 continue
-            agent = c.get("action", {}).get("subagent", "unknown")
+            raw_agent = c.get("action", {}).get("subagent", "unknown")
             started = c.get("outcome", {}).get("started", "")[:7]
+            # Split compound subagent names (e.g. "tech-researcher,retail-domain-researcher,secretary")
+            agents_list = [a.strip() for a in raw_agent.split(",") if a.strip()] if raw_agent else ["unknown"]
 
-            for axis in ["completeness", "accuracy", "clarity", "total"]:
-                val = j.get(axis)
-                if val is not None:
-                    fval = float(val)
-                    # Normalize: scores > 1.0 are on 0-10 scale, convert to 0-1.0
-                    if axis != "total" and fval > 1.0:
-                        fval = fval / 10.0
-                    judge_by_agent[agent][axis].append(fval)
+            for agent in agents_list:
+                for axis in ["completeness", "accuracy", "clarity", "total"]:
+                    val = j.get(axis)
+                    if val is not None:
+                        fval = float(val)
+                        # Normalize: scores > 1.0 are on 0-10 scale, convert to 0-1.0
+                        if axis != "total" and fval > 1.0:
+                            fval = fval / 10.0
+                        judge_by_agent[agent][axis].append(fval)
+                if started:
+                    monthly_scores[started][agent].append(float(j.get("total", 0)))
 
             if j.get("total") is not None:
+                # Use task_id date as fallback when outcome.started is empty
+                date_str = c.get("outcome", {}).get("started", "")[:10]
+                if not date_str:
+                    tid = c.get("id", "")
+                    if len(tid) >= 8 and tid[:8].isdigit():
+                        date_str = f"{tid[:4]}-{tid[4:6]}-{tid[6:8]}"
                 judge_trend_raw.append({
-                    "date": c.get("outcome", {}).get("started", "")[:10],
+                    "date": date_str,
                     "score": round(float(j["total"]), 2),
                 })
-            if started:
-                monthly_scores[started][agent].append(float(j.get("total", 0)))
     except Exception:
         pass
 
