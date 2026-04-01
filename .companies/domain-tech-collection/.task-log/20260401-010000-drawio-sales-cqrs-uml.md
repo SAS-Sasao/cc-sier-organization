@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-04-01T01:00:00"
 completed: "2026-04-01T01:15:00"
 request: "さっき作った販売管理システムに関連する図をUML方式でどのクラウドベンダーでも対応できるようにして欲しい。DBやアプリ、操作者などには適切なアイコンを使用する"
-issue_number: null
-pr_number: null
+issue_number: 193
+pr_number: 192
 ---
 
 ## 実行計画
