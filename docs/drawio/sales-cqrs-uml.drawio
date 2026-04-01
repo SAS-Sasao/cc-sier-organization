@@ -1,0 +1,229 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <mxCell id="op" value="Operator / Admin" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#2C3E50;strokeColor=#2C3E50;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="10" width="40" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="vpc" value="Virtual Private Cloud (10.0.0.0/16)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#34495E;dashed=1;dashPattern=8 4;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=5;arcSize=6;container=1;collapsible=0;pointerEvents=0;" vertex="1" parent="1">
+      <mxGeometry x="30" y="110" width="940" height="770" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="pub" value="Public Zone" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF5FB;strokeColor=#2980B9;fontSize=12;fontStyle=1;verticalAlign=top;spacingTop=4;arcSize=8;container=1;collapsible=0;pointerEvents=0;" vertex="1" parent="vpc">
+      <mxGeometry x="20" y="35" width="900" height="120" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="bastion" value="Bastion Server&#xa;(SoftEther VPN)" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#2C3E50;strokeColor=#1A252F;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="pub">
+      <mxGeometry x="50" y="30" width="155" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lb" value="Load Balancer" style="shape=mxgraph.cisco.switches.multilayer_switch;html=1;whiteSpace=wrap;fillColor=#2980B9;strokeColor=#1F618D;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="pub">
+      <mxGeometry x="370" y="30" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="nat" value="NAT Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#85C1E9;strokeColor=#2980B9;fontSize=10;fontStyle=1;" vertex="1" parent="pub">
+      <mxGeometry x="700" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="app" value="Private Zone - Application Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF9E7;strokeColor=#F39C12;fontSize=12;fontStyle=1;verticalAlign=top;spacingTop=4;arcSize=8;container=1;collapsible=0;pointerEvents=0;" vertex="1" parent="vpc">
+      <mxGeometry x="20" y="175" width="900" height="180" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="cmd1" value="Command&#xa;Service 1" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#E67E22;strokeColor=#CA6F1E;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="app">
+      <mxGeometry x="40" y="30" width="130" height="65" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="cmd2" value="Command&#xa;Service 2" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#E67E22;strokeColor=#CA6F1E;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="app">
+      <mxGeometry x="195" y="30" width="130" height="65" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="batch" value="Batch Server" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#1ABC9C;strokeColor=#148F77;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="app">
+      <mxGeometry x="370" y="115" width="160" height="50" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="qry1" value="Query&#xa;Service 1" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#27AE60;strokeColor=#1E8449;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="app">
+      <mxGeometry x="530" y="30" width="130" height="65" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="qry2" value="Query&#xa;Service 2" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#27AE60;strokeColor=#1E8449;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="app">
+      <mxGeometry x="685" y="30" width="130" height="65" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="data" value="Private Zone - Data Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5EEF8;strokeColor=#8E44AD;fontSize=12;fontStyle=1;verticalAlign=top;spacingTop=4;arcSize=8;container=1;collapsible=0;pointerEvents=0;" vertex="1" parent="vpc">
+      <mxGeometry x="20" y="375" width="900" height="370" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="writedb" value="Primary DB&#xa;(PostgreSQL)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E67E22;strokeColor=#CA6F1E;fontColor=#fff;fontSize=11;fontStyle=1;" vertex="1" parent="data">
+      <mxGeometry x="60" y="40" width="130" height="90" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="readgrp" value="Read Replicas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F8F5;strokeColor=#1ABC9C;fontSize=11;fontStyle=1;verticalAlign=top;spacingTop=4;arcSize=8;container=1;collapsible=0;pointerEvents=0;" vertex="1" parent="data">
+      <mxGeometry x="350" y="30" width="310" height="130" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="read1" value="Read&#xa;Replica 1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#27AE60;strokeColor=#1E8449;fontColor=#fff;fontSize=11;fontStyle=1;" vertex="1" parent="readgrp">
+      <mxGeometry x="20" y="30" width="120" height="85" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="read2" value="Read&#xa;Replica 2" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#27AE60;strokeColor=#1E8449;fontColor=#fff;fontSize=11;fontStyle=1;" vertex="1" parent="readgrp">
+      <mxGeometry x="170" y="30" width="120" height="85" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="filesrv" value="File Server" style="shape=mxgraph.cisco.servers.standard_server;html=1;whiteSpace=wrap;fillColor=#7F8C8D;strokeColor=#566573;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="data">
+      <mxGeometry x="700" y="40" width="130" height="60" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="storage" value="Shared Storage&#xa;(NFS)" style="shape=mxgraph.cisco.servers.file_server;html=1;whiteSpace=wrap;fillColor=#5D6D7E;strokeColor=#2C3E50;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="data">
+      <mxGeometry x="700" y="120" width="130" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="backup" value="Backup Storage&#xa;(Object Storage)" style="shape=mxgraph.cisco.servers.file_server;html=1;whiteSpace=wrap;fillColor=#E74C3C;strokeColor=#C0392B;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="170" y="920" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="monitor" value="Monitoring&#xa;Service" style="shape=mxgraph.cisco.servers.management_engine;html=1;whiteSpace=wrap;fillColor=#3498DB;strokeColor=#2471A3;fontColor=#fff;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="650" y="920" width="160" height="70" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e1" style="strokeColor=#2C3E50;strokeWidth=2;" edge="1" source="op" target="bastion" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1l" value="SoftEther VPN" style="edgeLabel;html=1;fontSize=10;fontColor=#2C3E50;fontStyle=1;" vertex="1" connectable="0" parent="e1">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e2" style="strokeColor=#2C3E50;strokeWidth=1;dashed=1;dashPattern=6 3;" edge="1" source="bastion" target="cmd1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2l" value="SSH" style="edgeLabel;html=1;fontSize=9;fontColor=#2C3E50;" vertex="1" connectable="0" parent="e2">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e3" style="strokeColor=#2C3E50;strokeWidth=1;dashed=1;dashPattern=6 3;" edge="1" source="bastion" target="batch" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e4" style="strokeColor=#E67E22;strokeWidth=2;" edge="1" source="lb" target="cmd1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4l" value="Command API" style="edgeLabel;html=1;fontSize=9;fontColor=#E67E22;fontStyle=1;" vertex="1" connectable="0" parent="e4">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e5" style="strokeColor=#E67E22;strokeWidth=2;" edge="1" source="lb" target="cmd2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e6" style="strokeColor=#27AE60;strokeWidth=2;" edge="1" source="lb" target="qry1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6l" value="Query API" style="edgeLabel;html=1;fontSize=9;fontColor=#27AE60;fontStyle=1;" vertex="1" connectable="0" parent="e6">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e7" style="strokeColor=#27AE60;strokeWidth=2;" edge="1" source="lb" target="qry2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e8" style="strokeColor=#E67E22;strokeWidth=2;" edge="1" source="cmd1" target="writedb" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8l" value="INSERT / UPDATE" style="edgeLabel;html=1;fontSize=9;fontColor=#E67E22;fontStyle=1;" vertex="1" connectable="0" parent="e8">
+      <mxGeometry x="-0.3" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e9" style="strokeColor=#E67E22;strokeWidth=2;" edge="1" source="cmd2" target="writedb" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e10" style="strokeColor=#27AE60;strokeWidth=2;" edge="1" source="qry1" target="read1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10l" value="SELECT" style="edgeLabel;html=1;fontSize=9;fontColor=#27AE60;fontStyle=1;" vertex="1" connectable="0" parent="e10">
+      <mxGeometry x="-0.3" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e11" style="strokeColor=#27AE60;strokeWidth=2;" edge="1" source="qry2" target="read2" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e12" style="strokeColor=#8E44AD;strokeWidth=2;dashed=1;dashPattern=8 4;" edge="1" source="writedb" target="readgrp" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12l" value="Async Replication (WAL)" style="edgeLabel;html=1;fontSize=9;fontColor=#8E44AD;fontStyle=3;" vertex="1" connectable="0" parent="e12">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e14" style="strokeColor=#1ABC9C;strokeWidth=2;" edge="1" source="batch" target="writedb" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14l" value="Batch Write" style="edgeLabel;html=1;fontSize=9;fontColor=#1ABC9C;fontStyle=1;" vertex="1" connectable="0" parent="e14">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e15" style="strokeColor=#1ABC9C;strokeWidth=1;dashed=1;dashPattern=6 3;" edge="1" source="batch" target="read1" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15l" value="Batch Read" style="edgeLabel;html=1;fontSize=9;fontColor=#1ABC9C;" vertex="1" connectable="0" parent="e15">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e16" style="strokeColor=#7F8C8D;strokeWidth=1;edgeStyle=orthogonalEdgeStyle;" edge="1" source="filesrv" target="storage" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="e17" style="strokeColor=#7F8C8D;strokeWidth=1;dashed=1;dashPattern=6 3;" edge="1" source="batch" target="storage" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e17l" value="File I/O" style="edgeLabel;html=1;fontSize=9;fontColor=#7F8C8D;" vertex="1" connectable="0" parent="e17">
+      <mxGeometry x="-0.3" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e19" style="strokeColor=#E74C3C;strokeWidth=1;dashed=1;dashPattern=6 3;" edge="1" source="writedb" target="backup" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e19l" value="Snapshot" style="edgeLabel;html=1;fontSize=9;fontColor=#E74C3C;" vertex="1" connectable="0" parent="e19">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="e20" style="strokeColor=#E74C3C;strokeWidth=1;dashed=1;dashPattern=6 3;" edge="1" source="storage" target="backup" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e20l" value="Backup" style="edgeLabel;html=1;fontSize=9;fontColor=#E74C3C;" vertex="1" connectable="0" parent="e20">
+      <mxGeometry x="-0.2" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+    </mxCell>
+
+    <mxCell id="legend" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#BDC3C7;fontSize=10;verticalAlign=top;spacingTop=8;container=1;collapsible=0;pointerEvents=0;" vertex="1" parent="1">
+      <mxGeometry x="30" y="1010" width="940" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_title" value="Legend" style="text;html=1;fontSize=12;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="5" width="60" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg1" value="Command (Write)" style="text;html=1;fontSize=10;fontColor=#E67E22;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="28" width="130" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="Query (Read)" style="text;html=1;fontSize=10;fontColor=#27AE60;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="150" y="28" width="110" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Replication" style="text;html=1;fontSize=10;fontColor=#8E44AD;fontStyle=3;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="270" y="28" width="100" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="Batch" style="text;html=1;fontSize=10;fontColor=#1ABC9C;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="380" y="28" width="80" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg5" value="Management" style="text;html=1;fontSize=10;fontColor=#2C3E50;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="470" y="28" width="110" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg6" value="File I/O" style="text;html=1;fontSize=10;fontColor=#7F8C8D;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="590" y="28" width="70" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg7" value="Backup" style="text;html=1;fontSize=10;fontColor=#E74C3C;fontStyle=1;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="670" y="28" width="70" height="16" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg8" value="Solid = realtime  |  Dashed = async or management" style="text;html=1;fontSize=9;fontColor=#7F8C8D;align=left;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="48" width="350" height="16" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
