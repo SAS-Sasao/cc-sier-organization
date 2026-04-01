@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreComputer Migration - UML Component Diagram - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:960px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { background:#8b5cf6; color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+.tag-wbs { background:#dcfce7; color:#166534; }
+@media (prefers-color-scheme: dark) {
+  .tag-project { background:#78350f; color:#fde68a; }
+  .tag-wbs { background:#14532d; color:#bbf7d0; }
+}
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.aws-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:#E67E22;
+           color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.aws-btn:hover { opacity:.85; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.legend-grid { display:flex; flex-wrap:wrap; gap:10px 20px; margin:12px 0; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:.82rem; }
+.legend-line { width:24px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; font-size:.9rem; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .learning-points li { border-bottom-color: rgba(255,255,255,.08); }
+  .learning-points li strong { color: #93c5fd; }
+}
+</style>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({startOnLoad:true, theme:'neutral', securityLevel:'loose'});
+</script>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>StoreComputer Migration - UML Component Diagram</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコン移行</span>
+  <span class="tag tag-type">UML Component</span>
+  <span class="tag tag-wbs">WBS 3.1.1</span>
+</div>
+<div class="date">生成日: 2026-04-01 | クラウドベンダー非依存</div>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+graph TB
+  subgraph EDGE["Edge / Security Layer"]
+    DNS(("DNS Name Resolution"))
+    CDN["CDN Edge Cache"]
+    WAF["WAF Firewall"]
+  end
+
+  subgraph NET["Network Layer"]
+    LB["Load Balancer L7 Routing Multi-AZ"]
+    DXLINE["Dedicated Line Private Connection"]
+  end
+
+  subgraph APP["Application Layer"]
+    API["Store API Server - Order Processing - Inventory Mgmt - Sales Reporting"]
+    BATCH["Batch Processor - Daily Aggregation - ETL / Report Gen"]
+    EVENT["Async Processor - Device State Update - Notifications"]
+  end
+
+  subgraph DATA["Data Layer"]
+    RDBMS[("RDBMS Main Database Auto-Scaling")]
+    KVS[("Key-Value Store Device State")]
+    CACHE[("In-Memory Cache Session / Master Data")]
+    OBJ["Object Storage Batch Files / Logs"]
+  end
+
+  ADMIN(("Admin Users"))
+  STORE(("Store Devices 5000+"))
+  MON["Monitoring"]
+  NAT["NAT Outbound"]
+
+  ADMIN -->|HTTPS| DNS
+  DNS --> CDN
+  CDN --> WAF
+  WAF --> LB
+  STORE -.->|Dedicated Line| DXLINE
+  DXLINE --> LB
+  LB --> API
+  LB --> BATCH
+  API --> RDBMS
+  API --> KVS
+  API --> CACHE
+  BATCH --> RDBMS
+  BATCH --> OBJ
+  EVENT --> KVS
+
+  style API fill:#dae8fc,stroke:#6c8ebf
+  style BATCH fill:#fff2cc,stroke:#d6b656
+  style EVENT fill:#e1d5e7,stroke:#9673a6
+  style RDBMS fill:#dae8fc,stroke:#6c8ebf
+  style KVS fill:#fff2cc,stroke:#d6b656
+  style CACHE fill:#d5e8d4,stroke:#82b366
+  style OBJ fill:#f8cecc,stroke:#b85450
+  style DNS fill:#e1d5e7,stroke:#9673a6
+  style CDN fill:#e1d5e7,stroke:#9673a6
+  style WAF fill:#f8cecc,stroke:#b85450
+  style LB fill:#dae8fc,stroke:#6c8ebf
+  style DXLINE fill:#fff2cc,stroke:#d6b656
+  style MON fill:#d5e8d4,stroke:#82b366
+  style NAT fill:#dae8fc,stroke:#6c8ebf
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./storcon-uml-component.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+    <a href="../diagrams/storcon-vpc-architecture.html" class="aws-btn">AWS版構成図を見る</a>
+  </div>
+</div>
+
+<h2>凡例</h2>
+<div class="legend-grid">
+  <div class="legend-item"><span class="legend-line" style="background:#4361ee"></span> Admin Access &#8212; HTTPS経由の管理者アクセス</div>
+  <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#e67e22"></span> Store Access &#8212; 専用線経由の店舗接続</div>
+  <div class="legend-item"><span class="legend-line" style="background:#7c3aed"></span> Internal Routing &#8212; LBからアプリ層への振り分け</div>
+  <div class="legend-item"><span class="legend-line" style="background:#0d9488"></span> Data Access &#8212; アプリ層からデータ層への読み書き</div>
+</div>
+
+<h2>概要</h2>
+<p>コンビニストアコンピューターのクラウド移行アーキテクチャを、特定のクラウドベンダーに依存しないUMLコンポーネント図として表現。AWS/Azure/GCP いずれの環境でも適用可能な論理アーキテクチャとして設計。</p>
+<p>UML標準の図形を使用: アクター（人型）でユーザー/デバイス、矩形でサービス/バッチ、シリンダーでデータベース、ドキュメント型でオブジェクトストレージを表現し、可読性と汎用性を両立。</p>
+
+<h2>構成要素</h2>
+<table>
+  <thead><tr><th>要素</th><th>種類</th><th>説明</th></tr></thead>
+  <tbody>
+    <tr><td>Admin Users</td><td>アクター（人型）</td><td>管理画面からHTTPS経由でアクセスする運用担当者</td></tr>
+    <tr><td>Store Devices (5,000+)</td><td>アクター（人型）</td><td>各店舗のストアコンピューター。専用線で接続</td></tr>
+    <tr><td>DNS</td><td>楕円（サービス）</td><td>名前解決。管理画面のドメイン管理</td></tr>
+    <tr><td>CDN</td><td>角丸矩形</td><td>エッジキャッシュ。静的コンテンツ配信とDDoS緩和</td></tr>
+    <tr><td>WAF</td><td>角丸矩形</td><td>Webアプリケーションファイアウォール。SQLi/XSS防御</td></tr>
+    <tr><td>Load Balancer</td><td>角丸矩形</td><td>L7ルーティング。Multi-AZ冗長構成</td></tr>
+    <tr><td>Dedicated Line</td><td>角丸矩形（破線）</td><td>店舗との専用線接続。低遅延・高帯域を保証</td></tr>
+    <tr><td>Store API Server</td><td>矩形 &laquo;Service&raquo;</td><td>発注・在庫・売上処理のAPIサーバ</td></tr>
+    <tr><td>Batch Processor</td><td>矩形 &laquo;Batch&raquo;</td><td>日次集計・ETL・帳票生成のバッチ処理</td></tr>
+    <tr><td>Async Processor</td><td>矩形 &laquo;EventHandler&raquo;</td><td>非同期イベント処理（デバイス状態更新・通知）</td></tr>
+    <tr><td>RDBMS</td><td>シリンダー（DB）</td><td>メインDB。発注・在庫・売上データ。オートスケーリング対応</td></tr>
+    <tr><td>Key-Value Store</td><td>シリンダー（DB）</td><td>デバイス状態管理。高スループット・低レイテンシー</td></tr>
+    <tr><td>In-Memory Cache</td><td>シリンダー（DB）</td><td>セッション・商品マスタキャッシュ。サブミリ秒応答</td></tr>
+    <tr><td>Object Storage</td><td>ドキュメント型</td><td>バッチファイル・ログ。暗号化・バージョニング対応</td></tr>
+    <tr><td>Monitoring</td><td>角丸矩形（独立）</td><td>ログ・メトリクス・アラート。全コンポーネントから収集</td></tr>
+    <tr><td>NAT</td><td>角丸矩形（独立）</td><td>Private Zoneからのアウトバウンド通信用</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>ベンダー非依存の論理設計</strong>: AWS (Fargate + Aurora)、Azure (Container Apps + Cosmos DB)、GCP (Cloud Run + AlloyDB) いずれでも実装可能。クラウド選定前の要件定義・基本設計フェーズで活用する。</li>
+  <li><strong>4層アーキテクチャ</strong>: Edge/Security → Network → Application → Data の4層に分離。各層の責務を明確にし、セキュリティ境界とスケーリング単位を一致させる。</li>
+  <li><strong>データストアの使い分け</strong>: RDBMS（トランザクション整合性）、KVS（高スループット）、Cache（低レイテンシー）、Object Storage（大容量ファイル）を用途に応じて選択。単一DBに集約しない。</li>
+  <li><strong>AWS版との対応</strong>: <a href="../diagrams/storcon-vpc-architecture.html">AWS版構成図</a>では各コンポーネントをAWSサービスに具体化し、IaCテンプレート（CloudFormation）も提供。</li>
+</ul>
+
+<h2>学習ポイント</h2>
+<ul class="learning-points">
+  <li><strong>UMLコンポーネント図の読み方</strong> &#8212; アクター（人型）はシステム外部のユーザーやデバイス、矩形はソフトウェアコンポーネント、シリンダーはデータストアを表す。ステレオタイプ（&laquo;Service&raquo;, &laquo;Batch&raquo;等）でコンポーネントの性質を明示する。実案件でもベンダー選定前の論理設計はこの表記が標準。</li>
+  <li><strong>論理設計と物理設計の分離</strong> &#8212; 本図はクラウドベンダー非依存の「論理設計」。AWSならFargate+Aurora、AzureならContainer Apps+Cosmos DBと、同じ論理設計から異なる物理設計を導出できる。ストコン案件ではAWS採用が決まっているが、将来のマルチクラウド移行やベンダー比較時にこの分離が活きる。</li>
+  <li><strong>多層防御の設計原則</strong> &#8212; Edge(CDN/WAF) → Network(LB) → Application → Data の各層にセキュリティ境界を設ける。外部からの攻撃は各層で段階的にフィルタリングされ、最内層のデータに到達するにはすべての防御を突破する必要がある。これはゼロトラスト以前からの基本的なセキュリティアーキテクチャ。</li>
+  <li><strong>Polyglot Persistence（多言語永続化）</strong> &#8212; 1つのシステムに複数種のデータストアを組み合わせるパターン。RDBMSの強い整合性、KVSの高スループット、Cacheの低レイテンシー、Object Storageの大容量をそれぞれの特性に合わせて使い分ける。ストコンでは発注データ（RDBMS）、デバイス状態（KVS）、商品マスタ（Cache）と明確に分離。</li>
+  <li><strong>同期 vs 非同期の設計判断</strong> &#8212; Store APIは同期的にレスポンスを返す必要があるが、デバイス状態更新やログ収集は非同期で処理できる。EventHandlerを分離することでAPIの応答性能を維持しつつ、バックグラウンド処理を並行実行する。この判断はストコンの24/365運用で応答時間SLAを守るために重要。</li>
+</ul>
+
+<p class="updated">最終更新: 2026-04-01 | draw.io MCP Server</p>
+</body>
+</html>
