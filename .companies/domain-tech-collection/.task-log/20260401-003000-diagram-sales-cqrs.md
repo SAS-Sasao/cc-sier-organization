@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-04-01T00:30:00"
 completed: "2026-04-01T00:50:00"
 request: "販売管理システムをRDSでCQRSの思想でアーキテクチャ描きたい。アプリケーションサーバ、バッチサーバ、DBサーバ、ファイルサーバが存在し、サーバはEC2やECSを使用（サーバレスではない構築）でサーバはプライベートサブネットに入れ、踏み台サーバからSoftEtherVPNを使用してアクセスする構成にしてほしい。"
-issue_number: null
-pr_number: null
+issue_number: 191
+pr_number: 190
 ---
 
 ## 実行計画
