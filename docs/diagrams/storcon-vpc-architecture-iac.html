@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreComputer Migration - VPC Architecture - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./storcon-vpc-architecture.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./storcon-vpc-architecture.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>StoreComputer Migration - VPC Architecture - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-04-01</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>489 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">storcon-vpc-architecture.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">489 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Powered by AWS IaC MCP Server</p>
+<script>
+const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: >\n  StoreComputer Migration - VPC Architecture\n  \u30b3\u30f3\u30d3\u30cb\u30b9\u30c8\u30a2\u30b3\u30f3\u30d4\u30e5\u30fc\u30bf\u30fc\u306e\u30af\u30e9\u30a6\u30c9\u79fb\u884c\u57fa\u76e4\u3002\n  Public/Private Subnet\u5206\u96e2\u3001Direct Connect\u5e97\u8217\u63a5\u7d9a\u3001Multi-AZ\u9ad8\u53ef\u7528\u6027\u69cb\u6210\u3002\n\nParameters:\n  EnvironmentName:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, stg, prod]\n    Description: Environment name # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n\n  VpcCidr:\n    Type: String\n    Default: '10.0.0.0/16'\n    Description: VPC CIDR block # TODO: \u5b9f\u904b\u7528\u6642\u306b\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u8a2d\u8a08\u306b\u5408\u308f\u305b\u3066\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n\n  PublicSubnetACidr:\n    Type: String\n    Default: '10.0.1.0/24'\n    Description: Public Subnet AZ-a CIDR\n\n  PublicSubnetCCidr:\n    Type: String\n    Default: '10.0.2.0/24'\n    Description: Public Subnet AZ-c CIDR\n\n  PrivateAppSubnetACidr:\n    Type: String\n    Default: '10.0.10.0/24'\n    Description: Private Application Subnet AZ-a CIDR\n\n  PrivateAppSubnetCCidr:\n    Type: String\n    Default: '10.0.11.0/24'\n    Description: Private Application Subnet AZ-c CIDR\n\n  PrivateDataSubnetACidr:\n    Type: String\n    Default: '10.0.20.0/24'\n    Description: Private Data Subnet AZ-a CIDR\n\n  PrivateDataSubnetCCidr:\n    Type: String\n    Default: '10.0.21.0/24'\n    Description: Private Data Subnet AZ-c CIDR\n\n  AuroraMinCapacity:\n    Type: Number\n    Default: 0.5\n    Description: Aurora Serverless v2 minimum ACU\n\n  AuroraMaxCapacity:\n    Type: Number\n    Default: 16\n    Description: Aurora Serverless v2 maximum ACU\n\n  DynamoDBTableName:\n    Type: String\n    Default: storcon-device-state\n    Description: DynamoDB table name for device state management # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n\nConditions:\n  IsProd: !Equals [!Ref EnvironmentName, prod]\n\nResources:\n  # ============================================================\n  # VPC & Networking\n  # ============================================================\n  VPC:\n    Type: AWS::EC2::VPC\n    Properties:\n      CidrBlock: !Ref VpcCidr\n      EnableDnsSupport: true\n      EnableDnsHostnames: true\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-storcon-vpc'\n\n  InternetGateway:\n    Type: AWS::EC2::InternetGateway\n    Properties:\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-storcon-igw'\n\n  IGWAttachment:\n    Type: AWS::EC2::VPCGatewayAttachment\n    Properties:\n      VpcId: !Ref VPC\n      InternetGatewayId: !Ref InternetGateway\n\n  # --- Public Subnets ---\n  PublicSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: !Ref PublicSubnetACidr\n      AvailabilityZone: !Select [0, !GetAZs '']\n      MapPublicIpOnLaunch: false\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-public-a'\n\n  PublicSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: !Ref PublicSubnetCCidr\n      AvailabilityZone: !Select [1, !GetAZs '']\n      MapPublicIpOnLaunch: false\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-public-c'\n\n  PublicRouteTable:\n    Type: AWS::EC2::RouteTable\n    Properties:\n      VpcId: !Ref VPC\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-public-rt'\n\n  PublicRoute:\n    Type: AWS::EC2::Route\n    DependsOn: IGWAttachment\n    Properties:\n      RouteTableId: !Ref PublicRouteTable\n      DestinationCidrBlock: '0.0.0.0/0'\n      GatewayId: !Ref InternetGateway\n\n  PublicSubnetARouteTableAssociation:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PublicSubnetA\n      RouteTableId: !Ref PublicRouteTable\n\n  PublicSubnetCRouteTableAssociation:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PublicSubnetC\n      RouteTableId: !Ref PublicRouteTable\n\n  # --- NAT Gateway ---\n  NatEIP:\n    Type: AWS::EC2::EIP\n    Properties:\n      Domain: vpc\n\n  NatGateway:\n    Type: AWS::EC2::NatGateway\n    Properties:\n      AllocationId: !GetAtt NatEIP.AllocationId\n      SubnetId: !Ref PublicSubnetA\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-nat-gw'\n\n  # --- Private Subnets (Application Tier) ---\n  PrivateAppSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: !Ref PrivateAppSubnetACidr\n      AvailabilityZone: !Select [0, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-app-a'\n\n  PrivateAppSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: !Ref PrivateAppSubnetCCidr\n      AvailabilityZone: !Select [1, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-app-c'\n\n  PrivateAppRouteTable:\n    Type: AWS::EC2::RouteTable\n    Properties:\n      VpcId: !Ref VPC\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-app-rt'\n\n  PrivateAppRoute:\n    Type: AWS::EC2::Route\n    Properties:\n      RouteTableId: !Ref PrivateAppRouteTable\n      DestinationCidrBlock: '0.0.0.0/0'\n      NatGatewayId: !Ref NatGateway\n\n  PrivateAppSubnetARouteTableAssociation:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PrivateAppSubnetA\n      RouteTableId: !Ref PrivateAppRouteTable\n\n  PrivateAppSubnetCRouteTableAssociation:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PrivateAppSubnetC\n      RouteTableId: !Ref PrivateAppRouteTable\n\n  # --- Private Subnets (Data Tier) ---\n  PrivateDataSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: !Ref PrivateDataSubnetACidr\n      AvailabilityZone: !Select [0, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-data-a'\n\n  PrivateDataSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref VPC\n      CidrBlock: !Ref PrivateDataSubnetCCidr\n      AvailabilityZone: !Select [1, !GetAZs '']\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-data-c'\n\n  PrivateDataRouteTable:\n    Type: AWS::EC2::RouteTable\n    Properties:\n      VpcId: !Ref VPC\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-private-data-rt'\n\n  PrivateDataRoute:\n    Type: AWS::EC2::Route\n    Properties:\n      RouteTableId: !Ref PrivateDataRouteTable\n      DestinationCidrBlock: '0.0.0.0/0'\n      NatGatewayId: !Ref NatGateway\n\n  PrivateDataSubnetARouteTableAssociation:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PrivateDataSubnetA\n      RouteTableId: !Ref PrivateDataRouteTable\n\n  PrivateDataSubnetCRouteTableAssociation:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PrivateDataSubnetC\n      RouteTableId: !Ref PrivateDataRouteTable\n\n  # ============================================================\n  # Security Groups\n  # ============================================================\n  ALBSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: ALB Security Group - allows HTTPS inbound\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 443\n          ToPort: 443\n          CidrIp: '0.0.0.0/0'\n          Description: HTTPS from CloudFront/Direct Connect\n      SecurityGroupEgress:\n        - IpProtocol: tcp\n          FromPort: 8080\n          ToPort: 8080\n          DestinationSecurityGroupId: !Ref AppSecurityGroup\n          Description: To App tier\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-alb-sg'\n\n  AppSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Application tier Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 8080\n          ToPort: 8080\n          SourceSecurityGroupId: !Ref ALBSecurityGroup\n          Description: From ALB\n      SecurityGroupEgress:\n        - IpProtocol: tcp\n          FromPort: 5432\n          ToPort: 5432\n          DestinationSecurityGroupId: !Ref DataSecurityGroup\n          Description: To Aurora PostgreSQL\n        - IpProtocol: tcp\n          FromPort: 6379\n          ToPort: 6379\n          DestinationSecurityGroupId: !Ref DataSecurityGroup\n          Description: To ElastiCache Redis\n        - IpProtocol: tcp\n          FromPort: 443\n          ToPort: 443\n          CidrIp: '0.0.0.0/0'\n          Description: HTTPS outbound (AWS APIs, patches)\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-app-sg'\n\n  DataSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Data tier Security Group\n      VpcId: !Ref VPC\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 5432\n          ToPort: 5432\n          SourceSecurityGroupId: !Ref AppSecurityGroup\n          Description: PostgreSQL from App tier\n        - IpProtocol: tcp\n          FromPort: 6379\n          ToPort: 6379\n          SourceSecurityGroupId: !Ref AppSecurityGroup\n          Description: Redis from App tier\n      SecurityGroupEgress:\n        - IpProtocol: '-1'\n          CidrIp: '127.0.0.1/32'\n          Description: Deny all outbound (data tier is sink)\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-data-sg'\n\n  # ============================================================\n  # ALB\n  # ============================================================\n  ApplicationLoadBalancer:\n    Type: AWS::ElasticLoadBalancingV2::LoadBalancer\n    Properties:\n      Name: !Sub '${EnvironmentName}-storcon-alb'\n      Scheme: internal\n      Type: application\n      Subnets:\n        - !Ref PublicSubnetA\n        - !Ref PublicSubnetC\n      SecurityGroups:\n        - !Ref ALBSecurityGroup\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-storcon-alb'\n\n  # ============================================================\n  # ECS Fargate Cluster\n  # ============================================================\n  ECSCluster:\n    Type: AWS::ECS::Cluster\n    Properties:\n      ClusterName: !Sub '${EnvironmentName}-storcon-cluster'\n      ClusterSettings:\n        - Name: containerInsights\n          Value: enabled\n\n  # ============================================================\n  # Aurora Serverless v2\n  # ============================================================\n  AuroraSubnetGroup:\n    Type: AWS::RDS::DBSubnetGroup\n    Properties:\n      DBSubnetGroupDescription: Subnet group for Aurora Serverless v2\n      SubnetIds:\n        - !Ref PrivateDataSubnetA\n        - !Ref PrivateDataSubnetC\n\n  AuroraCluster:\n    Type: AWS::RDS::DBCluster\n    Properties:\n      Engine: aurora-postgresql\n      EngineMode: provisioned\n      ServerlessV2ScalingConfiguration:\n        MinCapacity: !Ref AuroraMinCapacity\n        MaxCapacity: !Ref AuroraMaxCapacity\n      MasterUsername: storconadmin # TODO: \u5b9f\u904b\u7528\u6642\u306fSecrets Manager\u3067\u7ba1\u7406\u3057\u3066\u304f\u3060\u3055\u3044\n      ManageMasterUserPassword: true\n      DBSubnetGroupName: !Ref AuroraSubnetGroup\n      VpcSecurityGroupIds:\n        - !Ref DataSecurityGroup\n      StorageEncrypted: true\n      DeletionProtection: !If [IsProd, true, false]\n      BackupRetentionPeriod: !If [IsProd, 14, 1]\n      EnableCloudwatchLogsExports:\n        - postgresql\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-storcon-aurora'\n\n  AuroraInstance:\n    Type: AWS::RDS::DBInstance\n    Properties:\n      DBClusterIdentifier: !Ref AuroraCluster\n      DBInstanceClass: db.serverless\n      Engine: aurora-postgresql\n      AutoMinorVersionUpgrade: true\n      PubliclyAccessible: false\n\n  # ============================================================\n  # DynamoDB\n  # ============================================================\n  DeviceStateTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub '${EnvironmentName}-${DynamoDBTableName}'\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - AttributeName: deviceId\n          AttributeType: S\n        - AttributeName: storeId\n          AttributeType: S\n      KeySchema:\n        - AttributeName: deviceId\n          KeyType: HASH\n        - AttributeName: storeId\n          KeyType: RANGE\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n      SSESpecification:\n        SSEEnabled: true\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-device-state'\n\n  # ============================================================\n  # S3 Bucket (Batch Files)\n  # ============================================================\n  BatchFilesBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub '${EnvironmentName}-storcon-batch-files-${AWS::AccountId}'\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      VersioningConfiguration:\n        Status: Enabled\n      Tags:\n        - Key: Name\n          Value: !Sub '${EnvironmentName}-storcon-batch-files'\n\n  # ============================================================\n  # CloudWatch Log Group\n  # ============================================================\n  AppLogGroup:\n    Type: AWS::Logs::LogGroup\n    Properties:\n      LogGroupName: !Sub '/ecs/${EnvironmentName}/storcon'\n      RetentionInDays: !If [IsProd, 90, 14]\n      KmsKeyId: !If [IsProd, !Ref AWS::NoValue, !Ref AWS::NoValue]\n\nOutputs:\n  VpcId:\n    Description: VPC ID\n    Value: !Ref VPC\n    Export:\n      Name: !Sub '${EnvironmentName}-storcon-vpc-id'\n\n  ALBArn:\n    Description: Application Load Balancer ARN\n    Value: !Ref ApplicationLoadBalancer\n\n  ECSClusterArn:\n    Description: ECS Cluster ARN\n    Value: !GetAtt ECSCluster.Arn\n\n  AuroraClusterEndpoint:\n    Description: Aurora Cluster Endpoint\n    Value: !GetAtt AuroraCluster.Endpoint.Address\n\n  DynamoDBTableArn:\n    Description: DynamoDB Device State Table ARN\n    Value: !GetAtt DeviceStateTable.Arn\n\n  BatchFilesBucketArn:\n    Description: S3 Batch Files Bucket ARN\n    Value: !GetAtt BatchFilesBucket.Arn\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

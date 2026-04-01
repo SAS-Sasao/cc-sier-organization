@@ -56,6 +56,10 @@ td { padding:10px 12px; border:1px solid var(--border); }
 .legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
 .legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
 .legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
 .cost-note { font-size:.82rem; color:var(--muted); margin-bottom:16px; }
 tfoot th { background:var(--bg); font-size:.9rem; }
 .learning-points { list-style: none; padding: 0; }
@@ -82,6 +86,7 @@ tfoot th { background:var(--bg); font-size:.9rem; }
 <div class="diagram-container">
   <img src="./storcon-vpc-architecture.png" alt="StoreComputer Migration VPC Architecture" onclick="document.getElementById('lb').classList.add('active')">
   <div class="hint">クリックで拡大</div>
+  <a href="./storcon-vpc-architecture-iac.html" class="iac-btn">IaCソースコードを見る</a>
 </div>
 
 <div class="section">

@@ -56,3 +56,14 @@ reward: null
 - 凡例でEdge色と用途を日本語で明示
 - データフロー図をAdmin/Store/Sync/Batch/Asyncの5パターンに分類
 - 学習ポイント5項目で、VPC基本概念をストコン案件に紐づけて解説
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-01T18:23:18"
+```

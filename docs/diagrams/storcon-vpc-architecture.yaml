@@ -1,0 +1,489 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  StoreComputer Migration - VPC Architecture
+  コンビニストアコンピューターのクラウド移行基盤。
+  Public/Private Subnet分離、Direct Connect店舗接続、Multi-AZ高可用性構成。
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: Environment name # TODO: 実運用時に変更してください
+
+  VpcCidr:
+    Type: String
+    Default: '10.0.0.0/16'
+    Description: VPC CIDR block # TODO: 実運用時にネットワーク設計に合わせて変更してください
+
+  PublicSubnetACidr:
+    Type: String
+    Default: '10.0.1.0/24'
+    Description: Public Subnet AZ-a CIDR
+
+  PublicSubnetCCidr:
+    Type: String
+    Default: '10.0.2.0/24'
+    Description: Public Subnet AZ-c CIDR
+
+  PrivateAppSubnetACidr:
+    Type: String
+    Default: '10.0.10.0/24'
+    Description: Private Application Subnet AZ-a CIDR
+
+  PrivateAppSubnetCCidr:
+    Type: String
+    Default: '10.0.11.0/24'
+    Description: Private Application Subnet AZ-c CIDR
+
+  PrivateDataSubnetACidr:
+    Type: String
+    Default: '10.0.20.0/24'
+    Description: Private Data Subnet AZ-a CIDR
+
+  PrivateDataSubnetCCidr:
+    Type: String
+    Default: '10.0.21.0/24'
+    Description: Private Data Subnet AZ-c CIDR
+
+  AuroraMinCapacity:
+    Type: Number
+    Default: 0.5
+    Description: Aurora Serverless v2 minimum ACU
+
+  AuroraMaxCapacity:
+    Type: Number
+    Default: 16
+    Description: Aurora Serverless v2 maximum ACU
+
+  DynamoDBTableName:
+    Type: String
+    Default: storcon-device-state
+    Description: DynamoDB table name for device state management # TODO: 実運用時に変更してください
+
+Conditions:
+  IsProd: !Equals [!Ref EnvironmentName, prod]
+
+Resources:
+  # ============================================================
+  # VPC & Networking
+  # ============================================================
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-storcon-vpc'
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-storcon-igw'
+
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # --- Public Subnets ---
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-public-a'
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-public-c'
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-public-rt'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+
+  # --- NAT Gateway ---
+  NatEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-nat-gw'
+
+  # --- Private Subnets (Application Tier) ---
+  PrivateAppSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateAppSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-app-a'
+
+  PrivateAppSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateAppSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-app-c'
+
+  PrivateAppRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-app-rt'
+
+  PrivateAppRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateAppRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+
+  PrivateAppSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetA
+      RouteTableId: !Ref PrivateAppRouteTable
+
+  PrivateAppSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetC
+      RouteTableId: !Ref PrivateAppRouteTable
+
+  # --- Private Subnets (Data Tier) ---
+  PrivateDataSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateDataSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-data-a'
+
+  PrivateDataSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateDataSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-data-c'
+
+  PrivateDataRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-private-data-rt'
+
+  PrivateDataRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateDataRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+
+  PrivateDataSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDataSubnetA
+      RouteTableId: !Ref PrivateDataRouteTable
+
+  PrivateDataSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDataSubnetC
+      RouteTableId: !Ref PrivateDataRouteTable
+
+  # ============================================================
+  # Security Groups
+  # ============================================================
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Security Group - allows HTTPS inbound
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: '0.0.0.0/0'
+          Description: HTTPS from CloudFront/Direct Connect
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          DestinationSecurityGroupId: !Ref AppSecurityGroup
+          Description: To App tier
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-alb-sg'
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Application tier Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: From ALB
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          DestinationSecurityGroupId: !Ref DataSecurityGroup
+          Description: To Aurora PostgreSQL
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          DestinationSecurityGroupId: !Ref DataSecurityGroup
+          Description: To ElastiCache Redis
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: '0.0.0.0/0'
+          Description: HTTPS outbound (AWS APIs, patches)
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-app-sg'
+
+  DataSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Data tier Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+          Description: PostgreSQL from App tier
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+          Description: Redis from App tier
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          CidrIp: '127.0.0.1/32'
+          Description: Deny all outbound (data tier is sink)
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-data-sg'
+
+  # ============================================================
+  # ALB
+  # ============================================================
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub '${EnvironmentName}-storcon-alb'
+      Scheme: internal
+      Type: application
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetC
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-storcon-alb'
+
+  # ============================================================
+  # ECS Fargate Cluster
+  # ============================================================
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${EnvironmentName}-storcon-cluster'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  # ============================================================
+  # Aurora Serverless v2
+  # ============================================================
+  AuroraSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Aurora Serverless v2
+      SubnetIds:
+        - !Ref PrivateDataSubnetA
+        - !Ref PrivateDataSubnetC
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !Ref AuroraMinCapacity
+        MaxCapacity: !Ref AuroraMaxCapacity
+      MasterUsername: storconadmin # TODO: 実運用時はSecrets Managerで管理してください
+      ManageMasterUserPassword: true
+      DBSubnetGroupName: !Ref AuroraSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DataSecurityGroup
+      StorageEncrypted: true
+      DeletionProtection: !If [IsProd, true, false]
+      BackupRetentionPeriod: !If [IsProd, 14, 1]
+      EnableCloudwatchLogsExports:
+        - postgresql
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-storcon-aurora'
+
+  AuroraInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      AutoMinorVersionUpgrade: true
+      PubliclyAccessible: false
+
+  # ============================================================
+  # DynamoDB
+  # ============================================================
+  DeviceStateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${EnvironmentName}-${DynamoDBTableName}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: deviceId
+          AttributeType: S
+        - AttributeName: storeId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: deviceId
+          KeyType: HASH
+        - AttributeName: storeId
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-device-state'
+
+  # ============================================================
+  # S3 Bucket (Batch Files)
+  # ============================================================
+  BatchFilesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-storcon-batch-files-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-storcon-batch-files'
+
+  # ============================================================
+  # CloudWatch Log Group
+  # ============================================================
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${EnvironmentName}/storcon'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !If [IsProd, !Ref AWS::NoValue, !Ref AWS::NoValue]
+
+Outputs:
+  VpcId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub '${EnvironmentName}-storcon-vpc-id'
+
+  ALBArn:
+    Description: Application Load Balancer ARN
+    Value: !Ref ApplicationLoadBalancer
+
+  ECSClusterArn:
+    Description: ECS Cluster ARN
+    Value: !GetAtt ECSCluster.Arn
+
+  AuroraClusterEndpoint:
+    Description: Aurora Cluster Endpoint
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+
+  DynamoDBTableArn:
+    Description: DynamoDB Device State Table ARN
+    Value: !GetAtt DeviceStateTable.Arn
+
+  BatchFilesBucketArn:
+    Description: S3 Batch Files Bucket ARN
+    Value: !GetAtt BatchFilesBucket.Arn
