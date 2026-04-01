@@ -48,3 +48,14 @@ pr_number: 192
 | clarity | 5/5 | 色分け（Orange=Command, Green=Query, Purple=Replication, Teal=Batch）で視認性確保。凡例付き。 |
 
 **総合**: 4.7/5
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-01T12:45:01"
+```
