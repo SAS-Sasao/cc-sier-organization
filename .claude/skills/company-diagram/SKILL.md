@@ -323,6 +323,7 @@ docs/diagrams/
 4. **レイヤー構成** — テーブル形式（レイヤー / AWSサービス / 用途）
 5. **設計のポイント** — このアーキテクチャの重要な設計判断・トレードオフ・ベストプラクティス（3〜5項目）
 6. **コスト概算** — `references/aws-cost-estimation.md` のフォーマットに従いDev/Prod月額概算を記載（詳細は 3.4 参照）
+7. **学習ポイント** — この構成図から得られる技術的知見を3〜5項目で記載（全図必須）。詳細は「学習ポイントセクション仕様」を参照
 
 凡例セクションのHTML:
 ```html
@@ -347,7 +348,37 @@ docs/diagrams/
 - `style="bold"` のEdgeは実線（`.legend-line`）、`style="dashed"` のEdgeは破線（`.legend-dashed`）で表示
 - 画像内は英語のため、凡例で日本語の補足説明を提供する
 
-上記に加え、アーキテクチャ固有の補足セクション（コスト概算、レイテンシー特性、学習ポイント等）を必要に応じて追加する。
+上記に加え、アーキテクチャ固有の補足セクション（レイテンシー特性等）を必要に応じて追加する。
+
+### 学習ポイントセクション仕様
+
+全詳細ページに必須。「コスト概算」セクションの後に配置する。
+
+**記載ルール**:
+- 3〜5項目の要点。各項目は「タイトル（太字）＋説明文」の形式
+- この構成図を通じて理解すべき技術的知見・設計思想を記載する
+- AWSサービスの選定理由、設計パターンの背景、業務要件との対応など
+- 実案件（ストコン移行等）への適用が明確な場合は積極的に言及する
+
+HTMLテンプレート:
+```html
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>{要点タイトル}</strong> — {説明文}</li>
+    <li><strong>{要点タイトル}</strong> — {説明文}</li>
+    <li><strong>{要点タイトル}</strong> — {説明文}</li>
+  </ul>
+</div>
+```
+
+CSSスタイル（`<style>` 内に追加）:
+```css
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+```
 
 共通要素:
 - ヘッダー: タイトル、タグ、生成日

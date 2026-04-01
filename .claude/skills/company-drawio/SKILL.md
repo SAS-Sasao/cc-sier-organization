@@ -157,11 +157,42 @@ docs/drawio/
 2. **概要** — 図の目的・対象システム・スコープ
 3. **構成要素** — テーブル形式（要素名 / 種類 / 説明）
 4. **設計のポイント** — 設計判断・トレードオフ（2〜4項目）
+5. **学習ポイント** — この図から得られる技術的・業務的知見を3〜5項目で記載（全図必須）。詳細は「学習ポイントセクション仕様」を参照
 
 共通要素:
 - ヘッダー: タイトル、タグ（案件名・図の種類）、生成日
 - 「draw.ioで編集」ボタン（エディタURLへのリンク）
 - 「一覧に戻る」リンク
+
+### 学習ポイントセクション仕様
+
+全詳細ページに必須。「設計のポイント」セクションの後に配置する。
+
+**記載ルール**:
+- 3〜5項目の要点。各項目は「タイトル（太字）＋説明文」の形式
+- この図を通じて理解すべき技術的・業務的知見を記載する
+- 設計パターンの背景、業務プロセスの構造、データの流れの意味など
+- 実案件（ストコン移行等）への適用が明確な場合は積極的に言及する
+
+HTMLテンプレート:
+```html
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>{要点タイトル}</strong> — {説明文}</li>
+    <li><strong>{要点タイトル}</strong> — {説明文}</li>
+    <li><strong>{要点タイトル}</strong> — {説明文}</li>
+  </ul>
+</div>
+```
+
+CSSスタイル（`<style>` 内に追加）:
+```css
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+```
 
 ### 5.3 ダイアグラム表示とアクションボタン
 
