@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreComputer Migration VPC Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+.tag-wbs { background:#dcfce7; color:#166534; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+  .tag-wbs { background:#14532d; color:#bbf7d0; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-sync { background:#22c55e; color:#fff; }
+.badge-async { background:#8b5cf6; color:#fff; }
+.badge-batch { background:#3b82f6; color:#fff; }
+.badge-mgmt { background:#6366f1; color:#fff; }
+.badge-store { background:#e67e22; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.cost-note { font-size:.82rem; color:var(--muted); margin-bottom:16px; }
+tfoot th { background:var(--bg); font-size:.9rem; }
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .learning-points li { border-bottom-color: rgba(255,255,255,.08); }
+  .learning-points li strong { color: #93c5fd; }
+}
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>StoreComputer Migration - VPC Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコン移行</span>
+  <span class="tag tag-area">VPC / Network</span>
+  <span class="tag tag-wbs">WBS 3.1.1</span>
+  <span>生成日: 2026-04-01</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./storcon-vpc-architecture.png" alt="StoreComputer Migration VPC Architecture" onclick="document.getElementById('lb').classList.add('active')">
+  <div class="hint">クリックで拡大</div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> HTTPS --- 管理者からのHTTPSアクセス（CloudFront/WAF経由）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> Dedicated Line --- 店舗からのDirect Connect専用線接続</div>
+    <div class="legend-item"><span class="legend-line" style="background:purple"></span> API / Batch --- ALBからアプリケーション層へのルーティング</div>
+    <div class="legend-item"><span class="legend-line" style="background:teal"></span> Read/Write --- アプリケーション層からデータ層へのアクセス</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:darkorange"></span> Async --- 非同期イベント処理（API→Lambda）</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:gray"></span> Monitoring / Outbound --- CloudWatch監視・NAT GW経由のアウトバウンド</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>コンビニエンスストアのストアコンピューターをオンプレミス→AWSクラウドに移行するための基本VPCアーキテクチャ。全国5,000店舗以上の店舗端末（ストアコンピューター）からのデータを受け付け、発注・在庫・売上等の業務処理をクラウド上で実行する。</p>
+  <p>VPCの基本設計として、Public Subnet（ALB/NAT GW）とPrivate Subnet（Application Tier / Data Tier）を分離し、外部アクセスはCloudFront+WAFとDirect Connectの2経路で制御する。24/365稼働のコンビニ業務を支えるため、Multi-AZ構成で高可用性を確保する。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <p><span class="badge badge-mgmt">Admin</span> 管理者アクセス</p>
+  <div class="flow">
+    <span class="flow-step">Admin Users</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Route 53</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">WAF</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Store API (Fargate)</span>
+  </div>
+
+  <p><span class="badge badge-store">Store</span> 店舗からのアクセス（専用線）</p>
+  <div class="flow">
+    <span class="flow-step">Conv. Stores (5,000+)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Direct Connect</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Store API (Fargate)</span>
+  </div>
+
+  <p><span class="badge badge-sync">Sync</span> データアクセス（同期）</p>
+  <div class="flow">
+    <span class="flow-step">Store API</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora Serverless v2 (R/W)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Store API</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB (Device State)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Store API</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ElastiCache Redis (Cache)</span>
+  </div>
+
+  <p><span class="badge badge-batch">Batch</span> バッチ処理</p>
+  <div class="flow">
+    <span class="flow-step">Batch Processor (Fargate)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora Serverless v2 (ETL)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Batch Processor (Fargate)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (Batch Files)</span>
+  </div>
+
+  <p><span class="badge badge-async">Async</span> 非同期イベント処理</p>
+  <div class="flow">
+    <span class="flow-step">Store API</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (Event Handler)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB (Events)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <thead><tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td>Edge / Security</td><td>Route 53</td><td>DNS名前解決・ヘルスチェック</td></tr>
+      <tr><td>Edge / Security</td><td>CloudFront</td><td>CDN・DDoS防御（Shield Standard）・HTTPS終端</td></tr>
+      <tr><td>Edge / Security</td><td>WAF</td><td>Webアプリケーションファイアウォール（SQLi/XSS防御）</td></tr>
+      <tr><td>Store Connectivity</td><td>Direct Connect</td><td>店舗↔AWS間の専用線接続（低遅延・高帯域）</td></tr>
+      <tr><td>Public Subnet</td><td>ALB (Multi-AZ)</td><td>HTTP/HTTPSリクエストのルーティング・ヘルスチェック</td></tr>
+      <tr><td>Public Subnet</td><td>NAT Gateway</td><td>Private Subnetからのアウトバウンド通信（パッチ取得等）</td></tr>
+      <tr><td>Private Subnet (App)</td><td>Fargate - Store API</td><td>ストコンAPIサーバ（発注・在庫・売上処理）</td></tr>
+      <tr><td>Private Subnet (App)</td><td>Fargate - Batch Processor</td><td>日次/月次バッチ処理（売上集計・発注計算）</td></tr>
+      <tr><td>Private Subnet (App)</td><td>Lambda - Event Handler</td><td>非同期イベント処理（デバイス状態更新等）</td></tr>
+      <tr><td>Private Subnet (Data)</td><td>Aurora Serverless v2 (PostgreSQL)</td><td>メインDB（発注・在庫・売上データ）</td></tr>
+      <tr><td>Private Subnet (Data)</td><td>DynamoDB</td><td>デバイス状態管理（高スループット・低レイテンシー）</td></tr>
+      <tr><td>Private Subnet (Data)</td><td>ElastiCache Redis</td><td>セッション/マスタキャッシュ（商品マスタ等）</td></tr>
+      <tr><td>Storage</td><td>S3</td><td>バッチファイル・帳票・ログアーカイブ</td></tr>
+      <tr><td>Monitoring</td><td>CloudWatch</td><td>メトリクス・ログ・アラーム監視</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. Public / Private Subnet の分離</strong><br>
+  ALBとNAT GatewayのみをPublic Subnetに配置し、アプリケーションとデータベースはすべてPrivate Subnetに隔離する。これにより、インターネットからの直接アクセスを遮断し、セキュリティを確保する。ストコンは決済データ（PCI DSS対象）を扱うため、この分離は必須。</p>
+
+  <p><strong>2. Direct Connect による店舗接続</strong><br>
+  5,000+店舗からの常時接続をインターネットVPNではなくDirect Connectで実現。低遅延・高帯域・安定した接続品質を確保する。コンビニの発注・検品・POS精算はリアルタイム性が求められるため、専用線接続が適切。</p>
+
+  <p><strong>3. Aurora Serverless v2 の採用</strong><br>
+  ストコンの負荷は時間帯によって大きく変動する（早朝の発注ピーク、深夜の低負荷）。Aurora Serverless v2は0.5〜128 ACUの範囲で自動スケールし、負荷変動に追従しつつコストを最適化する。</p>
+
+  <p><strong>4. DynamoDB + ElastiCache の補完的活用</strong><br>
+  デバイス状態（ストコンのオンライン/オフライン、最終通信時刻等）はDynamoDBに格納し、ミリ秒単位の応答を実現。商品マスタ等の参照頻度が高いデータはElastiCache Redisでキャッシュし、Auroraへの負荷を軽減する。</p>
+
+  <p><strong>5. CloudFront + WAF によるエッジ保護</strong><br>
+  管理画面等のインターネット経由アクセスはCloudFront + WAFで保護する。WAFでSQLインジェクション・XSS・レートリミットを適用し、CloudFrontのShield StandardでL3/L4 DDoSを自動緩和する。</p>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p class="cost-note">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。<br>
+  為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <thead>
+      <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Route 53</td><td>Hosted Zone + クエリ</td><td>$1 (150円)</td><td>$5 (750円)</td></tr>
+      <tr><td>CloudFront</td><td>CDN配信</td><td>$1-5 (150-750円)</td><td>$20-50 (3,000-7,500円)</td></tr>
+      <tr><td>WAF</td><td>Web ACL + ルール</td><td>$7 (1,050円)</td><td>$15-30 (2,250-4,500円)</td></tr>
+      <tr><td>Direct Connect</td><td>1Gbps ポート + データ転送</td><td>$220 (33,000円)</td><td>$220-350 (33,000-52,500円)</td></tr>
+      <tr><td>ALB</td><td>Multi-AZ</td><td>$20 (3,000円)</td><td>$25-50 (3,750-7,500円)</td></tr>
+      <tr><td>NAT Gateway</td><td>1 AZ</td><td>$35 (5,250円)</td><td>$70-100 (10,500-15,000円)</td></tr>
+      <tr><td>Fargate (Store API)</td><td>1 vCPU 2GB (Dev) / 2 vCPU 4GB x2 (Prod)</td><td>$40 (6,000円)</td><td>$160 (24,000円)</td></tr>
+      <tr><td>Fargate (Batch)</td><td>0.5 vCPU 1GB (Dev) / 1 vCPU 2GB (Prod)</td><td>$20 (3,000円)</td><td>$40 (6,000円)</td></tr>
+      <tr><td>Lambda</td><td>Event Handler</td><td>$0-5 (0-750円)</td><td>$5-20 (750-3,000円)</td></tr>
+      <tr><td>Aurora Serverless v2</td><td>0.5-2 ACU (Dev) / 2-16 ACU Multi-AZ (Prod)</td><td>$50-100 (7,500-15,000円)</td><td>$200-400 (30,000-60,000円)</td></tr>
+      <tr><td>DynamoDB</td><td>On-Demand</td><td>$5-20 (750-3,000円)</td><td>$20-100 (3,000-15,000円)</td></tr>
+      <tr><td>ElastiCache Redis</td><td>Serverless</td><td>$25-50 (3,750-7,500円)</td><td>$90-150 (13,500-22,500円)</td></tr>
+      <tr><td>S3</td><td>100GB</td><td>$2-3 (300-450円)</td><td>$3-5 (450-750円)</td></tr>
+      <tr><td>CloudWatch</td><td>Logs + Metrics + Alarms</td><td>$5 (750円)</td><td>$20-40 (3,000-6,000円)</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><th colspan="2">合計</th><th>$431-533 (約64,650-79,950円)</th><th>$893-1,500 (約133,950-225,000円)</th></tr>
+    </tfoot>
+  </table>
+  <p><strong>前提条件</strong>: 24/7稼働、ap-northeast-1、Direct Connect 1Gbpsポート、店舗数5,000+、データ転送量 月500GB想定</p>
+  <p><strong>コスト最適化のポイント</strong>: Direct Connectは複数案件共用で按分可能、Fargate Savings Plans (1年)で最大20%削減、Aurora Serverless v2の夜間自動スケールダウン、Dev環境のDirect Connect共用</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>Public Subnet vs Private Subnet の使い分け</strong> &#8212; Public SubnetにはインターネットGateway経由でアクセスされるリソース（ALB、NAT GW）のみ配置する。アプリケーションやDBは必ずPrivate Subnetに隔離する。ストコンは決済データ（PCI DSS）を扱うため、この分離は要件上必須となる。</li>
+    <li><strong>NAT Gateway の役割</strong> &#8212; Private Subnet内のリソース（Fargate、Lambda）がインターネットへアウトバウンド通信（OSパッチ取得、外部API呼び出し等）を行うために必要。インバウンドは許可せず、アウトバウンドのみの一方向通信を実現する。月額$35〜と高コストなので、Multi-AZ化は本番のみ推奨。</li>
+    <li><strong>Direct Connect vs VPN</strong> &#8212; 5,000+店舗からの常時接続には、インターネットVPNでは帯域と安定性が不足する。Direct Connectは専用線で低遅延・高帯域を保証し、コンビニの発注・検品のリアルタイム処理に不可欠。ただし月額$220/ポートと高コストで、導入に数週間〜数ヶ月かかる点に注意。</li>
+    <li><strong>Aurora Serverless v2 のスケーリング特性</strong> &#8212; ストコンの負荷は時間帯で大きく変動する（早朝5-7時の発注ピーク vs 深夜の低負荷）。Serverless v2は0.5〜128 ACUで自動スケールし、ピーク時の性能と低負荷時のコスト削減を両立する。プロビジョニング型RDSとの使い分けを理解することが重要。</li>
+    <li><strong>多層防御（Defense in Depth）</strong> &#8212; CloudFront（L3/L4 DDoS緩和）→ WAF（L7アプリ層保護）→ ALB（ルーティング）→ Security Group（インスタンス層）→ NACL（サブネット層）の5層で防御する。AWSでは各レイヤーに適切なセキュリティサービスを配置する多層防御が基本設計思想。</li>
+  </ul>
+</div>
+
+<p class="updated">最終更新: 2026-04-01 | AWS Diagram MCP + Architecture Review Pass (6/6)</p>
+
+<div class="lightbox" id="lb" onclick="this.classList.remove('active')">
+  <img src="./storcon-vpc-architecture.png" alt="StoreComputer Migration VPC Architecture (拡大)">
+</div>
+</body>
+</html>
