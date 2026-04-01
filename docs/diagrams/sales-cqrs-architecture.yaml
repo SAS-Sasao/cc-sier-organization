@@ -1,0 +1,547 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Sales Management System - CQRS Architecture on AWS.
+  Command/Query segregation with RDS Primary + Read Replicas,
+  ECS application servers, EC2 batch/file servers in private subnets,
+  and SoftEther VPN bastion for management access.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: Deployment environment
+
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: VPC CIDR block # TODO: adjust for your network design
+
+  PublicSubnetACidr:
+    Type: String
+    Default: 10.0.1.0/24
+
+  PublicSubnetCCidr:
+    Type: String
+    Default: 10.0.2.0/24
+
+  PrivateSubnetAppACidr:
+    Type: String
+    Default: 10.0.10.0/24
+
+  PrivateSubnetAppCCidr:
+    Type: String
+    Default: 10.0.11.0/24
+
+  PrivateSubnetDataACidr:
+    Type: String
+    Default: 10.0.20.0/24
+
+  PrivateSubnetDataCCidr:
+    Type: String
+    Default: 10.0.21.0/24
+
+  DBMasterUsername:
+    Type: String
+    Default: salesadmin
+    NoEcho: true
+    Description: RDS master username # TODO: use Secrets Manager in production
+
+  DBMasterPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    Description: RDS master password # TODO: use Secrets Manager in production
+
+  BastionKeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: EC2 key pair for bastion host # TODO: set your key pair
+
+  BastionAllowedCidr:
+    Type: String
+    Default: 0.0.0.0/0
+    Description: Allowed CIDR for VPN access # TODO: restrict to your office IP
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
+Resources:
+  # ============================================================
+  # VPC & Networking
+  # ============================================================
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-vpc
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-igw
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # --- Public Subnets ---
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-public-a
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-public-c
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetCRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+
+  # --- NAT Gateway ---
+  NatEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-nat
+
+  # --- Private Subnets (App) ---
+  PrivateSubnetAppA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetAppACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-private-app-a
+
+  PrivateSubnetAppC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetAppCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-private-app-c
+
+  PrivateAppRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateAppRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateAppRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnetAppARouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetAppA
+      RouteTableId: !Ref PrivateAppRouteTable
+
+  PrivateSubnetAppCRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetAppC
+      RouteTableId: !Ref PrivateAppRouteTable
+
+  # --- Private Subnets (Data) ---
+  PrivateSubnetDataA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetDataACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-private-data-a
+
+  PrivateSubnetDataC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateSubnetDataCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-private-data-c
+
+  PrivateDataRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateDataRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateDataRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  PrivateSubnetDataARouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetDataA
+      RouteTableId: !Ref PrivateDataRouteTable
+
+  PrivateSubnetDataCRouteTableAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetDataC
+      RouteTableId: !Ref PrivateDataRouteTable
+
+  # ============================================================
+  # Security Groups
+  # ============================================================
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Bastion host with SoftEther VPN
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: udp
+          FromPort: 500
+          ToPort: 500
+          CidrIp: !Ref BastionAllowedCidr
+        - IpProtocol: udp
+          FromPort: 4500
+          ToPort: 4500
+          CidrIp: !Ref BastionAllowedCidr
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref BastionAllowedCidr
+
+  ALBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Application Load Balancer
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  AppSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS application services
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSG
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSG
+
+  BatchSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Batch server
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSG
+
+  DBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RDS PostgreSQL
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSG
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BatchSG
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BastionSG
+
+  EFSSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: EFS mount targets
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !Ref AppSG
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !Ref BatchSG
+
+  # ============================================================
+  # Bastion Host (SoftEther VPN)
+  # ============================================================
+  BastionInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-6.1-x86_64}}'
+      KeyName: !Ref BastionKeyPairName
+      SubnetId: !Ref PublicSubnetA
+      SecurityGroupIds:
+        - !Ref BastionSG
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-bastion
+
+  BastionEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref BastionInstance
+
+  # ============================================================
+  # ALB
+  # ============================================================
+  ApplicationLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub sales-cqrs-${Environment}-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetC
+      SecurityGroups:
+        - !Ref ALBSG
+
+  CommandTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub sales-cmd-${Environment}
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /health
+
+  QueryTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub sales-qry-${Environment}
+      Port: 8080
+      Protocol: HTTP
+      VpcId: !Ref VPC
+      TargetType: ip
+      HealthCheckPath: /health
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLB
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: arn:aws:acm:ap-northeast-1:123456789012:certificate/placeholder # TODO: set your ACM certificate ARN
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref QueryTargetGroup
+
+  CommandListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref ALBListener
+      Priority: 10
+      Conditions:
+        - Field: path-pattern
+          Values: ['/api/commands/*']
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref CommandTargetGroup
+
+  # ============================================================
+  # RDS (CQRS Write DB + Read Replicas)
+  # ============================================================
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Sales CQRS DB subnets
+      SubnetIds:
+        - !Ref PrivateSubnetDataA
+        - !Ref PrivateSubnetDataC
+
+  WritePrimary:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub sales-cqrs-${Environment}-primary
+      DBInstanceClass: !If [IsProd, db.r5.large, db.t3.medium]
+      Engine: postgres
+      EngineVersion: '16.6'
+      MasterUsername: !Ref DBMasterUsername
+      MasterUserPassword: !Ref DBMasterPassword
+      AllocatedStorage: 100
+      StorageType: gp3
+      StorageEncrypted: true
+      MultiAZ: !If [IsProd, true, false]
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DBSG
+      BackupRetentionPeriod: !If [IsProd, 14, 7]
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-write-primary
+
+  ReadReplica1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub sales-cqrs-${Environment}-read-1
+      DBInstanceClass: !If [IsProd, db.r5.large, db.t3.medium]
+      SourceDBInstanceIdentifier: !Ref WritePrimary
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-read-replica-1
+
+  ReadReplica2:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub sales-cqrs-${Environment}-read-2
+      DBInstanceClass: !If [IsProd, db.r5.large, db.t3.medium]
+      SourceDBInstanceIdentifier: !Ref WritePrimary
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-read-replica-2
+
+  # ============================================================
+  # EFS (Shared File Storage)
+  # ============================================================
+  SharedFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: true
+      PerformanceMode: generalPurpose
+      ThroughputMode: elastic
+      Tags:
+        - Key: Name
+          Value: !Sub sales-cqrs-${Environment}-efs
+
+  EFSMountTargetA:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref SharedFileSystem
+      SubnetId: !Ref PrivateSubnetDataA
+      SecurityGroups:
+        - !Ref EFSSG
+
+  EFSMountTargetC:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref SharedFileSystem
+      SubnetId: !Ref PrivateSubnetDataC
+      SecurityGroups:
+        - !Ref EFSSG
+
+  # ============================================================
+  # S3 (Backup)
+  # ============================================================
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub sales-cqrs-${Environment}-backup-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToIA
+            Status: Enabled
+            Transitions:
+              - StorageClass: STANDARD_IA
+                TransitionInDays: 30
+              - StorageClass: GLACIER
+                TransitionInDays: 90
+
+Outputs:
+  VPCId:
+    Value: !Ref VPC
+  ALBDNSName:
+    Value: !GetAtt ApplicationLB.DNSName
+  BastionPublicIP:
+    Value: !GetAtt BastionEIP.PublicIp
+  WritePrimaryEndpoint:
+    Value: !GetAtt WritePrimary.Endpoint.Address
+  ReadReplica1Endpoint:
+    Value: !GetAtt ReadReplica1.Endpoint.Address
+  ReadReplica2Endpoint:
+    Value: !GetAtt ReadReplica2.Endpoint.Address
+  EFSFileSystemId:
+    Value: !Ref SharedFileSystem
+  BackupBucketName:
+    Value: !Ref BackupBucket
