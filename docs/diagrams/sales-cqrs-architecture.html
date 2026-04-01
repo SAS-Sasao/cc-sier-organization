@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Management CQRS Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-sync { background:#22c55e; color:#fff; }
+.badge-async { background:#8b5cf6; color:#fff; }
+.badge-batch { background:#3b82f6; color:#fff; }
+.badge-mgmt { background:#6366f1; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.cost-note { font-size:.82rem; color:var(--muted); margin-bottom:16px; }
+tfoot th { background:var(--bg); font-size:.9rem; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Sales Management System - CQRS Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">販売管理システム</span>
+  <span class="tag tag-area">CQRS / RDS</span>
+  <span>生成日: 2026-04-01</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./sales-cqrs-architecture.png" alt="Sales Management CQRS Architecture" onclick="document.getElementById('lb').classList.add('active')">
+  <div class="hint">クリックで拡大</div>
+  <a href="./sales-cqrs-architecture-iac.html" class="iac-btn">IaCソースコードを見る</a>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> VPN Access --- SoftEther VPN経由の管理アクセス</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:darkblue"></span> SSH/RDP --- 踏み台からの保守接続</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkorange"></span> Command API --- 書き込み系API（INSERT/UPDATE/DELETE）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> Query API --- 読み取り系API（SELECT）</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:purple"></span> Async Replication --- RDS非同期レプリケーション</div>
+    <div class="legend-item"><span class="legend-line" style="background:teal"></span> Batch R/W --- バッチ処理のDB読み書き</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:gray"></span> File I/O --- EFS共有ファイルアクセス</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:red"></span> Backup --- S3へのスナップショット・バックアップ</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>販売管理システムのAWS構成図。CQRS（Command Query Responsibility Segregation）パターンを採用し、書き込み系（Command）と読み取り系（Query）のワークロードを分離することで、それぞれ独立したスケーリングとパフォーマンス最適化を実現する。</p>
+  <p>アプリケーションサーバはECS（EC2起動タイプ）、バッチサーバ・ファイルサーバはEC2で構成し、全サーバをPrivate Subnetに配置。外部からのアクセスはSoftEther VPNを搭載した踏み台サーバ経由で行う。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <p><span class="badge badge-sync">Command</span> 書き込み系リクエスト</p>
+  <div class="flow">
+    <span class="flow-step">Client</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Command Service (ECS)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">RDS Primary (Write)</span>
+  </div>
+
+  <p><span class="badge badge-sync">Query</span> 読み取り系リクエスト</p>
+  <div class="flow">
+    <span class="flow-step">Client</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Query Service (ECS)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">RDS Read Replica</span>
+  </div>
+
+  <p><span class="badge badge-async">Replication</span> 非同期データ同期</p>
+  <div class="flow">
+    <span class="flow-step">RDS Primary</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">WAL Streaming</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Read Replica 1 / 2</span>
+  </div>
+
+  <p><span class="badge badge-batch">Batch</span> バッチ処理</p>
+  <div class="flow">
+    <span class="flow-step">Batch Server (EC2)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">RDS Primary (Write)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Batch Server (EC2)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Read Replica (Read)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Batch Server (EC2)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EFS (File I/O)</span>
+  </div>
+
+  <p><span class="badge badge-mgmt">Management</span> 保守アクセス</p>
+  <div class="flow">
+    <span class="flow-step">Operator</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SoftEther VPN</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Bastion (EC2)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Private Resources</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <thead><tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td>Public Subnet</td><td>EC2 (Bastion + SoftEther VPN)</td><td>VPN接続による保守アクセスの入口</td></tr>
+      <tr><td>Public Subnet</td><td>ALB</td><td>Command/Query APIのルーティング</td></tr>
+      <tr><td>Public Subnet</td><td>NAT Gateway</td><td>Private Subnetからのアウトバウンド通信</td></tr>
+      <tr><td>Private Subnet (App)</td><td>ECS (EC2起動タイプ) x4</td><td>Command Service x2 + Query Service x2</td></tr>
+      <tr><td>Private Subnet (App)</td><td>EC2</td><td>バッチサーバ（定期バッチ・データ集計）</td></tr>
+      <tr><td>Private Subnet (Data)</td><td>RDS PostgreSQL (Primary)</td><td>CQRS Write DB（INSERT/UPDATE/DELETE）</td></tr>
+      <tr><td>Private Subnet (Data)</td><td>RDS Read Replica x2</td><td>CQRS Read DB（SELECT）非同期レプリケーション</td></tr>
+      <tr><td>Private Subnet (Data)</td><td>EC2 + EFS</td><td>ファイルサーバ（帳票・CSVエクスポート等）</td></tr>
+      <tr><td>外部</td><td>S3</td><td>DBスナップショット・EFSバックアップ</td></tr>
+      <tr><td>外部</td><td>CloudWatch</td><td>メトリクス・ログ・アラーム監視</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. CQRS分離によるスケーラビリティ</strong><br>
+  書き込みと読み取りのワークロードを物理的に分離。Read Replicaを2台配置し、参照系の負荷分散と可用性を確保。販売データの参照頻度が高い販売管理システムに最適なパターン。</p>
+
+  <p><strong>2. RDS非同期レプリケーション</strong><br>
+  PostgreSQLネイティブのWALストリーミングレプリケーションを使用。最大15台のRead Replicaまでスケールアウト可能。レプリケーションラグは通常数秒以内で、結果整合性は販売管理の参照用途では許容範囲。</p>
+
+  <p><strong>3. Private Subnet + SoftEther VPN</strong><br>
+  全サーバをPrivate Subnetに配置し、インターネットからの直接アクセスを遮断。保守はSoftEther VPN経由の踏み台サーバで行い、セキュリティグループで接続元を制限。</p>
+
+  <p><strong>4. EFS共有ストレージ</strong><br>
+  帳票出力・CSVエクスポート等のファイルをEFSで一元管理。Command Service・Batch Serverから同時アクセス可能。NFSプロトコルでEC2/ECSの両方からマウント可能。</p>
+
+  <p><strong>5. Multi-AZ推奨（RDS Primary）</strong><br>
+  本構成図ではRDS PrimaryのMulti-AZ設定を推奨。フェイルオーバー時も自動切替でダウンタイムを最小化。CloudFormationテンプレートではMulti-AZを有効化済み。</p>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p class="cost-note">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。<br>
+  為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <thead>
+      <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>EC2 (Bastion)</td><td>t3.micro x1</td><td>$8 (1,200円)</td><td>$8 (1,200円)</td></tr>
+      <tr><td>ALB</td><td>Application LB x1</td><td>$20 (3,000円)</td><td>$25-50 (3,750-7,500円)</td></tr>
+      <tr><td>NAT Gateway</td><td>x1 AZ</td><td>$35 (5,250円)</td><td>$35-100 (5,250-15,000円)</td></tr>
+      <tr><td>ECS (EC2起動)</td><td>t3.medium x2 (Dev) / m5.large x4 (Prod)</td><td>$60 (9,000円)</td><td>$280 (42,000円)</td></tr>
+      <tr><td>EC2 (Batch)</td><td>t3.medium (Dev) / m5.large (Prod)</td><td>$30 (4,500円)</td><td>$70 (10,500円)</td></tr>
+      <tr><td>RDS Primary</td><td>db.t3.medium (Dev) / db.r5.large Multi-AZ (Prod)</td><td>$50 (7,500円)</td><td>$250 (37,500円)</td></tr>
+      <tr><td>RDS Read Replica</td><td>db.t3.medium x2 (Dev) / db.r5.large x2 (Prod)</td><td>$70 (10,500円)</td><td>$250 (37,500円)</td></tr>
+      <tr><td>EC2 (File Server)</td><td>t3.small x1</td><td>$15 (2,250円)</td><td>$15 (2,250円)</td></tr>
+      <tr><td>EFS</td><td>50GB (Dev) / 500GB (Prod)</td><td>$15 (2,250円)</td><td>$150 (22,500円)</td></tr>
+      <tr><td>S3</td><td>100GB backup</td><td>$3 (450円)</td><td>$5 (750円)</td></tr>
+      <tr><td>CloudWatch</td><td>Logs + Metrics</td><td>$5 (750円)</td><td>$20 (3,000円)</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><th colspan="2">合計</th><th>$311 (約46,650円)</th><th>$1,108-1,223 (約166,200-183,450円)</th></tr>
+    </tfoot>
+  </table>
+  <p><strong>前提条件</strong>: 24/7稼働、ap-northeast-1、EBSはgp3 100GB想定、データ転送量は月100GB以内</p>
+  <p><strong>コスト最適化のポイント</strong>: EC2/RDS Reserved Instances (1年)で最大40%削減、Dev環境の夜間・休日停止で約60%削減、EFS Infrequent Accessクラスの活用</p>
+</div>
+
+<div class="section">
+  <h2>アーキテクチャレビュー結果</h2>
+  <table>
+    <thead><tr><th>#</th><th>観点</th><th>判定</th><th>備考</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>サービス互換性</td><td>Pass</td><td>ALB-ECS, ECS-RDS, EC2-EFS 全接続パターンはAWS公式確認済み</td></tr>
+      <tr><td>2</td><td>データフロー整合性</td><td>Pass</td><td>CQRS Write/Read分離、WALストリーミングレプリケーション</td></tr>
+      <tr><td>3</td><td>セキュリティ</td><td>Pass</td><td>Private Subnet配置、VPN踏み台、NAT GW</td></tr>
+      <tr><td>4</td><td>可用性・耐障害性</td><td>Pass</td><td>RDS Multi-AZ推奨、Read Replica 2台冗長</td></tr>
+      <tr><td>5</td><td>コスト効率</td><td>Pass</td><td>EC2/ECS指定に合致、不要な重複なし</td></tr>
+      <tr><td>6</td><td>ユーザー要望との一致</td><td>Pass</td><td>CQRS, RDS, EC2/ECS, Private Subnet, SoftEther VPN 全反映</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="updated">最終更新: 2026-04-01 | AWS Diagram MCP + AWS Knowledge MCP</p>
+
+<div class="lightbox" id="lb" onclick="this.classList.remove('active')">
+  <img src="./sales-cqrs-architecture.png" alt="Sales Management CQRS Architecture (拡大)">
+</div>
+</body>
+</html>
