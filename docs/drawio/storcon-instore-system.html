@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreComputer - In-Store System Architecture - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:960px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { background:#ef4444; color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+.tag-wbs { background:#dcfce7; color:#166534; }
+@media (prefers-color-scheme: dark) {
+  .tag-project { background:#78350f; color:#fde68a; }
+  .tag-wbs { background:#14532d; color:#bbf7d0; }
+}
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.aws-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:#E67E22;
+           color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.aws-btn:hover { opacity:.85; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.legend-grid { display:flex; flex-wrap:wrap; gap:10px 20px; margin:12px 0; }
+.legend-item { display:flex; align-items:center; gap:6px; font-size:.82rem; }
+.legend-line { width:24px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; font-size:.9rem; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .learning-points li { border-bottom-color: rgba(255,255,255,.08); }
+  .learning-points li strong { color: #93c5fd; }
+}
+</style>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({startOnLoad:true, theme:'neutral', securityLevel:'loose'});
+</script>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>StoreComputer - In-Store System Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコン移行</span>
+  <span class="tag tag-type">UML Component</span>
+  <span class="tag tag-wbs">WBS 2.1.3</span>
+</div>
+<div class="date">生成日: 2026-04-01 | コンビニ店舗内システム構成</div>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+graph TB
+  subgraph STOREFRONT["Store Front"]
+    CUSTOMER(("Customer"))
+    POS["POS Terminal - Sales Registration - Barcode Scan - Receipt Print"]
+    PAYMENT["Payment Terminal - Cash / Credit / IC - QR Code - E-Money"]
+    SIGNAGE["Digital Signage - Price Display - Promotion"]
+  end
+
+  subgraph APPSERVICE["App Services"]
+    STORCON["Store Computer - Hub Controller - EOS/EOB Processing - Master Sync"]
+    EOS["EOS/EOB Module - Electronic Ordering - Order Book Mgmt"]
+    ORDER["Order Management - Auto Order Calc - Delivery Schedule"]
+    INVENTORY["Inventory Management - Stock Count - Inspection"]
+    INSPECTION["Inspection Module - Delivery Check - Discrepancy Report"]
+    SETTLEMENT["Settlement Batch - Daily Close - Sales Aggregation"]
+    TEMPMON["Temperature Monitor - Refrigerator / Freezer - Alert Notification"]
+  end
+
+  subgraph DATALAYER["Data Layer"]
+    LOCALDB[("Local DB - Transaction Store")]
+    MASTER[("Master Cache - PLU / Price")]
+    JOURNAL["Sales Journal - Daily Report"]
+    TEMPLOG["Temperature Log - Hourly Record"]
+  end
+
+  MANAGER(("Store Manager"))
+  STAFF(("Store Staff"))
+  DRIVER(("Delivery Driver"))
+  HQCLOUD["HQ Cloud - Central Server"]
+  HANDY["Handy Terminal - Inspection - Stock Count"]
+
+  CUSTOMER --> POS
+  POS --> PAYMENT
+  POS --> STORCON
+  STORCON --> EOS
+  STORCON --> ORDER
+  STORCON --> INVENTORY
+  STORCON --> INSPECTION
+  STORCON --> SETTLEMENT
+  STORCON --> TEMPMON
+  EOS -.->|Bidirectional| HQCLOUD
+  ORDER --> LOCALDB
+  INVENTORY --> LOCALDB
+  SETTLEMENT --> JOURNAL
+  TEMPMON --> TEMPLOG
+  STORCON --> MASTER
+  MANAGER --> STORCON
+  STAFF --> POS
+  STAFF --> HANDY
+  HANDY --> INVENTORY
+  DRIVER --> INSPECTION
+  HQCLOUD -.->|Master Distribution| STORCON
+  PAYMENT --> SETTLEMENT
+
+  style STORCON fill:#dae8fc,stroke:#6c8ebf
+  style POS fill:#dae8fc,stroke:#6c8ebf
+  style PAYMENT fill:#fff2cc,stroke:#d6b656
+  style EOS fill:#e1d5e7,stroke:#9673a6
+  style ORDER fill:#d5e8d4,stroke:#82b366
+  style INVENTORY fill:#d5e8d4,stroke:#82b366
+  style INSPECTION fill:#d5e8d4,stroke:#82b366
+  style SETTLEMENT fill:#fff2cc,stroke:#d6b656
+  style TEMPMON fill:#f8cecc,stroke:#b85450
+  style LOCALDB fill:#dae8fc,stroke:#6c8ebf
+  style MASTER fill:#dae8fc,stroke:#6c8ebf
+  style JOURNAL fill:#fff2cc,stroke:#d6b656
+  style TEMPLOG fill:#f8cecc,stroke:#b85450
+  style SIGNAGE fill:#e1d5e7,stroke:#9673a6
+  style HANDY fill:#d5e8d4,stroke:#82b366
+  style HQCLOUD fill:#e1d5e7,stroke:#9673a6
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./storcon-instore-system.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+    <a href="../diagrams/storcon-vpc-architecture.html" class="aws-btn">AWS版構成図を見る</a>
+  </div>
+</div>
+
+<h2>凡例</h2>
+<div class="legend-grid">
+  <div class="legend-item"><span class="legend-line" style="background:#4361ee"></span> Customer / Staff Access &#8212; 店舗利用者・スタッフからの操作</div>
+  <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#e67e22"></span> HQ Communication &#8212; 本部クラウドとの双方向通信（EOS/EOB）</div>
+  <div class="legend-item"><span class="legend-line" style="background:#7c3aed"></span> Internal Processing &#8212; ストコンから各モジュールへの処理連携</div>
+  <div class="legend-item"><span class="legend-line" style="background:#0d9488"></span> Data Access &#8212; モジュールからデータ層への読み書き</div>
+</div>
+
+<h2>概要</h2>
+<p>コンビニエンスストアの店舗内システム構成を表現したUMLコンポーネント図。ストアコンピューター（ストコン）を中心ハブとし、POSレジ端末、マルチ決済端末、EOS/EOB（電子発注・電子受発注）による本部通信、温度管理モニタリングなど、店舗運営に必要な全要素を網羅。</p>
+<p>店長・スタッフ・配送ドライバー・顧客の4種のアクターが関与し、ハンディターミナルによる検品・棚卸、デジタルサイネージによる価格表示も含む。ストコンは本部クラウドからマスタデータ（PLU・価格）を受信し、売上ジャーナルと温度ログを本部に送信する双方向通信を担う。</p>
+
+<h2>構成要素</h2>
+<table>
+  <thead><tr><th>要素</th><th>種類</th><th>説明</th></tr></thead>
+  <tbody>
+    <tr><td>Store Manager</td><td>アクター（人型）</td><td>店長。ストコンを通じて発注承認・売上確認・温度アラート対応を行う</td></tr>
+    <tr><td>Store Staff</td><td>アクター（人型）</td><td>店舗スタッフ。POS操作、ハンディ端末での検品・棚卸を担当</td></tr>
+    <tr><td>Delivery Driver</td><td>アクター（人型）</td><td>配送ドライバー。商品納品時の検品処理に関与</td></tr>
+    <tr><td>Customer</td><td>アクター（人型）</td><td>来店客。POS端末で商品購入・決済を行う</td></tr>
+    <tr><td>EOS/EOB Module</td><td>矩形 &laquo;Service&raquo;</td><td>電子発注システム（EOS）と電子受発注帳（EOB）。本部との双方向通信</td></tr>
+    <tr><td>Order Management</td><td>矩形 &laquo;Service&raquo;</td><td>自動発注計算・配送スケジュール管理</td></tr>
+    <tr><td>Inventory Management</td><td>矩形 &laquo;Service&raquo;</td><td>在庫管理・棚卸カウント・検品</td></tr>
+    <tr><td>Inspection Module</td><td>矩形 &laquo;Service&raquo;</td><td>納品検品・数量差異レポート生成</td></tr>
+    <tr><td>Settlement Batch</td><td>矩形 &laquo;Batch&raquo;</td><td>日次精算・売上集計バッチ処理</td></tr>
+    <tr><td>Temperature Monitor</td><td>矩形 &laquo;Monitor&raquo;</td><td>冷蔵・冷凍庫の温度監視。異常時アラート通知</td></tr>
+    <tr><td>Store Computer</td><td>矩形 &laquo;Hub&raquo;</td><td>店舗内全システムのハブ。EOS/EOB処理・マスタ同期の中核</td></tr>
+    <tr><td>Local DB</td><td>シリンダー（DB）</td><td>ローカルトランザクションストア。売上・在庫データ保持</td></tr>
+    <tr><td>Master Cache</td><td>シリンダー（DB）</td><td>PLU（商品コード）・価格マスタのローカルキャッシュ</td></tr>
+    <tr><td>Sales Journal</td><td>ドキュメント型</td><td>日次売上ジャーナル。本部送信用レポート</td></tr>
+    <tr><td>Temperature Log</td><td>ドキュメント型</td><td>温度記録ログ。1時間ごとの記録で食品衛生法に対応</td></tr>
+    <tr><td>POS Terminal</td><td>角丸矩形</td><td>POSレジ端末。バーコードスキャン・売上登録・レシート印刷</td></tr>
+    <tr><td>Payment Terminal</td><td>角丸矩形</td><td>マルチ決済端末。現金・クレジット・IC・QR・電子マネー対応</td></tr>
+    <tr><td>Handy Terminal</td><td>角丸矩形</td><td>ハンディターミナル。検品・棚卸用モバイル端末</td></tr>
+    <tr><td>Digital Signage</td><td>角丸矩形</td><td>電子値札・プロモーション表示</td></tr>
+    <tr><td>HQ Cloud</td><td>矩形 &laquo;External&raquo;</td><td>本部クラウド（中央サーバー）。マスタ配信元・売上集約先</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>ストアコンピューターをハブとする設計</strong>: ストコンが全モジュール（EOS/EOB、発注、在庫、検品、精算、温度管理）を統合制御する。POS端末や各種端末は直接本部と通信せず、必ずストコンを経由する。これにより店舗内の通信を一元管理し、本部回線の障害時もローカルで業務継続が可能。</li>
+  <li><strong>EOS/EOBの双方向通信</strong>: EOS（Electronic Ordering System）で店舗から本部へ発注データを送信し、EOB（Electronic Order Book）で本部から店舗へ推奨発注量・新商品情報を受信する。この双方向通信により、店舗の自律的発注と本部のマーチャンダイジング指示を両立させる。</li>
+  <li><strong>マルチ決済の統合</strong>: 現金・クレジットカード・ICカード（Suica等）・QRコード（PayPay等）・電子マネー（nanaco等）の5種類以上の決済手段を決済端末で統合。POS端末は売上登録に集中し、決済処理は専用端末に分離することで、決済規格の追加・変更時の影響範囲を最小化する。</li>
+  <li><strong>温度管理による食品安全の担保</strong>: 冷蔵・冷凍庫の温度を1時間ごとに自動記録し、異常温度を検知した場合は店長へアラート通知。食品衛生法に基づく温度記録の義務化に対応し、紙の温度記録簿をデジタル化する。</li>
+</ul>
+
+<h2>学習ポイント</h2>
+<ul class="learning-points">
+  <li><strong>コンビニ3層構造（本部-ストコン-POS）の役割分担</strong> &#8212; コンビニチェーンのITシステムは「本部クラウド（中央サーバー）」「ストアコンピューター（店舗サーバー）」「POS端末（レジ）」の3層で構成される。本部はマスタデータ管理・全店売上分析・マーチャンダイジングを担い、ストコンは店舗内のデータ集約・発注・在庫管理のハブとして機能する。POSは販売登録に特化し、商品マスタはストコンからキャッシュを受け取る。この3層分離により、各層が独立してスケールでき、本部回線障害時も店舗が自律的に営業継続できる。</li>
+  <li><strong>EOS/EOBの仕組み（Electronic Ordering System / Electronic Order Book）</strong> &#8212; EOSは店舗から本部への電子発注で、店長がストコンで発注数を入力すると本部の受注システムへリアルタイム送信される。EOBは本部から店舗への推奨発注帳で、過去の販売実績・天候・イベント情報をもとにAIが最適発注量を提案する。日本のコンビニでは1970年代にセブン-イレブンが先駆けて導入し、現在は全チェーンの標準インフラとなっている。</li>
+  <li><strong>POS-ストコン間のマスタ同期とPLUキャッシュの必要性</strong> &#8212; PLU（Price Look-Up）コードは商品のバーコードに紐づく価格・名称情報で、POS端末が高速にスキャン処理するためにはローカルキャッシュが不可欠。本部で商品マスタが更新されるとストコン経由で各POS端末にプッシュ配信される。1店舗あたり約3,000SKUのマスタを保持し、新商品投入は週次で100品以上になるため、差分同期の仕組みが重要。同期失敗時は前回マスタで営業を継続する縮退運転設計が必須。</li>
+  <li><strong>マルチ決済の複雑性（現金・クレジット・IC・QR・電子マネー）</strong> &#8212; コンビニの決済手段は現金、クレジットカード（VISA/Master/JCB等）、交通系IC（Suica/PASMO等）、QRコード（PayPay/d払い/楽天ペイ等）、流通系電子マネー（nanaco/WAON等）と多岐にわたる。各決済ブランドごとに通信プロトコル・手数料率・精算サイクルが異なるため、POS端末と決済端末を分離し、決済端末側で各ブランドのプロトコル変換を吸収する設計が主流。新規決済手段の追加時にPOSソフトウェアの改修が不要になる。</li>
+  <li><strong>温度管理の法的要件（食品衛生法との関連）</strong> &#8212; 2021年6月施行の改正食品衛生法でHACCP（Hazard Analysis and Critical Control Points）に沿った衛生管理が全食品事業者に義務化された。コンビニでは冷蔵（0-10度C）・冷凍（-18度C以下）の温度を定期的に記録し、逸脱時の是正措置を文書化する必要がある。ストコンの温度監視モジュールはこの法的要件をデジタルで充足し、保健所の監査時にログを即時提出可能にする。紙の記録簿からの移行で記録漏れ・改ざんリスクも排除される。</li>
+</ul>
+
+<p class="updated">最終更新: 2026-04-01 | draw.io MCP Server</p>
+</body>
+</html>

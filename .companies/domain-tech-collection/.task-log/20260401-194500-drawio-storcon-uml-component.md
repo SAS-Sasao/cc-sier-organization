@@ -49,3 +49,14 @@ draw.io XMLで適切なUML図形を使用（アクター、矩形、シリンダ
 - 色分けによるコンポーネント種別の視認性
 - 凡例でエッジ色と用途を明示
 - 学習ポイントで「論理設計 vs 物理設計」「Polyglot Persistence」等の概念を解説
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-01T18:56:07"
+```
