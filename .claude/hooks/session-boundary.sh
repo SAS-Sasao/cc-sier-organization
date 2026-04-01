@@ -50,14 +50,14 @@ printf '\n---\n\n_セッション終了: %s_\n\n' "$DATETIME" >> "$LOG_FILE"
 # ================================================================
 # 3. セッション統計を抽出（bashのみ・AIなし）
 # ================================================================
-ENTRY_COUNT=$(grep -c '^### ' "$LOG_FILE" 2>/dev/null || echo "0")
+ENTRY_COUNT=$(grep -c '^### ' "$LOG_FILE" 2>/dev/null) || ENTRY_COUNT=0
 
 WRITE_COUNT=$(grep -cE '^### .* — \*\*(Write|Edit|Create|create_file|str_replace_based_edit_tool)\*\*' \
-  "$LOG_FILE" 2>/dev/null || echo "0")
+  "$LOG_FILE" 2>/dev/null) || WRITE_COUNT=0
 READ_COUNT=$(grep -cE '^### .* — \*\*(Read|View)\*\*' \
-  "$LOG_FILE" 2>/dev/null || echo "0")
+  "$LOG_FILE" 2>/dev/null) || READ_COUNT=0
 BASH_COUNT=$(grep -cE '^### .* — \*\*(Bash|bash_tool)\*\*' \
-  "$LOG_FILE" 2>/dev/null || echo "0")
+  "$LOG_FILE" 2>/dev/null) || BASH_COUNT=0
 OTHER_COUNT=$(( ENTRY_COUNT - WRITE_COUNT - READ_COUNT - BASH_COUNT ))
 [[ $OTHER_COUNT -lt 0 ]] && OTHER_COUNT=0
 
