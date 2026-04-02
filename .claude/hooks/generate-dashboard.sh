@@ -302,6 +302,101 @@ if best_agent:
         "this_month_avg": round(sum(monthly_scores[this_month_str][best_agent])/len(monthly_scores[this_month_str][best_agent]), 2),
     }
 
+# 5b. Monthly / Weekly / Category / Mode / Digest / Activity analysis
+from collections import defaultdict as _dd2
+
+ma_monthly = {}      # month_key -> {total, avg_reward, active_days}
+ma_weekly = {}       # W1..W5 -> {count, avg_reward}
+ma_category = {}     # category_name -> {count, avg_reward}
+ma_mode_cmp = {}     # mode -> {count, avg_reward}
+ma_digest_trend = [] # [{date, reward}]
+ma_daily_act = {}    # YYYY-MM-DD -> count
+ma_target_month = "" # which month the weekly breakdown applies to
+
+if cb_path.exists():
+    try:
+        _mad = json.loads(cb_path.read_text(encoding="utf-8", errors="ignore"))
+        _mac = _mad.get("cases", [])
+
+        # --- group by month ---
+        _mg = _dd2(list)
+        for c in _mac:
+            tid = c.get("id", "")
+            if len(tid) >= 6:
+                mk = f"{tid[:4]}-{tid[4:6]}"
+                _mg[mk].append(c)
+        for mk in sorted(_mg):
+            rr = [c.get("reward") for c in _mg[mk] if c.get("reward") is not None]
+            days = set(c.get("id","")[:8] for c in _mg[mk] if len(c.get("id",""))>=8)
+            ma_monthly[mk] = {
+                "total": len(_mg[mk]),
+                "avg_reward": round(sum(rr)/len(rr),3) if rr else 0,
+                "active_days": len(days),
+            }
+
+        # --- weekly breakdown (latest month with data) ---
+        ma_target_month = sorted(_mg.keys())[-1] if _mg else ""
+        if ma_target_month:
+            _wg = _dd2(list)
+            for c in _mg[ma_target_month]:
+                tid = c.get("id","")
+                if len(tid)>=8:
+                    d = int(tid[6:8])
+                    wk = "W1" if d<=7 else "W2" if d<=14 else "W3" if d<=21 else "W4" if d<=28 else "W5"
+                    _wg[wk].append(c)
+            for wk in ["W1","W2","W3","W4","W5"]:
+                cs = _wg.get(wk,[])
+                rr = [c.get("reward") for c in cs if c.get("reward") is not None]
+                ma_weekly[wk] = {"count":len(cs), "avg_reward": round(sum(rr)/len(rr),3) if rr else 0}
+
+        # --- category classification ---
+        _cg = _dd2(list)
+        for c in _mac:
+            tid = c.get("id","")
+            if "drawio" in tid: cat = "draw.io"
+            elif "diagram" in tid: cat = "AWS Diagram"
+            elif "daily-digest" in tid: cat = "Daily Digest"
+            elif any(k in tid for k in ["research","storcon","pm-","aws-basic","aws-deep"]): cat = "Research"
+            elif any(k in tid for k in ["admin","todo","wbs"]): cat = "Admin"
+            else: cat = "Other"
+            _cg[cat].append(c)
+        for cat in _cg:
+            rr = [c.get("reward") for c in _cg[cat] if c.get("reward") is not None]
+            ma_category[cat] = {"count":len(_cg[cat]), "avg_reward": round(sum(rr)/len(rr),3) if rr else 0}
+
+        # --- mode comparison ---
+        _modg = _dd2(list)
+        for c in _mac:
+            m = c.get("action",{}).get("mode","") or "unknown"
+            _modg[m].append(c)
+        for m in _modg:
+            rr = [c.get("reward") for c in _modg[m] if c.get("reward") is not None]
+            ma_mode_cmp[m] = {"count":len(_modg[m]), "avg_reward": round(sum(rr)/len(rr),3) if rr else 0}
+
+        # --- digest trend ---
+        for c in _mac:
+            if "daily-digest" in c.get("id",""):
+                tid = c.get("id","")
+                r = c.get("reward")
+                if len(tid)>=8 and r is not None:
+                    ma_digest_trend.append({"date": f"{tid[:4]}-{tid[4:6]}-{tid[6:8]}", "reward": r})
+        ma_digest_trend.sort(key=lambda x:x["date"])
+
+        # --- daily activity ---
+        for c in _mac:
+            tid = c.get("id","")
+            if len(tid)>=8:
+                dk = f"{tid[:4]}-{tid[4:6]}-{tid[6:8]}"
+                ma_daily_act[dk] = ma_daily_act.get(dk,0) + 1
+    except:
+        pass
+
+# Session count for active-days stats
+conv_dir_for_stats = org_dir / ".conversation-log"
+ma_session_count_total = 0
+if conv_dir_for_stats.exists():
+    ma_session_count_total = len(list(conv_dir_for_stats.glob("*.md")))
+
 # 6. Conversation log stats
 conv_dir = org_dir / ".conversation-log"
 conv_sessions = 0
@@ -673,6 +768,122 @@ failure_items_html = "".join([
     for fp in judge_failure_patterns
 ]) or "<li style='color:var(--muted);font-size:.82rem'>データ蓄積中</li>"
 
+# --- Monthly Analysis HTML fragments ---
+# JSON data for charts
+ma_weekly_labels_json = json.dumps(list(ma_weekly.keys()))
+ma_weekly_counts_json = json.dumps([v["count"] for v in ma_weekly.values()])
+ma_weekly_rewards_json = json.dumps([v["avg_reward"] for v in ma_weekly.values()])
+
+cat_sorted = sorted(ma_category.items(), key=lambda x: -x[1]["count"])
+ma_cat_labels_json = json.dumps([k for k,v in cat_sorted], ensure_ascii=False)
+ma_cat_counts_json = json.dumps([v["count"] for k,v in cat_sorted])
+ma_cat_rewards_json = json.dumps([v["avg_reward"] for k,v in cat_sorted])
+
+mode_sorted = sorted(ma_mode_cmp.items(), key=lambda x: -x[1]["count"])
+ma_mode_labels_json = json.dumps([k for k,v in mode_sorted], ensure_ascii=False)
+ma_mode_counts_json = json.dumps([v["count"] for k,v in mode_sorted])
+ma_mode_rewards_json = json.dumps([v["avg_reward"] for k,v in mode_sorted])
+
+ma_digest_dates_json = json.dumps([d["date"] for d in ma_digest_trend])
+ma_digest_rewards_json = json.dumps([d["reward"] for d in ma_digest_trend])
+
+# Monthly summary cards
+months_sorted = sorted(ma_monthly.keys())
+cur_m = months_sorted[-1] if months_sorted else ""
+prev_m = months_sorted[-2] if len(months_sorted) >= 2 else ""
+cur_stats = ma_monthly.get(cur_m, {"total":0,"avg_reward":0,"active_days":0})
+prev_stats = ma_monthly.get(prev_m, {"total":0,"avg_reward":0,"active_days":0})
+
+def delta_badge(cur_val, prev_val, fmt=".0f", invert=False):
+    if prev_val == 0: return ""
+    d = cur_val - prev_val
+    color = "var(--green)" if (d > 0) != invert else "var(--red)" if d != 0 else "var(--muted)"
+    sign = "+" if d > 0 else ""
+    return f'<span style="font-size:.75rem;color:{color};margin-left:6px">{sign}{d:{fmt}}</span>'
+
+monthly_summary_html = ""
+if cur_m:
+    d_task = delta_badge(cur_stats["total"], prev_stats["total"])
+    d_reward = delta_badge(cur_stats["avg_reward"], prev_stats["avg_reward"], ".3f")
+    d_days = delta_badge(cur_stats["active_days"], prev_stats["active_days"])
+
+    monthly_summary_html = f'''<div class="monthly-section">
+  <h2>月次分析 <span style="font-size:.8rem;color:var(--muted);font-weight:400">({ma_target_month})</span></h2>
+  <div class="evolve-grid" style="margin-bottom:16px">
+    <div class="evolve-card">
+      <div class="ev-label">月間タスク数</div>
+      <div class="ev-value" style="color:var(--blue)">{cur_stats["total"]}{d_task}</div>
+      <div class="ev-sub">前月: {prev_stats["total"]}件</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">平均報酬</div>
+      <div class="ev-value" style="color:{"var(--green)" if cur_stats["avg_reward"]>=0.9 else "var(--yellow)"}">{cur_stats["avg_reward"]:.3f}{d_reward}</div>
+      <div class="ev-sub">前月: {prev_stats["avg_reward"]:.3f}</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">稼働日数</div>
+      <div class="ev-value" style="color:var(--blue)">{cur_stats["active_days"]}{d_days}</div>
+      <div class="ev-sub">前月: {prev_stats["active_days"]}日</div>
+    </div>
+    <div class="evolve-card">
+      <div class="ev-label">セッション数</div>
+      <div class="ev-value" style="color:var(--blue)">{ma_session_count_total}</div>
+      <div class="ev-sub">全期間累計</div>
+    </div>
+  </div>'''
+else:
+    monthly_summary_html = '<div class="monthly-section"><h2>月次分析</h2><p style="color:var(--muted)">データ蓄積中</p>'
+
+# Activity heatmap HTML
+heatmap_cells = ""
+if ma_daily_act:
+    all_days = sorted(ma_daily_act.keys())
+    max_count = max(ma_daily_act.values()) if ma_daily_act else 1
+    for day_str in all_days:
+        cnt = ma_daily_act[day_str]
+        intensity = min(cnt / max_count, 1.0)
+        opacity = 0.15 + intensity * 0.85
+        short_day = day_str[5:]  # MM-DD
+        heatmap_cells += f'<div class="hm-cell" style="background:rgba(13,110,253,{opacity:.2f})" title="{day_str}: {cnt}件"><span class="hm-day">{short_day}</span><span class="hm-cnt">{cnt}</span></div>'
+
+heatmap_html = ""
+if heatmap_cells:
+    heatmap_html = f'''<div class="chart-box" style="margin-top:16px">
+    <h3>アクティビティカレンダー</h3>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">日別タスク件数。濃いほど多い。</p>
+    <div class="hm-grid">{heatmap_cells}</div>
+  </div>'''
+
+monthly_charts_html = f'''
+  <div class="charts-aligned" style="margin-top:16px">
+    <div class="chart-box">
+      <h3>週別タスク数 / 報酬</h3>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">{ma_target_month}の週別推移。タスク数（棒）と平均報酬（線）。</p>
+      <canvas id="weeklyChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>カテゴリ別分析</h3>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">タスク種別ごとの件数と平均報酬。</p>
+      <canvas id="categoryChart"></canvas>
+    </div>
+  </div>
+  <div class="charts-aligned" style="margin-top:16px">
+    <div class="chart-box">
+      <h3>実行モード比較</h3>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">direct / subagent / agent-teams の件数と報酬差。</p>
+      <canvas id="modeChart"></canvas>
+    </div>
+    <div class="chart-box">
+      <h3>日次ダイジェスト報酬推移</h3>
+      <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">wf-daily-digestの品質トレンド。</p>
+      <canvas id="digestChart"></canvas>
+    </div>
+  </div>
+  {heatmap_html}
+</div>'''
+
+monthly_section_full = monthly_summary_html + monthly_charts_html
+
 # --- HTML generation ---
 html = f"""<!DOCTYPE html>
 <html lang="ja">
@@ -793,6 +1004,14 @@ html = f"""<!DOCTYPE html>
                color: var(--text); text-decoration: none; font-size: 0.85rem;
                box-shadow: 0 1px 4px var(--shadow); transition: background 0.2s; }}
   .back-btn:hover {{ background: var(--border); }}
+  .monthly-section {{ margin-bottom: 24px; }}
+  .monthly-section h2 {{ font-size: 1.1rem; margin-bottom: 16px; }}
+  .hm-grid {{ display: flex; flex-wrap: wrap; gap: 4px; }}
+  .hm-cell {{ width: 52px; height: 40px; border-radius: 6px; display: flex;
+              flex-direction: column; align-items: center; justify-content: center;
+              font-size: .65rem; color: #fff; cursor: default; }}
+  .hm-day {{ font-weight: 600; }}
+  .hm-cnt {{ font-size: .6rem; opacity: .9; }}
 </style>
 </head>
 <body>
@@ -858,6 +1077,8 @@ html = f"""<!DOCTYPE html>
 </div>
 
 {evolve_section_html}
+
+{monthly_section_full}
 
 <!-- Row 1: reward推移 + judge推移 -->
 <div class="charts-aligned">
@@ -1034,6 +1255,129 @@ if (judgeCtx) {{
           x: {{ grid: {{ color: gridColor }}, ticks: {{ color: textColor, maxTicksLimit: 8 }} }},
           y: {{ min: 0, max: 1, grid: {{ color: gridColor }}, ticks: {{ color: textColor }} }}
         }}
+      }}
+    }});
+  }}
+}}
+
+// --- Monthly Analysis Charts ---
+
+// Weekly bar+line combo
+const weeklyCtx = document.getElementById('weeklyChart');
+if (weeklyCtx) {{
+  const wLabels = {ma_weekly_labels_json};
+  const wCounts = {ma_weekly_counts_json};
+  const wRewards = {ma_weekly_rewards_json};
+  if (wCounts.some(v => v > 0)) {{
+    new Chart(weeklyCtx, {{
+      type: 'bar',
+      data: {{
+        labels: wLabels,
+        datasets: [
+          {{ label: 'タスク数', data: wCounts, backgroundColor: 'rgba(13,110,253,0.6)', borderRadius: 4, yAxisID: 'y' }},
+          {{ label: '平均報酬', data: wRewards, type: 'line', borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,0.1)', tension: 0.3, pointRadius: 4, yAxisID: 'y1' }}
+        ]
+      }},
+      options: {{
+        plugins: {{ legend: {{ labels: {{ color: textColor }} }} }},
+        scales: {{
+          x: {{ grid: {{ color: gridColor }} }},
+          y: {{ position: 'left', grid: {{ color: gridColor }}, beginAtZero: true, ticks: {{ stepSize: 5 }} }},
+          y1: {{ position: 'right', min: 0, max: 1, grid: {{ drawOnChartArea: false }}, ticks: {{ stepSize: 0.2 }} }}
+        }},
+        animation: {{ duration: 1000 }}
+      }}
+    }});
+  }}
+}}
+
+// Category horizontal bar
+const catCtx = document.getElementById('categoryChart');
+if (catCtx) {{
+  const catLabels = {ma_cat_labels_json};
+  const catCounts = {ma_cat_counts_json};
+  const catRewards = {ma_cat_rewards_json};
+  if (catCounts.length > 0) {{
+    const catColors = catRewards.map(r => r >= 0.9 ? '#198754' : r >= 0.8 ? '#ffc107' : '#dc3545');
+    new Chart(catCtx, {{
+      type: 'bar',
+      data: {{
+        labels: catLabels,
+        datasets: [{{ label: '件数', data: catCounts, backgroundColor: catColors, borderRadius: 4 }}]
+      }},
+      options: {{
+        indexAxis: 'y',
+        plugins: {{
+          legend: {{ display: false }},
+          tooltip: {{ callbacks: {{ afterLabel: function(ctx) {{ return 'avg reward: ' + catRewards[ctx.dataIndex]; }} }} }}
+        }},
+        scales: {{
+          x: {{ grid: {{ color: gridColor }}, beginAtZero: true }},
+          y: {{ grid: {{ display: false }} }}
+        }},
+        animation: {{ delay(ctx) {{ return ctx.dataIndex * 100; }} }}
+      }}
+    }});
+  }}
+}}
+
+// Mode comparison bar
+const modeCtx = document.getElementById('modeChart');
+if (modeCtx) {{
+  const modeLabels = {ma_mode_labels_json};
+  const modeCounts = {ma_mode_counts_json};
+  const modeRewards = {ma_mode_rewards_json};
+  if (modeCounts.length > 0) {{
+    new Chart(modeCtx, {{
+      type: 'bar',
+      data: {{
+        labels: modeLabels,
+        datasets: [
+          {{ label: '件数', data: modeCounts, backgroundColor: 'rgba(67,97,238,0.6)', borderRadius: 4, yAxisID: 'y' }},
+          {{ label: '平均報酬', data: modeRewards, type: 'line', borderColor: '#06d6a0', backgroundColor: 'rgba(6,214,160,0.1)', tension: 0.3, pointRadius: 5, yAxisID: 'y1' }}
+        ]
+      }},
+      options: {{
+        plugins: {{ legend: {{ labels: {{ color: textColor }} }} }},
+        scales: {{
+          x: {{ grid: {{ color: gridColor }} }},
+          y: {{ position: 'left', grid: {{ color: gridColor }}, beginAtZero: true }},
+          y1: {{ position: 'right', min: 0, max: 1, grid: {{ drawOnChartArea: false }}, ticks: {{ stepSize: 0.2 }} }}
+        }},
+        animation: {{ duration: 1000 }}
+      }}
+    }});
+  }}
+}}
+
+// Digest reward trend line
+const digestCtx = document.getElementById('digestChart');
+if (digestCtx) {{
+  const dDates = {ma_digest_dates_json};
+  const dRewards = {ma_digest_rewards_json};
+  if (dDates.length > 0) {{
+    new Chart(digestCtx, {{
+      type: 'line',
+      data: {{
+        labels: dDates,
+        datasets: [{{
+          label: 'Daily Digest Reward',
+          data: dRewards,
+          borderColor: '#198754',
+          backgroundColor: 'rgba(25,135,84,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: dRewards.map(r => r >= 0.9 ? '#198754' : r >= 0.8 ? '#ffc107' : '#dc3545'),
+        }}]
+      }},
+      options: {{
+        plugins: {{ legend: {{ display: false }} }},
+        scales: {{
+          x: {{ grid: {{ color: gridColor }}, ticks: {{ maxTicksLimit: 8 }} }},
+          y: {{ min: 0.5, max: 1.05, grid: {{ color: gridColor }}, ticks: {{ stepSize: 0.1 }} }}
+        }},
+        animation: {{ duration: 1200 }}
       }}
     }});
   }}
