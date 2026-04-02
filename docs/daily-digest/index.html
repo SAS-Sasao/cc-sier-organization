@@ -112,29 +112,30 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全11件 ｜ 最終更新: 2026-04-01 09:42</p>
+<p class="subtitle">domain-tech-collection ｜ 全12件 ｜ 最終更新: 2026-04-02 09:32</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">536</div>
+    <div class="summary-value blue">641</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-04-01</div>
+    <div class="summary-value">2026-04-02</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">11</div>
+    <div class="summary-value green">12</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
-    <div class="summary-value">49</div>
+    <div class="summary-value">53</div>
   </div>
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-04-01" onclick="switchTab('2026-04-01')">2026-04-01</button>
+<button class="tab-btn active" data-date="2026-04-02" onclick="switchTab('2026-04-02')">2026-04-02</button>
+<button class="tab-btn" data-date="2026-04-01" onclick="switchTab('2026-04-01')">2026-04-01</button>
 <button class="tab-btn" data-date="2026-03-31" onclick="switchTab('2026-03-31')">2026-03-31</button>
 <button class="tab-btn" data-date="2026-03-30" onclick="switchTab('2026-03-30')">2026-03-30</button>
 <button class="tab-btn" data-date="2026-03-29" onclick="switchTab('2026-03-29')">2026-03-29</button>
@@ -147,7 +148,210 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-04-01" class="digest-panel" style="display:block">
+<div id="digest-2026-04-02" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 19件（成功15件 / 部分成功2件 / 失敗2件）</div><div class="meta-line"><strong>オペレーター</strong>: SAS-Sasao</div>
+<div class="meta-line"><strong>記事数:</strong> 105件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>axiosサプライチェーン攻撃が発生（3/31）</strong> — 人気HTTPライブラリaxiosのnpmパッケージが攻撃を受け、Zenn・Qiita・はてブで軒並みトップ。LiteLLM（PyPI）への同種攻撃もInfoQで報告され、npm/PyPI双方で脅威が顕在化。</li><li><strong>アスクル、ランサムウェア被害から復旧へ</strong> — 205億円の最終赤字を計上しつつもCISO新設・AI&テクノロジー本部設置でV字回復を計画。小売EC企業のセキュリティインシデント対応の重要事例。</li><li><strong>MCPの本番展開フェーズ突入</strong> — PinterestがMCPエコシステムを本番規模で展開、API Gateway+LambdaでのプライベートMCPサーバー構築など、実験段階から実務適用に移行。</li><li><strong>ShopifyがChatGPT連携AIショッピング機能を発表</strong> — 会話内で最初に表示されるブランドが購買に影響するとの知見も示され、EC業界のAI活用が本格化。</li><li><strong>食品4月値上げ2,798品目</strong> — 調味料が最多の1,514品目。改正物流効率化法も4月施行で物流改革が本格始動。</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>axiosサプライチェーン攻撃が発生（3/31）</strong> — 人気HTTPライブラリaxiosのnpmパッケージが攻撃を受け、Zenn・Qiita・はてブで軒並みトップ。LiteLLM（PyPI）への同種攻撃もInfoQで報告され、npm/PyPI双方で脅威が顕在化。</li>
+<li><strong>アスクル、ランサムウェア被害から復旧へ</strong> — 205億円の最終赤字を計上しつつもCISO新設・AI&テクノロジー本部設置でV字回復を計画。小売EC企業のセキュリティインシデント対応の重要事例。</li>
+<li><strong>MCPの本番展開フェーズ突入</strong> — PinterestがMCPエコシステムを本番規模で展開、API Gateway+LambdaでのプライベートMCPサーバー構築など、実験段階から実務適用に移行。</li>
+<li><strong>ShopifyがChatGPT連携AIショッピング機能を発表</strong> — 会話内で最初に表示されるブランドが購買に影響するとの知見も示され、EC業界のAI活用が本格化。</li>
+<li><strong>食品4月値上げ2,798品目</strong> — 調味料が最多の1,514品目。改正物流効率化法も4月施行で物流改革が本格始動。</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A章. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/aws_japan/articles/self-evolving-ops-agent-multi-layer-memory" target="_blank" rel="noopener">自己進化する運用エージェントの設計と実装 -- 3層メモリで AI が AI を育てる AIOps の世界</a></td><td>Zenn</td><td>多層メモリアーキテクチャによる自律的AIOpsエージェントの設計と実装パターンを解説。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/microsoft/articles/9db72608477de6" target="_blank" rel="noopener">AIエージェントだけでスクラムを回してみた</a></td><td>Zenn</td><td>AIエージェントのみでスクラム開発プロセスを自動運用した実験レポート。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/nextbeat/articles/practical-claude-code-introduction" target="_blank" rel="noopener">Claude Code を「何となく使っている」から抜け出す</a></td><td>Zenn</td><td>Claude Codeの実践的活用パターンと効果的な使用方法の解説。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/shio_shoppaize/articles/shogun-codd-coherence" target="_blank" rel="noopener">Prompt→Context→Harness、全部やった。整合性駆動開発CoDD爆誕</a></td><td>Zenn</td><td>AI生成コードの要件管理フレームワーク「CoDD」による壊れない開発アプローチの提案。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/theaktky/articles/5f9f18c34950c1" target="_blank" rel="noopener">完全自律のコーディングパイプラインを作った</a></td><td>はてブ</td><td>Claude Code・Codex CLI・Cursor CLIを組み合わせた自動コード生成・検証パイプラインの構築。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/k_izutani/items/3501b63f345f79246e4c" target="_blank" rel="noopener">Claude Codeのカスタムスキル育成 - 自動監査スキル実装</a></td><td>Qiita</td><td>Claude Codeでカスタムスキルを開発し自動監査機能を実装する方法の解説。</td></tr>
+<tr><td>7</td><td><a href="https://qiita.com/nogataka/items/9af38e7279f553f13e50" target="_blank" rel="noopener">イベント駆動型ワークフロー自動化ガイド</a></td><td>Qiita</td><td>Hooks・Scheduler・Skillsを組み合わせたClaude Code自動化パターンの紹介。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/mcp-apps-market-research/" target="_blank" rel="noopener">Claude Codeで MCP Apps市場調査</a></td><td>DevelopersIO</td><td>Claude Codeを活用したMCP Appsの市場動向と予測分析の実施レポート。</td></tr>
+<tr><td>9</td><td><a href="https://dev.classmethod.jp/articles/claude-code-schedule-comparison/" target="_blank" rel="noopener">Claude Codeスケジュール実行の3つの方法</a></td><td>DevelopersIO</td><td>Claude Codeのスケジュール実行パターンを整理・比較した解説記事。</td></tr>
+<tr><td>10</td><td><a href="https://qiita.com/nogataka/items/d6c83ea50b82e1c2602c" target="_blank" rel="noopener">100行のCLAUDE.mdより35行が効く理由</a></td><td>はてブ</td><td>Claude Code設定は長い1ファイルより短く分割した方が効果的であることを公式仕様から検証。</td></tr>
+<tr><td>11</td><td><a href="https://note.com/fukkyy/n/n1d8fce44e67a" target="_blank" rel="noopener">エージェントハーネスとAIマネージドサービス</a></td><td>はてブ</td><td>AIエージェントの本質的価値はエージェント自体ではなく包含インフラにあるという指摘。</td></tr>
+<tr><td>12</td><td><a href="https://www.infoq.com/news/2026/04/pinterest-mcp-ecosystem/" target="_blank" rel="noopener">Pinterest Deploys Production-Scale Model Context Protocol Ecosystem for AI Agent Workflows</a></td><td>InfoQ</td><td>Pinterestが本番規模のAIエージェント向けMCPエコシステムを展開。</td></tr>
+<tr><td>13</td><td><a href="https://www.infoq.com/news/2026/04/cloudflare-dynamic-workers-beta/" target="_blank" rel="noopener">Cloudflare Launches Dynamic Workers Open Beta: Isolate-Based Sandboxing for AI Agent Code Execution</a></td><td>InfoQ</td><td>CloudflareがAIエージェントコード実行向けのサンドボックス機能をベータ公開。</td></tr>
+<tr><td>14</td><td><a href="https://www.infoq.com/news/2026/03/agentic-engineering-patterns/" target="_blank" rel="noopener">Agentic AI Patterns Reinforce Engineering Discipline</a></td><td>InfoQ</td><td>AIエージェントのデザインパターンがエンジニアリング規律を強化する方向性を示唆。</td></tr>
+<tr><td>15</td><td><a href="https://qiita.com/Nana_777/items/22b87cd8d28e3675e5c2" target="_blank" rel="noopener">AWS FrontierAgentsによるAIOps実現</a></td><td>Qiita</td><td>AIエージェント活用でDevOpsとセキュリティを統合的に管理するAIOpsの実現手法。</td></tr>
+<tr><td>16</td><td><a href="https://future-architect.github.io/articles/20260324a/" target="_blank" rel="noopener">API GatewayとLambdaで実装するプライベートなMCPサーバー</a></td><td>フューチャー技術ブログ</td><td>AWSサーバーレス構成でプライベートMCPサーバーを構築する実装ガイド。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/porche1223/articles/90287ab85bba43" target="_blank" rel="noopener">ユーザーが使うほど成長するAIエージェントを作る（最適化パイプライン編）</a></td><td>Zenn</td><td>利用データに基づき継続的に改善されるAIシステムの構築パターン。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/kt3k/articles/74785af8436b1e" target="_blank" rel="noopener">ReAct (Reason+Act) パターンを TypeScript だけで実装する</a></td><td>Zenn</td><td>LLMエージェントの推論・実行パターンをTypeScriptでフルスクラッチ実装。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/elyza/articles/954e7c76e68340" target="_blank" rel="noopener">Rubric x LLM-as-a-Judge でLLMアプリの回帰テストを行う</a></td><td>Zenn</td><td>Rubric評価とLLM-as-a-Judgeを組み合わせた生成AI品質保証フレームワークの構築。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/retrieva_tech/articles/b5c21fe10e4ee9" target="_blank" rel="noopener">テキスト埋め込みモデルに対する自動プロンプト最適化</a></td><td>Zenn</td><td>埋め込みモデルの精度向上のためのプロンプト自動最適化手法。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/pksha/articles/743e5a2e1589d0" target="_blank" rel="noopener">Mistral AI Worldwide Hackathon 2026 - Tokyo Edition で優勝した話</a></td><td>Zenn</td><td>Mistral AIハッカソン東京大会での優勝プロジェクトの技術詳細と実践事例。</td></tr>
+<tr><td>6</td><td><a href="https://tech.layerx.co.jp/entry/2026/04/01/150000" target="_blank" rel="noopener">AIエージェントのHuman-in-the-Loop評価を深化させる</a></td><td>はてブ</td><td>AIエージェント運用における人間確認プロセスの定量評価手法の紹介。</td></tr>
+<tr><td>7</td><td><a href="https://www.publickey1.jp/blog/26/20301llm90.html" target="_blank" rel="noopener">LLM推論コスト2030年までに90%削減予想</a></td><td>はてブ</td><td>ガートナーが半導体効率化とモデル設計革新によるLLM推論コストの大幅削減を予測。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/amazon-bedrock-guardrails-grounding-eval/" target="_blank" rel="noopener">Amazon Bedrock Guardrails コンテキストグラウンディング機能の評価</a></td><td>DevelopersIO</td><td>Bedrockのハルシネーション防止効果をGuardrailsのグラウンディング機能で検証。</td></tr>
+<tr><td>9</td><td><a href="https://qiita.com/kentaro_kawamura/items/6acc39c4ccaf7b5b523e" target="_blank" rel="noopener">Google ADK BigQuery自然言語分析エージェント</a></td><td>Qiita</td><td>GeminiとBigQueryを統合した対話型データ分析システムの構築。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/2/claude-opus-4.6-available-amazon-bedrock/" target="_blank" rel="noopener">Claude Opus 4.6 が Amazon Bedrock で利用可能に</a></td><td>AWS What's New</td><td>Anthropic最新モデルClaude Opus 4.6がBedrock上で一般提供開始。</td></tr>
+<tr><td>11</td><td><a href="https://www.anthropic.com/news/claude-partner-network" target="_blank" rel="noopener">Anthropic invests $100 million into the Claude Partner Network</a></td><td>Anthropic</td><td>エンタープライズ採用支援のためパートナーネットワークに1億ドルを投資。</td></tr>
+<tr><td>12</td><td><a href="https://www.anthropic.com/news/the-anthropic-institute" target="_blank" rel="noopener">Introducing The Anthropic Institute</a></td><td>Anthropic</td><td>強力なAIがもたらす社会的課題に対処するための新機関を設立。</td></tr>
+<tr><td>13</td><td><a href="https://www.anthropic.com/81k-interviews" target="_blank" rel="noopener">What 81,000 people want from AI</a></td><td>Anthropic</td><td>81,000人のClaudeユーザーに対する大規模定性調査の結果を公開。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/hrbrain/articles/local-development-docker-to-mise" target="_blank" rel="noopener">モノレポのローカル開発環境をDockerからmiseに移行して起動速度を75%改善した</a></td><td>Zenn</td><td>Docker代替のmise導入によるモノレポ開発環境の起動速度75%改善事例。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/tried-emdash-astro-based-oss-cms-by-cloudflare/" target="_blank" rel="noopener">Cloudflare EmDash - Astro基盤のOSS CMS</a></td><td>DevelopersIO</td><td>CloudflareがリリースしたAstroベースOSS CMSのCloudflare Workersデプロイ実装。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/ec2-image-builder-lifecycle-enhancements/" target="_blank" rel="noopener">EC2 Image Builderライフサイクルポリシー更新</a></td><td>DevelopersIO</td><td>EC2 Image Builderがワイルドカード対応のレシピ指定機能をサポート。</td></tr>
+<tr><td>4</td><td><a href="https://future-architect.github.io/articles/20260325a/" target="_blank" rel="noopener">実験して入門するKubernetes：Schedulerを止めてみたくなった件</a></td><td>フューチャー技術ブログ</td><td>KubernetesのPodスケジューリング機構を実験的に検証し内部動作を深掘り。</td></tr>
+<tr><td>5</td><td><a href="https://developers.prtimes.jp/2026/03/31/improvement-with-worktree-compose/" target="_blank" rel="noopener">git worktree x Docker Composeによる開発環境改善</a></td><td>はてブ</td><td>git worktreeとDocker Composeで複数ブランチの並行開発環境を構築。</td></tr>
+<tr><td>6</td><td><a href="https://thenewstack.io/ai-cloud-taxonomy-2026/" target="_blank" rel="noopener">A practical guide to the 6 categories of AI cloud infrastructure in 2026</a></td><td>The New Stack</td><td>2026年のAIクラウドインフラを6つのカテゴリに分類した実践ガイド。</td></tr>
+<tr><td>7</td><td><a href="https://thenewstack.io/kubernetes-native-ai-infrastructure/" target="_blank" rel="noopener">Building a Kubernetes-native pattern for AI infrastructure at scale</a></td><td>The New Stack</td><td>KAITO・liteLLM・Flex Nodesを活用したKubernetesネイティブAIインフラの構築パターン。</td></tr>
+<tr><td>8</td><td><a href="https://thenewstack.io/kubernetes-gets-an-ai-conformance-program-and-vmware-is-already-on-board/" target="_blank" rel="noopener">Kubernetes Gets an AI Conformance Program</a></td><td>The New Stack</td><td>CNCFがKubernetes AI適合性認定プログラムを立ち上げ、VMwareが早期参加。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/blogs/aws/aws-weekly-roundup-aws-ai-ml-scholars-program-agent-plugin-for-aws-serverless-and-more-march-30-2026/" target="_blank" rel="noopener">AWS Weekly Roundup: Agent Plugin for AWS Serverless, and more (March 30, 2026)</a></td><td>AWS Blog</td><td>AIコーディングアシスタント向けAgent Plugin for AWS Serverlessなど最新アップデートまとめ。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/blogs/aws/aws-weekly-roundup-amazon-s3-turns-20-amazon-route-53-global-resolver-general-availability-and-more-march-16-2026/" target="_blank" rel="noopener">AWS Weekly Roundup: Amazon S3 turns 20, Route 53 Global Resolver GA (March 16, 2026)</a></td><td>AWS Blog</td><td>S3の20周年、Route 53 Global Resolverの一般提供開始など。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/loglass/articles/c2db7e85702571" target="_blank" rel="noopener">主キーはもう「UUIDv7」一択なのか？</a></td><td>Zenn</td><td>ID生成技術の進化を踏まえた現代的データベース設計におけるUUIDv7の検討。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/shirok/items/c38985bbf0ec13bf91b7" target="_blank" rel="noopener">Oracle AI Database自動インメモリ機能検証</a></td><td>Qiita</td><td>Oracle Exadata最新のAI自動インメモリ機能のパフォーマンス検証レポート。</td></tr>
+<tr><td>3</td><td><a href="https://thenewstack.io/four-data-infrastructure-shifts-defining-ai-success-in-2026/" target="_blank" rel="noopener">Four Data Infrastructure Shifts Defining AI Success in 2026</a></td><td>The New Stack</td><td>2026年のAI成功を左右する4つのデータインフラ変革トレンド。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/tomokoro/items/e8bdb326db4d1743f551" target="_blank" rel="noopener">NotebookLMインフラ構成提案検証</a></td><td>Qiita</td><td>Google NotebookLMを活用したインフラ構成提案の生成AI検証事例。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://qiita.com/ryo_sh/items/18a4ddd39ada54c58b12" target="_blank" rel="noopener">REST API vs GraphQL フロントエンド視点の整理</a></td><td>Qiita</td><td>REST APIとGraphQLの特性をフロントエンド実装面から比較分析。</td></tr>
+<tr><td>2</td><td><a href="https://efcl.info/2026/04/01/dockerfile-pin/" target="_blank" rel="noopener">dockerfile-pin: セキュアなDocker運用ツール</a></td><td>はてブ</td><td>DockerイメージをSHA256でピン留めするCLIツールによるサプライチェーン攻撃対策。</td></tr>
+<tr><td>3</td><td><a href="https://www.infoq.com/news/2026/04/eslint-10-release/" target="_blank" rel="noopener">ESLint v10: Flat Config Completion and JSX Tracking</a></td><td>InfoQ</td><td>ESLint最新版がフラット設定とJSXトラッキング機能を完成。</td></tr>
+<tr><td>4</td><td><a href="https://future-architect.github.io/articles/20260317a/" target="_blank" rel="noopener">記録のための日記から、対話で育てる日記へ -- Claude x Obsidian x MCP</a></td><td>フューチャー技術ブログ</td><td>生成AIとObsidianを統合した思考整理ジャーナリングツールの実装。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/gunta/articles/0152eadf05d173" target="_blank" rel="noopener">【緊急】axios がサプライチェーン攻撃 2026.03.31</a></td><td>Zenn</td><td>人気HTTPライブラリaxiosにサプライチェーン攻撃が発生、緊急対応が必要。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/dely_jp/articles/supply-chain-kowai" target="_blank" rel="noopener">サプライチェーン攻撃から身を守るために最低限設定しておきたいこと</a></td><td>Zenn</td><td>依存パッケージの脆弱性対策とセキュリティ設定の実装ガイド。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/cycloud_blog/articles/5ce66daf4bd0cb" target="_blank" rel="noopener">npm をセキュアな挙動にするために .npmrc に記述する最小設定</a></td><td>Zenn</td><td>JavaScriptプロジェクトのnpmパッケージ管理セキュリティ強化の最小設定。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/ubie_dev/articles/ai-sec-alert-ops" target="_blank" rel="noopener">Ubieにおける一年間のセキュリティ分析AIエージェントの運用</a></td><td>Zenn</td><td>セキュリティ脅威検出のためのAIエージェント1年間の実運用経験レポート。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/kawabe0201/items/b51cd76daa2fec5029f1" target="_blank" rel="noopener">axiosサプライチェーン攻撃の緊急対応</a></td><td>Qiita</td><td>axiosのnpmパッケージに対するセキュリティ脅威の実務的対処方法。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/kawabe0201/items/d698429413a1c9703b76" target="_blank" rel="noopener">2026年エンジニア必須セキュリティインシデント8選</a></td><td>Qiita</td><td>2026年の最新セキュリティ脅威動向と防御戦略のまとめ。</td></tr>
+<tr><td>7</td><td><a href="https://www.infoq.com/news/2026/03/litellm-supply-chain-attack/" target="_blank" rel="noopener">PyPI Supply Chain Attack Compromises LiteLLM</a></td><td>InfoQ</td><td>LiteLLMがPyPIサプライチェーン攻撃を受け機密情報流出のリスクが発生。</td></tr>
+<tr><td>8</td><td><a href="https://www.anthropic.com/news/mozilla-firefox-security" target="_blank" rel="noopener">Partnering with Mozilla to improve Firefox's security</a></td><td>Anthropic</td><td>AnthropicがMozillaと協力しFirefoxのセキュリティ機能を強化。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B章. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/store/s040114.html" target="_blank" rel="noopener">アクロスプラザ北柏／千葉県柏市に4/1オープン、ベルクス・マツキヨなど17店舗入居</a></td><td>流通ニュース</td><td>大和ハウスリアルティマネジメントが千葉県柏市に複合商業施設をオープン、17店舗入居。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/store/s040118.html" target="_blank" rel="noopener">マックスバリュ東海／松阪市役所に無人店舗4/1オープン</a></td><td>流通ニュース</td><td>官公庁施設内に無人販売店舗を展開、新たな出店形態の試み。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/store/s040146.html" target="_blank" rel="noopener">ニトリ／埼玉・神奈川・東京・大阪に計5店舗4/3同時オープン</a></td><td>流通ニュース</td><td>ニトリが複数都府県で5店舗を同時オープンする大規模出店。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/accounts/s040143.html" target="_blank" rel="noopener">あさくま／28年ぶりに売上100億円達成、4月には愛知県内2店舗を新規出店</a></td><td>流通ニュース</td><td>ステーキチェーンが28年ぶりの100億円到達、出店加速。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/strategy/s040145.html" target="_blank" rel="noopener">カクヤス／札幌エリアへ初進出、飲食店向け配達サービス2拠点同時オープン</a></td><td>流通ニュース</td><td>酒類配達のカクヤスが北海道に初進出。</td></tr>
+<tr><td>6</td><td><a href="https://diamond-rm.net/store/541170/" target="_blank" rel="noopener">ベニマルが白河の店舗を建て替え！ロピアは福岡・遠賀町に新設店</a></td><td>ダイヤモンド・チェーンストア</td><td>大型店舗の出店・建て替え計画に関する週間速報。</td></tr>
+<tr><td>7</td><td><a href="https://diamond-rm.net/management/businessplan/540599/" target="_blank" rel="noopener">首都圏でも攻勢？PPIHの食品強化型新フォーマット「ロビン・フッド」の可能性</a></td><td>ダイヤモンド・チェーンストア</td><td>ドン・キホーテ親会社PPIHの食品強化型新業態の首都圏展開戦略。</td></tr>
+<tr><td>8</td><td><a href="https://diamond-rm.net/management/businessplan/540604/" target="_blank" rel="noopener">2026年のショッピングセンター開業計画を分析 ますます主流になるNSC</a></td><td>ダイヤモンド・チェーンストア</td><td>SC開業トレンド分析、NSC（近隣型SC）が主流に。</td></tr>
+<tr><td>9</td><td><a href="https://www.retaildive.com/news/retail-store-openings-slowed-2025-growth-accelerates-2026/810233/" target="_blank" rel="noopener">Store openings slowed in 2025, growth accelerates in 2026</a></td><td>Retail Dive</td><td>2025年の出店減速から2026年は成長加速の見通し。</td></tr>
+<tr><td>10</td><td><a href="https://www.retaildive.com/news/nordstrom-closes-two-full-line-stores-sales-growth/815712/" target="_blank" rel="noopener">Nordstrom to close 2 full-line stores despite top-line strength last year</a></td><td>Retail Dive</td><td>ノードストロムが売上好調にもかかわらずフルライン2店舗を閉鎖、Rack店23店は新規出店。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/strategy/s040113.html" target="_blank" rel="noopener">サミット／「未来の店舗運営体制検討プロジェクト」新設</a></td><td>流通ニュース</td><td>サミットが店舗運営体制の抜本改革に向けたプロジェクトを始動。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/strategy/s040149.html" target="_blank" rel="noopener">ケンタッキー／名嶋専務が社長に昇格、遠藤社長は代表権のある会長に</a></td><td>流通ニュース</td><td>日本KFCホールディングスの経営体制変更を発表。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/management/topinterview/540619/" target="_blank" rel="noopener">紀ノ國屋富田社長インタビュー「路面店のリモデル」を検討へ</a></td><td>ダイヤモンド・チェーンストア</td><td>高級スーパー紀ノ國屋が路面店リモデルの経営方針を表明。</td></tr>
+<tr><td>4</td><td><a href="https://diamond-rm.net/management/businessplan/541168/" target="_blank" rel="noopener">東海地方の老舗有力スーパー・カネスエ、大型リブランディングの深謀</a></td><td>ダイヤモンド・チェーンストア</td><td>地域有力スーパーが大規模ブランド刷新を実施。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/management/businessplan/540319/" target="_blank" rel="noopener">ファーストリテイリングの歴史に学ぶ「経営人材」の育成手法</a></td><td>ダイヤモンド・チェーンストア</td><td>ユニクロの経営人材育成メソッドを分析。</td></tr>
+<tr><td>6</td><td><a href="https://news.nissyoku.co.jp/news/aoyagi20260330101456209" target="_blank" rel="noopener">日本ケロッグ、新体制移行で井上社長退任</a></td><td>日本食糧新聞</td><td>日本ケロッグの経営体制変更に伴う人事異動。</td></tr>
+<tr><td>7</td><td><a href="https://news.nissyoku.co.jp/news/kubo20260326030050825" target="_blank" rel="noopener">日清製粉グループ、4月〜6月機構改革・人事異動</a></td><td>日本食糧新聞</td><td>四半期ごとの組織体制見直し実施。</td></tr>
+<tr><td>8</td><td><a href="https://news.nissyoku.co.jp/news/honmiya20260327120509858" target="_blank" rel="noopener">農水省、外食の特定技能1号の交付停止</a></td><td>日本食糧新聞</td><td>4月13日から外食業分野の特定技能在留資格の受入制限を実施。</td></tr>
+<tr><td>9</td><td><a href="https://www.retaildive.com/news/distressed-retailers-vulnerable-could-file-bankruptcy-2026/810234/" target="_blank" rel="noopener">As 2026 kicks off, these retailers are vulnerable to bankruptcy</a></td><td>Retail Dive</td><td>経営難に陥る米国小売企業が2026年に破産リスクに直面。</td></tr>
+<tr><td>10</td><td><a href="https://netshop.impress.co.jp/n/2026/04/02/15852" target="_blank" rel="noopener">アスクル、「CISO」＋「AI&テクノロジー本部」を新設</a></td><td>ネットショップ担当者フォーラム</td><td>アスクルがCISO新設とAI活用推進の組織体制を強化。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/commodity/s040117.html" target="_blank" rel="noopener">食品主要195社／4月の値上げは2798品目、調味料が最多で1514品目</a></td><td>流通ニュース</td><td>主要食品メーカーによる大規模値上げ、調味料が最多カテゴリ。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/commodity/s031977.html" target="_blank" rel="noopener">ヤマダHD／SPA商品を「ヤマダプロダクツ」に統一</a></td><td>流通ニュース</td><td>ヤマダが自社ブランド商品を一本化、大型家電PBを強化。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/management/527680/" target="_blank" rel="noopener">2年連続で過去最高売上を達成 ハーゲンダッツのマーケティング戦略に迫る</a></td><td>ダイヤモンド・チェーンストア</td><td>プレミアムアイスクリームブランドの販促戦略が好調を牽引。</td></tr>
+<tr><td>4</td><td><a href="https://news.nissyoku.co.jp/news/yoshiokau20260331083417907" target="_blank" rel="noopener">つゆ市場、冷凍にヒットの兆し 参入相次ぎ活性化へ</a></td><td>日本食糧新聞</td><td>冷凍つゆの開発が相次ぎ、夏の酷暑による麺需要増が市場を活性化。</td></tr>
+<tr><td>5</td><td><a href="https://news.nissyoku.co.jp/news/mitsui20260317092944662" target="_blank" rel="noopener">みたけ食品工業、売上高150億円射程に</a></td><td>日本食糧新聞</td><td>穀物製粉メーカーが米粉事業で業界をリード、グループシナジー発揮。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/e/2026/04/02/15846" target="_blank" rel="noopener">AIとの会話で最初に表示されるブランドが消費者の記憶に残る――Shopify社長が説明した「ChatGPT」連携と新たなAIショッピング</a></td><td>ネットショップ担当者フォーラム</td><td>ShopifyがChatGPTとのAIショッピング連携を発表、会話内表示順が購買に影響。</td></tr>
+<tr><td>2</td><td><a href="https://netshop.impress.co.jp/n/2026/04/02/15849" target="_blank" rel="noopener">Amazon消費者調査：重視する要素は「価格」47%、「評価」27%。星4.0未満の商品は約6割が回避</a></td><td>ネットショップ担当者フォーラム</td><td>Amazon利用者の購買意思決定における価格・レビューの影響度を調査。</td></tr>
+<tr><td>3</td><td><a href="https://netshop.impress.co.jp/n/2026/04/02/15848" target="_blank" rel="noopener">ペットゴー、神奈川県厚木市の新物流拠点を稼働</a></td><td>ネットショップ担当者フォーラム</td><td>ペットゴーが新物流拠点を稼働、EC事業の成長基盤を整備。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/ec/s032718.html" target="_blank" rel="noopener">成城石井／公式オンラインショップで定期購入サービス開始</a></td><td>流通ニュース</td><td>成城石井が公式ECで定期配送機能を導入。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/ec/s022647.html" target="_blank" rel="noopener">セブンイレブン／宅配サービス「7NOW」で医薬品のネット販売開始</a></td><td>流通ニュース</td><td>セブンの即配サービス7NOWが医薬品ECに対応開始。</td></tr>
+<tr><td>6</td><td><a href="https://diamond-rm.net/ec-epayment/net-super/540588/" target="_blank" rel="noopener">地方部のネットスーパーで「恵方巻」が1日3000本も売れた理由</a></td><td>ダイヤモンド・チェーンストア</td><td>地方ネットスーパーの需要特性と成功事例。</td></tr>
+<tr><td>7</td><td><a href="https://diamond-rm.net/technology/dx/540477/" target="_blank" rel="noopener">顧客と「唯一無二の関係性」を築き、ファンコミュニティを「経営のエンジン」に！</a></td><td>ダイヤモンド・チェーンストア</td><td>ホームセンターのデジタル顧客関係管理とファンコミュニティ戦略。</td></tr>
+<tr><td>8</td><td><a href="https://ecnomikata.com/original_news/49980/" target="_blank" rel="noopener">メルカートが提唱するAI時代に求められる"気付かない"EC</a></td><td>ECのミカタ</td><td>AI時代のEC運営に必要な新しいアプローチを提唱。</td></tr>
+<tr><td>9</td><td><a href="https://ecnomikata.com/ecnews/50049/" target="_blank" rel="noopener">Shopify、米国購入者に向けた「AIチャットでの商品販売」機能を提供開始</a></td><td>ECのミカタ</td><td>Shopifyが数百万事業者向けにAIチャット販売機能を提供。</td></tr>
+<tr><td>10</td><td><a href="https://ecnomikata.com/ecnews/50044/" target="_blank" rel="noopener">ECサイトの「決済承認率」平均値85.4%、中央値88.0%</a></td><td>ECのミカタ</td><td>YTGATEによる200社のEC決済環境診断結果を公表。</td></tr>
+<tr><td>11</td><td><a href="https://ecnomikata.com/original_news/49931/" target="_blank" rel="noopener">いま、楽天市場で"広告よりもブランディング"が求められている理由</a></td><td>ECのミカタ</td><td>楽天市場での販売戦略が広告偏重からブランディング重視へ転換。</td></tr>
+<tr><td>12</td><td><a href="https://ecnomikata.com/ecnews/50040/" target="_blank" rel="noopener">再配達削減、オートロックによる「設備的制約」がハードルに</a></td><td>ECのミカタ</td><td>マンション居住者の再配達削減意向と置き配の物流課題を分析。</td></tr>
+<tr><td>13</td><td><a href="https://www.retaildive.com/news/retailers-balance-human-intelligence-ai-adoption/809506/" target="_blank" rel="noopener">Retailers carefully balance human intelligence with AI adoption</a></td><td>Retail Dive</td><td>小売業者がAI導入と人的知見のバランスを模索している動向。</td></tr>
+<tr><td>14</td><td><a href="https://nrf.com/blog/insights-on-returns-recommerce-and-circularity-at-nrf-rev-2026" target="_blank" rel="noopener">NRF Rev 2026: リターン・recommerce・循環性に関する洞察</a></td><td>NRF Blog</td><td>返品をコストではなく再販価値と捉え、リバースロジスティクスを競争優位化。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/sales/s033149.html" target="_blank" rel="noopener">経済産業省／2月の商業動態統計、小売業販売額は0.2%減</a></td><td>流通ニュース</td><td>2月の小売販売額12兆1550億円、前月比減少。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/sales/s033147.html" target="_blank" rel="noopener">ドラッグストア／2月の販売額5.6%増7445億円</a></td><td>流通ニュース</td><td>ドラッグストア業態が食品中心に好調推移。</td></tr>
+<tr><td>3</td><td><a href="https://www.retaildive.com/news/nrf-forecasts-retail-sales-growth-2026-consumer-uncertainty/815102/" target="_blank" rel="noopener">NRF forecasts 4.4% retail sales growth this year despite rising uncertainty</a></td><td>Retail Dive</td><td>NRFが2026年の米国小売売上4.4%成長を予測、不確実性の中でも堅調。</td></tr>
+<tr><td>4</td><td><a href="https://nrf.com/blog/nrf-is-forecasting-u-s-retail-sales-to-grow-4-4-in-2026" target="_blank" rel="noopener">NRF is forecasting U.S. retail sales to grow 4.4% in 2026</a></td><td>NRF Blog</td><td>米国小売売上が過去10年平均3.6%を上回る4.4%成長の予測。</td></tr>
+<tr><td>5</td><td><a href="https://www.retaildive.com/news/retail-trends-to-watch-2026/808341/" target="_blank" rel="noopener">6 retail trends to watch in 2026</a></td><td>Retail Dive</td><td>2026年の小売業界注目6トレンド（AI活用、消費者行動変化等）。</td></tr>
+<tr><td>6</td><td><a href="https://news.nissyoku.co.jp/news/shinoda20260331112147443" target="_blank" rel="noopener">食品界、4月からの変化 持続的供給支える2法施行</a></td><td>日本食糧新聞</td><td>改正物流効率化法と食料システム法が4月施行、130万円の壁に新ルール。</td></tr>
+<tr><td>7</td><td><a href="https://ecnomikata.com/ecnews/50061/" target="_blank" rel="noopener">Qoo10、最大20%お得になる「20%メガポセール」開催</a></td><td>ECのミカタ</td><td>Qoo10が4月1日から9日間の大型セールキャンペーンを実施。</td></tr>
+<tr><td>8</td><td><a href="https://ecnomikata.com/ecnews/50042/" target="_blank" rel="noopener">買い物は「コスパ」、家事は「タイパ」、休息は「メンパ」</a></td><td>ECのミカタ</td><td>生活者が重視する3つのパフォーマンス指標と最新消費トレンド。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/n/2026/04/02/15853" target="_blank" rel="noopener">ランサムウェア被害のアスクル、サービス復旧と販促で顧客数の回復が進む。今期205億円の最終赤字から来期V字回復を計画</a></td><td>ネットショップ担当者フォーラム</td><td>アスクルがランサムウェア被害からの復旧を推進、来期V字回復を計画。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/it/s032722.html" target="_blank" rel="noopener">アンドエスティHD／子会社ゼットンのメールシステムが不正アクセス被害</a></td><td>流通ニュース</td><td>飲食事業子会社で過去使用メールシステムへの不正アクセスが発覚。</td></tr>
+<tr><td>3</td><td><a href="https://news.nissyoku.co.jp/news/honmiya20260330113142021" target="_blank" rel="noopener">政府、サイバーセキュリティ強化へ SCS評価制度構築</a></td><td>日本食糧新聞</td><td>中小企業向けサイバーセキュリティ対策強化の新評価制度を政府が公表。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>C章. クロスドメイン分析</h2><h3>1. サプライチェーン攻撃と小売セキュリティの同時多発的課題</h3>
+<p>技術側ではaxios（npm）とLiteLLM（PyPI）へのサプライチェーン攻撃が顕在化し、パッケージマネージャの信頼性が揺らいでいる。同時に小売側ではアスクルがランサムウェア被害から205億円の赤字を計上、CISO新設に踏み切った。SIerとして注目すべきは、技術供給網（OSS依存）と事業運営（EC・物流基盤）の双方でセキュリティ投資が急務となっている点であり、小売向けシステム提案においてセキュリティ監査・SBOM管理・インシデントレスポンス体制の構築を付加価値として提示できる機会が拡大している。</p>
+<h3>2. AIエージェント×EC：会話型コマースの実用化フェーズ</h3>
+<p>ShopifyのChatGPT連携によるAIチャット販売が本格化し、「最初に表示されるブランドが消費者の記憶に残る」という知見が示された。技術側ではMCPの本番展開（Pinterest）やClaude Codeのスケジュール実行など、エージェント基盤の成熟が進む。SIerとして、小売クライアントのEC基盤にAIエージェントを組み込む際のMCPサーバー設計・プロンプト最適化・A/Bテスト基盤の提案が差別化要因になる。</p>
+<h3>3. 無人店舗・新業態と店舗DXの加速</h3>
+<p>マックスバリュ東海の官公庁内無人店舗、PPIHの食品強化型新フォーマット「ロビン・フッド」など、従来型の大型店舗から多様な業態への分岐が鮮明になっている。技術側ではKubernetes AI適合性認定やCloudflare Dynamic Workersなど、エッジ・分散コンピューティング基盤が整備されつつある。無人店舗のPOS・在庫管理をエッジAIで処理し、クラウドで統合分析するアーキテクチャの提案は、コンビニ・スーパー向けSI案件の有望なテーマである。</p>
+<h3>4. LLM推論コスト削減とデータ基盤の再構築</h3>
+<p>ガートナーによるLLM推論コスト90%削減予測（2030年）、Oracle AIデータベースの自動インメモリ機能、UUIDv7への移行議論など、データ基盤とAI推論基盤の再設計が同時進行している。小売業界では2月の商業動態統計の分析や顧客行動データの活用が進んでおり、DWH/データレイクハウスの設計にAI推論パイプラインを統合した提案が求められるフェーズに入っている。</p>
+<h3>5. 物流効率化法施行と再配達問題のテクノロジー解</h3>
+<p>改正物流効率化法が4月に施行され、CLO（最高物流責任者）配置が義務化された。EC側では再配達削減がオートロック等の設備的制約で難航している。NRFでは返品のrecommerce化（再販価値化）が議論されている。技術側のエッジコンピューティング進化と組み合わせ、配送最適化・置き配判定AI・リバースロジスティクス管理システムの構築は、物流DX案件として有望である。</p>
+<hr></div><div class="digest-section"><h2>D章. 巡回メタデータ</h2><h3>技術スタック系</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>✅ 成功</td><td>15件</td><td>axiosサプライチェーン攻撃関連が注目度1位</td></tr>
+<tr><td>2</td><td>Qiita</td><td>✅ 成功</td><td>13件</td><td>Claude Code・セキュリティ関連が上位</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>✅ 成功</td><td>15件</td><td>Zenn/Qiita記事との重複あり（初出ソースに帰属）</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>✅ 成功</td><td>7件</td><td>Bedrock・Cloudflare・Claude Code関連</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>⚠️ 部分成功</td><td>5件</td><td>Weekly Roundup等から補完</td></tr>
+<tr><td>6</td><td>InfoQ</td><td>✅ 成功</td><td>5件</td><td>MCP・サプライチェーン攻撃・ESLint v10</td></tr>
+<tr><td>7</td><td>The New Stack</td><td>⚠️ 部分成功</td><td>5件</td><td>WebFetch不可、WebSearchで補完</td></tr>
+<tr><td>8</td><td>Anthropic News</td><td>✅ 成功</td><td>6件</td><td>パートナーネットワーク・Anthropic Institute</td></tr>
+<tr><td>9</td><td>フューチャー技術ブログ</td><td>✅ 成功</td><td>5件</td><td>MCP・Kubernetes・Obsidian関連</td></tr>
+<tr><td>10</td><td>NTTデータ テックブログ</td><td>❌ 失敗</td><td>0件</td><td>DNS解決失敗（ドメイン変更またはサイトダウン）</td></tr>
+</tbody></table></div>
+<h3>小売ドメイン系</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>11</td><td>流通ニュース</td><td>✅ 成功</td><td>14件</td><td>出店・値上げ・EC関連が中心</td></tr>
+<tr><td>12</td><td>ダイヤモンド・チェーンストア</td><td>✅ 成功</td><td>10件</td><td>業態変革・経営戦略・EC関連</td></tr>
+<tr><td>13</td><td>ネットショップ担当者フォーラム</td><td>✅ 成功</td><td>5件</td><td>Shopify AI・アスクル被害・Amazon調査</td></tr>
+<tr><td>14</td><td>日本食糧新聞</td><td>✅ 成功</td><td>10件</td><td>人事異動・食品市場・法改正</td></tr>
+<tr><td>15</td><td>ITmedia ビジネスオンライン（流通・小売）</td><td>❌ 失敗</td><td>0件</td><td>カテゴリページに最新記事なし</td></tr>
+<tr><td>16</td><td>Retail Dive</td><td>✅ 成功</td><td>5件</td><td>出店動向・AI活用・NRF予測</td></tr>
+<tr><td>17</td><td>NRF Blog</td><td>✅ 成功</td><td>3件</td><td>売上予測・recommerce</td></tr>
+<tr><td>18</td><td>ECのミカタ</td><td>✅ 成功</td><td>7件</td><td>AI EC・決済・物流課題</td></tr>
+<tr><td>19</td><td>ロジスティクス・トゥデイ</td><td>❌ 失敗</td><td>0件</td><td>JS動的レンダリングで取得不可</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術55件 + 小売51件 = 106件</p></div>
+</div>
+<div id="digest-2026-04-01" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 30件（成功16件 / 一部取得4件 / 失敗10件）</div><div class="meta-line"><strong>オペレーター</strong>: SAS-Sasao</div>
 <div class="meta-line"><strong>記事数:</strong> 84件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>axiosがサプライチェーン攻撃の被害に — npmメンテナアカウント乗っ取りでマルウェア配布</strong> — 3ソースが一斉報道。OSSサプライチェーンセキュリティの緊急課題（[Zenn](https://zenn.dev/gunta/articles/0152eadf05d173)、[Qiita](https://qiita.com/kawabe0201/items/b51cd76daa2fec5029f1)、[はてブ](https://blog.flatt.tech/entry/axios_compromise)）</li><li><strong>Claude Codeソースコード流出 — npmソースマップに51万行が公開状態</strong> — Anthropic製CLIツールのソースが意図せず公開された事件が話題に（[はてブ](https://ai-heartland.com/news/claude-code-source-leak/)、[Hacker News](https://alex000kim.com/posts/2026-03-31-claude-code-source-leak/)）</li><li><strong>OpenAI、$852B評価額で資金調達を完了</strong> — AI業界の巨額バリュエーション更新（[Hacker News](https://www.cnbc.com/2026/03/31/openai-funding-round-ipo.html)）</li><li><strong>4月1日施行：改正物流効率化法・食料システム法</strong> — 小売・食品業界に直接影響、事業者の8割が「対応は負担」と回答（[日本食糧新聞](https://news.nissyoku.co.jp/news/shinoda20260331112147443)、[ECのミカタ](https://ecnomikata.com/ecnews/50013/)）</li><li><strong>しまむら EC売上51%増の196億円、TOKYO BASE EC売上23%増</strong> — 脱クーポン・ストア統合でEC好調決算が相次ぐ（[ネットショップ担当者フォーラム](https://netshop.impress.co.jp/n/2026/04/01/15843)、[ネットショップ担当者フォーラム](https://netshop.impress.co.jp/n/2026/04/01/15842)）</li></ol></div>
@@ -1693,11 +1897,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-04-01 09:42 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-04-02 09:32 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
