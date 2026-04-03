@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lambda vs Kappa Architecture on AWS - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-project { background:#fef3c7; color:#92400e; }
+.tag-type { color:#fff; }
+@media (prefers-color-scheme: dark) {
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+
+/* Diagram */
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+
+/* Section */
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+
+/* Flow */
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+
+/* Badge */
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-lambda { background:#3b82f6; color:#fff; }
+.badge-kappa { background:#22c55e; color:#fff; }
+
+/* Legend */
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+
+/* IaC Button */
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:var(--blue);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+
+/* Learning Points */
+.learning-points { counter-reset:lp; }
+.learning-points li { list-style:none; position:relative; padding-left:32px; margin-bottom:14px; font-size:.9rem; line-height:1.7; }
+.learning-points li::before { counter-increment:lp; content:counter(lp); position:absolute; left:0; top:2px;
+  width:22px; height:22px; background:var(--blue); color:#fff; border-radius:50%;
+  font-size:.72rem; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+/* Cost Note */
+.cost-note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+             font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .cost-note { background:#422006; border-color:#78350f; } }
+
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+
+/* Lightbox */
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Lambda vs Kappa Architecture on AWS</h1>
+<div class="meta">
+  <span class="tag tag-project">データ基盤</span>
+  <span class="tag tag-type" style="background:#e67e22;">AWS Architecture</span>
+</div>
+<p class="date">作成日: 2026-04-03 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <img src="./data-arch-lambda-vs-kappa-aws.png" alt="Lambda vs Kappa Architecture on AWS" style="max-width:100%;height:auto;" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./data-arch-lambda-vs-kappa-aws-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> Data Ingestion &mdash; データソースからKafka(MSK)への取り込み</div>
+    <div class="legend-item"><span class="legend-line" style="background:red"></span> Batch Path &mdash; S3 &rarr; Glue &rarr; Redshift のバッチ処理パス</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkorange"></span> Speed Path &mdash; Flink &rarr; DynamoDB のストリーム処理パス</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:purple"></span> Federated Query &mdash; Athena がBatch Views+RT Viewsをマージ参照</div>
+    <div class="legend-item"><span class="legend-line" style="background:green"></span> Single Stream Path &mdash; Kappa の単一ストリーム処理パス</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> Consumer Output &mdash; 利用者(QuickSight/Lambda API)への出力</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>Lambda Architecture と Kappa Architecture の2つのデータ処理パラダイムを、AWSマネージドサービスで実装・比較した構成図です。</p>
+  <p>Lambda Architecture はバッチ処理（S3 &rarr; Glue &rarr; Redshift）とストリーム処理（Flink &rarr; DynamoDB）を並列に走らせ、Athena Federated Queryで両者の結果をマージして提供します。一方 Kappa Architecture は MSK の長期リテンション機能を活用し、単一のストリーム処理パイプライン（Flink）のみでバッチ・リアルタイム双方の要件を満たす設計です。</p>
+  <p>両アーキテクチャとも、データ取り込みには Amazon MSK（Managed Streaming for Apache Kafka）を中核に据え、Kinesis Data Streams や AWS DMS を併用してデータソースからのイベント取り込みを行います。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3 style="font-size:.95rem; margin-bottom:12px;"><span class="badge badge-lambda">Lambda Architecture</span> バッチ + ストリーム二重処理</h3>
+  <p style="font-size:.88rem; color:var(--muted); margin-bottom:8px;">Batch Path (正確性重視) + Speed Path (低レイテンシ) を並列実行し、Serving Layer でマージ</p>
+  <div class="flow">
+    <span class="flow-step">Kinesis / DMS</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Amazon MSK</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (Data Lake)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AWS Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Redshift (Batch Views)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Amazon MSK</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Managed Flink</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB (RT Views)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">Redshift + DynamoDB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Athena (Federated Query)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight / Lambda API</span>
+  </div>
+
+  <h3 style="font-size:.95rem; margin:24px 0 12px;"><span class="badge badge-kappa">Kappa Architecture</span> 単一ストリーム処理</h3>
+  <p style="font-size:.88rem; color:var(--muted); margin-bottom:8px;">MSK の Long Retention により、バッチ再処理もストリーム再実行で代替</p>
+  <div class="flow">
+    <span class="flow-step">Kinesis / DMS</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Amazon MSK (Long Retention)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Managed Flink</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">OpenSearch / DynamoDB</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight / Lambda API</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+
+  <h3 style="font-size:.95rem; margin-bottom:12px;"><span class="badge badge-lambda">Lambda Architecture</span></h3>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>Data Source</td><td>Kinesis Data Streams / AWS DMS</td><td>POSデータ・DBの変更イベント取り込み</td></tr>
+    <tr><td>Message Broker</td><td>Amazon MSK (Kafka)</td><td>イベントの一時バッファリングとルーティング</td></tr>
+    <tr><td>Batch Layer - Storage</td><td>Amazon S3</td><td>全イベントの永続化（Immutable Master Dataset）</td></tr>
+    <tr><td>Batch Layer - ETL</td><td>AWS Glue</td><td>バッチ変換・集計ジョブ</td></tr>
+    <tr><td>Batch Views</td><td>Amazon Redshift Serverless</td><td>事前計算済みのバッチビュー（正確性重視）</td></tr>
+    <tr><td>Speed Layer</td><td>Amazon Managed Flink</td><td>リアルタイムストリーム処理（低レイテンシ）</td></tr>
+    <tr><td>Realtime Views</td><td>Amazon DynamoDB</td><td>リアルタイムビュー（近似値、即時性重視）</td></tr>
+    <tr><td>Serving Layer</td><td>Amazon Athena (Federated Query)</td><td>Batch Views + RT Views をSQLでマージ提供</td></tr>
+    <tr><td>Consumer</td><td>QuickSight / Lambda</td><td>BIダッシュボード・API提供</td></tr>
+  </table>
+
+  <h3 style="font-size:.95rem; margin:24px 0 12px;"><span class="badge badge-kappa">Kappa Architecture</span></h3>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>Data Source</td><td>Kinesis Data Streams / AWS DMS</td><td>POSデータ・DBの変更イベント取り込み</td></tr>
+    <tr><td>Immutable Log</td><td>Amazon MSK (Long Retention)</td><td>全イベントの永続ログ（再処理可能）</td></tr>
+    <tr><td>Stream Processing</td><td>Amazon Managed Flink</td><td>唯一の処理レイヤー（バッチ/RT統合）</td></tr>
+    <tr><td>Serving Store</td><td>OpenSearch Serverless / DynamoDB</td><td>検索・集計・キーバリューアクセス</td></tr>
+    <tr><td>Consumer</td><td>QuickSight / Lambda</td><td>BIダッシュボード・API提供</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. MSK を両アーキテクチャの中核に配置</strong><br>
+  Lambda Architecture では Message Broker として短期バッファリングに使用し、Kappa Architecture では Long Retention を有効化して Immutable Log（再処理可能な永続ログ）として使用する。同一のMSKクラスタでも retention.ms の設定変更だけでアーキテクチャの切り替えが可能であり、段階的な移行を実現できる。</p>
+
+  <p><strong>2. Athena Federated Query による Serving Layer 統合</strong><br>
+  Lambda Architecture では Redshift（Batch Views）と DynamoDB（RT Views）という異なるデータストアの結果を、Athena の Federated Query コネクタで透過的に結合する。利用者はSQL一本で最新かつ正確なデータにアクセスでき、Serving Layer の複雑さを隠蔽できる。</p>
+
+  <p><strong>3. Managed Flink の共通採用</strong><br>
+  両アーキテクチャで Amazon Managed Service for Apache Flink を採用。Lambda Architecture の Speed Layer と Kappa Architecture の唯一の処理レイヤーで同一のFlink基盤を使うことで、アプリケーションコードの再利用性が高く、Lambda から Kappa への段階的移行も容易になる。</p>
+
+  <p><strong>4. コスト・複雑性のトレードオフ明示</strong><br>
+  Lambda Architecture は Batch + Speed の二重パイプライン維持コストがかかるが、バッチ処理の正確性とストリーム処理の即時性を両立できる。Kappa Architecture はパイプラインが単一でシンプルだが、MSK の長期ストレージコストと Flink の再処理能力への依存がある。ユースケースに応じた選択指針を構成図で対比的に示している。</p>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:var(--muted);font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。24時間365日稼働前提。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>Amazon MSK</td><td>t3.small x3 broker</td><td>~$50 (7,500円)</td><td>~$150-300 (22,500-45,000円)</td></tr>
+    <tr><td>S3 Data Lake</td><td>100GB</td><td>~$2-3 (300-450円)</td><td>~$2-5 (300-750円)</td></tr>
+    <tr><td>AWS Glue</td><td>2 DPU</td><td>~$5-50 (750-7,500円)</td><td>~$50-500 (7,500-75,000円)</td></tr>
+    <tr><td>Redshift Serverless</td><td>32 RPU</td><td>~$50-200 (7,500-30,000円)</td><td>~$200-800 (30,000-120,000円)</td></tr>
+    <tr><td>DynamoDB</td><td>On-Demand x2 tables</td><td>~$10-40 (1,500-6,000円)</td><td>~$40-200 (6,000-30,000円)</td></tr>
+    <tr><td>Managed Flink</td><td>ストリーム処理</td><td>~$50-100 (7,500-15,000円)</td><td>~$100-400 (15,000-60,000円)</td></tr>
+    <tr><td>OpenSearch Serverless</td><td>Kappa用検索</td><td>~$25-50 (3,750-7,500円)</td><td>~$90+ (13,500円+)</td></tr>
+    <tr><td>Athena</td><td>Federated Query</td><td>~$5-20 (750-3,000円)</td><td>~$20-100 (3,000-15,000円)</td></tr>
+    <tr><td>QuickSight</td><td>BI</td><td>~$24 (3,600円)</td><td>~$24-240 (3,600-36,000円)</td></tr>
+    <tr><td>Lambda</td><td>API</td><td>~$0-5 (0-750円)</td><td>~$5-50 (750-7,500円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>~$221-492 (約33,150-73,800円)</td><td>~$681-2,785 (約102,150-417,750円)</td></tr>
+  </table>
+  <div class="cost-note">
+    <strong>コスト最適化のポイント:</strong> Dev環境ではMSK ServerlessへのダウングレードでBroker常時稼働コストを削減可能。Redshift Serverlessは業務時間外のpause schedulingで最大60%削減。S3はライフサイクルポリシーでGlacierへの自動階層化を設定。
+  </div>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>MSKの二面性</strong> &mdash; Lambda ArchitectureではMessage Broker、KappaではImmutable Log。retention.ms設定がアーキテクチャの分水嶺となる。短期保持（数時間〜数日）ならLambda、長期保持（数週間〜無期限）ならKappaのパターンに自然と収束する。</li>
+    <li><strong>Athena Federated Queryの威力</strong> &mdash; Redshift+DynamoDBを跨いだSQLクエリでServing Layerのマージを実現。Lambda Architectureの最大の課題である「Batch ViewsとRT Viewsの統合」をマネージドサービスだけで解決できる。</li>
+    <li><strong>Managed Flinkの共通性</strong> &mdash; 両アーキテクチャで同一のFlink基盤を使用。Lambda ArchのSpeed LayerをそのままKappaの唯一の処理レイヤーに昇格させることで、段階的移行が容易になる。</li>
+    <li><strong>DynamoDBの汎用性</strong> &mdash; Lambda ArchitectureのRT Views、KappaのServing Storeの両方で採用可能。オンデマンドモードでコスト最適化しつつ、シングルミリ秒のレイテンシでキーバリューアクセスを提供する。</li>
+    <li><strong>ストコン移行への適用</strong> &mdash; コンビニPOSデータはイベントストリームとして扱うのが自然。Kinesis &rarr; MSK &rarr; Flink &rarr; DynamoDB/OpenSearch の Kappa パターンが最適であり、バッチ処理が必要な帳票・集計系のみ Redshift を併用する Lambda パターンも選択肢となる。</li>
+  </ul>
+</div>
+
+<p class="updated">Generated by /company-diagram &mdash; AWS Diagram MCP Server</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>
