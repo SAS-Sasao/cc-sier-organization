@@ -8,8 +8,8 @@ subagent: "secretary"
 started: "2026-04-03T12:00:00"
 completed: "2026-04-03T12:20:00"
 request: "カッパアーキテクチャとラムダアーキテクチャの比較をAWS構成図にしてみて欲しい"
-issue_number: null
-pr_number: null
+issue_number: 209
+pr_number: 208
 reward: 0.87
 judge_summary: "completeness 9/10, accuracy 9/10, clarity 8/10"
 ---
