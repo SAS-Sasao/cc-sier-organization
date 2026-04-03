@@ -51,3 +51,14 @@ reward: null
 - 凡例で4種のエッジ（Customer Access/HQ Communication/Internal Processing/Data Access）を色分け表示
 - 構成要素テーブルで全20要素の種類・説明を一覧化
 - 設計のポイント4項目で設計判断の根拠を明記
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-01T19:42:14"
+```
