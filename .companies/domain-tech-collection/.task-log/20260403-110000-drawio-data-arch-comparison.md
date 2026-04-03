@@ -52,3 +52,14 @@ judge_summary: "completeness 9/10, accuracy 9/10, clarity 8/10"
 | accuracy | 9/10 | 各ツールの役割・配置が正確。提唱者情報も正しい。 |
 | clarity | 8/10 | swimlane並列比較で構造明快。エッジ貫通0件。Batch/Speed視覚的グルーピングがやや弱い。 |
 | **total** | **0.87** | (9+9+8)/30 = 0.87 |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-03T09:49:24"
+```
