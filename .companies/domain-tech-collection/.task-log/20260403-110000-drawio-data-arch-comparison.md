@@ -8,8 +8,8 @@ subagent: "secretary"
 started: "2026-04-03T11:00:00"
 completed: "2026-04-03T11:15:00"
 request: "カッパアーキテクチャとラムダアーキテクチャの詳細比較図をUML形式で作成"
-issue_number: null
-pr_number: null
+issue_number: 207
+pr_number: 206
 reward: 0.87
 judge_summary: "completeness 9/10, accuracy 9/10, clarity 8/10"
 ---
