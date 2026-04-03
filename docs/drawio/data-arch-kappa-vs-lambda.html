@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lambda vs Kappa アーキテクチャ比較 - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.note { background:#fffbe6; border:1px solid #fde68a; border-radius:8px; padding:12px 16px;
+        font-size:.85rem; margin:16px 0; }
+@media (prefers-color-scheme: dark) { .note { background:#422006; border-color:#78350f; } }
+.learning-points { list-style:none; padding:0; }
+.learning-points li { padding:10px 0; border-bottom:1px solid #e2e8f0; line-height:1.7; }
+.learning-points li:last-child { border-bottom:none; }
+.learning-points li strong { color:#1e40af; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>Lambda vs Kappa アーキテクチャ比較</h1>
+<div class="meta">
+  <span class="tag tag-project">データ基盤</span>
+  <span class="tag tag-type" style="background:#8b5cf6;">UML Architecture</span>
+</div>
+<p class="date">作成日: 2026-04-03 / 作成者: SAS-Sasao</p>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+flowchart TB
+    SRC["Data Sources: IoT / Web App / Database CDC"]
+
+    subgraph L["Lambda Architecture"]
+        direction TB
+        LK["Apache Kafka (Message Broker)"]
+        subgraph LB["Batch Layer"]
+            direction TB
+            HDFS["Hadoop HDFS (Raw Store)"] --> SPARK["Apache Spark (Batch)"]
+            SPARK --> BV["Batch Views (Druid/HBase)"]
+        end
+        subgraph LS["Speed Layer"]
+            direction TB
+            FLINK["Flink/Storm (Stream)"] --> RTV["RT Views (Redis/Cassandra)"]
+        end
+        LK --> HDFS
+        LK --> FLINK
+        BV --> SERVE["Serving Layer - Presto/Trino (Merge Views)"]
+        RTV --> SERVE
+    end
+
+    subgraph K["Kappa Architecture"]
+        direction TB
+        KK["Apache Kafka (Immutable Log / Long Retention)"]
+        SP["Stream Processor (Flink / Kafka Streams)"]
+        SS["Serving Store (Elasticsearch / Cassandra)"]
+        KK --> SP
+        SP --> SS
+        SP -.->|"Reprocessing (Log Replay from offset 0)"| KK
+    end
+
+    SRC --> LK
+    SRC --> KK
+    SERVE --> C["Data Consumers: Engineer / Analyst / App"]
+    SS --> C
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./data-arch-kappa-vs-lambda.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>
+  大規模データ処理における2つの代表的アーキテクチャパターン「Lambda Architecture」と「Kappa Architecture」を
+  同一キャンバス上で並列比較するUMLスタイルの構成図。データ生成者（UMLアクター）、メッセージブローカー（Kafka）、
+  処理エンジン（Spark/Flink）、ストレージ（シリンダー形状のDB）、利用者（アクター/アプリケーション）を
+  適切なUMLシェイプで表現し、全データフローを可視化している。
+</p>
+
+<div class="note">
+  <strong>Nathan Marzの提唱:</strong> Lambda ArchitectureはNathan Marzが2011年に提唱。
+  Batch LayerとSpeed Layerの二重構造で正確性とリアルタイム性を両立する。
+  Kappa ArchitectureはJay Krepsが2014年に提唱し、ストリーム処理のみで同等の結果を得るシンプル化を実現した。
+</div>
+
+<h2>構成要素</h2>
+<table>
+  <thead>
+    <tr><th>アーキテクチャ</th><th>コンポーネント</th><th>説明</th></tr>
+  </thead>
+  <tbody>
+    <tr><td rowspan="7">Lambda</td><td>Apache Kafka</td><td>メッセージブローカー。全データソースからのイベントを受信</td></tr>
+    <tr><td>Hadoop HDFS</td><td>バッチ層の生データストア。全履歴を永続保存</td></tr>
+    <tr><td>Apache Spark (Batch)</td><td>バッチ処理エンジン。大量データの一括変換・集計</td></tr>
+    <tr><td>Batch Views (Druid/HBase)</td><td>バッチ処理結果の事前集計ビュー</td></tr>
+    <tr><td>Apache Flink / Storm</td><td>スピード層のストリーム処理エンジン。低レイテンシ処理</td></tr>
+    <tr><td>Real-time Views (Redis)</td><td>ストリーム処理結果のリアルタイムビュー</td></tr>
+    <tr><td>Serving Layer (Presto)</td><td>Batch ViewsとRT Viewsをマージしてクエリに応答</td></tr>
+    <tr><td rowspan="3">Kappa</td><td>Apache Kafka (Immutable Log)</td><td>イミュータブルログ。長期保持設定で全履歴を保存</td></tr>
+    <tr><td>Stream Processor (Flink)</td><td>唯一の処理パス。全データをストリームとして処理</td></tr>
+    <tr><td>Serving Store (ES/Cassandra)</td><td>処理結果の配信ストア。クエリに直接応答</td></tr>
+  </tbody>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>Lambda: 二重パスの正確性保証</strong> — Batch Layerが全履歴から正確な結果を算出し、Speed Layerの近似結果を補正する。最終的整合性（eventual consistency）モデル。</li>
+  <li><strong>Kappa: 単一パスのシンプルさ</strong> — ストリーム処理のみで完結するため、コードベースが統一され運用負荷が低い。再処理はKafka Log Replay（offset 0から再消費）で実現。</li>
+  <li><strong>Kafkaの役割の違い</strong> — Lambdaではメッセージブローカーとして短期バッファ、Kappaではイミュータブルログとして長期保持。Kappaの成立にはKafkaの保持期間設定が鍵。</li>
+  <li><strong>適用判断の基準</strong> — 大量履歴の再計算が頻繁に必要→Lambda、イベント駆動でリアルタイム性重視→Kappa。多くのモダンシステムはKappa寄りに進化している。</li>
+</ul>
+
+<h2>学習ポイント</h2>
+<ul class="learning-points">
+  <li><strong>Batch/Speed二重管理のコスト</strong> — Lambda Architectureの最大の課題は、同一のビジネスロジックをBatch（Spark）とSpeed（Flink）の2つのフレームワークで実装・保守する必要がある点。これが技術的負債と運用負荷の主因となる。</li>
+  <li><strong>イミュータブルログの威力</strong> — Kappa ArchitectureはKafkaのイミュータブルログ（append-only、offset管理）を活用し、「再処理=新しいConsumerを過去のoffsetから再起動する」というシンプルなモデルで再計算を実現する。</li>
+  <li><strong>ストコン移行への示唆</strong> — コンビニストコンのPOSトランザクションデータは典型的なイベントストリーム。AWS移行時にKinesis Data Streams + Flink（Managed Service）でKappaパターンを適用すれば、リアルタイム売上集計と履歴分析を単一パイプラインで実現できる。</li>
+  <li><strong>Serving Layerの設計判断</strong> — LambdaのServing Layer（Presto/Trino）はBatch ViewsとRT Viewsのマージクエリを実行する。このマージロジックの複雑さがKappaへの移行動機の一つ。Kappaでは単一のServing Store（ES/Cassandra）に書き込むだけで済む。</li>
+  <li><strong>現代のハイブリッドアプローチ</strong> — 実務ではLambda/Kappaの純粋型ではなく、Delta Lake / Apache Iceberg等のLakehouseアーキテクチャが台頭。バッチとストリームの統合処理を単一フレームワーク（Spark Structured Streaming等）で実現する。</li>
+</ul>
+
+<p class="updated">Generated by /company-drawio &mdash; draw.io MCP Server</p>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+</script>
+</body>
+</html>
