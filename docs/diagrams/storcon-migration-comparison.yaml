@@ -1,0 +1,1603 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  StoreComputer Migration - To-Be Architecture (Comprehensive)
+  コンビニストアコンピューターAWS移行 To-Beアーキテクチャ。
+  ECS Fargate / Aurora Serverless v2 / DynamoDB / ElastiCache / Redshift Serverless /
+  API Gateway / CloudFront + WAF / Cognito / SQS / Lambda / Step Functions /
+  S3 / CloudWatch / CloudTrail を含む統合テンプレート。
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - stg
+      - prod
+    Description: Deployment environment # TODO: 実運用時に変更してください
+
+  VpcCidr:
+    Type: String
+    Default: '10.0.0.0/16'
+    Description: VPC CIDR block # TODO: 実運用時にネットワーク設計に合わせて変更してください
+
+  PublicSubnetACidr:
+    Type: String
+    Default: '10.0.1.0/24'
+    Description: Public Subnet AZ-a CIDR
+
+  PublicSubnetCCidr:
+    Type: String
+    Default: '10.0.2.0/24'
+    Description: Public Subnet AZ-c CIDR
+
+  PrivateAppSubnetACidr:
+    Type: String
+    Default: '10.0.10.0/24'
+    Description: Private Application Subnet AZ-a CIDR
+
+  PrivateAppSubnetCCidr:
+    Type: String
+    Default: '10.0.11.0/24'
+    Description: Private Application Subnet AZ-c CIDR
+
+  PrivateDataSubnetACidr:
+    Type: String
+    Default: '10.0.20.0/24'
+    Description: Private Data Subnet AZ-a CIDR
+
+  PrivateDataSubnetCCidr:
+    Type: String
+    Default: '10.0.21.0/24'
+    Description: Private Data Subnet AZ-c CIDR
+
+  AuroraMinCapacity:
+    Type: Number
+    Default: 0.5
+    Description: Aurora Serverless v2 minimum ACU
+
+  AuroraMaxCapacity:
+    Type: Number
+    Default: 16
+    Description: Aurora Serverless v2 maximum ACU
+
+  OrderingImageUri:
+    Type: String
+    Default: '123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-ordering:latest'
+    Description: ECR image URI for Ordering service # TODO: 実運用時に変更してください
+
+  InventoryImageUri:
+    Type: String
+    Default: '123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-inventory:latest'
+    Description: ECR image URI for Inventory service # TODO: 実運用時に変更してください
+
+  SalesImageUri:
+    Type: String
+    Default: '123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-sales:latest'
+    Description: ECR image URI for Sales service # TODO: 実運用時に変更してください
+
+  StaffImageUri:
+    Type: String
+    Default: '123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/storcon-staff:latest'
+    Description: ECR image URI for Staff service # TODO: 実運用時に変更してください
+
+  RedshiftAdminPassword:
+    Type: String
+    Default: 'ChangeMe1234!'
+    NoEcho: true
+    Description: Redshift Serverless admin password # TODO: 実運用時に必ずSecrets Managerで管理してください
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
+Resources:
+
+  # ============================================================
+  # KMS Customer Managed Key
+  # ============================================================
+  StorconKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for Storcon migration encryption
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableRootAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          - Sid: AllowCloudWatchLogs
+            Effect: Allow
+            Principal:
+              Service: !Sub 'logs.${AWS::Region}.amazonaws.com'
+            Action:
+              - 'kms:Encrypt*'
+              - 'kms:Decrypt*'
+              - 'kms:ReEncrypt*'
+              - 'kms:GenerateDataKey*'
+              - 'kms:Describe*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-kms'
+
+  StorconKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub 'alias/${Environment}-storcon'
+      TargetKeyId: !Ref StorconKMSKey
+
+  # ============================================================
+  # VPC & Networking
+  # ============================================================
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-vpc'
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-igw'
+
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # --- Public Subnets ---
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-public-a'
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-public-c'
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-public-rt'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+
+  # --- NAT Gateway ---
+  NatEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEIP.AllocationId
+      SubnetId: !Ref PublicSubnetA
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-nat-gw'
+
+  # --- Private Subnets (Application Tier) ---
+  PrivateAppSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateAppSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-private-app-a'
+
+  PrivateAppSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateAppSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-private-app-c'
+
+  PrivateAppRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-private-app-rt'
+
+  PrivateAppRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateAppRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+
+  PrivateAppSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetA
+      RouteTableId: !Ref PrivateAppRouteTable
+
+  PrivateAppSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateAppSubnetC
+      RouteTableId: !Ref PrivateAppRouteTable
+
+  # --- Private Subnets (Data Tier) ---
+  PrivateDataSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateDataSubnetACidr
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-private-data-a'
+
+  PrivateDataSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PrivateDataSubnetCCidr
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-private-data-c'
+
+  PrivateDataRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-private-data-rt'
+
+  PrivateDataRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateDataRouteTable
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGateway
+
+  PrivateDataSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDataSubnetA
+      RouteTableId: !Ref PrivateDataRouteTable
+
+  PrivateDataSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateDataSubnetC
+      RouteTableId: !Ref PrivateDataRouteTable
+
+  # ============================================================
+  # Security Groups
+  # ============================================================
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: '0.0.0.0/0'
+          Description: HTTPS inbound
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: '0.0.0.0/0'
+          Description: HTTP inbound (redirect to HTTPS)
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-alb-sg'
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Application tier Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+          Description: From ALB
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-app-sg'
+
+  AppSecurityGroupEgressAurora:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      DestinationSecurityGroupId: !Ref DataSecurityGroup
+      Description: To Aurora PostgreSQL
+
+  AppSecurityGroupEgressRedis:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: tcp
+      FromPort: 6379
+      ToPort: 6379
+      DestinationSecurityGroupId: !Ref DataSecurityGroup
+      Description: To ElastiCache Redis
+
+  AppSecurityGroupEgressHTTPS:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref AppSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: '0.0.0.0/0'
+      Description: HTTPS outbound (AWS APIs)
+
+  DataSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Data tier Security Group
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+          Description: Aurora from App tier
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+          Description: Redis from App tier
+        - IpProtocol: tcp
+          FromPort: 5439
+          ToPort: 5439
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+          Description: Redshift from App tier
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-data-sg'
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Lambda functions Security Group
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-lambda-sg'
+
+  LambdaSecurityGroupEgressHTTPS:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref LambdaSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: '0.0.0.0/0'
+      Description: HTTPS outbound
+
+  LambdaSecurityGroupEgressAurora:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref LambdaSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      DestinationSecurityGroupId: !Ref DataSecurityGroup
+      Description: To Aurora
+
+  # ============================================================
+  # IAM Roles
+  # ============================================================
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-storcon-ecs-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+      Policies:
+        - PolicyName: SecretsAndKMS
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'secretsmanager:GetSecretValue'
+                  - 'kms:Decrypt'
+                Resource: '*' # TODO: 実運用時にリソースを限定してください
+
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-storcon-ecs-task-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: StorconTaskPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:UpdateItem'
+                  - 'dynamodb:DeleteItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:Scan'
+                Resource:
+                  - !GetAtt ProductMasterTable.Arn
+              - Effect: Allow
+                Action:
+                  - 'sqs:SendMessage'
+                  - 'sqs:ReceiveMessage'
+                  - 'sqs:DeleteMessage'
+                  - 'sqs:GetQueueAttributes'
+                Resource:
+                  - !GetAtt OrderingQueue.Arn
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-storcon-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole'
+      Policies:
+        - PolicyName: LambdaStorconPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:Query'
+                Resource:
+                  - !GetAtt ProductMasterTable.Arn
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub '${ReportsBucket.Arn}/*'
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:GenerateDataKey'
+                Resource: !GetAtt StorconKMSKey.Arn
+
+  StepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-storcon-sfn-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: SFNInvokePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lambda:InvokeFunction'
+                Resource: !GetAtt StorconProcessorFunction.Arn
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogDelivery'
+                  - 'logs:GetLogDelivery'
+                  - 'logs:UpdateLogDelivery'
+                  - 'logs:DeleteLogDelivery'
+                  - 'logs:ListLogDeliveries'
+                  - 'logs:PutResourcePolicy'
+                  - 'logs:DescribeResourcePolicies'
+                  - 'logs:DescribeLogGroups'
+                Resource: '*'
+
+  CloudTrailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-storcon-cloudtrail-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: CloudTrailS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                Resource: !Sub '${LogsBucket.Arn}/cloudtrail/*'
+              - Effect: Allow
+                Action:
+                  - 's3:GetBucketAcl'
+                Resource: !GetAtt LogsBucket.Arn
+
+  # ============================================================
+  # ECS Fargate Cluster & Services
+  # ============================================================
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub '${Environment}-storcon-cluster'
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-cluster'
+
+  # --- Ordering Service ---
+  OrderingTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${Environment}-storcon-ordering'
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: ordering
+          Image: !Ref OrderingImageUri
+          PortMappings:
+            - ContainerPort: 8080
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref OrderingLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ordering
+
+  OrderingService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub '${Environment}-ordering'
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref OrderingTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateAppSubnetA
+            - !Ref PrivateAppSubnetC
+          SecurityGroups:
+            - !Ref AppSecurityGroup
+          AssignPublicIp: DISABLED
+
+  # --- Inventory Service ---
+  InventoryTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${Environment}-storcon-inventory'
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: inventory
+          Image: !Ref InventoryImageUri
+          PortMappings:
+            - ContainerPort: 8080
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref InventoryLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: inventory
+
+  InventoryService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub '${Environment}-inventory'
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref InventoryTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateAppSubnetA
+            - !Ref PrivateAppSubnetC
+          SecurityGroups:
+            - !Ref AppSecurityGroup
+          AssignPublicIp: DISABLED
+
+  # --- Sales Service ---
+  SalesTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${Environment}-storcon-sales'
+      Cpu: '512'
+      Memory: '1024'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: sales
+          Image: !Ref SalesImageUri
+          PortMappings:
+            - ContainerPort: 8080
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref SalesLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: sales
+
+  SalesService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub '${Environment}-sales'
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref SalesTaskDefinition
+      DesiredCount: 2
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateAppSubnetA
+            - !Ref PrivateAppSubnetC
+          SecurityGroups:
+            - !Ref AppSecurityGroup
+          AssignPublicIp: DISABLED
+
+  # --- Staff Service ---
+  StaffTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub '${Environment}-storcon-staff'
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      ContainerDefinitions:
+        - Name: staff
+          Image: !Ref StaffImageUri
+          PortMappings:
+            - ContainerPort: 8080
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref StaffLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: staff
+
+  StaffService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub '${Environment}-staff'
+      Cluster: !Ref ECSCluster
+      TaskDefinition: !Ref StaffTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateAppSubnetA
+            - !Ref PrivateAppSubnetC
+          SecurityGroups:
+            - !Ref AppSecurityGroup
+          AssignPublicIp: DISABLED
+
+  # ============================================================
+  # Aurora Serverless v2
+  # ============================================================
+  AuroraSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Aurora Serverless v2
+      SubnetIds:
+        - !Ref PrivateDataSubnetA
+        - !Ref PrivateDataSubnetC
+
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      EngineVersion: '15.4'
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !Ref AuroraMinCapacity
+        MaxCapacity: !Ref AuroraMaxCapacity
+      MasterUsername: storconadmin # TODO: 実運用時はSecrets Managerで管理してください
+      ManageMasterUserPassword: true
+      DBSubnetGroupName: !Ref AuroraSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref DataSecurityGroup
+      StorageEncrypted: true
+      KmsKeyId: !Ref StorconKMSKey
+      DeletionProtection: !If [IsProd, true, false]
+      BackupRetentionPeriod: !If [IsProd, 14, 1]
+      EnableCloudwatchLogsExports:
+        - postgresql
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-aurora'
+
+  AuroraInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+      AutoMinorVersionUpgrade: true
+      PubliclyAccessible: false
+
+  # ============================================================
+  # DynamoDB - ProductMaster
+  # ============================================================
+  ProductMasterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${Environment}-ProductMaster'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: productId
+          AttributeType: S
+        - AttributeName: categoryId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: productId
+          KeyType: HASH
+        - AttributeName: categoryId
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !Ref StorconKMSKey
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-product-master'
+
+  # ============================================================
+  # ElastiCache Redis
+  # ============================================================
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Subnet group for ElastiCache Redis
+      SubnetIds:
+        - !Ref PrivateDataSubnetA
+        - !Ref PrivateDataSubnetC
+
+  RedisCluster:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      ReplicationGroupDescription: !Sub '${Environment} StorCon Redis Cluster'
+      NumCacheClusters: 2
+      CacheNodeType: cache.t4g.small # TODO: 実運用時に適切なサイズに変更してください
+      Engine: redis
+      EngineVersion: '7.0'
+      AtRestEncryptionEnabled: true
+      TransitEncryptionEnabled: true
+      CacheSubnetGroupName: !Ref RedisSubnetGroup
+      SecurityGroupIds:
+        - !Ref DataSecurityGroup
+      AutomaticFailoverEnabled: true
+      MultiAZEnabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-redis'
+
+  # ============================================================
+  # Redshift Serverless
+  # ============================================================
+  RedshiftNamespace:
+    Type: AWS::RedshiftServerless::Namespace
+    Properties:
+      NamespaceName: !Sub '${Environment}-storcon-ns'
+      AdminUsername: admin # TODO: 実運用時に変更してください
+      AdminUserPassword: !Ref RedshiftAdminPassword
+      DbName: storcondb
+      DefaultIamRoleArn: !GetAtt RedshiftRole.Arn
+      IamRoles:
+        - !GetAtt RedshiftRole.Arn
+
+  RedshiftWorkgroup:
+    Type: AWS::RedshiftServerless::Workgroup
+    Properties:
+      WorkgroupName: !Sub '${Environment}-storcon-wg'
+      NamespaceName: !Ref RedshiftNamespace
+      BaseCapacity: 8 # TODO: 実運用時に必要なRPUに変更してください
+      EnhancedVpcRouting: true
+      PubliclyAccessible: false
+      SubnetIds:
+        - !Ref PrivateDataSubnetA
+        - !Ref PrivateDataSubnetC
+      SecurityGroupIds:
+        - !Ref DataSecurityGroup
+
+  RedshiftRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${Environment}-storcon-redshift-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: redshift-serverless.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: RedshiftS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:ListBucket'
+                Resource:
+                  - !GetAtt ReportsBucket.Arn
+                  - !Sub '${ReportsBucket.Arn}/*'
+
+  # ============================================================
+  # Cognito UserPool
+  # ============================================================
+  StorconUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub '${Environment}-storcon-userpool'
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      PasswordPolicy:
+        MinimumLength: 12
+        RequireUppercase: true
+        RequireLowercase: true
+        RequireNumbers: true
+        RequireSymbols: true
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+      UserPoolAddOns:
+        AdvancedSecurityMode: ENFORCED
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      Schema:
+        - Name: employee_id
+          AttributeDataType: String
+          Mutable: false
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+
+  StorconUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${Environment}-storcon-app-client'
+      UserPoolId: !Ref StorconUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      PreventUserExistenceErrors: ENABLED
+
+  # ============================================================
+  # SQS FIFO Queue
+  # ============================================================
+  OrderingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${Environment}-storcon-ordering.fifo'
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      KmsMasterKeyId: !Ref StorconKMSKey
+      VisibilityTimeout: 300
+      MessageRetentionPeriod: 86400
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt OrderingDLQ.Arn
+        maxReceiveCount: 3
+
+  OrderingDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${Environment}-storcon-ordering-dlq.fifo'
+      FifoQueue: true
+      KmsMasterKeyId: !Ref StorconKMSKey
+      MessageRetentionPeriod: 1209600
+
+  # ============================================================
+  # Lambda Function
+  # ============================================================
+  StorconProcessorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${Environment}-storcon-processor'
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          # TODO: 実運用時にデプロイパッケージに変更してください
+          import json
+          def handler(event, context):
+              print(json.dumps(event))
+              return {'statusCode': 200, 'body': json.dumps('OK')}
+      Timeout: 60
+      MemorySize: 256
+      ReservedConcurrentExecutions: 10
+      VpcConfig:
+        SubnetIds:
+          - !Ref PrivateAppSubnetA
+          - !Ref PrivateAppSubnetC
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
+          DYNAMODB_TABLE: !Ref ProductMasterTable
+      KmsKeyArn: !GetAtt StorconKMSKey.Arn
+      TracingConfig:
+        Mode: Active
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-processor'
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Environment}-storcon-processor'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  # ============================================================
+  # Step Functions State Machine
+  # ============================================================
+  StorconStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub '${Environment}-storcon-batch-workflow'
+      StateMachineType: STANDARD
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      LoggingConfiguration:
+        Level: ALL
+        IncludeExecutionData: true
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt StepFunctionsLogGroup.Arn
+      Definition:
+        Comment: StorCon batch processing workflow
+        StartAt: ProcessOrder
+        States:
+          ProcessOrder:
+            Type: Task
+            Resource: !GetAtt StorconProcessorFunction.Arn
+            Retry:
+              - ErrorEquals:
+                  - Lambda.ServiceException
+                  - Lambda.AWSLambdaException
+                IntervalSeconds: 2
+                MaxAttempts: 3
+                BackoffRate: 2
+            Catch:
+              - ErrorEquals:
+                  - States.ALL
+                Next: HandleError
+            Next: CheckResult
+          CheckResult:
+            Type: Choice
+            Choices:
+              - Variable: '$.statusCode'
+                NumericEquals: 200
+                Next: Success
+            Default: HandleError
+          HandleError:
+            Type: Fail
+            Error: ProcessingFailed
+            Cause: Order processing failed
+          Success:
+            Type: Succeed
+
+  StepFunctionsLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/states/${Environment}-storcon-batch-workflow'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  # ============================================================
+  # S3 Buckets
+  # ============================================================
+  ReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${Environment}-storcon-reports-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref StorconKMSKey
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveOldReports
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: STANDARD_IA
+              - TransitionInDays: 365
+                StorageClass: GLACIER
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-reports'
+
+  LogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${Environment}-storcon-logs-${AWS::AccountId}'
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref StorconKMSKey
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldLogs
+            Status: Enabled
+            ExpirationInDays: 365
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-logs'
+
+  LogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref LogsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudTrail
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 's3:PutObject'
+            Resource: !Sub '${LogsBucket.Arn}/cloudtrail/*'
+            Condition:
+              StringEquals:
+                's3:x-amz-acl': bucket-owner-full-control
+          - Sid: AllowCloudTrailAcl
+            Effect: Allow
+            Principal:
+              Service: cloudtrail.amazonaws.com
+            Action: 's3:GetBucketAcl'
+            Resource: !GetAtt LogsBucket.Arn
+          - Sid: DenyHTTP
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt LogsBucket.Arn
+              - !Sub '${LogsBucket.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
+
+  # ============================================================
+  # API Gateway REST API
+  # ============================================================
+  StorconRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${Environment}-storcon-api'
+      Description: StorCon Migration REST API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Policy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: 'execute-api:Invoke'
+            Resource: 'execute-api:/*'
+
+  StorconApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref StorconRestApi
+      ParentId: !GetAtt StorconRestApi.RootResourceId
+      PathPart: '{proxy+}'
+
+  StorconApiMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref StorconRestApi
+      ResourceId: !Ref StorconApiResource
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref StorconApiAuthorizer
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: 'http://localhost/' # TODO: 実運用時にALBエンドポイントに変更してください
+
+  StorconApiAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: !Sub '${Environment}-storcon-cognito-authorizer'
+      RestApiId: !Ref StorconRestApi
+      Type: COGNITO_USER_POOLS
+      IdentitySource: method.request.header.Authorization
+      ProviderARNs:
+        - !GetAtt StorconUserPool.Arn
+
+  StorconApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: StorconApiMethod
+    Properties:
+      RestApiId: !Ref StorconRestApi
+
+  StorconApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref StorconRestApi
+      DeploymentId: !Ref StorconApiDeployment
+      StageName: !Ref Environment
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          LoggingLevel: INFO
+          DataTraceEnabled: false
+          ThrottlingBurstLimit: 500
+          ThrottlingRateLimit: 100
+
+  # ============================================================
+  # CloudFront + WAF
+  # ============================================================
+  StorconWebACL:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub '${Environment}-storcon-webacl'
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      Rules:
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 1
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSetMetric
+        - Name: AWSManagedRulesKnownBadInputsRuleSet
+          Priority: 2
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesKnownBadInputsRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesKnownBadInputsRuleSetMetric
+        - Name: RateLimitRule
+          Priority: 3
+          Action:
+            Block: {}
+          Statement:
+            RateBasedStatement:
+              Limit: 2000 # TODO: 実運用時に適切な値に変更してください
+              AggregateKeyType: IP
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimitRuleMetric
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub '${Environment}StorconWebACL'
+
+  StorconDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub '${Environment} StorCon CDN Distribution'
+        DefaultRootObject: index.html
+        WebACLId: !GetAtt StorconWebACL.Arn
+        Origins:
+          - Id: ApiGatewayOrigin
+            DomainName: !Sub '${StorconRestApi}.execute-api.${AWS::Region}.amazonaws.com'
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols:
+                - TLSv1.2
+        DefaultCacheBehavior:
+          TargetOriginId: ApiGatewayOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+          CachedMethods:
+            - GET
+            - HEAD
+          CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad' # CachingDisabled
+          OriginRequestPolicyId: 'b689b0a8-53d0-40ab-baf2-68738e2966ac' # AllViewerExceptHostHeader
+        PriceClass: PriceClass_200
+        Logging:
+          Bucket: !GetAtt LogsBucket.DomainName
+          Prefix: cloudfront/
+        HttpVersion: http2
+        IPV6Enabled: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-cdn'
+
+  # ============================================================
+  # CloudWatch Log Groups
+  # ============================================================
+  OrderingLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${Environment}/storcon/ordering'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  InventoryLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${Environment}/storcon/inventory'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  SalesLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${Environment}/storcon/sales'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  StaffLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/ecs/${Environment}/storcon/staff'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/apigateway/${Environment}/storcon'
+      RetentionInDays: !If [IsProd, 90, 14]
+      KmsKeyId: !GetAtt StorconKMSKey.Arn
+
+  # ============================================================
+  # CloudWatch Alarms
+  # ============================================================
+  ECSCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-storcon-ecs-cpu-high'
+      AlarmDescription: ECS cluster CPU utilization high
+      MetricName: CPUUtilization
+      Namespace: AWS/ECS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref ECSCluster
+      TreatMissingData: notBreaching
+
+  AuroraConnectionsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-storcon-aurora-connections-high'
+      AlarmDescription: Aurora DB connections high
+      MetricName: DatabaseConnections
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 100 # TODO: 実運用時に適切な閾値に変更してください
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: DBClusterIdentifier
+          Value: !Ref AuroraCluster
+      TreatMissingData: notBreaching
+
+  SQSDLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-storcon-sqs-dlq-messages'
+      AlarmDescription: Messages in ordering DLQ
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt OrderingDLQ.QueueName
+      TreatMissingData: notBreaching
+
+  LambdaErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${Environment}-storcon-lambda-errors'
+      AlarmDescription: Lambda function errors
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref StorconProcessorFunction
+      TreatMissingData: notBreaching
+
+  # ============================================================
+  # CloudTrail
+  # ============================================================
+  StorconTrail:
+    Type: AWS::CloudTrail::Trail
+    DependsOn: LogsBucketPolicy
+    Properties:
+      TrailName: !Sub '${Environment}-storcon-trail'
+      IsLogging: true
+      S3BucketName: !Ref LogsBucket
+      S3KeyPrefix: cloudtrail
+      IncludeGlobalServiceEvents: true
+      IsMultiRegionTrail: !If [IsProd, true, false]
+      EnableLogFileValidation: true
+      KMSKeyId: !Ref StorconKMSKey
+      EventSelectors:
+        - ReadWriteType: All
+          IncludeManagementEvents: true
+          DataResources:
+            - Type: 'AWS::S3::Object'
+              Values:
+                - !Sub '${ReportsBucket.Arn}/'
+                - !Sub '${LogsBucket.Arn}/'
+            - Type: 'AWS::DynamoDB::Table'
+              Values:
+                - !GetAtt ProductMasterTable.Arn
+      Tags:
+        - Key: Name
+          Value: !Sub '${Environment}-storcon-trail'
+
+Outputs:
+  VpcId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub '${Environment}-storcon-vpc-id'
+
+  ECSClusterArn:
+    Description: ECS Cluster ARN
+    Value: !GetAtt ECSCluster.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-ecs-cluster-arn'
+
+  AuroraClusterEndpoint:
+    Description: Aurora Cluster Endpoint
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+    Export:
+      Name: !Sub '${Environment}-storcon-aurora-endpoint'
+
+  ProductMasterTableArn:
+    Description: DynamoDB ProductMaster Table ARN
+    Value: !GetAtt ProductMasterTable.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-dynamodb-arn'
+
+  RedisEndpoint:
+    Description: ElastiCache Redis Primary Endpoint
+    Value: !GetAtt RedisCluster.PrimaryEndPoint.Address
+    Export:
+      Name: !Sub '${Environment}-storcon-redis-endpoint'
+
+  RedshiftWorkgroupEndpoint:
+    Description: Redshift Serverless Workgroup Endpoint
+    Value: !GetAtt RedshiftWorkgroup.Workgroup.Endpoint.Address
+    Export:
+      Name: !Sub '${Environment}-storcon-redshift-endpoint'
+
+  ApiGatewayEndpoint:
+    Description: API Gateway Endpoint URL
+    Value: !Sub 'https://${StorconRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${Environment}-storcon-api-endpoint'
+
+  CloudFrontDomainName:
+    Description: CloudFront Distribution Domain Name
+    Value: !GetAtt StorconDistribution.DomainName
+    Export:
+      Name: !Sub '${Environment}-storcon-cloudfront-domain'
+
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref StorconUserPool
+    Export:
+      Name: !Sub '${Environment}-storcon-userpool-id'
+
+  CognitoUserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref StorconUserPoolClient
+    Export:
+      Name: !Sub '${Environment}-storcon-userpool-client-id'
+
+  OrderingQueueArn:
+    Description: SQS Ordering FIFO Queue ARN
+    Value: !GetAtt OrderingQueue.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-ordering-queue-arn'
+
+  LambdaFunctionArn:
+    Description: StorCon Processor Lambda Function ARN
+    Value: !GetAtt StorconProcessorFunction.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-lambda-arn'
+
+  StateMachineArn:
+    Description: Step Functions State Machine ARN
+    Value: !Ref StorconStateMachine
+    Export:
+      Name: !Sub '${Environment}-storcon-sfn-arn'
+
+  ReportsBucketArn:
+    Description: S3 Reports Bucket ARN
+    Value: !GetAtt ReportsBucket.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-reports-bucket-arn'
+
+  LogsBucketArn:
+    Description: S3 Logs Bucket ARN
+    Value: !GetAtt LogsBucket.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-logs-bucket-arn'
+
+  KMSKeyArn:
+    Description: KMS Key ARN for encryption
+    Value: !GetAtt StorconKMSKey.Arn
+    Export:
+      Name: !Sub '${Environment}-storcon-kms-arn'
