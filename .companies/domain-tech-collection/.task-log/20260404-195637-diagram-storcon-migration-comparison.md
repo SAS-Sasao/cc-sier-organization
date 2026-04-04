@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-04-04T19:56:37"
 completed: "2026-04-04T20:15:00"
 request: "As-Is(オンプレ)→To-Be(AWS)のストコン移行比較AWS構成図を作成"
-issue_number: null
-pr_number: null
+issue_number: 218
+pr_number: 217
 reward: 0.86
 subagent: "secretary"
 ---
