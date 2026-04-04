@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-04-04T19:31:50"
 completed: "2026-04-04T19:40:00"
 request: "ストコン移行 As-Is / To-Be 対比図を draw.io で作成"
-issue_number: null
-pr_number: null
+issue_number: 216
+pr_number: 215
 reward: 0.86
 subagent: "secretary"
 ---
