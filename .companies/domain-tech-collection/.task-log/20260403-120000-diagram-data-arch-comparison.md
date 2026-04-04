@@ -97,3 +97,14 @@ IaC: CloudFormation YAML生成 + generate-iac-viewer.py でコードビューア
 | accuracy | 9/10 | 初回レビューでElastiCache→Athena非互換検出→DynamoDB修正。全統合パスAWS Knowledge MCPで検証済み |
 | clarity | 8/10 | 2 Cluster（青/緑）で視覚的分離。Edge色6種でフロー識別。凡例で日本語補足 |
 | **total** | **0.87** | (9+9+8)/30 = 0.87 |
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-03T10:08:35"
+```
