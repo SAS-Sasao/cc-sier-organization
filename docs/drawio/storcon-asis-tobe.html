@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ストコン移行 As-Is / To-Be 対比図 - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:960px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { background:#ef4444; color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+.tag-wbs { background:#dcfce7; color:#166534; }
+@media (prefers-color-scheme: dark) {
+  .tag-project { background:#78350f; color:#fde68a; }
+  .tag-wbs { background:#14532d; color:#bbf7d0; }
+}
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.section { margin-bottom:24px; }
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; font-size:.9rem; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .learning-points li { border-bottom-color: rgba(255,255,255,.08); }
+  .learning-points li strong { color: #93c5fd; }
+}
+</style>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+mermaid.initialize({startOnLoad:true, theme:'neutral', securityLevel:'loose'});
+</script>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>ストコン移行 As-Is / To-Be 対比図</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコン移行</span>
+  <span class="tag tag-type">C4 Model</span>
+</div>
+<div class="date">生成日: 2026-04-04 | オンプレミス現状とAWSクラウド移行後のシステム構成対比</div>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+graph LR
+  subgraph ASIS["As-Is: オンプレミス"]
+    direction TB
+    subgraph HQ["本部DC"]
+      MASTER_A["商品マスタ管理"]
+      EOS_A["EOS/EOB 発注管理"]
+      DWH_A["DWH 売上分析"]
+      BATCH_A["バッチサーバー"]
+      DB_A[("Oracle / SQL Server")]
+    end
+    NET_A["専用回線 / VPN"]
+    subgraph STORE_A["店舗"]
+      SC_A["ストコン 専用HW"]
+      POS_A["POS"]
+      PAY_A["決済端末"]
+    end
+    HQ --> NET_A --> STORE_A
+  end
+
+  subgraph MIGRATION["移行"]
+    direction TB
+    P1["Phase1 Rehost"]
+    P2["Phase2 Replatform"]
+    P3["Phase3 Refactor"]
+    P1 --> P2 --> P3
+  end
+
+  subgraph TOBE["To-Be: AWS クラウド"]
+    direction TB
+    subgraph EDGE["エッジ/セキュリティ"]
+      CF["CloudFront"] --- WAF["WAF"] --- COGNITO["Cognito"]
+    end
+    APIGW["API Gateway"]
+    subgraph COMPUTE["ECS/Fargate"]
+      SVC_ORD["発注"] --- SVC_INV["在庫"] --- SVC_SALES["売上"] --- SVC_STAFF["従業員"]
+    end
+    subgraph DATA["データ層 Multi-AZ"]
+      AURORA[("Aurora")] --- DYNAMO[("DynamoDB")] --- REDIS[("ElastiCache")] --- RS[("Redshift")]
+    end
+    NET_B["Direct Connect / VPC"]
+    subgraph STORE_B["店舗"]
+      SC_B["ストコン クラウド接続型"]
+      LOCAL_B[("ローカルDB")]
+      IOT_B["IoT Core"]
+    end
+    EDGE --> APIGW --> COMPUTE --> DATA
+    NET_B --> STORE_B
+  end
+
+  ASIS --> MIGRATION --> TOBE
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./storcon-asis-tobe.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>コンビニエンスストアのストアコンピューター（ストコン）をオンプレミスからAWSクラウドへ移行する際の、現行構成（As-Is）と移行後構成（To-Be）を左右対比で可視化した図。中央に3フェーズの移行ステップ（Rehost → Replatform → Refactor）と主要コンポーネントの対応関係を示す。</p>
+</div>
+
+<div class="section">
+  <h2>構成要素</h2>
+
+  <h3 style="font-size:.95rem; margin:16px 0 8px;">As-Is（オンプレミス）</h3>
+  <table>
+    <tr><th>要素</th><th>種類</th><th>説明</th></tr>
+    <tr><td>本部データセンター</td><td>コンテナ</td><td>商品マスタ管理、EOS/EOB発注管理、DWH、バッチサーバー、会計システムを集約</td></tr>
+    <tr><td>オンプレDB (Oracle/SQL Server)</td><td>データベース</td><td>トランザクション・マスタデータを一元管理するRDBMS</td></tr>
+    <tr><td>専用回線 / VPN</td><td>ネットワーク</td><td>本部DCと店舗を接続する閉域網</td></tr>
+    <tr><td>ストアコンピューター（専用HW）</td><td>店舗端末</td><td>店舗の全業務を統合制御するハブ。POS・決済端末・ハンディ端末・温度監視と接続</td></tr>
+    <tr><td>物流・サービス</td><td>外部連携</td><td>配送センター、収納代行、チケット発券との接続</td></tr>
+  </table>
+
+  <h3 style="font-size:.95rem; margin:16px 0 8px;">To-Be（AWSクラウド）</h3>
+  <table>
+    <tr><th>要素</th><th>種類</th><th>説明</th></tr>
+    <tr><td>CloudFront + WAF + Cognito + Route 53</td><td>エッジ・セキュリティ</td><td>CDN配信、ファイアウォール、認証、DNS管理</td></tr>
+    <tr><td>API Gateway</td><td>APIレイヤー</td><td>REST/WebSocket APIの統合ゲートウェイ</td></tr>
+    <tr><td>ECS/Fargate マイクロサービス</td><td>コンピュート</td><td>発注・在庫・売上・従業員の4サービスに分割</td></tr>
+    <tr><td>SQS + Lambda</td><td>非同期処理</td><td>FIFO/Standardキューとイベント駆動処理</td></tr>
+    <tr><td>Step Functions + AWS Batch</td><td>バッチ処理</td><td>日次集計・棚卸のオーケストレーション</td></tr>
+    <tr><td>Aurora / DynamoDB / ElastiCache / Redshift</td><td>データレイヤー</td><td>Multi-AZ構成。用途別にDB最適化（ACID / NoSQL / Cache / DWH）</td></tr>
+    <tr><td>S3 + Glacier</td><td>ストレージ</td><td>レポート・ログの永続化とアーカイブ</td></tr>
+    <tr><td>CloudWatch + X-Ray</td><td>監視</td><td>メトリクス・ログ・分散トレーシング</td></tr>
+    <tr><td>Direct Connect + VPC (Multi-AZ)</td><td>ネットワーク</td><td>専用線接続とVPC内ネットワーク分離</td></tr>
+    <tr><td>ストコン端末（クラウド接続型）+ ローカルDB</td><td>店舗端末</td><td>クラウド接続 + オフライン耐性（差分同期）</td></tr>
+    <tr><td>IoT Core</td><td>店舗IoT</td><td>温度センサー・機器監視のクラウド連携</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>移行マッピング</h2>
+  <table>
+    <tr><th>#</th><th>As-Is</th><th>To-Be</th><th>移行手法</th></tr>
+    <tr><td>1</td><td>Oracle / SQL Server</td><td>Aurora (MySQL/PostgreSQL)</td><td>DMS (Database Migration Service) + SCT (Schema Conversion Tool)</td></tr>
+    <tr><td>2</td><td>EOS/EOB 発注管理（モノリス）</td><td>発注サービス (ECS/Fargate)</td><td>ストラングラーフィグパターンでコンテナ化</td></tr>
+    <tr><td>3</td><td>DWH（オンプレ）</td><td>Redshift</td><td>S3経由バルクロード + CDC連携</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul>
+    <li><strong>段階的移行（3フェーズ）</strong> ― Phase 1: Rehost（EC2へのLift&Shift）でリスク最小化 → Phase 2: Replatform（コンテナ化・マネージドDB化）→ Phase 3: Refactor（マイクロサービス＋イベント駆動化）</li>
+    <li><strong>オフライン耐性の維持</strong> ― 移行後もローカルDBを維持し、店舗ネットワーク障害時の業務継続を保証。差分同期で復旧時にクラウドと整合</li>
+    <li><strong>データ層の用途別最適化</strong> ― 単一RDBMSからAurora（ACID）、DynamoDB（高頻度アクセス）、ElastiCache（キャッシュ）、Redshift（分析）に分割し、各ワークロードに最適化</li>
+    <li><strong>温度監視のIoT化</strong> ― 既存の店舗内温度監視をIoT Coreに移行し、センサーデータのクラウド収集・異常検知を実現</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>7R移行戦略の段階的適用</strong> ― 24/365稼働のシステムでは一括移行は高リスク。Rehost→Replatform→Refactorの段階適用が王道パターン。各フェーズでロールバック可能な状態を維持する</li>
+    <li><strong>モノリスからマイクロサービスへの分解基準</strong> ― ストコンの業務機能（発注・在庫・売上・従業員）はそれぞれ独立したビジネスドメインを持つ。ドメイン境界に沿った分割がマイクロサービス設計の基本</li>
+    <li><strong>ハイブリッド期間の設計</strong> ― 移行期間中はオンプレとAWSが共存する。Direct Connectによる専用線接続と、ストラングラーフィグパターンによるAPIルーティング層が共存を可能にする</li>
+    <li><strong>非機能要件の移行先マッピング</strong> ― 24/365可用性 → Multi-AZ + Auto Scaling、PCI DSS → WAF + KMS + GuardDuty、スケーラビリティ → SQS背圧制御 + DynamoDB On-Demand。As-Isの課題がTo-Beのどの要素で解消されるかを対応付けることが重要</li>
+    <li><strong>エッジコンピューティングの継続</strong> ― クラウド移行後もローカルDBを残す設計は、コンビニ特有のオフライン耐性要件に起因する。すべてをクラウドに寄せるのではなく、業務継続要件に応じたエッジ処理の残し方が実案件では問われる</li>
+  </ul>
+</div>
+
+<p class="updated">最終更新: 2026-04-04 | 作成者: secretary</p>
+</body>
+</html>
