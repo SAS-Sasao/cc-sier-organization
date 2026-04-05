@@ -64,3 +64,14 @@ subagent: "secretary"
 | accuracy | 5/5 |
 | clarity | 4/5 |
 | **total** | **4.3/5** (reward: 0.86) |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-04T20:42:27"
+```

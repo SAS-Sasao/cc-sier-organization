@@ -51,3 +51,14 @@ subagent: "secretary"
 | accuracy | 5/5 | 既存ドメイン知識ドキュメントと整合。移行フェーズもWBSと一致 |
 | clarity | 4/5 | 左右対比レイアウト + 番号マッピング + 凡例・課題/メリット注釈 |
 | **total** | **4.3/5** | 案件参画時の説明資料として十分な品質 |
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-04T19:50:13"
+```
