@@ -68,7 +68,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count"><span id="match-count">1-18 / 18</span> 件の構成図</p>
+<p class="count"><span id="match-count">1-20 / 20</span> 件の構成図</p>
 
 <!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
 <div class="search-bar">
@@ -79,6 +79,30 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <!-- ▲ 検索・フィルタ ここまで -->
 
 <div class="grid">
+  <a href="./storcon-vpc-multi-az.html" class="card">
+    <img class="card-thumb" src="./storcon-vpc-multi-az.png" alt="StoreCon VPC Multi-AZ Architecture">
+    <div class="card-body">
+      <div class="card-title">StoreCon VPC Multi-AZ Architecture</div>
+      <div class="card-meta">
+        <span class="tag tag-project">ストコン移行</span>
+        <span class="tag tag-area">Network / VPC</span>
+      </div>
+      <div class="card-desc">3層サブネット(Public/Private/Data) x 2AZ + NAT GW + Direct Connect + VPC Endpoints</div>
+      <div class="card-date">2026-04-06</div>
+    </div>
+  </a>
+  <a href="./storcon-iam-multi-account.html" class="card">
+    <img class="card-thumb" src="./storcon-iam-multi-account.png" alt="StoreCon IAM Multi-Account Architecture">
+    <div class="card-body">
+      <div class="card-title">StoreCon IAM Multi-Account Architecture</div>
+      <div class="card-meta">
+        <span class="tag tag-project">ストコン移行</span>
+        <span class="tag tag-area">Security / IAM</span>
+      </div>
+      <div class="card-desc">Organizations+SSO+Cognito+IAMロールによるマルチアカウントIAM設計（56,000店舗）</div>
+      <div class="card-date">2026-04-06</div>
+    </div>
+  </a>
   <a href="./storcon-migration-comparison.html" class="card">
     <img class="card-thumb" src="./storcon-migration-comparison.png" alt="StoreComputer Migration On-Premise to AWS">
     <div class="card-body">
