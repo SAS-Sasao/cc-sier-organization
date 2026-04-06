@@ -106,7 +106,7 @@ tfoot th { background:var(--bg); font-weight:700; }
 
 <div class="section">
   <h2>概要</h2>
-  <p>ストアコンピューターシ���テムの本番ワークロードを収容するVPC設計。2つのアベイラビリティゾーン（AZ-a / AZ-c）にまたがる��ルチAZ構��で、3層サブネ���ト（Public / Private / Data）による縦深防御を実現。56,000台の店舗端末からのトラフィックはCloudFront+WAFを経由してVPC内のALB→ECS Fargateに到達し、データ層のAurora/ElastiCacheにアクセスする。本部DCとはDirect Connect（主回線）+ Site-to-Site VPN（バックアップ）で接続。</p>
+  <p>ストアコンピューターシステムの本番ワークロードを収容するVPC設計。2つのアベイラビリティゾーン（AZ-a / AZ-c）にまたがるマルチAZ構成で、3層サブネット（Public / Private / Data）による縦深防御を実現。56,000台の店舗端末からのトラフィックはCloudFront+WAFを経由してVPC内のALB→ECS Fargateに到達し、データ層のAurora/ElastiCacheにアクセスする。本部DCとはDirect Connect（主回線）+ Site-to-Site VPN（バックアップ）で接続。</p>
 </div>
 
 <div class="section">
@@ -159,11 +159,11 @@ tfoot th { background:var(--bg); font-weight:700; }
 <div class="section">
   <h2>レイヤー構成</h2>
   <table>
-    <tr><th>レイヤー</th><th>サブネ���ト / サービス</th><th>用途</th></tr>
+    <tr><th>レイヤー</th><th>サブネット / サービス</th><th>用途</th></tr>
     <tr><td>Edge</td><td>CloudFront, WAF</td><td>CDN配信、DDoS防御、WAFルール適用</td></tr>
-    <tr><td>Public Subnet</td><td>ALB, NAT Gateway (10.0.1.0/24, 10.0.2.0/24)</td><td>外部向けロードバラン��ー、Private Subnetの外部通��用NAT</td></tr>
+    <tr><td>Public Subnet</td><td>ALB, NAT Gateway (10.0.1.0/24, 10.0.2.0/24)</td><td>外部向けロードバランサー、Private Subnetの外部通信用NAT</td></tr>
     <tr><td>Private Subnet</td><td>ECS Fargate (10.0.10.0/24, 10.0.11.0/24)</td><td>アプリケーションコンテナ（インターネットから直接到達不可）</td></tr>
-    <tr><td>Data Subnet</td><td>Aurora, ElastiCache (10.0.20.0/24, 10.0.21.0/24)</td><td>データベース（App SGからのみア���セス可）</td></tr>
+    <tr><td>Data Subnet</td><td>Aurora, ElastiCache (10.0.20.0/24, 10.0.21.0/24)</td><td>データベース（App SGからのみアクセス可）</td></tr>
     <tr><td>VPC Endpoints</td><td>S3 Gateway, SecretsManager Interface</td><td>NATを経由せずAWSサービスへプライベート接続</td></tr>
     <tr><td>Hybrid</td><td>Direct Connect, Site-to-Site VPN</td><td>本部DC専用線接続 + VPNバックアップ</td></tr>
     <tr><td>Security Groups</td><td>SG-ALB / SG-App / SG-Data</td><td>3層のステートフルファイアウォール（ALB→App→Data）</td></tr>
@@ -173,7 +173,7 @@ tfoot th { background:var(--bg); font-weight:700; }
 <div class="section">
   <h2>設計のポイント</h2>
   <ul style="padding-left:24px;">
-    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>3層サブネットによる縦深防御</strong> &#8212; Public（ALB/NAT）→ Private（App）→ Data（DB）の3層でネットワークを分離。各層のSecurity Groupで許可する���信を厳密に制御し、万が一ALBが侵害されてもDBには直接到達できない</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>3層サブネットによる縦深防御</strong> &#8212; Public（ALB/NAT）→ Private（App）→ Data（DB）の3層でネットワークを分離。各層のSecurity Groupで許可する通信を厳密に制御し、万が一ALBが侵害されてもDBには直接到達できない</li>
     <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>AZごとのNAT Gatewayで可用性確保</strong> &#8212; NAT Gatewayを各AZに1台ずつ配置し、AZ障害時もNAT通信が継続。シングルNATはSPOF（単一障害点）となるため、本番環境では必ずAZごとに配置する</li>
     <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>VPC Endpointによるコスト削減とセキュリティ向上</strong> &#8212; S3 Gateway EndpointはNAT Gatewayを経由せず無料でS3にアクセス可能。大量のS3通信があるストコン（売上データ、ログ）ではNAT転送料金を大幅に削減でき、かつトラフィックがAWSバックボーン内に留まる</li>
     <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>Direct Connect + VPNの冗長構成</strong> &#8212; 主回線はDirect Connect（1Gbps、低遅延）、障害時はSite-to-Site VPN（インターネット経由）にフェイルオーバー。56,000店舗のデータが流れるため、帯域保証のある専用線が不可欠</li>
@@ -203,17 +203,17 @@ tfoot th { background:var(--bg); font-weight:700; }
     </tfoot>
   </table>
   <p><strong>前提条件</strong>: NAT GWのデータ転送量100GB/AZ/月想定。Direct ConnectはProd環境のみ。VPN接続は常時ON。CloudFrontは転送量10-100GB/月想定</p>
-  <p><strong>コスト最適化のポイント</strong>: S3 Gateway Endpointの活用でNAT転送料金を削減（S3通信はNATを経由しない）。Devは単一AZ+単一NAT構成にする��とで$35/月削減可能。Direct Connect料金は帯域選択（1Gbps vs 10Gbps）で大きく変動</p>
+  <p><strong>コスト最適化のポイント</strong>: S3 Gateway Endpointの活用でNAT転送料金を削減（S3通信はNATを経由しない）。Devは単一AZ+単一NAT構成にすることで$35/月削減可能。Direct Connect料金は帯域選択（1Gbps vs 10Gbps）で大きく変動</p>
 </div>
 
 <div class="section">
   <h2>学習ポイント</h2>
   <ul class="learning-points">
-    <li><strong>サブネットは「ルートテーブル」で決まる</strong> &#8212; サブ��ットがPublicかPrivateかは名前ではなく、ルートテーブルにInternet Gatewayへのルート（0.0.0.0/0 → IGW）があるかどうかで決まる。Private SubnetのデフォルトルートはNAT Gatewayを指す。この区別はSAA試験で最頻出</li>
-    <li><strong>Security GroupとNACLの使い分け</strong> &#8212; Security Groupはステートフル（戻りトラフィック自動許可）でインスタンス/ENI単位。NACLはステートレス（戻りも明示許可必要）でサブネット単位。通常はSGで十分だが、サブネット単位���「特定IPを全面ブロック」したい場合はNACLを併用する</li>
+    <li><strong>サブネットは「ルートテーブル」で決まる</strong> &#8212; サブネットがPublicかPrivateかは名前ではなく、ルートテーブルにInternet Gatewayへのルート（0.0.0.0/0 → IGW）があるかどうかで決まる。Private SubnetのデフォルトルートはNAT Gatewayを指す。この区別はSAA試験で最頻出</li>
+    <li><strong>Security GroupとNACLの使い分け</strong> &#8212; Security Groupはステートフル（戻りトラフィック自動許可）でインスタンス/ENI単位。NACLはステートレス（戻りも明示許可必要）でサブネット単位。通常はSGで十分だが、サブネット単位で「特定IPを全面ブロック」したい場合はNACLを併用する</li>
     <li><strong>NAT Gatewayの料金構造を理解する</strong> &#8212; NAT GWは「時間課金（$0.062/hr = 約$45/月）+ データ処理料金（$0.062/GB）」の二重課金。S3やDynamoDBへのアクセスはVPC Endpointを使えばNATを回避でき、コスト・セキュリティ両面で有利</li>
-    <li><strong>Gateway型 vs Interface�� VPC Endpoint</strong> &#8212; Gateway型（S3/DynamoDB専用）はルートテーブルで制御し無料。Interface型（その他AWSサービス）はENI+PrivateLink経由で時間+データ課金あり。ストコンのようにS3通信が多いシステムでは、Gateway Endpointが大きなコスト削減に直結する</li>
-    <li><strong>CIDR設計は拡張性を考慮する</strong> &#8212; /16（65,536 IP）のVPCに/24（256 IP）のサブネットを配置。将来のサブネット追加（監視用、管理用等）に備えて、CIDR空間に余裕を持たせる。10.0.0.0/16の中で10.0.1-2（Public）、10.0.10-11（Private）、10.0.20-21（Data）と間隔を空けることで、���層の追加が容易</li>
+    <li><strong>Gateway型 vs Interface型 VPC Endpoint</strong> &#8212; Gateway型（S3/DynamoDB専用）はルートテーブルで制御し無料。Interface型（その他AWSサービス）はENI+PrivateLink経由で時間+データ課金あり。ストコンのようにS3通信が多いシステムでは、Gateway Endpointが大きなコスト削減に直結する</li>
+    <li><strong>CIDR設計は拡張性を考慮する</strong> &#8212; /16（65,536 IP）のVPCに/24（256 IP）のサブネットを配置。将来のサブネット追加（監視用、管理用等）に備えて、CIDR空間に余裕を持たせる。10.0.0.0/16の中で10.0.1-2（Public）、10.0.10-11（Private）、10.0.20-21（Data）と間隔を空けることで、新層の追加が容易</li>
   </ul>
 </div>
 
