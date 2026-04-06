@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreCon VPC Multi-AZ Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-inbound { background:#3b82f6; color:#fff; }
+.badge-app { background:#22c55e; color:#fff; }
+.badge-data { background:#8b5cf6; color:#fff; }
+.badge-outbound { background:#6b7280; color:#fff; }
+.badge-hybrid { background:#ef4444; color:#fff; }
+.badge-repl { background:#f59e0b; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.85; transform:translateY(-1px); }
+.cost-note { font-size:.82rem; color:var(--muted); margin-bottom:12px; }
+tfoot th { background:var(--bg); font-weight:700; }
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; font-size:.9rem; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .learning-points li { border-bottom-color: rgba(255,255,255,.08); }
+  .learning-points li strong { color: #93c5fd; }
+}
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>StoreCon VPC Multi-AZ Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコン移行</span>
+  <span class="tag tag-area">Network / VPC</span>
+  <span>生成日: 2026-04-06</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./storcon-vpc-multi-az.png" alt="StoreCon VPC Multi-AZ Architecture" onclick="document.getElementById('lb').classList.add('active')">
+  <p class="hint">クリックで拡大</p>
+  <a href="./storcon-vpc-multi-az-iac.html" class="iac-btn">IaCソースコードを見る</a>
+</div>
+<div id="lb" class="lightbox" onclick="this.classList.remove('active')">
+  <img src="./storcon-vpc-multi-az.png" alt="拡大図">
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> HTTPS &#8212; 店舗/インターネットからのHTTPSトラフィック</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> Route / Forward &#8212; ALBからECSへのルーティング</div>
+    <div class="legend-item"><span class="legend-line" style="background:purple"></span> Read/Write &#8212; Aurora DBへのデータアクセス</div>
+    <div class="legend-item"><span class="legend-line" style="background:teal"></span> Cache &#8212; ElastiCacheへのキャッシュアクセス</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:darkorange"></span> Replication &#8212; AZ間のデータレプリケーション</div>
+    <div class="legend-item"><span class="legend-line" style="background:red"></span> Dedicated Line &#8212; Direct Connect専用線接続</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:red"></span> Backup &#8212; Site-to-Site VPNバックアップ回線</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:gray"></span> Outbound / Endpoint &#8212; NAT経由外部通信 / VPCエンドポイント</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>ストアコンピューターシ���テムの本番ワークロードを収容するVPC設計。2つのアベイラビリティゾーン（AZ-a / AZ-c）にまたがる��ルチAZ構��で、3層サブネ���ト（Public / Private / Data）による縦深防御を実現。56,000台の店舗端末からのトラフィックはCloudFront+WAFを経由してVPC内のALB→ECS Fargateに到達し、データ層のAurora/ElastiCacheにアクセスする。本部DCとはDirect Connect（主回線）+ Site-to-Site VPN（バックアップ）で接続。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <p><span class="badge badge-inbound">Inbound</span> 店舗からのリクエスト</p>
+  <div class="flow">
+    <span class="flow-step">Store Computer</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront + WAF</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Internet Gateway</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ALB (Public Subnet)</span>
+  </div>
+
+  <p><span class="badge badge-app">App</span> アプリケーション処理</p>
+  <div class="flow">
+    <span class="flow-step">ALB</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECS Fargate (Private Subnet)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora Writer / ElastiCache (Data Subnet)</span>
+  </div>
+
+  <p><span class="badge badge-repl">Replication</span> AZ間レプリケーション</p>
+  <div class="flow">
+    <span class="flow-step">Aurora Writer (AZ-a)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora Reader (AZ-c)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">ElastiCache Primary (AZ-a)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ElastiCache Replica (AZ-c)</span>
+  </div>
+
+  <p><span class="badge badge-outbound">Outbound</span> 外部通信</p>
+  <div class="flow">
+    <span class="flow-step">ECS Fargate</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">NAT Gateway (Public Subnet)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Internet</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">ECS Fargate</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Gateway Endpoint (NAT不要)</span>
+  </div>
+
+  <p><span class="badge badge-hybrid">Hybrid</span> 本部DC接続</p>
+  <div class="flow">
+    <span class="flow-step">HQ Data Center</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Direct Connect (1Gbps)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">VPC</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>サブネ���ト / サービス</th><th>用途</th></tr>
+    <tr><td>Edge</td><td>CloudFront, WAF</td><td>CDN配信、DDoS防御、WAFルール適用</td></tr>
+    <tr><td>Public Subnet</td><td>ALB, NAT Gateway (10.0.1.0/24, 10.0.2.0/24)</td><td>外部向けロードバラン��ー、Private Subnetの外部通��用NAT</td></tr>
+    <tr><td>Private Subnet</td><td>ECS Fargate (10.0.10.0/24, 10.0.11.0/24)</td><td>アプリケーションコンテナ（インターネットから直接到達不可）</td></tr>
+    <tr><td>Data Subnet</td><td>Aurora, ElastiCache (10.0.20.0/24, 10.0.21.0/24)</td><td>データベース（App SGからのみア���セス可）</td></tr>
+    <tr><td>VPC Endpoints</td><td>S3 Gateway, SecretsManager Interface</td><td>NATを経由せずAWSサービスへプライベート接続</td></tr>
+    <tr><td>Hybrid</td><td>Direct Connect, Site-to-Site VPN</td><td>本部DC専用線接続 + VPNバックアップ</td></tr>
+    <tr><td>Security Groups</td><td>SG-ALB / SG-App / SG-Data</td><td>3層のステートフルファイアウォール（ALB→App→Data）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul style="padding-left:24px;">
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>3層サブネットによる縦深防御</strong> &#8212; Public（ALB/NAT）→ Private（App）→ Data（DB）の3層でネットワークを分離。各層のSecurity Groupで許可する���信を厳密に制御し、万が一ALBが侵害されてもDBには直接到達できない</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>AZごとのNAT Gatewayで可用性確保</strong> &#8212; NAT Gatewayを各AZに1台ずつ配置し、AZ障害時もNAT通信が継続。シングルNATはSPOF（単一障害点）となるため、本番環境では必ずAZごとに配置する</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>VPC Endpointによるコスト削減とセキュリティ向上</strong> &#8212; S3 Gateway EndpointはNAT Gatewayを経由せず無料でS3にアクセス可能。大量のS3通信があるストコン（売上データ、ログ）ではNAT転送料金を大幅に削減でき、かつトラフィックがAWSバックボーン内に留まる</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>Direct Connect + VPNの冗長構成</strong> &#8212; 主回線はDirect Connect（1Gbps、低遅延）、障害時はSite-to-Site VPN（インターネット経由）にフェイルオーバー。56,000店舗のデータが流れるため、帯域保証のある専用線が不可欠</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p class="cost-note">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。<br>
+  為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <thead>
+      <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>NAT Gateway x2</td><td>2 AZ, 各100GB転送</td><td>$70 (10,500円)</td><td>$70-200 (10,500-30,000円)</td></tr>
+      <tr><td>ALB</td><td>1台 (Cross-AZ)</td><td>$20 (3,000円)</td><td>$25-50 (3,750-7,500円)</td></tr>
+      <tr><td>CloudFront + WAF</td><td>CDN + WAF Rules</td><td>$6-15 (900-2,250円)</td><td>$30-120 (4,500-18,000円)</td></tr>
+      <tr><td>Direct Connect</td><td>1Gbps Dedicated</td><td>&#8212;</td><td>$200+ (30,000円+)</td></tr>
+      <tr><td>Site-to-Site VPN</td><td>Backup connection</td><td>$36 (5,400円)</td><td>$36 (5,400円)</td></tr>
+      <tr><td>VPC Endpoint (IF)</td><td>SecretsManager x2 AZ</td><td>$15 (2,250円)</td><td>$15 (2,250円)</td></tr>
+      <tr><td>S3 Gateway EP</td><td>Gateway型</td><td>$0 (無料)</td><td>$0 (無料)</td></tr>
+      <tr><td>EIP x2</td><td>NAT GW用</td><td>$0 (使用中無料)</td><td>$0 (使用中無料)</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><th colspan="2">合計（ネットワーク層のみ）</th><th>$147-156 (約22,050-23,400円)</th><th>$376-621 (約56,400-93,150円)</th></tr>
+    </tfoot>
+  </table>
+  <p><strong>前提条件</strong>: NAT GWのデータ転送量100GB/AZ/月想定。Direct ConnectはProd環境のみ。VPN接続は常時ON。CloudFrontは転送量10-100GB/月想定</p>
+  <p><strong>コスト最適化のポイント</strong>: S3 Gateway Endpointの活用でNAT転送料金を削減（S3通信はNATを経由しない）。Devは単一AZ+単一NAT構成にする��とで$35/月削減可能。Direct Connect料金は帯域選択（1Gbps vs 10Gbps）で大きく変動</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>サブネットは「ルートテーブル」で決まる</strong> &#8212; サブ��ットがPublicかPrivateかは名前ではなく、ルートテーブルにInternet Gatewayへのルート（0.0.0.0/0 → IGW）があるかどうかで決まる。Private SubnetのデフォルトルートはNAT Gatewayを指す。この区別はSAA試験で最頻出</li>
+    <li><strong>Security GroupとNACLの使い分け</strong> &#8212; Security Groupはステートフル（戻りトラフィック自動許可）でインスタンス/ENI単位。NACLはステートレス（戻りも明示許可必要）でサブネット単位。通常はSGで十分だが、サブネット単位���「特定IPを全面ブロック」したい場合はNACLを併用する</li>
+    <li><strong>NAT Gatewayの料金構造を理解する</strong> &#8212; NAT GWは「時間課金（$0.062/hr = 約$45/月）+ データ処理料金（$0.062/GB）」の二重課金。S3やDynamoDBへのアクセスはVPC Endpointを使えばNATを回避でき、コスト・セキュリティ両面で有利</li>
+    <li><strong>Gateway型 vs Interface�� VPC Endpoint</strong> &#8212; Gateway型（S3/DynamoDB専用）はルートテーブルで制御し無料。Interface型（その他AWSサービス）はENI+PrivateLink経由で時間+データ課金あり。ストコンのようにS3通信が多いシステムでは、Gateway Endpointが大きなコスト削減に直結する</li>
+    <li><strong>CIDR設計は拡張性を考慮する</strong> &#8212; /16（65,536 IP）のVPCに/24（256 IP）のサブネットを配置。将来のサブネット追加（監視用、管理用等）に備えて、CIDR空間に余裕を持たせる。10.0.0.0/16の中で10.0.1-2（Public）、10.0.10-11（Private）、10.0.20-21（Data）と間隔を空けることで、���層の追加が容易</li>
+  </ul>
+</div>
+
+<p class="updated">最終更新: 2026-04-06 | 作成者: secretary | WBS: 3.1.1</p>
+</body>
+</html>

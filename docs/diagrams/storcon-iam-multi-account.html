@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StoreCon IAM Multi-Account Architecture - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-sso { background:#3b82f6; color:#fff; }
+.badge-role { background:#22c55e; color:#fff; }
+.badge-device { background:#8b5cf6; color:#fff; }
+.badge-gov { background:#ef4444; color:#fff; }
+.badge-audit { background:#f59e0b; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.85; transform:translateY(-1px); }
+.cost-note { font-size:.82rem; color:var(--muted); margin-bottom:12px; }
+tfoot th { background:var(--bg); font-weight:700; }
+.learning-points { list-style: none; padding: 0; }
+.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; font-size:.9rem; }
+.learning-points li:last-child { border-bottom: none; }
+.learning-points li strong { color: #1e40af; }
+@media (prefers-color-scheme: dark) {
+  .learning-points li { border-bottom-color: rgba(255,255,255,.08); }
+  .learning-points li strong { color: #93c5fd; }
+}
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>StoreCon IAM Multi-Account Architecture</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコン移行</span>
+  <span class="tag tag-area">Security / IAM</span>
+  <span>生成日: 2026-04-06</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./storcon-iam-multi-account.png" alt="StoreCon IAM Multi-Account Architecture" onclick="document.getElementById('lb').classList.add('active')">
+  <p class="hint">クリックで拡大</p>
+  <a href="./storcon-iam-multi-account-iac.html" class="iac-btn">IaCソースコードを見る</a>
+</div>
+<div id="lb" class="lightbox" onclick="this.classList.remove('active')">
+  <img src="./storcon-iam-multi-account.png" alt="拡大図">
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> SSO Login &#8212; IAM Identity Center経由のログイン</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:darkgreen"></span> AssumeRole &#8212; クロスアカウントロール切替</div>
+    <div class="legend-item"><span class="legend-line" style="background:purple"></span> Device Auth &#8212; Cognito経由のデバイス認証</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:purple"></span> STS Token &#8212; 一時認証情報の発行</div>
+    <div class="legend-item"><span class="legend-line" style="background:red"></span> SCP Deny &#8212; Organizations SCPによるガードレール</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:darkorange"></span> Audit Log &#8212; CloudTrail/SecurityHub監査フロー</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:gray"></span> Resource Access &#8212; IAMロール経由のリソースアクセス</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>コンビニエンスストアのストアコンピューター（56,000台）をAWSへ移行する際のIAM設計。AWS Organizationsによるマルチアカウント戦略を基盤に、人間のアクセス（SSO）とデバイスのアクセス（Cognito）を分離。本番/ステージング/開発の環境分離と、ログ集約アカウントによる統合監査を実現する。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <p><span class="badge badge-sso">SSO</span> 本部スタッフのアクセス</p>
+  <div class="flow">
+    <span class="flow-step">HQ Operations / Developers</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">IAM Identity Center (SSO)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">AssumeRole</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ProdOpsRole / StagingRole / DevRole</span>
+  </div>
+
+  <p><span class="badge badge-device">Device</span> 店舗デバイス認証</p>
+  <div class="flow">
+    <span class="flow-step">Store Computer (56,000)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Cognito (Device Auth)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">STS Token</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">StrConAppRole (Instance Profile)</span>
+  </div>
+
+  <p><span class="badge badge-role">Resource</span> ロールからリソースへのアクセス</p>
+  <div class="flow">
+    <span class="flow-step">StrConAppRole</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Secrets Manager (DB認証情報)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">StrConAppRole</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">KMS CMK (暗号化/復号)</span>
+  </div>
+
+  <p><span class="badge badge-gov">Governance</span> ガバナンス</p>
+  <div class="flow">
+    <span class="flow-step">Organizations</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SCP (Region Lock)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">全アカウントに適用</span>
+  </div>
+
+  <p><span class="badge badge-audit">Audit</span> 監査フロー</p>
+  <div class="flow">
+    <span class="flow-step">全アカウントのAPI操作</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudTrail (全リージョン)</span>
+  </div>
+  <div class="flow">
+    <span class="flow-step">GuardDuty (脅威検出)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Security Hub (統合ダッシュボード)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>Governance</td><td>Organizations, SCP</td><td>マルチアカウント管理、リージョン制限ガードレール</td></tr>
+    <tr><td>Identity (Human)</td><td>IAM Identity Center (SSO)</td><td>本部スタッフのシングルサインオン、クロスアカウントアクセス</td></tr>
+    <tr><td>Identity (Device)</td><td>Cognito User Pool / Identity Pool</td><td>56,000台の店舗端末デバイス認証、STS一時認証情報発行</td></tr>
+    <tr><td>IAM Roles</td><td>StrConAppRole, ProdOpsRole, DevRole</td><td>最小権限の原則に基づく職責別ロール</td></tr>
+    <tr><td>Encryption</td><td>KMS (CMK), Secrets Manager</td><td>データ暗号化、DB認証情報の安全な保管</td></tr>
+    <tr><td>Audit</td><td>CloudTrail, GuardDuty, Security Hub</td><td>全アカウント統合監査、脅威検出、セキュリティ検出結果の集約</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul style="padding-left:24px;">
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>マルチアカウント分離</strong> &#8212; 本番/ステージング/開発/セキュリティを別アカウントに分離することで、アクセスキー漏洩時の爆発半径（Blast Radius）を限定。SCPで東京リージョン以外のEC2起動を禁止し、コンプライアンスを自動適用</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>IAMロールによるアクセスキーレス</strong> &#8212; EC2インスタンスプロファイル（StrConAppRole）により、アプリケーションコードにアクセスキーを埋め込まずにS3/SecretsManager/KMSにアクセス。56,000台のデバイスへの鍵配布リスクをゼロに</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>人間とデバイスの認証分離</strong> &#8212; 人間はSSO経由でMFA必須のAssumeRole、デバイスはCognito経由でSTS一時認証情報を取得。認証方式を分離することで、デバイス側のセキュリティインシデントが人間の管理者アクセスに波及しない</li>
+    <li style="font-size:.9rem;line-height:1.7;margin-bottom:8px;"><strong>ProdOpsRoleのMFA必須化</strong> &#8212; 本番アカウントへのAssumeRoleにMFA条件を付与。万が一SSOセッションが乗っ取られても、物理MFAトークンなしでは本番操作不可</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p class="cost-note">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。<br>
+  為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <thead>
+      <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>IAM / Organizations / SSO</td><td>グローバルサービス</td><td>$0 (無料)</td><td>$0 (無料)</td></tr>
+      <tr><td>Cognito</td><td>User Pool (56,000 MAU)</td><td>$0 (Free Tier)</td><td>$33 (4,950円)</td></tr>
+      <tr><td>KMS</td><td>CMK x1 + API呼出</td><td>$1-3 (150-450円)</td><td>$1-10 (150-1,500円)</td></tr>
+      <tr><td>Secrets Manager</td><td>シークレット x3-5</td><td>$1.20-2.00 (180-300円)</td><td>$1.20-2.00 (180-300円)</td></tr>
+      <tr><td>CloudTrail</td><td>マルチリージョン (1 trail)</td><td>$0 (1 trail無料)</td><td>$0-5 (0-750円)</td></tr>
+      <tr><td>GuardDuty</td><td>脅威検出</td><td>$4-10 (600-1,500円)</td><td>$10-30 (1,500-4,500円)</td></tr>
+      <tr><td>Security Hub</td><td>検出結果集約</td><td>$1-5 (150-750円)</td><td>$5-15 (750-2,250円)</td></tr>
+    </tbody>
+    <tfoot>
+      <tr><th colspan="2">合計</th><th>$7-20 (約1,050-3,000円)</th><th>$50-95 (約7,500-14,250円)</th></tr>
+    </tfoot>
+  </table>
+  <p><strong>前提条件</strong>: Cognitoは50,000 MAUまでFree Tier適用（Devは範囲内、Prodは56,000 MAUで超過分のみ課金）。CloudTrailは管理イベント1 trailが無料。GuardDutyはCloudTrailイベント量・VPCフローログ量に依存</p>
+  <p><strong>コスト最適化のポイント</strong>: IAM/SSO/Organizationsは無料サービスのためコスト懸念なし。Cognito MAU課金は56,000台で月$33程度と低額。GuardDuty/SecurityHubは全アカウント有効化を推奨（セキュリティインシデントの早期検知によるコスト回避効果が大きい）</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>マルチアカウント戦略が「前提」である理由</strong> &#8212; AWSではシングルアカウントでのIAMポリシーによる論理分離ではなく、アカウントレベルの物理分離がベストプラクティス。アカウントはリソースの「爆発半径」を制限する最も強力な境界であり、56,000店舗規模のシステムでは必須の設計判断</li>
+    <li><strong>IAMロール vs IAMユーザーの使い分け</strong> &#8212; EC2やLambdaなどAWSサービスには「IAMロール」（一時認証情報、アクセスキー不要）を使う。人間のアクセスにはSSO+AssumeRoleを使う。「IAMユーザーにアクセスキーを発行する」のはアンチパターン。SAA試験でも最頻出テーマの一つ</li>
+    <li><strong>SCPは「最大権限の天井」</strong> &#8212; SCP（Service Control Policy）はOrganizationsレベルで適用され、IAMポリシーのAllowよりも優先してDenyが適用される。例えば「東京リージョン以外でのEC2起動を禁止」するSCPを適用すると、どのIAMユーザー/ロールでもバージニアでEC2を起動できない</li>
+    <li><strong>Cognito Identity PoolによるSTS連携</strong> &#8212; Cognito User Poolで認証したデバイスに、Identity Pool経由でIAMロールの一時認証情報（STS Token）を発行する。これにより、56,000台の店舗端末それぞれにアクセスキーを配布する必要がなくなり、鍵管理のリスクをゼロにできる</li>
+    <li><strong>セキュリティサービスの階層構造</strong> &#8212; CloudTrailは「誰が何をしたか」の証跡、GuardDutyは「異常な振る舞い」の検出、Security Hubはそれらの「統合ダッシュボード」。この3層構造がAWSセキュリティの基本であり、全アカウントで有効化するのがWell-Architectedの推奨</li>
+  </ul>
+</div>
+
+<p class="updated">最終更新: 2026-04-06 | 作成者: secretary | WBS: 3.1.1</p>
+</body>
+</html>

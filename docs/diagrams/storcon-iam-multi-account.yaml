@@ -1,0 +1,335 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  StoreCon IAM Multi-Account Architecture - IAM Roles, Cognito Device Auth,
+  Security Services for convenience store computer AWS migration.
+  This template covers the Production Account resources.
+  Organizations/SCP are managed separately in the Management Account.
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, stg, prod]
+    Description: Environment name (dev/stg/prod)
+  ProjectName:
+    Type: String
+    Default: storcon
+    Description: Project identifier for resource naming
+  StoreDeviceCount:
+    Type: Number
+    Default: 56000
+    Description: Number of store computer devices # TODO: Update for actual store count
+
+Resources:
+  # ============================================================
+  # KMS - Customer Managed Key for encryption
+  # ============================================================
+  StorConCMK:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub "${ProjectName}-${Environment} Customer Managed Key"
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableRootAccountAccess
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+          - Sid: AllowAppRoleUsage
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt StrConAppRole.Arn
+            Action:
+              - kms:Decrypt
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:GenerateDataKey*
+            Resource: "*"
+      EnableKeyRotation: true
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  StorConCMKAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${ProjectName}-${Environment}-cmk"
+      TargetKeyId: !Ref StorConCMK
+
+  # ============================================================
+  # Secrets Manager - DB credentials, API keys
+  # ============================================================
+  DBSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "${ProjectName}-${Environment}-db-credentials"
+      Description: Database connection credentials for StoreCon application
+      KmsKeyId: !Ref StorConCMK
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "storcon_app"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludeCharacters: '"@/\'
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # ============================================================
+  # Cognito - Store Device Authentication
+  # ============================================================
+  StoreDeviceUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${ProjectName}-${Environment}-store-devices"
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: "OFF"
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 16
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      Schema:
+        - Name: store_id
+          AttributeDataType: String
+          Mutable: false
+          Required: false
+        - Name: device_type
+          AttributeDataType: String
+          Mutable: true
+          Required: false
+      Tags:
+        Project: !Ref ProjectName
+        Environment: !Ref Environment
+
+  StoreDeviceUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${ProjectName}-${Environment}-store-client"
+      UserPoolId: !Ref StoreDeviceUserPool
+      GenerateSecret: true
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+
+  StoreDeviceIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Sub "${ProjectName}-${Environment}-store-identity"
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref StoreDeviceUserPoolClient
+          ProviderName: !GetAtt StoreDeviceUserPool.ProviderName
+
+  # ============================================================
+  # IAM Roles
+  # ============================================================
+
+  # StrConAppRole - EC2 Instance Profile for application servers
+  StrConAppRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${Environment}-StrConAppRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Policies:
+        - PolicyName: StrConAppPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: S3Access
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub "arn:aws:s3:::${ProjectName}-${Environment}-*"
+                  - !Sub "arn:aws:s3:::${ProjectName}-${Environment}-*/*"
+              - Sid: SecretsAccess
+                Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref DBSecret
+              - Sid: KMSAccess
+                Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - kms:DescribeKey
+                Resource: !GetAtt StorConCMK.Arn
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  StrConAppInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub "${ProjectName}-${Environment}-StrConAppProfile"
+      Roles:
+        - !Ref StrConAppRole
+
+  # ProdOpsRole - Operations team cross-account access
+  ProdOpsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${Environment}-ProdOpsRole"
+      MaxSessionDuration: 3600
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root" # TODO: Replace with SSO/Identity Center principal
+            Action: sts:AssumeRole
+            Condition:
+              Bool:
+                aws:MultiFactorAuthPresent: "true"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
+      Policies:
+        - PolicyName: OpsDeployPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: ECSDeployAccess
+                Effect: Allow
+                Action:
+                  - ecs:UpdateService
+                  - ecs:DescribeServices
+                  - ecs:DescribeTaskDefinition
+                  - ecs:RegisterTaskDefinition
+                Resource: "*"
+                Condition:
+                  StringEquals:
+                    aws:ResourceTag/Project: !Ref ProjectName
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Cognito Authenticated Role - For store devices via Identity Pool
+  CognitoAuthRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-${Environment}-CognitoAuthRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                cognito-identity.amazonaws.com:aud: !Ref StoreDeviceIdentityPool
+              ForAnyValue:StringLike:
+                cognito-identity.amazonaws.com:amr: authenticated
+      Policies:
+        - PolicyName: StoreDevicePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: APIAccess
+                Effect: Allow
+                Action:
+                  - execute-api:Invoke
+                Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/prod/*"
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  IdentityPoolRoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref StoreDeviceIdentityPool
+      Roles:
+        authenticated: !GetAtt CognitoAuthRole.Arn
+
+  # ============================================================
+  # Security Services
+  # ============================================================
+  CloudTrailTrail:
+    Type: AWS::CloudTrail::Trail
+    Properties:
+      TrailName: !Sub "${ProjectName}-${Environment}-audit-trail"
+      IsLogging: true
+      IsMultiRegionTrail: true
+      EnableLogFileValidation: true
+      IncludeGlobalServiceEvents: true
+      S3BucketName: !Sub "${ProjectName}-log-account-trail-bucket" # TODO: Replace with actual log account bucket
+      KMSKeyId: !GetAtt StorConCMK.Arn
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  GuardDutyDetector:
+    Type: AWS::GuardDuty::Detector
+    Properties:
+      Enable: true
+      FindingPublishingFrequency: FIFTEEN_MINUTES
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+  SecurityHubInstance:
+    Type: AWS::SecurityHub::Hub
+    Properties:
+      Tags:
+        Project: !Ref ProjectName
+        Environment: !Ref Environment
+
+Outputs:
+  StrConAppRoleArn:
+    Description: ARN of the StrConAppRole (EC2 Instance Profile)
+    Value: !GetAtt StrConAppRole.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${Environment}-StrConAppRoleArn"
+
+  ProdOpsRoleArn:
+    Description: ARN of the ProdOpsRole (Operations team)
+    Value: !GetAtt ProdOpsRole.Arn
+
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID for store device authentication
+    Value: !Ref StoreDeviceUserPool
+    Export:
+      Name: !Sub "${ProjectName}-${Environment}-StoreDeviceUserPoolId"
+
+  CognitoIdentityPoolId:
+    Description: Cognito Identity Pool ID
+    Value: !Ref StoreDeviceIdentityPool
+
+  KMSKeyArn:
+    Description: ARN of the Customer Managed KMS Key
+    Value: !GetAtt StorConCMK.Arn
+    Export:
+      Name: !Sub "${ProjectName}-${Environment}-CMKArn"
+
+  DBSecretArn:
+    Description: ARN of the DB credentials secret
+    Value: !Ref DBSecret
