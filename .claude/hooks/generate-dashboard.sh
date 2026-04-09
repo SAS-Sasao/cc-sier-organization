@@ -895,129 +895,211 @@ html = f"""<!DOCTYPE html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {{
-    --bg: #f8f9fa; --card-bg: #fff; --text: #212529; --muted: #6c757d;
-    --border: #dee2e6; --shadow: rgba(0,0,0,0.08);
-    --blue: #0d6efd; --yellow: #ffc107; --red: #dc3545; --green: #198754;
+    --bg: #0b1222; --bg2: #0f1a2e; --card-bg: #131d2f; --card-bg-hover: #182640;
+    --text: #e2e8f0; --text-bright: #f8fafc; --muted: #64748b; --muted-light: #94a3b8;
+    --border: #1e293b; --border-light: #334155;
+    --shadow: rgba(0,0,0,0.4); --shadow-lg: rgba(0,0,0,0.6);
+    --blue: #3b82f6; --blue-glow: rgba(59,130,246,0.15);
+    --yellow: #f59e0b; --yellow-glow: rgba(245,158,11,0.15);
+    --red: #ef4444; --red-glow: rgba(239,68,68,0.15);
+    --green: #10b981; --green-glow: rgba(16,185,129,0.15);
+    --purple: #8b5cf6; --teal: #06b6d4;
+    --accent: #3b82f6;
+    --header-bg: #0f1a2e;
   }}
-  @media (prefers-color-scheme: dark) {{
+  @media (prefers-color-scheme: light) {{
     :root {{
-      --bg: #1a1a2e; --card-bg: #16213e; --text: #e0e0e0; --muted: #9e9e9e;
-      --border: #2a2a4a; --shadow: rgba(0,0,0,0.3);
-      --blue: #4dabf7; --yellow: #ffd43b; --red: #ff6b6b; --green: #51cf66;
+      --bg: #f1f5f9; --bg2: #e2e8f0; --card-bg: #ffffff; --card-bg-hover: #f8fafc;
+      --text: #1e293b; --text-bright: #0f172a; --muted: #64748b; --muted-light: #94a3b8;
+      --border: #e2e8f0; --border-light: #cbd5e1;
+      --shadow: rgba(0,0,0,0.06); --shadow-lg: rgba(0,0,0,0.1);
+      --blue: #2563eb; --blue-glow: rgba(37,99,235,0.08);
+      --yellow: #d97706; --yellow-glow: rgba(217,119,6,0.08);
+      --red: #dc2626; --red-glow: rgba(220,38,38,0.08);
+      --green: #059669; --green-glow: rgba(5,150,105,0.08);
+      --purple: #7c3aed; --teal: #0891b2;
+      --accent: #2563eb;
+      --header-bg: #ffffff;
     }}
   }}
   * {{ margin:0; padding:0; box-sizing:border-box; }}
-  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-         background: var(--bg); color: var(--text); padding: 24px; }}
-  h1 {{ font-size: 1.5rem; margin-bottom: 4px; }}
-  .subtitle {{ color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }}
-  .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }}
+  body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+         background: var(--bg); color: var(--text); }}
+  /* ─── Header Bar ─── */
+  .header-bar {{ background: var(--header-bg); border-bottom: 1px solid var(--border);
+                 padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+                 position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+                 -webkit-backdrop-filter: blur(12px); }}
+  .header-left {{ display: flex; align-items: center; gap: 16px; }}
+  .header-logo {{ font-size: 1.25rem; font-weight: 700; color: var(--text-bright);
+                  letter-spacing: -0.02em; }}
+  .header-logo span {{ color: var(--accent); }}
+  .header-badge {{ font-size: 0.68rem; padding: 3px 10px; border-radius: 20px;
+                   background: var(--blue-glow); color: var(--blue); font-weight: 600;
+                   border: 1px solid rgba(59,130,246,0.2); }}
+  .header-right {{ display: flex; align-items: center; gap: 12px; }}
+  .header-time {{ font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }}
+  .header-dot {{ width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+                 box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }}
+  @keyframes pulse {{ 0%,100% {{ opacity:1; }} 50% {{ opacity:0.5; }} }}
+  /* ─── Main Content ─── */
+  .main-content {{ padding: 24px 32px; max-width: 1440px; margin: 0 auto; }}
+  .section-title {{ font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+                    letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px;
+                    padding-left: 12px; border-left: 3px solid var(--accent); }}
+  h1 {{ font-size: 1.5rem; margin-bottom: 4px; color: var(--text-bright); }}
+  .subtitle {{ color: var(--muted); font-size: 0.82rem; margin-bottom: 24px; }}
+  /* ─── KPI Cards ─── */
+  .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }}
   .card {{ background: var(--card-bg); border: 1px solid var(--border);
-           border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
-  .card-label {{ font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }}
-  .card-hint {{ font-size: 0.65rem; color: var(--muted); margin-top: 4px; opacity: 0.7; }}
-  .card-value {{ font-size: 2.2rem; font-weight: 700; margin-top: 4px; }}
+           border-radius: 8px; padding: 20px; position: relative; overflow: hidden;
+           transition: border-color 0.2s, box-shadow 0.2s; }}
+  .card:hover {{ border-color: var(--border-light); box-shadow: 0 4px 20px var(--shadow); }}
+  .card::before {{ content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }}
+  .card:nth-child(1)::before {{ background: var(--blue); }}
+  .card:nth-child(2)::before {{ background: var(--yellow); }}
+  .card:nth-child(3)::before {{ background: var(--red); }}
+  .card:nth-child(4)::before {{ background: var(--green); }}
+  .card-label {{ font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                 letter-spacing: 0.06em; font-weight: 600; }}
+  .card-hint {{ font-size: 0.65rem; color: var(--muted); margin-top: 6px; opacity: 0.7; }}
+  .card-value {{ font-size: 2.4rem; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums;
+                 letter-spacing: -0.02em; }}
   .card-value.blue {{ color: var(--blue); }}
   .card-value.yellow {{ color: var(--yellow); }}
   .card-value.red {{ color: var(--red); }}
   .card-value.green {{ color: var(--green); }}
-  .stats-row {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }}
+  /* ─── Stats Row ─── */
+  .stats-row {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }}
   .stat-card {{ background: var(--card-bg); border: 1px solid var(--border);
-               border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }}
-  .stat-label {{ font-size: 0.75rem; color: var(--muted); }}
-  .stat-value {{ font-size: 1.5rem; font-weight: 600; margin-top: 2px; }}
+               border-radius: 8px; padding: 16px; transition: border-color 0.2s; }}
+  .stat-card:hover {{ border-color: var(--border-light); }}
+  .stat-label {{ font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                 letter-spacing: 0.05em; font-weight: 600; }}
+  .stat-value {{ font-size: 1.6rem; font-weight: 700; margin-top: 4px; color: var(--text-bright);
+                 font-variant-numeric: tabular-nums; }}
+  /* ─── Conversation Topics ─── */
   .conv-topics {{ background: var(--card-bg); border: 1px solid var(--border);
-                  border-radius: 12px; padding: 20px; margin-bottom: 24px;
-                  box-shadow: 0 2px 8px var(--shadow); }}
-  .conv-topics h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+                  border-radius: 8px; padding: 20px; margin-bottom: 24px; }}
+  .conv-topics h3 {{ font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }}
   .rally {{ padding: 10px 0; border-bottom: 1px solid var(--border); }}
   .rally:last-child {{ border-bottom: none; }}
-  .rally-human, .rally-claude {{ font-size: 0.85rem; padding: 4px 0; }}
+  .rally-human, .rally-claude {{ font-size: 0.82rem; padding: 4px 0; }}
   .rally-human {{ color: var(--text); }}
-  .rally-claude {{ color: var(--muted); margin-left: 16px; }}
-  .rally-label {{ font-size: 0.8rem; margin-right: 4px; }}
-  .plan-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }}
+  .rally-claude {{ color: var(--muted-light); margin-left: 16px; }}
+  .rally-label {{ font-size: 0.75rem; margin-right: 4px; }}
+  /* ─── Plan Cards ─── */
+  .plan-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin-bottom: 24px; }}
   .plan-card {{ background: var(--card-bg); border: 1px solid var(--border);
-               border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
+               border-radius: 8px; padding: 20px; }}
   .plan-card.full-width {{ margin-bottom: 24px; }}
-  .plan-card h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+  .plan-card h3 {{ font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }}
   .progress-row {{ display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }}
-  .progress-bar {{ flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }}
-  .progress-fill {{ height: 100%; background: var(--blue); border-radius: 5px; transition: width 1s ease; }}
-  .progress-fill.green {{ background: var(--green); }}
-  .progress-text {{ font-size: 0.8rem; color: var(--muted); white-space: nowrap; }}
+  .progress-bar {{ flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }}
+  .progress-fill {{ height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+                    background: linear-gradient(90deg, var(--blue), var(--teal)); }}
+  .progress-fill.green {{ background: linear-gradient(90deg, var(--green), #34d399); }}
+  .progress-text {{ font-size: 0.78rem; color: var(--muted-light); white-space: nowrap;
+                    font-variant-numeric: tabular-nums; }}
   .ms-timeline {{ display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }}
-  .ms-item {{ display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }}
-  .ms-badge {{ background: var(--blue); color: #fff; border-radius: 4px; padding: 2px 8px;
-              font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }}
+  .ms-item {{ display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }}
+  .ms-badge {{ background: var(--blue-glow); color: var(--blue); border: 1px solid rgba(59,130,246,0.2);
+              border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }}
   .ms-name {{ flex: 1; }}
-  .ms-date {{ color: var(--muted); font-size: 0.8rem; flex-shrink: 0; }}
+  .ms-date {{ color: var(--muted); font-size: 0.78rem; flex-shrink: 0; font-variant-numeric: tabular-nums; }}
   .action-list {{ list-style: none; padding: 0; }}
-  .action-list li {{ padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+  .action-list li {{ padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
                     display: flex; align-items: center; gap: 8px; }}
   .action-list li:last-child {{ border-bottom: none; }}
-  .action-badge {{ font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }}
-  .action-badge.todo {{ background: var(--blue); color: #fff; }}
-  .action-badge.wbs {{ background: var(--yellow); color: #000; }}
-  .action-badge.issue {{ background: var(--green); color: #fff; }}
+  .action-badge {{ font-size: 0.62rem; padding: 2px 8px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }}
+  .action-badge.todo {{ background: var(--blue-glow); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }}
+  .action-badge.wbs {{ background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }}
+  .action-badge.issue {{ background: var(--green-glow); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }}
   .check-box {{ color: var(--muted); }}
-  .source-hint {{ font-size: 0.7rem; color: var(--muted); margin-top: 8px; font-style: italic; }}
+  .source-hint {{ font-size: 0.68rem; color: var(--muted); margin-top: 8px; font-style: italic; }}
+  /* ─── Evolve Section ─── */
   .evolve-section {{ margin-bottom: 24px; }}
-  .evolve-section h2 {{ font-size: 1.1rem; margin-bottom: 16px; }}
-  .evolve-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }}
+  .evolve-section h2 {{ font-size: 1.05rem; margin-bottom: 16px; color: var(--text-bright); }}
+  .evolve-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }}
   .evolve-card {{ background: var(--card-bg); border: 1px solid var(--border);
-                  border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }}
-  .evolve-card .ev-label {{ font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }}
-  .evolve-card .ev-value {{ font-size: 1.8rem; font-weight: 700; margin-top: 4px; }}
-  .evolve-card .ev-sub {{ font-size: 0.75rem; color: var(--muted); margin-top: 2px; }}
+                  border-radius: 8px; padding: 16px; }}
+  .evolve-card .ev-label {{ font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                            letter-spacing: 0.05em; font-weight: 600; }}
+  .evolve-card .ev-value {{ font-size: 1.8rem; font-weight: 700; margin-top: 4px;
+                            font-variant-numeric: tabular-nums; }}
+  .evolve-card .ev-sub {{ font-size: 0.72rem; color: var(--muted); margin-top: 2px; }}
+  /* ─── Task List ─── */
   .today-tasks {{ background: var(--card-bg); border: 1px solid var(--border);
-                  border-radius: 12px; padding: 20px; margin-bottom: 16px;
-                  box-shadow: 0 2px 8px var(--shadow); }}
-  .today-tasks h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+                  border-radius: 8px; padding: 20px; margin-bottom: 16px; }}
+  .today-tasks h3 {{ font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }}
   .task-row {{ display: flex; align-items: center; gap: 12px; padding: 8px 0;
-               border-bottom: 1px solid var(--border); font-size: 0.85rem; }}
+               border-bottom: 1px solid var(--border); font-size: 0.82rem; }}
   .task-row:last-child {{ border-bottom: none; }}
-  .reward-badge {{ display: inline-block; padding: 2px 10px; border-radius: 12px;
-                   font-weight: 600; font-size: 0.8rem; min-width: 48px; text-align: center; }}
-  .reward-high {{ background: rgba(25,135,84,0.15); color: var(--green); }}
-  .reward-mid {{ background: rgba(255,193,7,0.15); color: var(--yellow); }}
-  .reward-low {{ background: rgba(220,53,69,0.15); color: var(--red); }}
+  .reward-badge {{ display: inline-block; padding: 3px 10px; border-radius: 4px;
+                   font-weight: 600; font-size: 0.75rem; min-width: 48px; text-align: center;
+                   font-variant-numeric: tabular-nums; }}
+  .reward-high {{ background: var(--green-glow); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }}
+  .reward-mid {{ background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }}
+  .reward-low {{ background: var(--red-glow); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }}
   .reward-none {{ background: var(--border); color: var(--muted); }}
-  .task-id {{ flex: 1; font-family: monospace; font-size: 0.8rem; }}
-  .task-mode {{ font-size: 0.7rem; color: var(--muted); }}
+  .task-id {{ flex: 1; font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 0.78rem; }}
+  .task-mode {{ font-size: 0.68rem; color: var(--muted); }}
+  /* ─── Alert Card ─── */
   .alert-card {{ background: var(--card-bg); border-left: 3px solid var(--red);
-                 border-radius: 12px; padding: 16px; margin-bottom: 16px;
-                 box-shadow: 0 2px 8px var(--shadow); }}
-  .alert-card h3 {{ font-size: 0.9rem; color: var(--red); margin-bottom: 8px; }}
-  .charts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }}
+                 border-radius: 8px; padding: 16px; margin-bottom: 16px; }}
+  .alert-card h3 {{ font-size: 0.88rem; color: var(--red); margin-bottom: 8px; }}
+  /* ─── Charts ─── */
+  .charts {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; margin-bottom: 24px; }}
   .chart-box {{ background: var(--card-bg); border: 1px solid var(--border);
-                border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }}
-  .chart-box h3 {{ font-size: 0.95rem; margin-bottom: 12px; }}
+                border-radius: 8px; padding: 20px; }}
+  .chart-box h3 {{ font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }}
   canvas {{ width: 100%; }}
   .chart-box canvas {{ display: block; margin: 0 auto; }}
-  .charts-aligned {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }}
+  .charts-aligned {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }}
   .charts-aligned .chart-box {{ display: flex; flex-direction: column; }}
   .charts-aligned .chart-box canvas {{ flex: 1; min-height: 0; }}
-  .footer {{ margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; }}
-  .back-btn {{ display: inline-block; margin-bottom: 16px; padding: 6px 16px;
-               background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
-               color: var(--text); text-decoration: none; font-size: 0.85rem;
-               box-shadow: 0 1px 4px var(--shadow); transition: background 0.2s; }}
-  .back-btn:hover {{ background: var(--border); }}
+  /* ─── Footer ─── */
+  .footer {{ margin-top: 32px; padding: 16px 0; border-top: 1px solid var(--border);
+             text-align: center; color: var(--muted); font-size: 0.72rem; }}
+  /* ─── Back Button ─── */
+  .back-btn {{ display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+               background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px;
+               color: var(--muted-light); text-decoration: none; font-size: 0.8rem;
+               transition: all 0.2s; }}
+  .back-btn:hover {{ background: var(--card-bg-hover); color: var(--text-bright); border-color: var(--border-light); }}
+  /* ─── Monthly Section ─── */
   .monthly-section {{ margin-bottom: 24px; }}
-  .monthly-section h2 {{ font-size: 1.1rem; margin-bottom: 16px; }}
-  .hm-grid {{ display: flex; flex-wrap: wrap; gap: 4px; }}
-  .hm-cell {{ width: 52px; height: 40px; border-radius: 6px; display: flex;
+  .monthly-section h2 {{ font-size: 1.05rem; margin-bottom: 16px; color: var(--text-bright); }}
+  .hm-grid {{ display: flex; flex-wrap: wrap; gap: 3px; }}
+  .hm-cell {{ width: 52px; height: 40px; border-radius: 4px; display: flex;
               flex-direction: column; align-items: center; justify-content: center;
-              font-size: .65rem; color: #fff; cursor: default; }}
+              font-size: .65rem; color: #fff; cursor: default; transition: transform 0.15s; }}
+  .hm-cell:hover {{ transform: scale(1.1); }}
   .hm-day {{ font-weight: 600; }}
   .hm-cnt {{ font-size: .6rem; opacity: .9; }}
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {{
+    .header-bar {{ padding: 12px 16px; }}
+    .main-content {{ padding: 16px; }}
+    .charts-aligned {{ grid-template-columns: 1fr; }}
+    .grid {{ grid-template-columns: repeat(2, 1fr); }}
+  }}
 </style>
 </head>
 <body>
+<div class="header-bar">
+  <div class="header-left">
+    <div class="header-logo"><span>cc</span>-sier</div>
+    <div class="header-badge">{org_slug}</div>
+  </div>
+  <div class="header-right">
+    <div class="header-time">{now}</div>
+    <div class="header-dot" title="Auto-refresh: 5min"></div>
+  </div>
+</div>
+<div class="main-content">
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
-<h1>📊 {org_slug}</h1>
-<p class="subtitle">最終更新: {now} ｜ 5分ごとに自動リフレッシュ</p>
+<div class="section-title">Task Overview</div>
 
 <div class="grid">
   <div class="card">
@@ -1065,6 +1147,7 @@ html = f"""<!DOCTYPE html>
 
 {conv_topics_html}
 
+<div class="section-title">Analytics</div>
 <div class="charts">
   <div class="chart-box">
     <h3>品質ゲート合格率</h3>
@@ -1080,6 +1163,7 @@ html = f"""<!DOCTYPE html>
 
 {monthly_section_full}
 
+<div class="section-title">Performance Trends</div>
 <!-- Row 1: reward推移 + judge推移 -->
 <div class="charts-aligned">
   <div class="chart-box">
@@ -1116,7 +1200,8 @@ html = f"""<!DOCTYPE html>
   </div>
 </div>
 
-<div class="footer">Generated by cc-sier company-dashboard</div>
+<div class="footer">Powered by cc-sier company-dashboard</div>
+</div><!-- /.main-content -->
 
 <script>
 // Count-up animation
@@ -1132,17 +1217,19 @@ document.querySelectorAll('[data-count]').forEach(el => {{
   }}, step);
 }});
 
-const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-const textColor = isDark ? '#e0e0e0' : '#212529';
+const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+const textColor = isLight ? '#1e293b' : '#94a3b8';
+const brightText = isLight ? '#0f172a' : '#e2e8f0';
 Chart.defaults.color = textColor;
+Chart.defaults.borderColor = gridColor;
 
 // Donut: Quality gate pass rate
 new Chart(document.getElementById('qgChart'), {{
   type: 'doughnut',
   data: {{
     labels: ['合格', '不合格'],
-    datasets: [{{ data: [{qg_pass}, {qg_fail}], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }}]
+    datasets: [{{ data: [{qg_pass}, {qg_fail}], backgroundColor: ['#10b981','#ef4444'], borderWidth: 0 }}]
   }},
   options: {{
     cutout: '70%',
@@ -1159,7 +1246,7 @@ new Chart(document.getElementById('qgChart'), {{
       const {{ ctx, chartArea: {{ width, height, top, left }} }} = chart;
       ctx.save();
       ctx.font = 'bold 2rem -apple-system, sans-serif';
-      ctx.fillStyle = textColor;
+      ctx.fillStyle = brightText;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('{qg_rate}%', left + width/2, top + height/2);
@@ -1175,7 +1262,7 @@ new Chart(document.getElementById('agentChart'), {{
     labels: {json.dumps(agent_labels, ensure_ascii=False)},
     datasets: [{{
       data: {json.dumps(agent_values)},
-      backgroundColor: '#4dabf7',
+      backgroundColor: 'rgba(59,130,246,0.7)',
       borderRadius: 4,
     }}]
   }},
@@ -1208,8 +1295,8 @@ if (radarCtx) {{
           ],
           borderWidth: 1.5,
           fill: true,
-          backgroundColor: `hsla(${{i * 60}}, 70%, 60%, 0.1)`,
-          borderColor: `hsla(${{i * 60}}, 70%, 50%, 0.8)`,
+          backgroundColor: `hsla(${{i * 60 + 200}}, 80%, 60%, 0.08)`,
+          borderColor: `hsla(${{i * 60 + 200}}, 80%, 55%, 0.7)`,
         }})),
       }},
       options: {{
@@ -1241,8 +1328,8 @@ if (judgeCtx) {{
         datasets: [{{
           label: 'judge total',
           data: judgeTrendData,
-          borderColor: '#7209b7',
-          backgroundColor: 'rgba(114,9,183,.12)',
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,.1)',
           tension: 0.4,
           fill: true,
           pointRadius: 3,
@@ -1274,8 +1361,8 @@ if (weeklyCtx) {{
       data: {{
         labels: wLabels,
         datasets: [
-          {{ label: 'タスク数', data: wCounts, backgroundColor: 'rgba(13,110,253,0.6)', borderRadius: 4, yAxisID: 'y' }},
-          {{ label: '平均報酬', data: wRewards, type: 'line', borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,0.1)', tension: 0.3, pointRadius: 4, yAxisID: 'y1' }}
+          {{ label: 'タスク数', data: wCounts, backgroundColor: 'rgba(59,130,246,0.6)', borderRadius: 4, yAxisID: 'y' }},
+          {{ label: '平均報酬', data: wRewards, type: 'line', borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.3, pointRadius: 4, yAxisID: 'y1' }}
         ]
       }},
       options: {{
@@ -1298,7 +1385,7 @@ if (catCtx) {{
   const catCounts = {ma_cat_counts_json};
   const catRewards = {ma_cat_rewards_json};
   if (catCounts.length > 0) {{
-    const catColors = catRewards.map(r => r >= 0.9 ? '#198754' : r >= 0.8 ? '#ffc107' : '#dc3545');
+    const catColors = catRewards.map(r => r >= 0.9 ? '#10b981' : r >= 0.8 ? '#f59e0b' : '#ef4444');
     new Chart(catCtx, {{
       type: 'bar',
       data: {{
@@ -1333,8 +1420,8 @@ if (modeCtx) {{
       data: {{
         labels: modeLabels,
         datasets: [
-          {{ label: '件数', data: modeCounts, backgroundColor: 'rgba(67,97,238,0.6)', borderRadius: 4, yAxisID: 'y' }},
-          {{ label: '平均報酬', data: modeRewards, type: 'line', borderColor: '#06d6a0', backgroundColor: 'rgba(6,214,160,0.1)', tension: 0.3, pointRadius: 5, yAxisID: 'y1' }}
+          {{ label: '件数', data: modeCounts, backgroundColor: 'rgba(59,130,246,0.6)', borderRadius: 4, yAxisID: 'y' }},
+          {{ label: '平均報酬', data: modeRewards, type: 'line', borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.08)', tension: 0.3, pointRadius: 5, yAxisID: 'y1' }}
         ]
       }},
       options: {{
@@ -1363,12 +1450,12 @@ if (digestCtx) {{
         datasets: [{{
           label: 'Daily Digest Reward',
           data: dRewards,
-          borderColor: '#198754',
-          backgroundColor: 'rgba(25,135,84,0.1)',
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.08)',
           fill: true,
           tension: 0.3,
           pointRadius: 4,
-          pointBackgroundColor: dRewards.map(r => r >= 0.9 ? '#198754' : r >= 0.8 ? '#ffc107' : '#dc3545'),
+          pointBackgroundColor: dRewards.map(r => r >= 0.9 ? '#10b981' : r >= 0.8 ? '#f59e0b' : '#ef4444'),
         }}]
       }},
       options: {{
@@ -1391,8 +1478,8 @@ new Chart(document.getElementById('scoreChart'), {{
     datasets: [{{
       label: '報酬スコア',
       data: {json.dumps(score_values)},
-      borderColor: '#ffc107',
-      backgroundColor: 'rgba(255,193,7,0.1)',
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245,158,11,0.08)',
       fill: true,
       tension: 0.3,
       pointRadius: 3,
@@ -1445,7 +1532,7 @@ if current_org not in orgs:
 
 cards = ""
 for org in orgs:
-    active = ' style="border:2px solid #4361ee;"' if org == current_org else ''
+    active = ' style="border:2px solid var(--accent);"' if org == current_org else ''
     cards += f'''
     <a href="./secretary/{org}/dashboard.html" class="card"{active}>
       <div class="org-name">{org}</div>
@@ -1455,7 +1542,7 @@ for org in orgs:
 # ダイジェストページが存在すれば追加
 if Path("docs/daily-digest/index.html").exists():
     cards += '''
-    <a href="./daily-digest/index.html" class="card" style="border:2px solid #198754;">
+    <a href="./daily-digest/index.html" class="card" style="border:2px solid #10b981;">
       <div class="org-name">日次ダイジェスト</div>
       <div class="org-label">技術・小売ニュース巡回 →</div>
     </a>'''
@@ -1463,7 +1550,7 @@ if Path("docs/daily-digest/index.html").exists():
 # 構成図ページが存在すれば追加
 if Path("docs/diagrams/index.html").exists():
     cards += '''
-    <a href="./diagrams/index.html" class="card" style="border:2px solid #e67e22;">
+    <a href="./diagrams/index.html" class="card" style="border:2px solid #f59e0b;">
       <div class="org-name">AWS 構成図</div>
       <div class="org-label">アーキテクチャ図ギャラリー →</div>
     </a>'''
@@ -1491,26 +1578,29 @@ html = f"""<!DOCTYPE html>
 <meta http-equiv="refresh" content="300">
 <title>cc-sier-organization</title>
 <style>
-:root {{ --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); }}
-@media (prefers-color-scheme: dark) {{
-  :root {{ --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); }}
+:root {{ --bg:#0b1222; --bg2:#131d2f; --text:#e2e8f0; --accent:#3b82f6; --border:#1e293b; --muted:#64748b; }}
+@media (prefers-color-scheme: light) {{
+  :root {{ --bg:#f1f5f9; --bg2:#ffffff; --text:#1e293b; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; }}
 }}
 * {{ box-sizing:border-box; margin:0; padding:0; }}
-body {{ background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:40px 32px; }}
-h1 {{ font-size:1.5rem; margin-bottom:8px; }}
-p  {{ color:#6c757d; font-size:.88rem; margin-bottom:32px; }}
-.grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }}
-.card {{ background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+body {{ background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif; padding:40px 32px; }}
+h1 {{ font-size:1.5rem; margin-bottom:8px; letter-spacing:-0.02em; }}
+h1 span {{ color:var(--accent); }}
+p  {{ color:var(--muted); font-size:.85rem; margin-bottom:32px; }}
+.grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }}
+.card {{ background:var(--bg2); border:1px solid var(--border); border-radius:8px;
          padding:20px 24px; text-decoration:none; color:var(--text);
-         transition:box-shadow .2s; display:block; }}
-.card:hover {{ box-shadow:0 4px 16px rgba(0,0,0,.12); }}
+         transition:all .2s; display:block; position:relative; overflow:hidden; }}
+.card::before {{ content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); opacity:0; transition:opacity .2s; }}
+.card:hover {{ border-color:#334155; box-shadow:0 4px 20px rgba(0,0,0,.3); }}
+.card:hover::before {{ opacity:1; }}
 .org-name {{ font-size:1rem; font-weight:600; margin-bottom:6px; }}
-.org-label {{ font-size:.8rem; color:#6c757d; }}
-.updated {{ margin-top:40px; font-size:.78rem; color:#6c757d; }}
+.org-label {{ font-size:.78rem; color:var(--muted); }}
+.updated {{ margin-top:40px; font-size:.75rem; color:var(--muted); }}
 </style>
 </head>
 <body>
-<h1>cc-sier-organization</h1>
+<h1><span>cc</span>-sier-organization</h1>
 <p>組織を選択してダッシュボードを表示します</p>
 <div class="grid">{cards}
 </div>
