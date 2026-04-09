@@ -7,7 +7,7 @@ org: domain-tech-collection
 dept: research, retail-domain
 operator: SAS-Sasao
 created: 2026-04-09T19:12:52+09:00
-issue_number: null
+issue_number: 237
 reward: 0.90
 subagents: [tech-researcher, retail-domain-researcher]
 ---
