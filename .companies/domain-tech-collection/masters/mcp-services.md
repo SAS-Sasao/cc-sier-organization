@@ -83,3 +83,35 @@
   - [GitHub](https://github.com/jgraph/drawio-mcp)
   - [サーバーワークスBlog解説](https://blog.serverworks.co.jp/drawio-mcp-claude-code)
   - [Zenn解説記事](https://zenn.dev/aya1357/articles/12f4ede03bc32c)
+
+## figma
+
+- **サービス名**: Figma MCP Server
+- **提供元**: Figma公式
+- **ステータス**: active
+- **連携部署**: [dept-secretary, dept-research]
+- **想定操作**: Figmaデザイン取得・スクリーンショット・メタデータ取得、FigJamダイアグラム生成、Code Connect管理
+- **設定先**: Claude Code組み込み（claude.ai MCP connector）
+- **認証**: OAuth（ブラウザ認証、`/mcp` → Figma → Authenticate）
+- **プラン**: Starter（Viewシート）— 読み取り系は制限なし、キャンバス書き込みは制限あり
+- **提供ツール**:
+  - `get_design_context` — デザインのコード・スクリーンショット・コンテキストヒントを取得
+  - `get_screenshot` — デザインのスクリーンショット取得
+  - `get_metadata` — ファイルメタデータ取得
+  - `get_figjam` — FigJamファイルのリソース取得
+  - `generate_diagram` — FigJamにダイアグラム生成
+  - `get_variable_defs` — デザイン変数（トークン）定義の取得
+  - `search_design_system` — デザインシステム検索
+  - `use_figma` — キャンバスへの書き込み（Viewシートでは制限あり）
+  - `create_new_file` — 新規Figmaファイル作成
+  - `whoami` — 認証ユーザー情報の確認
+  - `get_code_connect_map` — Code Connectマッピング取得
+  - `get_code_connect_suggestions` — Code Connect候補の提案
+  - `get_context_for_code_connect` — Code Connectコンテキスト取得
+  - `add_code_connect_map` — Code Connectマッピング追加
+  - `send_code_connect_mappings` — Code Connectマッピング送信
+  - `create_design_system_rules` — デザインシステムルール作成
+- **参考ドキュメント**:
+  - [公式ドキュメント](https://developers.figma.com/docs/figma-mcp-server/)
+  - [リモートサーバーインストール](https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/)
+  - [GitHub ガイド](https://github.com/figma/mcp-server-guide)
