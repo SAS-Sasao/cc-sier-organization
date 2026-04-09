@@ -8,129 +8,211 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #f8f9fa; --card-bg: #fff; --text: #212529; --muted: #6c757d;
-    --border: #dee2e6; --shadow: rgba(0,0,0,0.08);
-    --blue: #0d6efd; --yellow: #ffc107; --red: #dc3545; --green: #198754;
+    --bg: #0b1222; --bg2: #0f1a2e; --card-bg: #131d2f; --card-bg-hover: #182640;
+    --text: #e2e8f0; --text-bright: #f8fafc; --muted: #64748b; --muted-light: #94a3b8;
+    --border: #1e293b; --border-light: #334155;
+    --shadow: rgba(0,0,0,0.4); --shadow-lg: rgba(0,0,0,0.6);
+    --blue: #3b82f6; --blue-glow: rgba(59,130,246,0.15);
+    --yellow: #f59e0b; --yellow-glow: rgba(245,158,11,0.15);
+    --red: #ef4444; --red-glow: rgba(239,68,68,0.15);
+    --green: #10b981; --green-glow: rgba(16,185,129,0.15);
+    --purple: #8b5cf6; --teal: #06b6d4;
+    --accent: #3b82f6;
+    --header-bg: #0f1a2e;
   }
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     :root {
-      --bg: #1a1a2e; --card-bg: #16213e; --text: #e0e0e0; --muted: #9e9e9e;
-      --border: #2a2a4a; --shadow: rgba(0,0,0,0.3);
-      --blue: #4dabf7; --yellow: #ffd43b; --red: #ff6b6b; --green: #51cf66;
+      --bg: #f1f5f9; --bg2: #e2e8f0; --card-bg: #ffffff; --card-bg-hover: #f8fafc;
+      --text: #1e293b; --text-bright: #0f172a; --muted: #64748b; --muted-light: #94a3b8;
+      --border: #e2e8f0; --border-light: #cbd5e1;
+      --shadow: rgba(0,0,0,0.06); --shadow-lg: rgba(0,0,0,0.1);
+      --blue: #2563eb; --blue-glow: rgba(37,99,235,0.08);
+      --yellow: #d97706; --yellow-glow: rgba(217,119,6,0.08);
+      --red: #dc2626; --red-glow: rgba(220,38,38,0.08);
+      --green: #059669; --green-glow: rgba(5,150,105,0.08);
+      --purple: #7c3aed; --teal: #0891b2;
+      --accent: #2563eb;
+      --header-bg: #ffffff;
     }
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-         background: var(--bg); color: var(--text); padding: 24px; }
-  h1 { font-size: 1.5rem; margin-bottom: 4px; }
-  .subtitle { color: var(--muted); font-size: 0.85rem; margin-bottom: 24px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+         background: var(--bg); color: var(--text); }
+  /* ─── Header Bar ─── */
+  .header-bar { background: var(--header-bg); border-bottom: 1px solid var(--border);
+                 padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+                 position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+                 -webkit-backdrop-filter: blur(12px); }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-logo { font-size: 1.25rem; font-weight: 700; color: var(--text-bright);
+                  letter-spacing: -0.02em; }
+  .header-logo span { color: var(--accent); }
+  .header-badge { font-size: 0.68rem; padding: 3px 10px; border-radius: 20px;
+                   background: var(--blue-glow); color: var(--blue); font-weight: 600;
+                   border: 1px solid rgba(59,130,246,0.2); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-time { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .header-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+                 box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+  /* ─── Main Content ─── */
+  .main-content { padding: 24px 32px; max-width: 1440px; margin: 0 auto; }
+  .section-title { font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+                    letter-spacing: 0.08em; color: var(--muted); margin-bottom: 12px;
+                    padding-left: 12px; border-left: 3px solid var(--accent); }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; color: var(--text-bright); }
+  .subtitle { color: var(--muted); font-size: 0.82rem; margin-bottom: 24px; }
+  /* ─── KPI Cards ─── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .card { background: var(--card-bg); border: 1px solid var(--border);
-           border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
-  .card-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .card-hint { font-size: 0.65rem; color: var(--muted); margin-top: 4px; opacity: 0.7; }
-  .card-value { font-size: 2.2rem; font-weight: 700; margin-top: 4px; }
+           border-radius: 8px; padding: 20px; position: relative; overflow: hidden;
+           transition: border-color 0.2s, box-shadow 0.2s; }
+  .card:hover { border-color: var(--border-light); box-shadow: 0 4px 20px var(--shadow); }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .card:nth-child(1)::before { background: var(--blue); }
+  .card:nth-child(2)::before { background: var(--yellow); }
+  .card:nth-child(3)::before { background: var(--red); }
+  .card:nth-child(4)::before { background: var(--green); }
+  .card-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                 letter-spacing: 0.06em; font-weight: 600; }
+  .card-hint { font-size: 0.65rem; color: var(--muted); margin-top: 6px; opacity: 0.7; }
+  .card-value { font-size: 2.4rem; font-weight: 700; margin-top: 6px; font-variant-numeric: tabular-nums;
+                 letter-spacing: -0.02em; }
   .card-value.blue { color: var(--blue); }
   .card-value.yellow { color: var(--yellow); }
   .card-value.red { color: var(--red); }
   .card-value.green { color: var(--green); }
-  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  /* ─── Stats Row ─── */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .stat-card { background: var(--card-bg); border: 1px solid var(--border);
-               border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }
-  .stat-label { font-size: 0.75rem; color: var(--muted); }
-  .stat-value { font-size: 1.5rem; font-weight: 600; margin-top: 2px; }
+               border-radius: 8px; padding: 16px; transition: border-color 0.2s; }
+  .stat-card:hover { border-color: var(--border-light); }
+  .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                 letter-spacing: 0.05em; font-weight: 600; }
+  .stat-value { font-size: 1.6rem; font-weight: 700; margin-top: 4px; color: var(--text-bright);
+                 font-variant-numeric: tabular-nums; }
+  /* ─── Conversation Topics ─── */
   .conv-topics { background: var(--card-bg); border: 1px solid var(--border);
-                  border-radius: 12px; padding: 20px; margin-bottom: 24px;
-                  box-shadow: 0 2px 8px var(--shadow); }
-  .conv-topics h3 { font-size: 0.95rem; margin-bottom: 12px; }
+                  border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+  .conv-topics h3 { font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }
   .rally { padding: 10px 0; border-bottom: 1px solid var(--border); }
   .rally:last-child { border-bottom: none; }
-  .rally-human, .rally-claude { font-size: 0.85rem; padding: 4px 0; }
+  .rally-human, .rally-claude { font-size: 0.82rem; padding: 4px 0; }
   .rally-human { color: var(--text); }
-  .rally-claude { color: var(--muted); margin-left: 16px; }
-  .rally-label { font-size: 0.8rem; margin-right: 4px; }
-  .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .rally-claude { color: var(--muted-light); margin-left: 16px; }
+  .rally-label { font-size: 0.75rem; margin-right: 4px; }
+  /* ─── Plan Cards ─── */
+  .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .plan-card { background: var(--card-bg); border: 1px solid var(--border);
-               border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
+               border-radius: 8px; padding: 20px; }
   .plan-card.full-width { margin-bottom: 24px; }
-  .plan-card h3 { font-size: 0.95rem; margin-bottom: 12px; }
+  .plan-card h3 { font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }
   .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .progress-bar { flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--blue); border-radius: 5px; transition: width 1s ease; }
-  .progress-fill.green { background: var(--green); }
-  .progress-text { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  .progress-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+                    background: linear-gradient(90deg, var(--blue), var(--teal)); }
+  .progress-fill.green { background: linear-gradient(90deg, var(--green), #34d399); }
+  .progress-text { font-size: 0.78rem; color: var(--muted-light); white-space: nowrap;
+                    font-variant-numeric: tabular-nums; }
   .ms-timeline { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-  .ms-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-  .ms-badge { background: var(--blue); color: #fff; border-radius: 4px; padding: 2px 8px;
-              font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
+  .ms-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; }
+  .ms-badge { background: var(--blue-glow); color: var(--blue); border: 1px solid rgba(59,130,246,0.2);
+              border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-weight: 600; flex-shrink: 0; }
   .ms-name { flex: 1; }
-  .ms-date { color: var(--muted); font-size: 0.8rem; flex-shrink: 0; }
+  .ms-date { color: var(--muted); font-size: 0.78rem; flex-shrink: 0; font-variant-numeric: tabular-nums; }
   .action-list { list-style: none; padding: 0; }
-  .action-list li { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem;
+  .action-list li { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem;
                     display: flex; align-items: center; gap: 8px; }
   .action-list li:last-child { border-bottom: none; }
-  .action-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }
-  .action-badge.todo { background: var(--blue); color: #fff; }
-  .action-badge.wbs { background: var(--yellow); color: #000; }
-  .action-badge.issue { background: var(--green); color: #fff; }
+  .action-badge { font-size: 0.62rem; padding: 2px 8px; border-radius: 3px; font-weight: 600; flex-shrink: 0; }
+  .action-badge.todo { background: var(--blue-glow); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }
+  .action-badge.wbs { background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }
+  .action-badge.issue { background: var(--green-glow); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
   .check-box { color: var(--muted); }
-  .source-hint { font-size: 0.7rem; color: var(--muted); margin-top: 8px; font-style: italic; }
+  .source-hint { font-size: 0.68rem; color: var(--muted); margin-top: 8px; font-style: italic; }
+  /* ─── Evolve Section ─── */
   .evolve-section { margin-bottom: 24px; }
-  .evolve-section h2 { font-size: 1.1rem; margin-bottom: 16px; }
-  .evolve-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .evolve-section h2 { font-size: 1.05rem; margin-bottom: 16px; color: var(--text-bright); }
+  .evolve-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .evolve-card { background: var(--card-bg); border: 1px solid var(--border);
-                  border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px var(--shadow); }
-  .evolve-card .ev-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
-  .evolve-card .ev-value { font-size: 1.8rem; font-weight: 700; margin-top: 4px; }
-  .evolve-card .ev-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+                  border-radius: 8px; padding: 16px; }
+  .evolve-card .ev-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+                            letter-spacing: 0.05em; font-weight: 600; }
+  .evolve-card .ev-value { font-size: 1.8rem; font-weight: 700; margin-top: 4px;
+                            font-variant-numeric: tabular-nums; }
+  .evolve-card .ev-sub { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  /* ─── Task List ─── */
   .today-tasks { background: var(--card-bg); border: 1px solid var(--border);
-                  border-radius: 12px; padding: 20px; margin-bottom: 16px;
-                  box-shadow: 0 2px 8px var(--shadow); }
-  .today-tasks h3 { font-size: 0.95rem; margin-bottom: 12px; }
+                  border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+  .today-tasks h3 { font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }
   .task-row { display: flex; align-items: center; gap: 12px; padding: 8px 0;
-               border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+               border-bottom: 1px solid var(--border); font-size: 0.82rem; }
   .task-row:last-child { border-bottom: none; }
-  .reward-badge { display: inline-block; padding: 2px 10px; border-radius: 12px;
-                   font-weight: 600; font-size: 0.8rem; min-width: 48px; text-align: center; }
-  .reward-high { background: rgba(25,135,84,0.15); color: var(--green); }
-  .reward-mid { background: rgba(255,193,7,0.15); color: var(--yellow); }
-  .reward-low { background: rgba(220,53,69,0.15); color: var(--red); }
+  .reward-badge { display: inline-block; padding: 3px 10px; border-radius: 4px;
+                   font-weight: 600; font-size: 0.75rem; min-width: 48px; text-align: center;
+                   font-variant-numeric: tabular-nums; }
+  .reward-high { background: var(--green-glow); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .reward-mid { background: var(--yellow-glow); color: var(--yellow); border: 1px solid rgba(245,158,11,0.2); }
+  .reward-low { background: var(--red-glow); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
   .reward-none { background: var(--border); color: var(--muted); }
-  .task-id { flex: 1; font-family: monospace; font-size: 0.8rem; }
-  .task-mode { font-size: 0.7rem; color: var(--muted); }
+  .task-id { flex: 1; font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 0.78rem; }
+  .task-mode { font-size: 0.68rem; color: var(--muted); }
+  /* ─── Alert Card ─── */
   .alert-card { background: var(--card-bg); border-left: 3px solid var(--red);
-                 border-radius: 12px; padding: 16px; margin-bottom: 16px;
-                 box-shadow: 0 2px 8px var(--shadow); }
-  .alert-card h3 { font-size: 0.9rem; color: var(--red); margin-bottom: 8px; }
-  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
+                 border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+  .alert-card h3 { font-size: 0.88rem; color: var(--red); margin-bottom: 8px; }
+  /* ─── Charts ─── */
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 12px; margin-bottom: 24px; }
   .chart-box { background: var(--card-bg); border: 1px solid var(--border);
-                border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px var(--shadow); }
-  .chart-box h3 { font-size: 0.95rem; margin-bottom: 12px; }
+                border-radius: 8px; padding: 20px; }
+  .chart-box h3 { font-size: 0.9rem; margin-bottom: 12px; color: var(--text-bright); }
   canvas { width: 100%; }
   .chart-box canvas { display: block; margin: 0 auto; }
-  .charts-aligned { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+  .charts-aligned { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: stretch; }
   .charts-aligned .chart-box { display: flex; flex-direction: column; }
   .charts-aligned .chart-box canvas { flex: 1; min-height: 0; }
-  .footer { margin-top: 24px; text-align: center; color: var(--muted); font-size: 0.75rem; }
-  .back-btn { display: inline-block; margin-bottom: 16px; padding: 6px 16px;
-               background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
-               color: var(--text); text-decoration: none; font-size: 0.85rem;
-               box-shadow: 0 1px 4px var(--shadow); transition: background 0.2s; }
-  .back-btn:hover { background: var(--border); }
+  /* ─── Footer ─── */
+  .footer { margin-top: 32px; padding: 16px 0; border-top: 1px solid var(--border);
+             text-align: center; color: var(--muted); font-size: 0.72rem; }
+  /* ─── Back Button ─── */
+  .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+               background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px;
+               color: var(--muted-light); text-decoration: none; font-size: 0.8rem;
+               transition: all 0.2s; }
+  .back-btn:hover { background: var(--card-bg-hover); color: var(--text-bright); border-color: var(--border-light); }
+  /* ─── Monthly Section ─── */
   .monthly-section { margin-bottom: 24px; }
-  .monthly-section h2 { font-size: 1.1rem; margin-bottom: 16px; }
-  .hm-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-  .hm-cell { width: 52px; height: 40px; border-radius: 6px; display: flex;
+  .monthly-section h2 { font-size: 1.05rem; margin-bottom: 16px; color: var(--text-bright); }
+  .hm-grid { display: flex; flex-wrap: wrap; gap: 3px; }
+  .hm-cell { width: 52px; height: 40px; border-radius: 4px; display: flex;
               flex-direction: column; align-items: center; justify-content: center;
-              font-size: .65rem; color: #fff; cursor: default; }
+              font-size: .65rem; color: #fff; cursor: default; transition: transform 0.15s; }
+  .hm-cell:hover { transform: scale(1.1); }
   .hm-day { font-weight: 600; }
   .hm-cnt { font-size: .6rem; opacity: .9; }
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    .header-bar { padding: 12px 16px; }
+    .main-content { padding: 16px; }
+    .charts-aligned { grid-template-columns: 1fr; }
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
 </style>
 </head>
 <body>
+<div class="header-bar">
+  <div class="header-left">
+    <div class="header-logo"><span>cc</span>-sier</div>
+    <div class="header-badge">domain-tech-collection</div>
+  </div>
+  <div class="header-right">
+    <div class="header-time">2026-04-09 20:40:11</div>
+    <div class="header-dot" title="Auto-refresh: 5min"></div>
+  </div>
+</div>
+<div class="main-content">
 <a href="https://sas-sasao.github.io/cc-sier-organization/" class="back-btn">← トップに戻る</a>
-<h1>📊 domain-tech-collection</h1>
-<p class="subtitle">最終更新: 2026-04-03 12:37:22 ｜ 5分ごとに自動リフレッシュ</p>
+<div class="section-title">Task Overview</div>
 
 <div class="grid">
   <div class="card">
@@ -158,19 +240,19 @@
 <div class="stats-row">
   <div class="stat-card">
     <div class="stat-label">セッション数</div>
-    <div class="stat-value">42</div>
+    <div class="stat-value">50</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">ツール実行数</div>
-    <div class="stat-value">15481</div>
+    <div class="stat-value">16516</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">会話セッション</div>
-    <div class="stat-value">37</div>
+    <div class="stat-value">48</div>
   </div>
   <div class="stat-card">
     <div class="stat-label">Human 発言数</div>
-    <div class="stat-value">5712</div>
+    <div class="stat-value">6703</div>
   </div>
 </div>
 
@@ -187,8 +269,8 @@
 <div class="plan-card">
   <h3>WBS / マイルストーン</h3>
   <div class="progress-row">
-    <div class="progress-bar"><div class="progress-fill green" style="width:8%"></div></div>
-    <span class="progress-text">完了5 / 進行中4 / 未着手53</span>
+    <div class="progress-bar"><div class="progress-fill green" style="width:23%"></div></div>
+    <span class="progress-text">完了15 / 進行中4 / 未着手47</span>
   </div>
   <div class="ms-timeline"><div class="ms-item"><span class="ms-badge">M1</span><span class="ms-name">基礎固め完了</span><span class="ms-date">04/11（W3末）</span></div><div class="ms-item"><span class="ms-badge">M2</span><span class="ms-name">案件直結知識完了</span><span class="ms-date">05/02（W6末）</span></div><div class="ms-item"><span class="ms-badge">M3</span><span class="ms-name">移行技術・統合完了</span><span class="ms-date">05/23（W9末）</span></div><div class="ms-item"><span class="ms-badge">M4</span><span class="ms-name">総仕上げ・参画準備完了</span><span class="ms-date">05/29（W10末）</span></div></div>
   <div class="source-hint">docs/secretary/storcon-preparation-wbs.md</div>
@@ -199,8 +281,13 @@
   <ul class="action-list"><li><span class="action-badge todo">TODO</span> AWS Skill Builder のアカウント確認・コース選定</li><li><span class="action-badge todo">TODO</span> Cloud Practitioner Essentials の最初のモジュールに着手</li><li><span class="action-badge todo">TODO</span> 日次ダイジェスト巡回（WBS 1.3）-- 本日分は生成済み（3/25ダイジェスト）</li><li><span class="action-badge wbs">WBS</span> ` 進行中 / `[x]` 完了</li></ul>
 </div>
 
-<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKマージしたからmain以外のローカルブランチ削除して。</div><div class="rally-claude"><span class="rally-label">🤖</span> 削除完了。ローカルブランチは `main` のみです。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 今作成したカッパアーキテクチャとラムダアーキテクチャの比較をAWS構成図にしてみて欲しい。</div><div class="rally-claude"><span class="rally-label">🤖</span> 先ほどのdraw.io比較図をAWSサービスにマッピングした構成図を作成します。まず参照情報を収集します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 1. **CSS**: Adapted from the existing `enterprise-data-arch.html` and `storcon-d...</div><div class="rally-claude"><span class="rally-label">🤖</span> 詳細HTMLページ生成完了。judge評価を実施してコミットに進みます。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKマージしたからmain以外のローカルブランチ削除して。</div><div class="rally-claude"><span class="rally-label">🤖</span> 削除完了。ローカルブランチは `main` のみです。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OKマージしたからmain以外のローカルブランチ削除して。</div><div class="rally-claude"><span class="rally-label">🤖</span> 削除完了。ローカルブランチは `main` のみです。</div></div></div>
+<div class="conv-topics"><h3>直近の会話</h3><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> &lt;local-command-caveat&gt;Caveat: The messages below were generated by the user whil</div><div class="rally-claude"><span class="rally-label">🤖</span> 現在のアクティブ組織: **ドメイン知識や技術スタック収集PJT** (`domain-tech-collection`)</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> 日次ダイジェスト対応から初めて</div><div class="rally-claude"><span class="rally-label">🤖</span> 了解です。日次ダイジェスト（`wf-daily-digest`）を開始します。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> &lt;task-notification&gt;
+&lt;task-id&gt;a0638b91197a91366&lt;/task-id&gt;
+&lt;tool-use-id&gt;toolu_017n</div><div class="rally-claude"><span class="rally-label">🤖</span> 小売ドメイン室が完了しました（48件収集）。技術リサーチ室の完了を待ちます。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> &lt;task-notification&gt;
+&lt;task-id&gt;a9230b8a244f785f5&lt;/task-id&gt;
+&lt;tool-use-id&gt;toolu_01WU</div><div class="rally-claude"><span class="rally-label">🤖</span> 両エージェント完了。技術65件+小売47件。ダイジェスト統合に入ります。</div></div><div class="rally"><div class="rally-human"><span class="rally-label">👤</span> OK！マージしたからmain以外のローカルブランチ削除して。</div><div class="rally-claude"><span class="rally-label">🤖</span> ローカルmainにマージコミットを取り込みます。</div></div></div>
 
+<div class="section-title">Analytics</div>
 <div class="charts">
   <div class="chart-box">
     <h3>品質ゲート合格率</h3>
@@ -217,7 +304,7 @@
   <div class="evolve-grid">
     <div class="evolve-card">
       <div class="ev-label">Case Bank</div>
-      <div class="ev-value" style="color:var(--blue)">60</div>
+      <div class="ev-value" style="color:var(--blue)">71</div>
       <div class="ev-sub">インデックス済みケース</div>
     </div>
     <div class="evolve-card">
@@ -228,12 +315,12 @@
     <div class="evolve-card">
       <div class="ev-label">報酬分布</div>
       <div style="display:flex;gap:4px;height:14px;border-radius:7px;overflow:hidden;margin-top:10px">
-        <div style="flex:87;background:var(--green)" title="高 (≥0.7): 52件"></div>
+        <div style="flex:87;background:var(--green)" title="高 (≥0.7): 62件"></div>
         <div style="flex:0;background:var(--yellow)" title="中 (0.4-0.7): 0件"></div>
         <div style="flex:0;background:var(--red)" title="低 (<0.4): 0件"></div>
-        <div style="flex:13;background:var(--border)" title="未評価: 8件"></div>
+        <div style="flex:13;background:var(--border)" title="未評価: 9件"></div>
       </div>
-      <div class="ev-sub" style="margin-top:6px">高52 / 中0 / 低0 / 未8</div>
+      <div class="ev-sub" style="margin-top:6px">高62 / 中0 / 低0 / 未9</div>
     </div>
     <div class="evolve-card">
       <div class="ev-label">本日評価</div>
@@ -241,7 +328,7 @@
       <div class="ev-sub">タスク</div>
     </div>
   </div>
-  <div class="today-tasks"><h3>本日のタスク評価</h3><div class="task-row"><span class="reward-badge reward-high">0.9</span><span class="task-id">daily-digest</span><span class="task-mode">direct</span></div><div class="task-row"><span class="reward-badge reward-high">0.9</span><span class="task-id">drawio-data-arch-comparison</span><span class="task-mode">direct</span></div><div class="task-row"><span class="reward-badge reward-high">0.9</span><span class="task-id">diagram-data-arch-comparison</span><span class="task-mode">direct</span></div></div>
+  <div class="today-tasks"><h3>本日のタスク評価</h3><div class="task-row"><span class="reward-badge reward-high">0.9</span><span class="task-id">daily-digest</span><span class="task-mode">agent-teams</span></div><div class="task-row"><span class="reward-badge reward-high">0.9</span><span class="task-id">nec-lawson-deep-research</span><span class="task-mode">agent-teams</span></div><div class="task-row"><span class="reward-badge reward-none">N/A</span><span class="task-id">admin-add-mcp-figma</span><span class="task-mode">direct</span></div></div>
   
 </div>
 
@@ -250,22 +337,22 @@
   <div class="evolve-grid" style="margin-bottom:16px">
     <div class="evolve-card">
       <div class="ev-label">月間タスク数</div>
-      <div class="ev-value" style="color:var(--blue)">11<span style="font-size:.75rem;color:var(--red);margin-left:6px">-38</span></div>
+      <div class="ev-value" style="color:var(--blue)">22<span style="font-size:.75rem;color:var(--red);margin-left:6px">-27</span></div>
       <div class="ev-sub">前月: 49件</div>
     </div>
     <div class="evolve-card">
       <div class="ev-label">平均報酬</div>
-      <div class="ev-value" style="color:var(--green)">0.922<span style="font-size:.75rem;color:var(--red);margin-left:6px">-0.014</span></div>
+      <div class="ev-value" style="color:var(--green)">0.907<span style="font-size:.75rem;color:var(--red);margin-left:6px">-0.029</span></div>
       <div class="ev-sub">前月: 0.936</div>
     </div>
     <div class="evolve-card">
       <div class="ev-label">稼働日数</div>
-      <div class="ev-value" style="color:var(--blue)">3<span style="font-size:.75rem;color:var(--red);margin-left:6px">-7</span></div>
+      <div class="ev-value" style="color:var(--blue)">9<span style="font-size:.75rem;color:var(--red);margin-left:6px">-1</span></div>
       <div class="ev-sub">前月: 10日</div>
     </div>
     <div class="evolve-card">
       <div class="ev-label">セッション数</div>
-      <div class="ev-value" style="color:var(--blue)">37</div>
+      <div class="ev-value" style="color:var(--blue)">48</div>
       <div class="ev-sub">全期間累計</div>
     </div>
   </div>
@@ -296,10 +383,11 @@
   <div class="chart-box" style="margin-top:16px">
     <h3>アクティビティカレンダー</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">日別タスク件数。濃いほど多い。</p>
-    <div class="hm-grid"><div class="hm-cell" style="background:rgba(13,110,253,0.61)" title="2026-03-21: 7件"><span class="hm-day">03-21</span><span class="hm-cnt">7</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-03-23: 1件"><span class="hm-day">03-23</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-03-24: 1件"><span class="hm-day">03-24</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.48)" title="2026-03-25: 5件"><span class="hm-day">03-25</span><span class="hm-cnt">5</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.48)" title="2026-03-26: 5件"><span class="hm-day">03-26</span><span class="hm-cnt">5</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.61)" title="2026-03-27: 7件"><span class="hm-day">03-27</span><span class="hm-cnt">7</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.54)" title="2026-03-28: 6件"><span class="hm-day">03-28</span><span class="hm-cnt">6</span></div><div class="hm-cell" style="background:rgba(13,110,253,1.00)" title="2026-03-29: 13件"><span class="hm-day">03-29</span><span class="hm-cnt">13</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.35)" title="2026-03-30: 3件"><span class="hm-day">03-30</span><span class="hm-cnt">3</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-03-31: 1件"><span class="hm-day">03-31</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.61)" title="2026-04-01: 7件"><span class="hm-day">04-01</span><span class="hm-cnt">7</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-04-02: 1件"><span class="hm-day">04-02</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.35)" title="2026-04-03: 3件"><span class="hm-day">04-03</span><span class="hm-cnt">3</span></div></div>
+    <div class="hm-grid"><div class="hm-cell" style="background:rgba(13,110,253,0.61)" title="2026-03-21: 7件"><span class="hm-day">03-21</span><span class="hm-cnt">7</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-03-23: 1件"><span class="hm-day">03-23</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-03-24: 1件"><span class="hm-day">03-24</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.48)" title="2026-03-25: 5件"><span class="hm-day">03-25</span><span class="hm-cnt">5</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.48)" title="2026-03-26: 5件"><span class="hm-day">03-26</span><span class="hm-cnt">5</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.61)" title="2026-03-27: 7件"><span class="hm-day">03-27</span><span class="hm-cnt">7</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.54)" title="2026-03-28: 6件"><span class="hm-day">03-28</span><span class="hm-cnt">6</span></div><div class="hm-cell" style="background:rgba(13,110,253,1.00)" title="2026-03-29: 13件"><span class="hm-day">03-29</span><span class="hm-cnt">13</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.35)" title="2026-03-30: 3件"><span class="hm-day">03-30</span><span class="hm-cnt">3</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-03-31: 1件"><span class="hm-day">03-31</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.61)" title="2026-04-01: 7件"><span class="hm-day">04-01</span><span class="hm-cnt">7</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-04-02: 1件"><span class="hm-day">04-02</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.35)" title="2026-04-03: 3件"><span class="hm-day">04-03</span><span class="hm-cnt">3</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.35)" title="2026-04-04: 3件"><span class="hm-day">04-04</span><span class="hm-cnt">3</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-04-05: 1件"><span class="hm-day">04-05</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.28)" title="2026-04-06: 2件"><span class="hm-day">04-06</span><span class="hm-cnt">2</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-04-07: 1件"><span class="hm-day">04-07</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.22)" title="2026-04-08: 1件"><span class="hm-day">04-08</span><span class="hm-cnt">1</span></div><div class="hm-cell" style="background:rgba(13,110,253,0.35)" title="2026-04-09: 3件"><span class="hm-day">04-09</span><span class="hm-cnt">3</span></div></div>
   </div>
 </div>
 
+<div class="section-title">Performance Trends</div>
 <!-- Row 1: reward推移 + judge推移 -->
 <div class="charts-aligned">
   <div class="chart-box">
@@ -325,28 +413,22 @@
   <div class="chart-box">
     <h3>改善インサイト</h3>
     <p style="font-size:.78rem;color:var(--muted);margin-bottom:12px">judge 評価から自動分析。弱点の可視化・低スコア原因・改善アクションを提示。</p>
-    <div style="border-left: 3px solid #06d6a0; padding: 12px 16px; border-radius: 8px; background: var(--card-bg); margin-bottom: 8px;">
-  <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase">今月最も改善した Subagent</div>
-  <div style="font-size:1.2rem;font-weight:700;color:#06d6a0;margin-top:4px">secretary</div>
-  <div style="font-size:.82rem;color:var(--muted);margin-top:2px">
-    judge スコア +0.02 ／ 今月平均: 0.93
-  </div>
-</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:8px">改善ハイライト: 月をまたいだデータが蓄積されると表示されます</div>
     <div style="margin-bottom:12px"><div style="font-size:.8rem;font-weight:600;margin-bottom:6px">軸別弱点分析</div><div style="padding:8px 0;border-bottom:1px solid var(--border)">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <span style="font-size:.82rem;font-weight:600">retail-domain-researcher</span>
-    <span style="font-size:.7rem;color:var(--muted)">7件</span>
+    <span style="font-size:.7rem;color:var(--muted)">12件</span>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:89%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.89</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:80%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.80</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">1.00</span></div>
+  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:87%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.87</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:80%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.80</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:99%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.99</span></div>
   <div style="font-size:.72rem;color:#ef476f;margin-top:4px">
     弱点: 正確性（0.80）
   </div>
 </div><div style="padding:8px 0;border-bottom:1px solid var(--border)">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <span style="font-size:.82rem;font-weight:600">tech-researcher</span>
-    <span style="font-size:.7rem;color:var(--muted)">6件</span>
+    <span style="font-size:.7rem;color:var(--muted)">11件</span>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:87%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.87</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:80%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.80</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">1.00</span></div>
+  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:85%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.85</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:80%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.80</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:99%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.99</span></div>
   <div style="font-size:.72rem;color:#ef476f;margin-top:4px">
     弱点: 正確性（0.80）
   </div>
@@ -361,10 +443,19 @@
   </div>
 </div><div style="padding:8px 0;border-bottom:1px solid var(--border)">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:.82rem;font-weight:600">secretary</span>
-    <span style="font-size:.7rem;color:var(--muted)">38件</span>
+    <span style="font-size:.82rem;font-weight:600">unknown</span>
+    <span style="font-size:.7rem;color:var(--muted)">1件</span>
   </div>
-  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:92%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.92</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:88%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.88</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:93%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.93</span></div>
+  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">1.00</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:80%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.80</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">1.00</span></div>
+  <div style="font-size:.72rem;color:#ef476f;margin-top:4px">
+    弱点: 正確性（0.80）
+  </div>
+</div><div style="padding:8px 0;border-bottom:1px solid var(--border)">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:.82rem;font-weight:600">secretary</span>
+    <span style="font-size:.7rem;color:var(--muted)">46件</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">網羅性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:90%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.90</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">正確性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:88%;height:100%;background:#ef476f;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.88</span></div><div style="display:flex;align-items:center;gap:6px;margin:2px 0"><span style="font-size:.7rem;width:50px;color:var(--muted)">明瞭性</span><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:93%;height:100%;background:#06d6a0;border-radius:3px"></div></div><span style="font-size:.7rem;width:30px;text-align:right">0.93</span></div>
   <div style="font-size:.72rem;color:#ef476f;margin-top:4px">
     弱点: 正確性（0.88）
   </div>
@@ -382,7 +473,8 @@
   </div>
 </div>
 
-<div class="footer">Generated by cc-sier company-dashboard</div>
+<div class="footer">Powered by cc-sier company-dashboard</div>
+</div><!-- /.main-content -->
 
 <script>
 // Count-up animation
@@ -398,17 +490,19 @@ document.querySelectorAll('[data-count]').forEach(el => {
   }, step);
 });
 
-const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-const textColor = isDark ? '#e0e0e0' : '#212529';
+const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+const textColor = isLight ? '#1e293b' : '#94a3b8';
+const brightText = isLight ? '#0f172a' : '#e2e8f0';
 Chart.defaults.color = textColor;
+Chart.defaults.borderColor = gridColor;
 
 // Donut: Quality gate pass rate
 new Chart(document.getElementById('qgChart'), {
   type: 'doughnut',
   data: {
     labels: ['合格', '不合格'],
-    datasets: [{ data: [79, 0], backgroundColor: ['#198754','#dc3545'], borderWidth: 0 }]
+    datasets: [{ data: [95, 0], backgroundColor: ['#10b981','#ef4444'], borderWidth: 0 }]
   },
   options: {
     cutout: '70%',
@@ -425,7 +519,7 @@ new Chart(document.getElementById('qgChart'), {
       const { ctx, chartArea: { width, height, top, left } } = chart;
       ctx.save();
       ctx.font = 'bold 2rem -apple-system, sans-serif';
-      ctx.fillStyle = textColor;
+      ctx.fillStyle = brightText;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('100%', left + width/2, top + height/2);
@@ -440,8 +534,8 @@ new Chart(document.getElementById('agentChart'), {
   data: {
     labels: ["retail-domain-researcher", "tech-researcher", "secretary", "project-manager", "cloud-engineer"],
     datasets: [{
-      data: [14, 10, 53, 1, 1],
-      backgroundColor: '#4dabf7',
+      data: [19, 15, 62, 1, 1],
+      backgroundColor: 'rgba(59,130,246,0.7)',
       borderRadius: 4,
     }]
   },
@@ -459,7 +553,7 @@ new Chart(document.getElementById('agentChart'), {
 // Radar: LLM-as-Judge evaluation axes
 const radarCtx = document.getElementById('radarChart');
 if (radarCtx) {
-  const radarLabelsData = ["secretary", "retail-domain-researcher", "tech-researcher", "cloud-engineer"];
+  const radarLabelsData = ["secretary", "retail-domain-researcher", "tech-researcher", "cloud-engineer", "unknown"];
   if (radarLabelsData.length > 0) {
     new Chart(radarCtx.getContext('2d'), {
       type: 'radar',
@@ -468,14 +562,14 @@ if (radarCtx) {
         datasets: radarLabelsData.map((agent, i) => ({
           label: agent,
           data: [
-            [0.92, 0.89, 0.87, 1.0][i] || 0,
-            [0.88, 0.8, 0.8, 0.8][i] || 0,
-            [0.93, 1.0, 1.0, 0.8][i] || 0,
+            [0.9, 0.87, 0.85, 1.0, 1.0][i] || 0,
+            [0.88, 0.8, 0.8, 0.8, 0.8][i] || 0,
+            [0.93, 0.99, 0.99, 0.8, 1.0][i] || 0,
           ],
           borderWidth: 1.5,
           fill: true,
-          backgroundColor: `hsla(${i * 60}, 70%, 60%, 0.1)`,
-          borderColor: `hsla(${i * 60}, 70%, 50%, 0.8)`,
+          backgroundColor: `hsla(${i * 60 + 200}, 80%, 60%, 0.08)`,
+          borderColor: `hsla(${i * 60 + 200}, 80%, 55%, 0.7)`,
         })),
       },
       options: {
@@ -497,8 +591,8 @@ if (radarCtx) {
 // Line: Judge total trend
 const judgeCtx = document.getElementById('judgeChart');
 if (judgeCtx) {
-  const judgeTrendLabels = ["2026-03-27", "2026-03-27", "2026-03-28", "2026-03-28", "2026-03-28", "2026-03-28", "2026-03-28", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-30", "2026-03-30", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-03", "2026-04-03"];
-  const judgeTrendData = [1.0, 1.0, 0.94, 0.87, 0.93, 0.93, 0.9, 0.87, 0.87, 0.93, 0.87, 0.93, 0.8, 0.87, 0.8, 0.86, 0.86, 0.94, 0.87, 0.86, 0.94, 0.94, 0.93, 1.0, 1.0, 1.0, 0.93, 0.87, 0.87, 0.87];
+  const judgeTrendLabels = ["2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-30", "2026-03-30", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-03", "2026-04-03", "2026-04-04", "2026-04-04", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09"];
+  const judgeTrendData = [0.93, 0.87, 0.93, 0.8, 0.87, 0.8, 0.86, 0.86, 0.94, 0.87, 0.86, 0.94, 0.94, 0.93, 1.0, 1.0, 1.0, 0.93, 0.87, 0.87, 0.87, 0.86, 0.87, 0.87, 0.86, 0.86, 0.93, 0.93, 0.83, 0.94];
   if (judgeTrendData.length > 0) {
     new Chart(judgeCtx.getContext('2d'), {
       type: 'line',
@@ -507,8 +601,8 @@ if (judgeCtx) {
         datasets: [{
           label: 'judge total',
           data: judgeTrendData,
-          borderColor: '#7209b7',
-          backgroundColor: 'rgba(114,9,183,.12)',
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,.1)',
           tension: 0.4,
           fill: true,
           pointRadius: 3,
@@ -532,16 +626,16 @@ if (judgeCtx) {
 const weeklyCtx = document.getElementById('weeklyChart');
 if (weeklyCtx) {
   const wLabels = ["W1", "W2", "W3", "W4", "W5"];
-  const wCounts = [11, 0, 0, 0, 0];
-  const wRewards = [0.922, 0, 0, 0, 0];
+  const wCounts = [18, 4, 0, 0, 0];
+  const wRewards = [0.913, 0.867, 0, 0, 0];
   if (wCounts.some(v => v > 0)) {
     new Chart(weeklyCtx, {
       type: 'bar',
       data: {
         labels: wLabels,
         datasets: [
-          { label: 'タスク数', data: wCounts, backgroundColor: 'rgba(13,110,253,0.6)', borderRadius: 4, yAxisID: 'y' },
-          { label: '平均報酬', data: wRewards, type: 'line', borderColor: '#ffc107', backgroundColor: 'rgba(255,193,7,0.1)', tension: 0.3, pointRadius: 4, yAxisID: 'y1' }
+          { label: 'タスク数', data: wCounts, backgroundColor: 'rgba(59,130,246,0.6)', borderRadius: 4, yAxisID: 'y' },
+          { label: '平均報酬', data: wRewards, type: 'line', borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.08)', tension: 0.3, pointRadius: 4, yAxisID: 'y1' }
         ]
       },
       options: {
@@ -560,11 +654,11 @@ if (weeklyCtx) {
 // Category horizontal bar
 const catCtx = document.getElementById('categoryChart');
 if (catCtx) {
-  const catLabels = ["AWS Diagram", "draw.io", "Research", "Daily Digest", "Other", "Admin"];
-  const catCounts = [15, 15, 12, 11, 4, 3];
-  const catRewards = [0.955, 0.901, 0.975, 0.934, 0, 0.867];
+  const catLabels = ["Daily Digest", "AWS Diagram", "draw.io", "Research", "Other", "Admin"];
+  const catCounts = [17, 17, 16, 13, 4, 4];
+  const catRewards = [0.919, 0.948, 0.899, 0.967, 0, 0.867];
   if (catCounts.length > 0) {
-    const catColors = catRewards.map(r => r >= 0.9 ? '#198754' : r >= 0.8 ? '#ffc107' : '#dc3545');
+    const catColors = catRewards.map(r => r >= 0.9 ? '#10b981' : r >= 0.8 ? '#f59e0b' : '#ef4444');
     new Chart(catCtx, {
       type: 'bar',
       data: {
@@ -591,16 +685,16 @@ if (catCtx) {
 const modeCtx = document.getElementById('modeChart');
 if (modeCtx) {
   const modeLabels = ["direct", "agent-teams", "subagent", "unknown"];
-  const modeCounts = [37, 12, 6, 5];
-  const modeRewards = [0.922, 0.94, 1.0, 0];
+  const modeCounts = [41, 19, 6, 5];
+  const modeRewards = [0.919, 0.921, 1.0, 0];
   if (modeCounts.length > 0) {
     new Chart(modeCtx, {
       type: 'bar',
       data: {
         labels: modeLabels,
         datasets: [
-          { label: '件数', data: modeCounts, backgroundColor: 'rgba(67,97,238,0.6)', borderRadius: 4, yAxisID: 'y' },
-          { label: '平均報酬', data: modeRewards, type: 'line', borderColor: '#06d6a0', backgroundColor: 'rgba(6,214,160,0.1)', tension: 0.3, pointRadius: 5, yAxisID: 'y1' }
+          { label: '件数', data: modeCounts, backgroundColor: 'rgba(59,130,246,0.6)', borderRadius: 4, yAxisID: 'y' },
+          { label: '平均報酬', data: modeRewards, type: 'line', borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.08)', tension: 0.3, pointRadius: 5, yAxisID: 'y1' }
         ]
       },
       options: {
@@ -619,8 +713,8 @@ if (modeCtx) {
 // Digest reward trend line
 const digestCtx = document.getElementById('digestChart');
 if (digestCtx) {
-  const dDates = ["2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03"];
-  const dRewards = [1.0, 1.0, 1.0, 1.0, 0.95, 0.8, 0.85, 0.87, 1.0, 0.93, 0.87];
+  const dDates = ["2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09"];
+  const dRewards = [1.0, 1.0, 1.0, 1.0, 0.95, 0.8, 0.85, 0.87, 1.0, 0.93, 0.87, 1.0, 0.86, 0.86, 0.93, 0.8, 0.9];
   if (dDates.length > 0) {
     new Chart(digestCtx, {
       type: 'line',
@@ -629,12 +723,12 @@ if (digestCtx) {
         datasets: [{
           label: 'Daily Digest Reward',
           data: dRewards,
-          borderColor: '#198754',
-          backgroundColor: 'rgba(25,135,84,0.1)',
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.08)',
           fill: true,
           tension: 0.3,
           pointRadius: 4,
-          pointBackgroundColor: dRewards.map(r => r >= 0.9 ? '#198754' : r >= 0.8 ? '#ffc107' : '#dc3545'),
+          pointBackgroundColor: dRewards.map(r => r >= 0.9 ? '#10b981' : r >= 0.8 ? '#f59e0b' : '#ef4444'),
         }]
       },
       options: {
@@ -653,12 +747,12 @@ if (digestCtx) {
 new Chart(document.getElementById('scoreChart'), {
   type: 'line',
   data: {
-    labels: ["2026-03-28", "2026-03-28", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-29", "2026-03-30", "2026-03-30", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-03", "2026-04-03"],
+    labels: ["2026-03-29", "2026-03-30", "2026-03-30", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-03", "2026-04-03", "2026-04-04", "2026-04-04", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09"],
     datasets: [{
       label: '報酬スコア',
-      data: [1.0, 0.9, 0.8, 0.8, 1.0, 1.0, 1.0, 0.85, 0.85, 0.9, 0.92, 0.87, 1.0, 0.8, 1.0, 0.8, 1.0, 1.0, 1.0, 0.93, 0.87, 0.87, 0.87],
-      borderColor: '#ffc107',
-      backgroundColor: 'rgba(255,193,7,0.1)',
+      data: [0.85, 0.85, 0.9, 0.92, 0.87, 1.0, 0.8, 1.0, 0.8, 1.0, 1.0, 1.0, 0.93, 0.87, 0.87, 0.87, 1.0, 0.86, 0.86, 0.86, 0.86, 0.93, 0.93, 0.8, 0.9],
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245,158,11,0.08)',
       fill: true,
       tension: 0.3,
       pointRadius: 3,
