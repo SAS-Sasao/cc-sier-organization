@@ -5,29 +5,32 @@
 <meta http-equiv="refresh" content="300">
 <title>cc-sier-organization</title>
 <style>
-:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); }
-@media (prefers-color-scheme: dark) {
-  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); }
+:root { --bg:#0b1222; --bg2:#131d2f; --text:#e2e8f0; --accent:#3b82f6; --border:#1e293b; --muted:#64748b; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f1f5f9; --bg2:#ffffff; --text:#1e293b; --accent:#2563eb; --border:#e2e8f0; --muted:#64748b; }
 }
 * { box-sizing:border-box; margin:0; padding:0; }
-body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:40px 32px; }
-h1 { font-size:1.5rem; margin-bottom:8px; }
-p  { color:#6c757d; font-size:.88rem; margin-bottom:32px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
-.card { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Inter',sans-serif; padding:40px 32px; }
+h1 { font-size:1.5rem; margin-bottom:8px; letter-spacing:-0.02em; }
+h1 span { color:var(--accent); }
+p  { color:var(--muted); font-size:.85rem; margin-bottom:32px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px; }
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:8px;
          padding:20px 24px; text-decoration:none; color:var(--text);
-         transition:box-shadow .2s; display:block; }
-.card:hover { box-shadow:0 4px 16px rgba(0,0,0,.12); }
+         transition:all .2s; display:block; position:relative; overflow:hidden; }
+.card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--accent); opacity:0; transition:opacity .2s; }
+.card:hover { border-color:#334155; box-shadow:0 4px 20px rgba(0,0,0,.3); }
+.card:hover::before { opacity:1; }
 .org-name { font-size:1rem; font-weight:600; margin-bottom:6px; }
-.org-label { font-size:.8rem; color:#6c757d; }
-.updated { margin-top:40px; font-size:.78rem; color:#6c757d; }
+.org-label { font-size:.78rem; color:var(--muted); }
+.updated { margin-top:40px; font-size:.75rem; color:var(--muted); }
 </style>
 </head>
 <body>
-<h1>cc-sier-organization</h1>
+<h1><span>cc</span>-sier-organization</h1>
 <p>組織を選択してダッシュボードを表示します</p>
 <div class="grid">
-    <a href="./secretary/domain-tech-collection/dashboard.html" class="card" style="border:2px solid #4361ee;">
+    <a href="./secretary/domain-tech-collection/dashboard.html" class="card" style="border:2px solid var(--accent);">
       <div class="org-name">domain-tech-collection</div>
       <div class="org-label">ダッシュボードを開く →</div>
     </a>
@@ -35,7 +38,11 @@ p  { color:#6c757d; font-size:.88rem; margin-bottom:32px; }
       <div class="org-name">standardization-initiative</div>
       <div class="org-label">ダッシュボードを開く →</div>
     </a>
-    <a href="./diagrams/index.html" class="card" style="border:2px solid #e67e22;">
+    <a href="./daily-digest/index.html" class="card" style="border:2px solid #10b981;">
+      <div class="org-name">日次ダイジェスト</div>
+      <div class="org-label">技術・小売ニュース巡回 →</div>
+    </a>
+    <a href="./diagrams/index.html" class="card" style="border:2px solid #f59e0b;">
       <div class="org-name">AWS 構成図</div>
       <div class="org-label">アーキテクチャ図ギャラリー →</div>
     </a>
@@ -47,12 +54,7 @@ p  { color:#6c757d; font-size:.88rem; margin-bottom:32px; }
       <div class="org-name">ナレッジポータル</div>
       <div class="org-label">全活動履歴・判断履歴・Tips →</div>
     </a>
-
-    <a href="./daily-digest/index.html" class="card" style="border:2px solid #198754;">
-      <div class="org-name">日次ダイジェスト</div>
-      <div class="org-label">技術・小売ニュース巡回 →</div>
-    </a>
 </div>
-<p class="updated">最終更新: 2026-04-03 12:37 ／ 5分ごと自動リフレッシュ</p>
+<p class="updated">最終更新: 2026-04-09 20:40 ／ 5分ごと自動リフレッシュ</p>
 </body>
 </html>
