@@ -1571,6 +1571,14 @@ if Path("docs/handover/index.html").exists():
       <div class="org-label">全活動履歴・判断履歴・Tips →</div>
     </a>'''
 
+# TodoInsights ダッシュボードが存在すれば追加
+if Path("docs/insights/index.html").exists():
+    cards += '''
+    <a href="./insights/index.html" class="card" style="border:2px solid #4361ee;">
+      <div class="org-name">TodoInsights</div>
+      <div class="org-label">活動インサイト・完了グラフ →</div>
+    </a>'''
+
 html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
