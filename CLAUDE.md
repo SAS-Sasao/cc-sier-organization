@@ -156,6 +156,10 @@ cc-sier-organization/
 - ⚠️ 日次ダイジェストは章順固定（A → B → C → D）・テーブル形式・テーマ別分類
 - ⚠️ AWS Diagram Python コードのラベルに `\n` 改行を含めない（silent error）
 - ⚠️ Subagent 名は task-log に英字で記録（日本語名だと Case Bank 検出不可）
+- ⚠️ `claude-code-action@v1` は `claude_code_oauth_token` / `anthropic_api_key` を **input parameter で渡す**（action.yml が env を input で上書きするため env block だけでは効かない）
+- ⚠️ claude-code-action を挟む workflow では post step にも env が必要なため env は **job レベル** に配置（step-level は post step に伝播しない）
+- ⚠️ claude-code-action 実行後の `git push` 前に `git remote set-url origin https://x-access-token:${GH_TOKEN}@...` を再設定（action が remote URL を書き換える可能性）
+- ⚠️ 必須セクションの**順序違反**も `critical_triggered = true` 扱い（欠落と同じく均し込み禁止）
 
 詳細: @.claude/rules/review-pattern.md
 
