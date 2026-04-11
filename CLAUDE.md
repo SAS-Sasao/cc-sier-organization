@@ -1,184 +1,184 @@
 # CC-SIer 開発リポジトリ
 
-このリポジトリは Claude Code プラグイン **cc-sier**（SIer業務特化の仮想組織プラグイン）の開発リポジトリです。
+## AI 運用ルール
 
-## ディレクトリ構成
+### 基本原則
+
+- **言語**: 応答・ドキュメント・コメントは日本語（コード内コメントは英語可）
+- **業務成果物の配置**: 必ず `.companies/{org-slug}/docs/` または `docs/` 配下（リポジトリルート直下は禁止）
+- **破壊的操作**: `git reset --hard` / `git push --force` / `rm -rf` 等は事前承認必須
+- **リファクタのスコープ遵守**: 依頼外の改善・コメント追加・過剰な抽象化は禁止
+- **不明点の解消**: 既存成果物や rules/ を先に確認し、推測で埋めない
+
+### 作業ルール
+
+- ファイル生成を伴う作業は必ずブランチ＋PR（例外は @.claude/rules/git-workflow.md 参照）
+- `plugins/cc-sier/skills/` を編集したら `.claude/skills/` にも必ず同期
+- 3層レビュー（L0/L1/L2）を通さずに auto-merge しない
+- タスクログは YAML フロントマター形式で `.task-log/` に記録
+
+詳細: @.claude/rules/git-workflow.md / @.claude/rules/task-log.md
+
+---
+
+## プロジェクト概要
+
+このリポジトリは Claude Code プラグイン **cc-sier**（SIer 業務特化の仮想組織プラグイン）の開発リポジトリです。マスタデータ駆動で部署・ロール・ワークフローを動的に編成し、Agent Teams で並列作業を実行します。
+
+主要機能:
+
+- **マルチ組織運営**: `.companies/` 配下で複数組織を並列管理（現在 3 組織）
+- **Skill による業務自動化**: 12 種類の `/company-*` コマンド
+- **Subagent による専門領域**: 19 種類のロール別エージェント
+- **3 層レビュー + auto-merge**: Skill 成果物を機械的・構造的・LLM的に 3 層で品質担保
+- **Case Bank 継続学習**: 過去タスクログを報酬スコア付きで蓄積し次セッションで参照
+
+要件定義書 v0.3: @docs/requirements.md (1,515 行)
+
+---
+
+## 技術スタック
+
+| 領域 | 技術 | バージョン |
+|---|---|---|
+| プラグイン基盤 | Claude Code Plugin（Skill + Subagent） | - |
+| MCP サーバー | aws-knowledge / aws-diagram / aws-iac / drawio | 各 latest |
+| ランタイム（Python） | Python + uv + GraphViz（aws-diagram 用） | 3.10+ |
+| ランタイム（Node） | Node.js + npx（drawio MCP, review-drawio.js） | 20+ |
+| シェル | Bash（`.claude/hooks/` 配下 15 本） | 5.x |
+| CLI | GitHub CLI (`gh`) | latest |
+| ドキュメント配信 | GitHub Pages (`docs/` 配下) | - |
+
+---
+
+## 開発コマンド
+
+### Skill 実行（`/` プレフィックス）
+
+| コマンド | 用途 |
+|---|---|
+| `/company` | 秘書・組織運営・壁打ち・部署追加 |
+| `/company-admin` | マスタデータ管理（部署・ロール・ワークフロー） |
+| `/company-daily-digest` | 日次ニュース巡回 → MD → 3層レビュー → PR → HTML公開（8フェーズ） |
+| `/company-diagram` | AWS 構成図生成 + L0/L1/L2 レビュー + auto-merge（9フェーズ） |
+| `/company-drawio` | draw.io 汎用図生成 + 3層レビュー + auto-merge（9フェーズ） |
+| `/company-dashboard` | 組織活動ダッシュボード HTML 生成 |
+| `/company-digest-html` | 日次ダイジェスト HTML 再生成（main 直コミット） |
+| `/company-handover` | 全活動のナレッジポータル HTML 生成 |
+| `/company-spawn` | アプリケーションリポジトリ切り出し |
+| `/company-report` | 組織活動サマリーレポート（日次/週次/月次） |
+| `/company-evolve` | Case Bank 継続学習・Skill トリガー語拡張 |
+| `/company-quality-setup` | `masters/quality-gates/` チェックリスト配置 |
+
+### Git / PR
+
+```bash
+# ブランチ作成
+git checkout -b {org-slug}/{type}/{YYYY-MM-DD}-{summary}
+
+# PR 作成 + auto-merge
+gh pr create --title "..." --body "..."
+gh pr merge {N} --auto --squash --delete-branch
+```
+
+### Skill 同期（新規追加・更新時）
+
+```bash
+cp -r plugins/cc-sier/skills/{name} .claude/skills/
+diff -rq plugins/cc-sier/skills/{name}/ .claude/skills/{name}/
+```
+
+### L0 レビュースクリプト
+
+```bash
+node .claude/skills/company-drawio/references/review-drawio.js docs/drawio/{filename}.drawio
+```
+
+---
+
+## ディレクトリ構造
 
 ```
 cc-sier-organization/
-├── .claude-plugin/           ← プラグインメタデータ（marketplace.json, plugin.json）
+├── .claude-plugin/           ← plugin.json / marketplace.json
+├── .claude/
+│   ├── skills/               ← ランタイム Skill（plugins からの同期先、12種）
+│   ├── agents/               ← 19 種の Subagent
+│   ├── hooks/                ← 15 本の Shell スクリプト（Case Bank / Dashboard 等）
+│   └── rules/                ← 詳細ルール（本 CLAUDE.md から @参照）
 ├── .companies/               ← 組織データ（マルチ組織対応）
-│   ├── .active               ← アクティブ組織のslug
-│   └── {org-slug}/           ← 組織ごとのディレクトリ
-├── plugins/cc-sier/
-│   ├── skills/
-│   │   ├── company/          ← メインSkill（/company コマンド）
-│   │   │   ├── SKILL.md
-│   │   │   └── references/   ← 部署テンプレート、ワークフロー定義等
-│   │   ├── company-admin/    ← マスタ管理Skill（/company-admin コマンド）
-│   │   │   ├── SKILL.md
-│   │   │   └── references/
-│   │   └── company-spawn/    ← アプリリポジトリ切り出しSkill
-│   │       ├── SKILL.md
-│   │       └── references/
-│   └── agents/               ← Subagent定義（secretary.md, project-manager.md 等）
-├── docs/
-│   └── requirements.md       ← 要件定義書（実装時は必ず参照すること）
-├── requirements/             ← 要件定義書の原本
-├── CLAUDE.md                 ← このファイル
-├── README.md
-└── LICENSE
+│   ├── .active               ← .gitignore で除外、ローカル設定
+│   └── {org-slug}/
+│       ├── masters/          ← organization/departments/roles/workflows/projects/mcp-services/quality-gates
+│       ├── docs/             ← 全業務成果物（部署別）
+│       ├── .task-log/        ← タスクログ（Git 管理）
+│       └── CLAUDE.md         ← 組織文脈
+├── plugins/cc-sier/          ← プラグインソース（VCS 真ソース）
+│   ├── skills/               ← 9 種の Skill（company / -admin / -diagram 等）
+│   └── agents/               ← Subagent 定義
+├── docs/                     ← GitHub Pages 配信 + 要件定義
+│   ├── requirements.md       ← 要件定義 v0.3（実装時必読）
+│   ├── diagrams/             ← AWS 構成図（PNG/HTML/YAML/iac-viewer）
+│   ├── drawio/               ← draw.io 汎用図
+│   ├── daily-digest/         ← 日次ダイジェスト HTML
+│   ├── secretary/            ← ダッシュボード HTML
+│   └── handover/             ← ナレッジポータル
+├── CLAUDE.md                 ← このファイル（開発用）
+└── README.md
 ```
 
-## 要件定義書
-
-**docs/requirements.md** に要件定義書 v0.3 があります。実装時は必ず該当セクションを参照してください。
-
-主要セクション:
-- セクション 2: Claude Code 機能マッピング
-- セクション 3: Skill 設計（/company, /company-admin）
-- セクション 4: Subagent 設計（13種のエージェント定義）
-- セクション 5: CLAUDE.md 設計（階層構造）
-- セクション 6: マスタデータ設計（スキーマ、連鎖更新ルール）
-- セクション 7: Agent Teams 統合設計
-- セクション 8: SIer特化テンプレート（ADR、ポストモーテム等）
-
-## マルチ組織構造
-
-### .companies/ ディレクトリ
-
-複数の仮想組織を並列管理するためのルートディレクトリ。各組織のマスタデータ・成果物はすべてこのディレクトリ配下の組織ディレクトリに格納される。
-
-```
-.companies/
-├── .active                  ← 現在操作対象のorg-slugを1行で記載
-├── a-sha-dwh-project/       ← 組織ディレクトリの例
-│   ├── masters/             ← マスタデータ
-│   ├── CLAUDE.md            ← 組織の文脈情報
-│   └── docs/                ← 全成果物はここに集約
-│       └── {dept}/          ← 部署ごとの成果物
-└── standardization-initiative/
-    └── ...
-```
-
-### org-slug 命名ルール
-
-- kebab-case（小文字英数字とハイフンのみ）
-- 日本語はローマ字または英訳に変換
-- 例: 「A社DWH構築プロジェクト」→ `a-sha-dwh-project`
-- 例: 「社内標準化推進」→ `standardization-initiative`
-- `.companies/` 直下のディレクトリ名として一意であること
-- 既存と重複する場合はサフィックス（-2, -3等）を付与
-
-### .active ファイル
-
-`.companies/.active` はローカル設定ファイル（`.gitignore` で除外）。各ユーザーが独立して組織を切り替え可能。
-アクティブ組織の org-slug を1行で記載する。Skillはこのファイルを起動時に読み取り、操作対象組織を特定する。
-
-```
-# .companies/.active の例
-a-sha-dwh-project
-```
+詳細: @.claude/rules/multi-org.md / @.claude/rules/artifact-placement.md
 
 ---
 
-## 成果物格納ルール
+## コーディング規約
 
-- **全成果物は `.companies/{org-slug}/docs/` 配下に作成すること**
-- CLAUDE.md（組織ルール）と masters/（マスタデータ）は組織ルート直下に配置
-- リポジトリルートや `.claude/` 配下に業務成果物ファイルを作成してはならない
-- Subagentへの委譲時も、組織パス（`.companies/{org-slug}/docs/`）を明示して指示すること
-- Subagentファイル（`.claude/agents/`）はグローバルリソースのため例外とする
+- **コミットメッセージ**: Conventional Commits（`feat:` / `fix:` / `docs:` / `refactor:` / `chore:` / `admin:`）
+- **コミット本文形式**: `{type}: {概要} [{org-slug}] by {operator}`
+- **ブランチ命名**: `{org-slug}/{type}/{YYYY-MM-DD}-{summary}`
+- **SKILL.md の長さ**: 1,500〜2,000 語以内（プログレッシブ・ディスクロージャ、詳細は `references/` に外出し）
+- **MD リンクタイトル**: 半角 `[...]` は全角 `【...】` に置換（HTML 変換時のリンク消失防止）
+- **インデント**: 2 スペース（HTML/YAML/Markdown）、タブ使用禁止
 
----
-
-## Gitワークフロー
-
-ファイル生成を伴うすべての業務作業はブランチを作成してPRで管理する。
-
-### ブランチ命名規則
-
-```
-{org-slug}/{type}/{YYYY-MM-DD}-{summary}
-```
-
-- `{type}`: 作業種別（`feat`, `fix`, `docs`, `admin` 等）
-- `{summary}`: 作業概要をkebab-caseで記述
-- 例: `a-sha-dwh-project/feat/2026-03-19-add-security-dept`
-- 例: `a-sha-dwh-project/admin/2026-03-19-update-roles`
-
-### コミットメッセージ
-
-```
-{type}: {概要} [{org-slug}] by {operator}
-```
-
-- 例: `feat: セキュリティ部門を追加 [a-sha-dwh-project]`
-- 例: `docs: 要件定義書を更新 [standardization-initiative]`
-
-### フロー
-
-1. mainから作業ブランチを作成
-2. 成果物を `.companies/{org-slug}/docs/` 配下に生成
-3. コミット（メッセージは上記規則に従う）
-4. PR作成（変更サマリーをPR本文に記載）
-5. mainブランチに戻る
-
-## タスクログと Issue 自動作成
-
-ファイル生成を伴うタスクの実行過程を `.companies/{org-slug}/.task-log/` に記録し、完了時に GitHub Issue として自動作成する。
-
-### .task-log/ ディレクトリ
-
-```
-.companies/{org-slug}/
-├── CLAUDE.md
-├── masters/
-├── docs/
-└── .task-log/                        ← タスク実行ログ（Git管理対象）
-    └── {task-id}.md                  ← 1タスク1ファイル
-```
-
-- task-id: `YYYYMMDD-HHMMSS-{概要slug}`
-- ログファイルは成果物（docs/）とは分離して配置
-- タスク完了時のコミットに含める（PRの一部になる）
-
-### Issue 作成
-
-- タスク完了時に `gh issue create` で自動作成
-- ラベル: `org:{org-slug}`, `mode:{mode}`, `dept:{dept}`, `type:{type}`
-- テンプレート: `.claude/skills/company/references/task-log-template.md`
-- ファイル生成を伴わない作業（壁打ち、ダッシュボード等）ではスキップ
+詳細: @.claude/rules/git-workflow.md / @.claude/rules/skill-development.md
 
 ---
 
-## 開発ルール
+## 注意事項
 
-### コミットメッセージ
-Conventional Commits に従うこと:
-- `feat:` 新機能
-- `fix:` バグ修正
-- `docs:` ドキュメントのみの変更
-- `refactor:` リファクタリング
-- `chore:` ビルド・設定等の変更
+- ❌ リポジトリルートや `.claude/skills/agents/hooks/rules` 以外の `.claude/` 配下に業務成果物を作成しない
+- ❌ `main` への force push 禁止（緊急時も明示承認必要）
+- ❌ `.companies/.active` のコミット禁止（ローカル専用、`.gitignore` で除外済み）
+- ❌ SKILL.md リライト時の旧版 references/ 取りこぼし禁止（事前に既存成果物を `grep -o "<h2>"` で必須セクション抽出）
+- ❌ 必須セクション欠落のまま auto-merge 禁止（L2 で `critical_triggered = true` を強制する設計）
+- ❌ `--no-verify` でのフック skip
+- ⚠️ `/company-diagram` 詳細ページは **必須 7 セクション固定順序**: 凡例 → 概要 → データフロー → レイヤー構成 → 設計のポイント → コスト概算 → 学習ポイント
+- ⚠️ 日次ダイジェストは章順固定（A → B → C → D）・テーブル形式・テーマ別分類
+- ⚠️ AWS Diagram Python コードのラベルに `\n` 改行を含めない（silent error）
+- ⚠️ Subagent 名は task-log に英字で記録（日本語名だと Case Bank 検出不可）
 
-### 言語
-- ドキュメント・コメント: 日本語
-- コード内コメント: 英語可
+詳細: @.claude/rules/review-pattern.md
 
-### SKILL.md の制約
-- **1,500〜2,000語以内に収めること**（プログレッシブ・ディスクロージャ）
-- 詳細な定義は `references/` 配下に外出しし、必要時のみ参照する
+---
 
-### 実装時の必須事項
-- 実装前に必ず `docs/requirements.md` の該当セクションを読むこと
-- マスタスキーマの変更は `references/master-schemas.md` のバリデーションルールに従うこと
+## 外部参照
 
-## 重要な注意
+| ファイル | 内容 |
+|---|---|
+| @docs/requirements.md | 要件定義書 v0.3（§2 機能マッピング / §3 Skill / §4 Subagent / §5 CLAUDE.md 階層 / §6 マスタ / §7 Agent Teams / §8 SIer テンプレート） |
+| @.claude/rules/git-workflow.md | ブランチ命名・コミット・PR 運用・auto-merge の詳細 |
+| @.claude/rules/skill-development.md | SKILL.md 制約・plugins↔.claude 同期・リライト時の取りこぼし防止 |
+| @.claude/rules/multi-org.md | `.companies/` マルチ組織運用・org-slug 命名・.active |
+| @.claude/rules/artifact-placement.md | 成果物配置マトリクス（`docs/` vs `.companies/{org}/docs/`） |
+| @.claude/rules/task-log.md | YAML フロントマター形式・Issue 自動作成・ラベル決定 |
+| @.claude/rules/review-pattern.md | L0/L1/L2 3 層レビュー + auto-merge 設計 |
 
-- `plugins/cc-sier/skills/` 配下が **Skill ファイル**（プラグインインストール時に `.claude/skills/` に配置される）
-- `plugins/cc-sier/agents/` 配下が **Subagent ファイル**（プラグインインストール時に `.claude/agents/` に配置される）
-- プロジェクトルートの `CLAUDE.md`（このファイル）は開発用。ユーザー環境に生成される `.companies/{org-slug}/CLAUDE.md` とは別物
-- `/company-spawn` でアプリケーションリポジトリを新規作成できる
-- 設計成果物とSubagentを新リポにコピーし、パスを自動書き換えする
-- コピー元の追跡情報は新リポの `docs/design/origin.md` に記録される
+---
+
+## 重要な前提
+
+- `plugins/cc-sier/` = プラグインソース（VCS 真ソース）
+- `.claude/skills/` と `.claude/agents/` = インストール済みランタイム（`plugins/` から手動 `cp` 同期）
+- プロジェクトルート `CLAUDE.md`（本ファイル）= 開発用
+- `.companies/{org-slug}/CLAUDE.md` = 組織文脈（ランタイム、別物）
+- `/company-spawn` でアプリケーションリポジトリ新規作成可、設計成果物とSubagent を自動コピー、追跡情報は新リポ `docs/design/origin.md` に記録
