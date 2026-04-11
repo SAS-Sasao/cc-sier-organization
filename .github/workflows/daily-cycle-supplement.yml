@@ -1,0 +1,262 @@
+name: Daily Cycle Supplement (19:00 JST)
+
+# 解決策 X の Actions 補完部分。
+# 毎日 19:00 JST に git tracked データのみから軽量サマリーを生成し、
+# 単一の継続トラッキング Issue にコメント追記する。
+#
+# - Claude Code Action は使わない（純粋 shell + gh CLI で完結、無料・高速）
+# - 完全な observability（会話統計・session 統計・品質ゲート・Case Bank）は
+#   ローカル `/company-cycle` で生成される（gitignored データ依存のため Actions では非対応）
+# - 本日 cycle がローカル実行されているかを git log で検知してリマインダー通知
+
+on:
+  schedule:
+    # 19:00 JST = 10:00 UTC（JST は夏時間なし、年中固定）
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+# 同時実行防止
+concurrency:
+  group: daily-cycle-supplement
+  cancel-in-progress: false
+
+env:
+  TRACKING_ISSUE_LABEL: cycle-supplement-tracker
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # -----------------------------------------------------------------
+      # Step 1: Checkout（全履歴）
+      # -----------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------
+      # Step 2: 日付ウィンドウの決定（JST 基準）
+      # -----------------------------------------------------------------
+      - name: Determine date window
+        id: date
+        run: |
+          DATE_JST=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          DOW_JST=$(TZ=Asia/Tokyo date +%u)
+          case $DOW_JST in
+            1) DOW_JP=月 ;;
+            2) DOW_JP=火 ;;
+            3) DOW_JP=水 ;;
+            4) DOW_JP=木 ;;
+            5) DOW_JP=金 ;;
+            6) DOW_JP=土 ;;
+            7) DOW_JP=日 ;;
+          esac
+          # JST 00:00 を ISO8601 形式で
+          SINCE=$(TZ=Asia/Tokyo date -d "${DATE_JST} 00:00:00" --iso-8601=seconds)
+
+          {
+            echo "date_jst=$DATE_JST"
+            echo "dow_jp=$DOW_JP"
+            echo "since=$SINCE"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::JST window: $DATE_JST ($DOW_JP) since $SINCE"
+
+      # -----------------------------------------------------------------
+      # Step 3: git-tracked シグナル収集
+      # -----------------------------------------------------------------
+      - name: Collect git-tracked signals
+        id: signals
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE: ${{ steps.date.outputs.date_jst }}
+          SINCE: ${{ steps.date.outputs.since }}
+        run: |
+          mkdir -p /tmp/signals
+
+          # ---- task-log files modified today (git tracked のみ) ----
+          git log --since="$SINCE" --name-only --format='' main \
+            -- '.companies/**/.task-log/*.md' 2>/dev/null \
+            | grep -v '^$' | sort -u > /tmp/signals/tasklogs.txt || true
+          TASKLOG_COUNT=$(wc -l < /tmp/signals/tasklogs.txt 2>/dev/null || echo 0)
+
+          # ---- commit count (main, today) ----
+          COMMIT_COUNT=$(git log --since="$SINCE" --format='%h' main 2>/dev/null | wc -l)
+
+          # ---- merged PRs today ----
+          gh pr list --state merged \
+            --search "merged:>=${DATE}" \
+            --json number,title,mergedAt \
+            --limit 50 \
+            > /tmp/signals/prs.json 2>/dev/null || echo '[]' > /tmp/signals/prs.json
+          PR_COUNT=$(jq length /tmp/signals/prs.json)
+
+          # ---- opened Issues today (除外: tracking 系ラベル) ----
+          gh issue list --state all \
+            --search "created:>=${DATE} -label:cycle-supplement-tracker -label:nightly-claude-md-tracker -label:nightly-claude-md-update" \
+            --json number,title,createdAt \
+            --limit 50 \
+            > /tmp/signals/issues_opened.json 2>/dev/null || echo '[]' > /tmp/signals/issues_opened.json
+          ISSUE_OPENED_COUNT=$(jq length /tmp/signals/issues_opened.json)
+
+          # ---- closed Issues today ----
+          gh issue list --state closed \
+            --search "closed:>=${DATE}" \
+            --json number,title,closedAt \
+            --limit 50 \
+            > /tmp/signals/issues_closed.json 2>/dev/null || echo '[]' > /tmp/signals/issues_closed.json
+          ISSUE_CLOSED_COUNT=$(jq length /tmp/signals/issues_closed.json)
+
+          # ---- /company-cycle がローカル実行されたか検知 ----
+          # cycle Skill の task-log は YYYYMMDD-HHMMSS-cycle-{period}.md 形式
+          CYCLE_TASKLOG=$(git log --since="$SINCE" --name-only --format='' main \
+            -- '.companies/**/.task-log/*-cycle-*.md' 2>/dev/null \
+            | grep -v '^$' | head -1 || true)
+          if [ -n "$CYCLE_TASKLOG" ]; then
+            CYCLE_RAN=true
+          else
+            CYCLE_RAN=false
+          fi
+
+          {
+            echo "tasklog_count=$TASKLOG_COUNT"
+            echo "commit_count=$COMMIT_COUNT"
+            echo "pr_count=$PR_COUNT"
+            echo "issue_opened_count=$ISSUE_OPENED_COUNT"
+            echo "issue_closed_count=$ISSUE_CLOSED_COUNT"
+            echo "cycle_ran=$CYCLE_RAN"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::today: tasklog=$TASKLOG_COUNT commit=$COMMIT_COUNT pr=$PR_COUNT issue_opened=$ISSUE_OPENED_COUNT issue_closed=$ISSUE_CLOSED_COUNT cycle_ran=$CYCLE_RAN"
+
+      # -----------------------------------------------------------------
+      # Step 4: サマリー作成 + tracking Issue に投稿
+      # -----------------------------------------------------------------
+      - name: Compose and post summary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          TC: ${{ steps.signals.outputs.tasklog_count }}
+          CC: ${{ steps.signals.outputs.commit_count }}
+          PC: ${{ steps.signals.outputs.pr_count }}
+          IO: ${{ steps.signals.outputs.issue_opened_count }}
+          IC: ${{ steps.signals.outputs.issue_closed_count }}
+          CR: ${{ steps.signals.outputs.cycle_ran }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # ---- cycle 実行有無に基づく hint ----
+          if [ "$CR" = "true" ]; then
+            HINT="✅ 本日 \`/company-cycle\` ローカル実行済み — 完全な observability データが反映済みです"
+          else
+            HINT=$(cat <<'HINTEOF'
+          ⚠️ **本日 `/company-cycle` がまだローカル実行されていません**
+
+          ローカル Claude Code で以下を実行してください:
+
+          ```
+          /company-cycle
+          ```
+
+          これにより以下の **gitignored 観測データ** が反映されます:
+
+          - `.session-summaries/` ベースのツール実行統計
+          - `.conversation-log/` ベースの会話統計・頻出フレーズ
+          - `.quality-gate-log/` ベースの品質ゲート通過率（ドーナツチャート）
+          - `~/.claude/.../memory/feedback_*.md` 統合の Case Bank
+          - reward / judge スコアの自動採点
+          - Subagent 評価軸レーダー（completeness / accuracy / clarity）
+
+          GitHub Actions では gitignored データが取れないため、これらは **ローカル実行が必須** です。
+          HINTEOF
+          )
+          fi
+
+          # ---- 本日の merged PR 上位 5 件 ----
+          if [ "$PC" -gt 0 ]; then
+            PR_LIST=$(jq -r '.[] | "- #\(.number) \(.title)"' /tmp/signals/prs.json | head -5)
+            if [ "$PC" -gt 5 ]; then
+              PR_LIST="${PR_LIST}
+          - … 他 $((PC - 5)) 件"
+            fi
+          else
+            PR_LIST="（なし）"
+          fi
+
+          # ---- summary 本文 ----
+          SUMMARY=$(cat <<EOF
+          ## 📊 ${DATE_JST} (${DOW_JP}) — Daily Activity Summary
+
+          | 項目 | 件数 |
+          |---|---|
+          | task-log 編集 | ${TC} 件 |
+          | commit (main) | ${CC} 件 |
+          | merged PR | ${PC} 件 |
+          | opened Issue | ${IO} 件 |
+          | closed Issue | ${IC} 件 |
+
+          ### 本日マージされた主な PR
+
+          ${PR_LIST}
+
+          ---
+
+          ${HINT}
+
+          ---
+
+          *この summary は **git tracked データのみ** から生成されています。会話統計・session 統計・品質ゲート通過率・Case Bank は \`/company-cycle\` をローカルで実行してください。*
+
+          *workflow run: ${RUN_URL}*
+          EOF
+          )
+
+          # ---- tracking Issue を確保（なければ作成） ----
+          gh label create "$TRACKING_ISSUE_LABEL" --color "0e8a16" --description "daily cycle supplement tracker" 2>/dev/null || true
+
+          ISSUE_NUMBER=$(gh issue list \
+            --label "$TRACKING_ISSUE_LABEL" \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUE_NUMBER" ]; then
+            ISSUE_URL=$(gh issue create \
+              --title "daily: cycle 補完サマリー（継続トラッキング 19:00 JST）" \
+              --label "$TRACKING_ISSUE_LABEL" \
+              --body "$(cat <<'INITBODY'
+          この Issue は \`daily-cycle-supplement.yml\` workflow の実行履歴を記録します。
+
+          ## ワークフローの目的
+
+          - **毎日 19:00 JST** に発火（cron: \`0 10 * * *\`）
+          - **git tracked データのみ** から軽量サマリーを生成
+          - 本日 \`/company-cycle\` がローカル実行されているかをチェック
+          - されていなければユーザーにリマインダーを通知
+
+          ## なぜ補完が必要か
+
+          完全な observability データ（会話統計・session 統計・品質ゲート・Case Bank・feedback memory）は \`.gitignored\` でローカル限定のため、GitHub Actions では取れません。
+
+          観測完全性のためには、ローカル Claude Code で以下を実行する必要があります:
+
+          \`\`\`
+          /company-cycle
+          \`\`\`
+
+          本 Issue の毎日のコメントは「ローカル実行を促すリマインダー」と「git tracked データの軽量集計」を兼ねています。
+          INITBODY
+          )")
+            ISSUE_NUMBER="${ISSUE_URL##*/}"
+            echo "::notice::created tracking issue: $ISSUE_URL"
+          fi
+
+          # ---- コメント投稿 ----
+          gh issue comment "$ISSUE_NUMBER" --body "$SUMMARY"
+          echo "::notice::posted summary to issue #$ISSUE_NUMBER"
