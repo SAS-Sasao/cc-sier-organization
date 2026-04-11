@@ -82,3 +82,14 @@ failure_reason: ""
 judge_comment: "auto-mapped from /company-daily-digest l2_scores: completeness=avg(s1_structure,s5_dedup)=avg(1.00,0.95)=0.975, accuracy=avg(s2_links,s3_summary)=avg(1.00,0.95)=0.975, clarity=avg(s4_cross_domain,s6_violations)=avg(1.00,0.70)=0.85。致命軸 s2/s6 ともに 0.5 以上で critical_triggered=false、composite=0.93≥0.85 で pass。L2 レビュアーから D 章ステータス列の ✅/⚠️ 絵文字についての軽微違反指摘があったが、quality-gates のフォーマットテンプレート例に `✅ 成功` 記載ありで仕様上は許容。Phase 2-5 + Phase 8 を GitHub Actions 環境で完走、Phase 6/7 は後続 shell step に委譲。"
 judged_at: "2026-04-11T17:55:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-11T17:53:24"
+```
