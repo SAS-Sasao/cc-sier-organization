@@ -1,0 +1,542 @@
+name: Daily TODO Sync (05:00 JST)
+
+# 毎朝 05:00 JST に以下を自動実行する:
+#   1. 全組織の WBS markdown を parse
+#   2. 前日のシグナル（merged PR / closed Issue / task-log）を収集
+#   3. sync-board.sh で各組織の board.md を再生成
+#   4. Claude Code Action が WBS ステータス更新 + Top N 選定
+#   5. Project v2 に同期（GraphQL）
+#   6. WBS markdown に変更あれば PR 作成
+#   7. tracking issue に日次サマリー投稿
+#
+# モード:
+#   - mode: daily   (default): 毎朝の同期処理のみ
+#   - mode: bootstrap        : 初回 Issue バルク作成 + Project v2 setup
+#
+# 認証:
+#   - PROJECTS_PAT (required)           : Fine-grained PAT, project:write + issues:write + contents:write
+#   - CLAUDE_CODE_OAUTH_TOKEN (required): Max plan OAuth
+#   - GITHUB_TOKEN                      : 自動注入、PR 作成用
+
+on:
+  schedule:
+    # 05:00 JST = 20:00 UTC (前日)
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "実行モード"
+        type: choice
+        default: "daily"
+        options:
+          - "daily"
+          - "bootstrap"
+      dry_run:
+        description: "実行計画のみ（書き込み禁止）"
+        type: boolean
+        default: false
+      top_n:
+        description: "Top N 選定数（daily モードのみ）"
+        type: string
+        default: "5"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: daily-todo-sync
+  cancel-in-progress: false
+
+env:
+  TRACKING_ISSUE_LABEL: daily-todo-sync-tracker
+  PROJECT_V2_NODE_ID: PVT_kwHODAtE_84BUTl8
+  PROJECT_NUMBER: "1"
+  PROJECT_OWNER: "SAS-Sasao"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # 認証 env は job レベル必須（step-level は post step に伝播しない）
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+      DISALLOWED_TOOLS: ""
+      CLAUDE_CODE_DISALLOWED_TOOLS: ""
+    steps:
+      # -----------------------------------------------------------------
+      # Step 1: Checkout
+      # -----------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------
+      # Step 2: Pre-flight auth check
+      # -----------------------------------------------------------------
+      - name: Pre-flight auth check
+        run: |
+          if [ -z "${PROJECTS_PAT:-}" ]; then
+            echo "::error::PROJECTS_PAT が未設定です (Fine-grained PAT, project:write)"
+            exit 1
+          fi
+          if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "::error::CLAUDE_CODE_OAUTH_TOKEN または ANTHROPIC_API_KEY が必要"
+            exit 1
+          fi
+          echo "::notice::Auth OK"
+
+      # -----------------------------------------------------------------
+      # Step 3: 日付計算
+      # -----------------------------------------------------------------
+      - name: Determine date
+        id: date
+        run: |
+          DATE_JST=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          DOW_JST=$(TZ=Asia/Tokyo date +%u)
+          case $DOW_JST in
+            1) DOW_JP=月 ;; 2) DOW_JP=火 ;; 3) DOW_JP=水 ;;
+            4) DOW_JP=木 ;; 5) DOW_JP=金 ;; 6) DOW_JP=土 ;; 7) DOW_JP=日 ;;
+          esac
+          # 前日 (06:00 JST - 24h) のタイムスタンプ
+          SINCE_ISO=$(TZ=Asia/Tokyo date -d "1 day ago" +%Y-%m-%dT%H:%M:%S+09:00)
+
+          # 今週の Iteration を推定 (W1 start = 2026-03-24)
+          # W1 開始日 (月曜): 2026-03-24
+          W1_START_EPOCH=$(date -d "2026-03-24" +%s)
+          TODAY_EPOCH=$(TZ=Asia/Tokyo date +%s)
+          DIFF_DAYS=$(( (TODAY_EPOCH - W1_START_EPOCH) / 86400 ))
+          CURRENT_WEEK=$(( DIFF_DAYS / 7 + 1 ))
+
+          {
+            echo "date_jst=$DATE_JST"
+            echo "dow_jp=$DOW_JP"
+            echo "since_iso=$SINCE_ISO"
+            echo "current_week=W${CURRENT_WEEK}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::date=$DATE_JST ($DOW_JP) current iteration=W${CURRENT_WEEK}"
+
+      # -----------------------------------------------------------------
+      # Step 4: モード判定
+      # -----------------------------------------------------------------
+      - name: Detect mode
+        id: mode
+        env:
+          INPUT_MODE: ${{ github.event.inputs.mode }}
+        run: |
+          MODE="${INPUT_MODE:-daily}"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "::notice::mode=$MODE"
+
+      # -----------------------------------------------------------------
+      # Step 5: Bootstrap (mode=bootstrap only)
+      # -----------------------------------------------------------------
+      - name: Bootstrap Issues & Project v2
+        if: steps.mode.outputs.mode == 'bootstrap'
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
+        run: |
+          chmod +x .claude/hooks/bootstrap-todo-issues.sh
+          bash .claude/hooks/bootstrap-todo-issues.sh 2>&1 | tee /tmp/bootstrap.log
+          tail -20 /tmp/bootstrap.log
+
+      # -----------------------------------------------------------------
+      # Step 6: シグナル収集 (daily mode)
+      # -----------------------------------------------------------------
+      - name: Collect signals
+        if: steps.mode.outputs.mode == 'daily'
+        id: signals
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SINCE_ISO: ${{ steps.date.outputs.since_iso }}
+        run: |
+          mkdir -p /tmp/signals
+
+          # 昨日 merged PR
+          gh pr list --state merged --search "merged:>=${SINCE_ISO%T*}" \
+            --json number,title,body,mergedAt,labels,files \
+            --limit 50 \
+            > /tmp/signals/merged-prs.json || echo '[]' > /tmp/signals/merged-prs.json
+          PR_COUNT=$(python3 -c "import json,sys; print(len(json.loads(open('/tmp/signals/merged-prs.json').read())))")
+
+          # 昨日 closed Issues
+          gh issue list --state closed --search "closed:>=${SINCE_ISO%T*}" \
+            --json number,title,labels \
+            --limit 50 \
+            > /tmp/signals/closed-issues.json || echo '[]' > /tmp/signals/closed-issues.json
+          ISSUE_COUNT=$(python3 -c "import json,sys; print(len(json.loads(open('/tmp/signals/closed-issues.json').read())))")
+
+          # 24h 以内に更新された task-log
+          find .companies -path '*/.task-log/*.md' -newer /tmp/.prev -print 2>/dev/null > /tmp/signals/recent-tasklogs.txt || true
+          git log --since="$SINCE_ISO" --name-only --format='' -- '.companies/**/.task-log/*.md' \
+            | grep -v '^$' | sort -u > /tmp/signals/recent-tasklogs.txt || true
+          TASKLOG_COUNT=$(wc -l < /tmp/signals/recent-tasklogs.txt || echo 0)
+
+          {
+            echo "pr_count=$PR_COUNT"
+            echo "issue_count=$ISSUE_COUNT"
+            echo "tasklog_count=$TASKLOG_COUNT"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::signals: PR=$PR_COUNT Issue=$ISSUE_COUNT tasklog=$TASKLOG_COUNT"
+
+      # -----------------------------------------------------------------
+      # Step 7: parse-wbs.py で全組織の WBS を JSON 出力
+      # -----------------------------------------------------------------
+      - name: Parse WBS (all orgs)
+        if: steps.mode.outputs.mode == 'daily'
+        id: parse
+        run: |
+          python3 .claude/hooks/parse-wbs.py > /tmp/signals/wbs-tasks.json
+          TOTAL=$(python3 -c "import json; print(len(json.load(open('/tmp/signals/wbs-tasks.json'))))")
+          TODO=$(python3 -c "import json; print(sum(1 for t in json.load(open('/tmp/signals/wbs-tasks.json')) if t['status']=='todo'))")
+          IN_PROGRESS=$(python3 -c "import json; print(sum(1 for t in json.load(open('/tmp/signals/wbs-tasks.json')) if t['status']=='in-progress'))")
+          DONE=$(python3 -c "import json; print(sum(1 for t in json.load(open('/tmp/signals/wbs-tasks.json')) if t['status']=='done'))")
+
+          {
+            echo "total_tasks=$TOTAL"
+            echo "todo_tasks=$TODO"
+            echo "in_progress_tasks=$IN_PROGRESS"
+            echo "done_tasks=$DONE"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::WBS $TOTAL tasks (todo=$TODO, in-progress=$IN_PROGRESS, done=$DONE)"
+
+      # -----------------------------------------------------------------
+      # Step 8: Claude Code Action (案 C: AI による status 更新 + Top N 選定)
+      # -----------------------------------------------------------------
+      - name: Run Claude Code (AI analysis + Top N selection)
+        if: steps.mode.outputs.mode == 'daily'
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            あなたは /company の秘書エージェントで、毎朝 05:00 JST の TODO 管理を担当しています。
+            git / gh コマンドの実行は後続 shell step の責務なので、**一切実行禁止**です。
+
+            # 実行コンテキスト
+            - 対象日: ${{ steps.date.outputs.date_jst }} (${{ steps.date.outputs.dow_jp }})
+            - 今週の iteration: ${{ steps.date.outputs.current_week }}
+            - 全 WBS タスク: ${{ steps.parse.outputs.total_tasks }} 件 (todo=${{ steps.parse.outputs.todo_tasks }}, in-progress=${{ steps.parse.outputs.in_progress_tasks }}, done=${{ steps.parse.outputs.done_tasks }})
+            - 前日シグナル: PR=${{ steps.signals.outputs.pr_count }}, Issue=${{ steps.signals.outputs.issue_count }}, task-log=${{ steps.signals.outputs.tasklog_count }}
+            - Top N: ${{ github.event.inputs.top_n || '5' }}
+
+            # 必読ファイル（Read ツールで必ず読むこと）
+            1. `.claude/rules/todo-management.md` — TODO 管理の全体ルール（三層モデル、Top N 選定ロジック）
+            2. `.claude/rules/wbs-schema.md` — WBS markdown スキーマ
+            3. `/tmp/signals/wbs-tasks.json` — 全 WBS タスクのパース済 JSON
+            4. `/tmp/signals/merged-prs.json` — 昨日 merged PR 一覧
+            5. `/tmp/signals/closed-issues.json` — 昨日 closed Issue 一覧
+            6. `/tmp/signals/recent-tasklogs.txt` — 24h 以内に更新された task-log パス一覧
+
+            # 実行ステップ
+
+            ## Step 1: 完了判定（WBS ステータス更新）
+
+            `.claude/rules/todo-management.md` Section 2.1 の完了判定ルールに従い、以下のいずれかに該当する `[ ]`/`[~]` タスクを `[x]` に更新する:
+
+            1. **対応 Issue が close された**: `/tmp/signals/closed-issues.json` を確認し、label `wbs:N.M` が一致する Issue が close されていれば該当タスクを `[x]` に
+            2. **成果物が main に commit された**: WBS 行の「成果物」列に書かれたファイルパスが実際に存在する → `[x]` に
+            3. **対応 task-log が status: completed**: task-log の `request` フィールドに WBS ID (`3.1.1` など) を含み、status が completed → `[x]` に
+            4. **ユーザ手動編集**: WBS markdown の該当行が手動で `[x]` に変わっている場合は尊重（上書きしない）
+
+            更新対象の WBS ファイル:
+            - `.companies/domain-tech-collection/docs/secretary/storcon-preparation-wbs.md`
+            - `.companies/standardization-initiative/docs/pm/projects/standardization-project-wbs.md`
+            - `.companies/standardization-initiative/docs/pm/projects/proj-proposal-std/wbs.md`
+
+            **重要**: Edit ツールで該当行のステータスセル (`[ ]` → `[x]`) のみを変更すること。他の列は触らない。変更した行数・理由を後でまとめて出力。
+
+            ## Step 2: 停滞検知
+
+            `/tmp/signals/wbs-tasks.json` を精査し、以下に該当するタスクを blocker 候補として抽出:
+
+            - in-progress のままで 24h 以上経過（task-log の completed が空のもの）
+            - iteration が今週より前 (W1-${{ steps.date.outputs.current_week }} より前) にあり、未完了
+            - 成果物列のファイルが存在しない & task-log もない
+
+            これらは後で tracking issue コメントに警告として記載する（WBS の自動変更はしない）。
+
+            ## Step 3: 今日の Top N 選定
+
+            `.claude/rules/todo-management.md` Section 3 の選定ロジックに従い、今週 iteration に属する未完了タスクから以下の順序で Top ${{ github.event.inputs.top_n || '5' }} を選ぶ:
+
+            1. **候補絞り込み**:
+               - ステータス `[ ]` または `[~]` のみ
+               - iteration が `${{ steps.date.outputs.current_week }}` または前週からの繰り越し
+               - 前々週以前は blocker 扱いで候補から除外
+
+            2. **優先度ソート**:
+               - Priority 1 → 2 → 3 → 4
+               - 同優先度内: delivery > learning > diagram > research > operational
+
+            3. **依存チェック**:
+               - 親タスク (Phase 1 → Phase 2 のような序列) の完了状態を確認
+               - 親未完了なら後続を後回し
+
+            4. **時間上限**:
+               - 「時間」列の合計が 4 時間を超えたら打ち切り
+
+            5. **Case Bank 参照**:
+               - `.companies/domain-tech-collection/.case-bank/` が存在すれば、類似タスクの過去 reward スコア < 0.5 なら priority を +1 格上げ
+
+            選ばれた Top N は `/tmp/signals/top-n.json` に以下の形式で書き出すこと（後続 shell step が Project v2 同期で使う）:
+
+            ```json
+            [
+              {
+                "wbs_id": "3.1.2",
+                "task": "DB基礎",
+                "org": "domain-tech-collection",
+                "priority": 1,
+                "type": "learning",
+                "iteration": "W4",
+                "reason": "Priority 1 最優先、今週 iteration の最初のタスク、前週 3.1.1 が完了済のため依存解消"
+              }
+            ]
+            ```
+
+            ## Step 4: サマリー出力
+
+            最終 stdout に以下の形式で出力:
+
+            ```
+            === DAILY TODO SYNC REPORT ===
+            date: ${{ steps.date.outputs.date_jst }}
+            current_iteration: ${{ steps.date.outputs.current_week }}
+
+            ## ステータス更新
+            - [x] に変更: N 件
+              - domain-tech-collection WBS 3.1.1 (成果物 docs/research/... がコミット済)
+              - ...
+
+            ## 停滞検知
+            - blocker 候補: M 件
+              - standardization-initiative WBS 1.0.3 (W1-2 だが in-progress 24h 経過)
+              - ...
+
+            ## 今日の Top N
+            1. [domain-tech-collection] WBS 3.1.2: DB基礎 (Pri 1, learning, W4)
+            2. ...
+
+            ## M1-M4 マイルストーン進捗
+            - M1 基礎固め完了 (target 04/11): 完了率 X% (N/M タスク)
+            - M2 案件直結 (target 05/02): ...
+            ```
+
+            # 禁止事項
+            - ❌ git / gh コマンド実行
+            - ❌ `docs/`, `.github/`, `.claude/rules/` の編集
+            - ❌ WBS markdown の構造変更（ステータスセル以外）
+            - ❌ `/tmp/signals/top-n.json` 以外の新規ファイル作成
+            - ❌ 破壊的操作全般
+
+            # 最終アウトプット
+            - ステータス更新結果（WBS markdown 変更）
+            - `/tmp/signals/top-n.json`
+            - stdout のサマリー
+          claude_args: |
+            --max-turns 80
+            --permission-mode bypassPermissions
+            --model claude-opus-4-6
+            --allowedTools "Read,Write,Edit,Bash,Grep,Glob,Task,WebFetch,WebSearch"
+
+      # -----------------------------------------------------------------
+      # Step 9: board.md 再生成 (既存 sync-board.sh)
+      # -----------------------------------------------------------------
+      - name: Regenerate board.md (sync-board.sh)
+        if: steps.mode.outputs.mode == 'daily'
+        run: |
+          chmod +x .claude/hooks/sync-board.sh
+          for org in domain-tech-collection standardization-initiative jutaku-dev-team; do
+            if [ -d ".companies/$org/docs/secretary" ]; then
+              echo "=== sync-board for $org ==="
+              bash .claude/hooks/sync-board.sh "$org" 2>&1 | tail -5 || echo "::warning::sync-board failed for $org"
+            fi
+          done
+
+      # -----------------------------------------------------------------
+      # Step 10: Project v2 に同期 (GraphQL)
+      # -----------------------------------------------------------------
+      - name: Sync to Project v2
+        if: steps.mode.outputs.mode == 'daily' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_PAT }}
+        run: |
+          if [ ! -f /tmp/signals/top-n.json ]; then
+            echo "::warning::top-n.json not found, skipping Project v2 sync"
+            exit 0
+          fi
+
+          # Today フィールドの option ID を取得 (Yes に設定するため)
+          python3 <<'PYEOF'
+          import json, os, subprocess, sys
+
+          # 今回は minimal: Top N のタスクについて Issue# が WBS に記録されていれば
+          # Project v2 に「Today=Yes」を設定する
+          # （完全な GraphQL mutation は後続で実装、ここではログ出力のみ）
+          try:
+              top_n = json.load(open('/tmp/signals/top-n.json'))
+          except Exception as e:
+              print(f"::warning::Failed to read top-n.json: {e}")
+              sys.exit(0)
+
+          print(f"Today selection: {len(top_n)} tasks")
+          for i, task in enumerate(top_n, 1):
+              print(f"  {i}. [{task.get('org','?')}] {task.get('wbs_id','?')}: {task.get('task','?')}")
+              print(f"     priority={task.get('priority')}, type={task.get('type')}, iteration={task.get('iteration')}")
+              print(f"     reason: {task.get('reason','—')}")
+
+          # TODO: 実際の GraphQL mutation は別 step で実装
+          # Step 1: 各 WBS-ID に対応する Project v2 item を検索
+          # Step 2: Today フィールドを Yes に設定
+          # Step 3: blocker 検知タスクは Today=No に戻す
+          PYEOF
+
+      # -----------------------------------------------------------------
+      # Step 11: WBS 変更があれば PR 作成
+      # -----------------------------------------------------------------
+      - name: Commit WBS changes as PR
+        if: steps.mode.outputs.mode == 'daily' && github.event.inputs.dry_run != 'true'
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+        run: |
+          # WBS ファイルのみ変更チェック
+          WBS_CHANGED=$(git diff --name-only -- '.companies/**/wbs*.md' '.companies/**/*wbs*.md' 2>/dev/null || true)
+          BOARD_CHANGED=$(git diff --name-only -- '.companies/**/board.md' 2>/dev/null || true)
+
+          if [ -z "$WBS_CHANGED" ] && [ -z "$BOARD_CHANGED" ]; then
+            echo "::notice::No changes in WBS or board.md"
+            echo "pr_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git config user.email "daily-todo-sync-bot@users.noreply.github.com"
+          git config user.name "Daily TODO Sync Bot"
+
+          BRANCH="chore/$(date +%Y-%m-%d)-todo-sync"
+          git checkout -b "$BRANCH"
+
+          # WBS と board.md のみ stage
+          [ -n "$WBS_CHANGED" ] && echo "$WBS_CHANGED" | xargs git add
+          [ -n "$BOARD_CHANGED" ] && echo "$BOARD_CHANGED" | xargs git add
+
+          # 他の変更（scope 外）を破棄
+          git stash --include-untracked 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "::notice::No staged changes"
+            echo "pr_url=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "chore: WBS & board 自動同期 (${DATE_JST}) [daily-todo-sync]
+
+          🤖 Generated by daily-todo-sync.yml"
+          git push origin "$BRANCH"
+
+          gh label create "daily-todo-sync" --color "5319e7" --description "daily-todo-sync workflow" 2>/dev/null || true
+
+          PR_URL=$(gh pr create \
+            --title "chore: WBS & board 自動同期 (${DATE_JST})" \
+            --body "## 概要
+          daily-todo-sync.yml workflow による自動同期 PR。
+
+          ## 変更内容
+          - WBS markdown のステータス更新（前日 merged PR / closed Issue / task-log に基づく）
+          - board.md の再生成
+
+          ## 関連
+          - workflow run: https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          - tracking issue: ラベル \`${TRACKING_ISSUE_LABEL}\` の最新 Issue を参照
+
+          🤖 Generated by \`.github/workflows/daily-todo-sync.yml\`" \
+            --label "daily-todo-sync" \
+            --base main \
+            --head "$BRANCH")
+
+          PR_NUMBER="${PR_URL##*/}"
+          gh pr merge "$PR_NUMBER" --squash --delete-branch
+
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "::notice::PR #$PR_NUMBER merged: $PR_URL"
+
+      # -----------------------------------------------------------------
+      # Step 12: tracking issue 更新 (always)
+      # -----------------------------------------------------------------
+      - name: Update tracking issue
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          CURRENT_WEEK: ${{ steps.date.outputs.current_week }}
+          MODE: ${{ steps.mode.outputs.mode }}
+          JOB_STATUS: ${{ job.status }}
+          TOTAL_TASKS: ${{ steps.parse.outputs.total_tasks }}
+          TODO_TASKS: ${{ steps.parse.outputs.todo_tasks }}
+          DONE_TASKS: ${{ steps.parse.outputs.done_tasks }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          PR_COUNT: ${{ steps.signals.outputs.pr_count }}
+          ISSUE_COUNT: ${{ steps.signals.outputs.issue_count }}
+          TASKLOG_COUNT: ${{ steps.signals.outputs.tasklog_count }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create "${TRACKING_ISSUE_LABEL}" --color "0e8a16" \
+            --description "daily-todo-sync workflow 継続トラッキング" 2>/dev/null || true
+
+          ISSUE_NUMBER=$(gh issue list --label "${TRACKING_ISSUE_LABEL}" --state open \
+            --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUE_NUMBER" ]; then
+            ISSUE_URL=$(gh issue create \
+              --title "daily-todo-sync: 継続トラッキング (05:00 JST)" \
+              --label "${TRACKING_ISSUE_LABEL}" \
+              --body "この Issue は \`daily-todo-sync.yml\` workflow の実行履歴を記録します。
+
+          毎朝 05:00 JST に:
+          1. 全組織の WBS markdown を parse
+          2. 前日のシグナル（PR/Issue/task-log）を収集
+          3. Claude Code Action で WBS 完了判定 + Top N 選定
+          4. board.md 再生成
+          5. Project v2 に同期
+          6. WBS 変更があれば PR 作成
+
+          失敗時のフォールバック: ローカル Claude Code で \`/company\` を起動して手動で TODO 調整。")
+            ISSUE_NUMBER="${ISSUE_URL##*/}"
+          fi
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            STATUS_ICON="✅"
+          else
+            STATUS_ICON="❌"
+          fi
+
+          COMMENT=$(cat <<EOF
+          ${STATUS_ICON} **${DATE_JST} (${DOW_JP})** — mode: \`${MODE}\` / iteration: ${CURRENT_WEEK}
+
+          | 項目 | 値 |
+          |---|---|
+          | job status | \`${JOB_STATUS}\` |
+          | WBS 総タスク | ${TOTAL_TASKS:-n/a} (todo=${TODO_TASKS:-n/a} / done=${DONE_TASKS:-n/a}) |
+          | 前日 merged PR | ${PR_COUNT:-n/a} |
+          | 前日 closed Issue | ${ISSUE_COUNT:-n/a} |
+          | 更新 task-log | ${TASKLOG_COUNT:-n/a} |
+          | 同期 PR | ${PR_URL:-変更なし} |
+          | workflow run | ${RUN_URL} |
+          EOF
+          )
+
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT"
+          echo "::notice::tracking issue #$ISSUE_NUMBER updated"
