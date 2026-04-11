@@ -1,0 +1,251 @@
+name: Daily Insights Sync (23:50 JST)
+
+# 毎晩 23:50 JST に実行し、過去 24h にクローズされた Issues/PRs を
+# TodoInsights (Project 4) に同期 + HTML dashboard を再生成する。
+#
+# モード (workflow_dispatch input):
+#   sync      (default)  — 過去 24h の closed items を追加
+#   backfill              — --since 以降の全 closed items を一括インポート
+#   dry-run               — 実変更なし、計画のみ出力
+#   html-only             — Project への同期スキップ、HTML のみ再生成
+#
+# 認証:
+#   PROJECTS_PAT — Classic PAT (project + read:org + read:discussion)
+#   GITHUB_TOKEN — auto (Issue 読み取り、PR 作成)
+
+on:
+  schedule:
+    # 23:50 JST = 14:50 UTC
+    - cron: "50 14 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "実行モード"
+        type: choice
+        default: "sync"
+        options:
+          - "sync"
+          - "backfill"
+          - "dry-run"
+          - "html-only"
+      since:
+        description: "backfill 開始日 YYYY-MM-DD (backfill モード時のみ)"
+        required: false
+        type: string
+        default: "2026-03-21"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: daily-insights-sync
+  cancel-in-progress: false
+
+env:
+  TRACKING_ISSUE_LABEL: daily-insights-sync-tracker
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pre-flight auth check
+        run: |
+          if [ -z "${PROJECTS_PAT:-}" ]; then
+            echo "::error::PROJECTS_PAT required"
+            exit 1
+          fi
+          echo "::notice::Auth OK"
+
+      - name: Determine date
+        id: date
+        run: |
+          DATE_JST=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          DOW_JST=$(TZ=Asia/Tokyo date +%u)
+          case $DOW_JST in
+            1) DOW_JP=月 ;; 2) DOW_JP=火 ;; 3) DOW_JP=水 ;;
+            4) DOW_JP=木 ;; 5) DOW_JP=金 ;; 6) DOW_JP=土 ;; 7) DOW_JP=日 ;;
+          esac
+          {
+            echo "date_jst=$DATE_JST"
+            echo "dow_jp=$DOW_JP"
+          } >> "$GITHUB_OUTPUT"
+          echo "::notice::${DATE_JST} (${DOW_JP})"
+
+      - name: Detect mode
+        id: mode
+        run: |
+          MODE="${{ github.event.inputs.mode || 'sync' }}"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "::notice::mode=$MODE"
+
+      # ---------------------------------------------------------------
+      # Step A: Sync (project に items 追加)
+      # ---------------------------------------------------------------
+      - name: Run daily insights sync
+        id: sync
+        if: steps.mode.outputs.mode != 'html-only'
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          MODE="${{ steps.mode.outputs.mode }}"
+          SINCE="${{ github.event.inputs.since || '2026-03-21' }}"
+
+          ARGS=(--mode "$MODE")
+          if [ "$MODE" = "backfill" ]; then
+            ARGS+=(--since "$SINCE")
+          fi
+
+          python3 .claude/hooks/daily-insights-sync.py "${ARGS[@]}" \
+            > /tmp/insights-sync.log 2>&1 &
+          PY_PID=$!
+          tail -f /tmp/insights-sync.log --pid=$PY_PID 2>/dev/null &
+          TAIL_PID=$!
+          wait $PY_PID
+          PY_EXIT=$?
+          kill $TAIL_PID 2>/dev/null || true
+          cat /tmp/insights-sync.log
+
+          if [ $PY_EXIT -ne 0 ]; then
+            echo "::error::daily-insights-sync.py exited $PY_EXIT"
+            exit $PY_EXIT
+          fi
+
+          ADDED=$(grep -oP "Added: \K\d+" /tmp/insights-sync.log | tail -1 || echo "0")
+          SKIPPED=$(grep -oP "Skipped \(already in project\): \K\d+" /tmp/insights-sync.log | tail -1 || echo "0")
+          FETCHED=$(grep -oP "Fetched \(matching search\): \K\d+" /tmp/insights-sync.log | tail -1 || echo "0")
+
+          {
+            echo "added=$ADDED"
+            echo "skipped=$SKIPPED"
+            echo "fetched=$FETCHED"
+          } >> "$GITHUB_OUTPUT"
+
+      # ---------------------------------------------------------------
+      # Step B: HTML dashboard 再生成
+      # ---------------------------------------------------------------
+      - name: Generate HTML dashboard
+        id: html
+        if: steps.mode.outputs.mode != 'dry-run'
+        env:
+          PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 .claude/hooks/generate-insights-html.py 2>&1 | tee /tmp/insights-html.log
+
+          if [ -f docs/insights/index.html ]; then
+            SIZE=$(wc -c < docs/insights/index.html)
+            echo "html_size=$SIZE" >> "$GITHUB_OUTPUT"
+            echo "::notice::HTML generated: docs/insights/index.html ($SIZE bytes)"
+          else
+            echo "::warning::HTML file not created"
+            echo "html_size=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ---------------------------------------------------------------
+      # Step C: HTML 変更を main に直 commit
+      # ---------------------------------------------------------------
+      - name: Commit HTML to main
+        if: steps.mode.outputs.mode != 'dry-run'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+        run: |
+          git config user.email "daily-insights-sync-bot@users.noreply.github.com"
+          git config user.name "Daily Insights Sync Bot"
+
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git add docs/insights/ docs/index.html 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "::notice::HTML 変更なし"
+          else
+            git commit -m "chore: TodoInsights HTML 更新 [daily-insights-sync] (${DATE_JST})"
+            git push origin main
+            echo "::notice::HTML committed and pushed"
+          fi
+
+      # ---------------------------------------------------------------
+      # Step D: tracking issue 更新
+      # ---------------------------------------------------------------
+      - name: Update tracking issue
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          MODE: ${{ steps.mode.outputs.mode }}
+          JOB_STATUS: ${{ job.status }}
+          ADDED: ${{ steps.sync.outputs.added }}
+          SKIPPED: ${{ steps.sync.outputs.skipped }}
+          FETCHED: ${{ steps.sync.outputs.fetched }}
+          HTML_SIZE: ${{ steps.html.outputs.html_size }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create "${TRACKING_ISSUE_LABEL}" --color "4361ee" \
+            --description "daily-insights-sync workflow 継続トラッキング" 2>/dev/null || true
+
+          ISSUE_NUMBER=$(gh issue list --label "${TRACKING_ISSUE_LABEL}" --state open \
+            --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUE_NUMBER" ]; then
+            ISSUE_URL=$(gh issue create \
+              --title "daily-insights-sync: 継続トラッキング (23:50 JST)" \
+              --label "${TRACKING_ISSUE_LABEL}" \
+              --body "この Issue は \`daily-insights-sync.yml\` workflow の実行履歴を記録します。
+
+          毎晩 23:50 JST に以下を実行:
+          1. 過去 24h にクローズされた Issues/PRs を GitHub Search API で取得
+          2. TodoInsights (Project 4) に追加 + Closed date/Type/Org/Category 設定
+          3. HTML dashboard (\`docs/insights/index.html\`) を Chart.js で再生成
+          4. main 直コミット → GitHub Pages に即反映
+
+          Dashboard: https://sas-sasao.github.io/cc-sier-organization/insights/
+          Project: https://github.com/users/SAS-Sasao/projects/4")
+            ISSUE_NUMBER="${ISSUE_URL##*/}"
+          fi
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            STATUS_ICON="✅"
+          else
+            STATUS_ICON="❌"
+          fi
+
+          HTML_KB="—"
+          if [ -n "${HTML_SIZE:-}" ] && [ "$HTML_SIZE" != "0" ]; then
+            HTML_KB=$(awk "BEGIN {printf \"%.1f KB\", $HTML_SIZE / 1024}")
+          fi
+
+          COMMENT=$(cat <<EOF
+          ${STATUS_ICON} **${DATE_JST} (${DOW_JP})** — mode: \`${MODE}\`
+
+          | 項目 | 値 |
+          |---|---|
+          | job status | \`${JOB_STATUS}\` |
+          | 検索ヒット | ${FETCHED:-n/a} 件 |
+          | 新規追加 | ${ADDED:-n/a} 件 |
+          | 既存 skip | ${SKIPPED:-n/a} 件 |
+          | HTML サイズ | ${HTML_KB} |
+          | workflow run | ${RUN_URL} |
+
+          **Dashboard**: https://sas-sasao.github.io/cc-sier-organization/insights/
+          **Project**: https://github.com/users/SAS-Sasao/projects/4
+          EOF
+          )
+
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT"
+          echo "::notice::tracking issue #$ISSUE_NUMBER updated"
