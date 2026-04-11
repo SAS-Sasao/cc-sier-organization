@@ -1,0 +1,459 @@
+name: Nightly CLAUDE.md & Rules Update
+
+# 毎日 23:00 JST (14:00 UTC) に CLAUDE.md と .claude/rules/ を
+# 過去 24h / 日曜は過去 7d の学び（PR / task-log / 会話ログ / 直接commit）
+# から自動更新する保守型ワークフロー（案A）。
+#
+# - 変更あり → PR作成（needs-human-review ラベル、auto-merge なし）
+# - 変更なし → 単一の継続トラッキング Issue にコメント追記
+# - 対象ファイルは CLAUDE.md と .claude/rules/*.md のみ（安全装置あり）
+# - starter-kit プラクティス（8セクション / 200行 / @参照 / kebab-case）を prompt で強制
+
+on:
+  schedule:
+    # 23:00 JST = 14:00 UTC（JST は夏時間なし、年中固定）
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      force_period:
+        description: "強制的に分析期間を指定 (24h / 7d / 空=自動: 日曜7d/平日24h)"
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""
+          - "24h"
+          - "7d"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+# 同時実行を防止（手動 dispatch と cron の衝突対策）
+concurrency:
+  group: nightly-claude-md-update
+  cancel-in-progress: false
+
+env:
+  TRACKING_ISSUE_LABEL: nightly-claude-md-tracker
+  NIGHTLY_PR_LABEL: nightly-claude-md-update
+  REVIEW_LABEL: needs-human-review
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # -----------------------------------------------------------------
+      # Step 1: リポジトリ取得（git log 用に全履歴）
+      # -----------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------
+      # Step 2: 分析期間の決定（JST基準で日曜判定）
+      # -----------------------------------------------------------------
+      - name: Determine analysis window
+        id: window
+        run: |
+          FORCE="${{ github.event.inputs.force_period }}"
+          DOW_JST=$(TZ=Asia/Tokyo date +%u)   # 1=月 ... 7=日
+          DATE_JST=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+
+          if [ "$FORCE" = "7d" ] || { [ -z "$FORCE" ] && [ "$DOW_JST" = "7" ]; }; then
+            SINCE=$(date -u -d '7 days ago' --iso-8601=seconds)
+            PERIOD="weekly-7d"
+            PERIOD_JP="週次（過去7日）"
+          else
+            SINCE=$(date -u -d '1 day ago' --iso-8601=seconds)
+            PERIOD="daily-24h"
+            PERIOD_JP="日次（過去24時間）"
+          fi
+
+          {
+            echo "since=$SINCE"
+            echo "period=$PERIOD"
+            echo "period_jp=$PERIOD_JP"
+            echo "date_jst=$DATE_JST"
+            echo "dow_jst=$DOW_JST"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::analysis window: $PERIOD_JP since $SINCE (JST day=$DOW_JST)"
+
+      # -----------------------------------------------------------------
+      # Step 3: シグナル収集（PR / task-log / 会話ログ / 直接commit）
+      # -----------------------------------------------------------------
+      - name: Collect signals
+        id: signals
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SINCE: ${{ steps.window.outputs.since }}
+        run: |
+          mkdir -p /tmp/signals
+
+          # ---- 3-1. Merged PR（過去 nightly PR は除外して循環学習防止）----
+          gh pr list --state merged \
+            --search "merged:>=$SINCE -label:${{ env.NIGHTLY_PR_LABEL }}" \
+            --json number,title,body,mergedAt,author,labels \
+            --limit 100 \
+            > /tmp/signals/recent-prs.json
+          PR_COUNT=$(jq length /tmp/signals/recent-prs.json)
+
+          # ---- 3-2. Task-log（git で追跡された直近編集ファイル）----
+          git log --since="$SINCE" --name-only --format='' \
+            -- '.companies/**/.task-log/*.md' \
+            | grep -v '^$' | sort -u > /tmp/signals/recent-tasklog-paths.txt || true
+          TASKLOG_COUNT=$(wc -l < /tmp/signals/recent-tasklog-paths.txt || echo 0)
+
+          # ---- 3-3. 会話ログ（capture-conversation.sh 由来）----
+          git log --since="$SINCE" --name-only --format='' \
+            -- '.companies/**/.conversation-log/*.md' \
+            | grep -v '^$' | sort -u > /tmp/signals/recent-convlog-paths.txt || true
+          CONVLOG_COUNT=$(wc -l < /tmp/signals/recent-convlog-paths.txt || echo 0)
+
+          # ---- 3-4. 直接コミット（main への push 含む、PR経由でない学びも拾う）----
+          # hash|ISO日時|author|subject の1行サマリ
+          git log --since="$SINCE" \
+            --format='%h|%ai|%an|%s' main \
+            > /tmp/signals/recent-commits.txt || true
+          COMMIT_COUNT=$(wc -l < /tmp/signals/recent-commits.txt || echo 0)
+
+          # ---- 集計 ----
+          TOTAL=$((PR_COUNT + TASKLOG_COUNT + CONVLOG_COUNT + COMMIT_COUNT))
+
+          {
+            echo "pr_count=$PR_COUNT"
+            echo "tasklog_count=$TASKLOG_COUNT"
+            echo "convlog_count=$CONVLOG_COUNT"
+            echo "commit_count=$COMMIT_COUNT"
+            echo "total=$TOTAL"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::signals - PR=$PR_COUNT tasklog=$TASKLOG_COUNT convlog=$CONVLOG_COUNT commit=$COMMIT_COUNT total=$TOTAL"
+
+      # -----------------------------------------------------------------
+      # Step 4: Claude Code Action による更新提案
+      # -----------------------------------------------------------------
+      - name: Run Claude Code
+        if: steps.signals.outputs.total != '0'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            あなたは cc-sier リポジトリの **CLAUDE.md / .claude/rules/** の nightly 更新担当です。
+            過去 ${{ steps.window.outputs.period_jp }} のシグナルから「運用ルールに追加すべき学び」を
+            抽出し、rules/ を更新または新規作成してください。
+
+            ## シグナル概要
+            - 期間: ${{ steps.window.outputs.period_jp }}（since ${{ steps.window.outputs.since }}）
+            - Merged PR: ${{ steps.signals.outputs.pr_count }} 件
+            - Task-log: ${{ steps.signals.outputs.tasklog_count }} 件
+            - Conversation-log: ${{ steps.signals.outputs.convlog_count }} 件
+            - 直接 commit: ${{ steps.signals.outputs.commit_count }} 件
+
+            ## シグナルファイル（すべて Read ツールで読めます）
+            - `/tmp/signals/recent-prs.json` — マージ済 PR（number/title/body/mergedAt/author/labels）
+            - `/tmp/signals/recent-tasklog-paths.txt` — 編集された task-log のパス一覧
+            - `/tmp/signals/recent-convlog-paths.txt` — 編集された会話ログのパス一覧
+            - `/tmp/signals/recent-commits.txt` — 直近 commit（`hash|ISO日時|author|subject`）
+
+            直接 commit のうち、PR 番号を含まないもの（`(#123)` 等がない subject）は **main 直 push** の可能性があり、PR 本文には現れない学びを含むので重点的に確認してください。
+
+            ## 必須プロセス（絶対に守ること）
+
+            ### Step 0: 既存ルールの把握（重複追加防止）
+            1. `CLAUDE.md` を Read
+            2. `ls .claude/rules/` で既存 rules 一覧を確認
+            3. 全 `.claude/rules/*.md` を Read して既存カバー範囲を把握
+            4. `grep -l "{キーワード}" .claude/rules/*.md` で類似記述を検索
+
+            ### Step 1: シグナル分析
+            1. `cat /tmp/signals/recent-prs.json | jq '.[] | {number, title, body}'` で PR を 1 件ずつ読む
+               - 特に fix: / docs: / refactor: 系の body 内「根本原因」「修正内容」「今後の期待動作」に注目
+            2. recent-tasklog-paths.txt の各ファイルを Read し、YAML frontmatter の `judge` / `reward` / `l2_composite` / `findings` を確認
+               - reward が 0.5 以下 / judge が fail のものは失敗パターン
+            3. recent-convlog-paths.txt で直近の対話を読み、繰り返し指摘されたパターンを探す
+            4. recent-commits.txt で PR 番号のない直接 commit を特定し、`git show {hash}` で差分を見る
+
+            ### Step 2: 学び抽出の判定基準
+
+            **追加する条件（全て満たすこと）**:
+            - 実際に起きた失敗・修正から導出されている（推測・改善案は不可）
+            - 既存 `.claude/rules/*.md` に記載されていない（重複禁止）
+            - 他の類似タスクに再発・応用可能（原理原則レベルに一般化されている）
+            - 数値や具体的な手順を含む（「気をつける」等の曖昧表現は不可）
+
+            **追加しない条件**:
+            - 1回限りの特殊ケース
+            - 既存ルールで十分カバーされている
+            - 好みのレベルの細かい話
+            - 既に数字で明記されている内容
+
+            ### Step 3: 更新方針（starter-kit プラクティス厳守）
+
+            **CLAUDE.md**:
+            - **200 行以内を厳守**（現在値を `wc -l CLAUDE.md` で確認）
+            - 8 セクション構成を維持: `AI 運用ルール / プロジェクト概要 / 技術スタック / 開発コマンド / ディレクトリ構造 / コーディング規約 / 注意事項 / 外部参照`
+            - 追加学びは注意事項セクションに **1 行で統合**、詳細は rules/ へ分離
+            - `@path/to/file` の @参照記法を使う
+            - 参考: https://sas-dx.github.io/claude-code-starter-kit/pages/claude-md.html
+
+            **rules/**:
+            - ファイル命名は **kebab-case**（例: `git-workflow.md`, `skill-development.md`）
+            - 既存ファイル更新は **差分追加が原則**、大幅書き換え禁止
+            - 新規ファイル作成時は CLAUDE.md の「外部参照」セクションにも必ず @参照を追記
+            - トップ見出しは `# ルール名`、末尾に「## 関連」で他 rules への @参照
+            - パス指定ルールは YAML frontmatter（`paths:`）で指定
+            - 参考: https://sas-dx.github.io/claude-code-starter-kit/pages/rules.html
+
+            **記述スタイル**:
+            - 具体的に（「きれいに」ではなく「2 スペースインデント」「200 行以内」）
+            - コマンドは実行可能形式（コピペで動く）
+            - 禁止事項は ❌ マーカーで明記
+            - 日本語で統一
+
+            ### Step 4: 変更実施
+
+            - 変更が有意義なら CLAUDE.md / rules/ を Write/Edit で編集
+            - **変更不要なら一切ファイルを触らない**（この判断は Step 2 の基準に従う）
+            - ブランチ作成・コミット・push・PR 作成は **workflow の後続 shell ステップが実施する**ので、あなたはファイル編集のみ行ってください
+
+            ## 編集後の検証（あなたが必ず実施）
+
+            1. `wc -l CLAUDE.md` で 200 行以内を確認
+            2. `git diff --name-only` で `CLAUDE.md` と `.claude/rules/` 以外が変更されていないことを確認
+            3. 新規 rules 作成時は CLAUDE.md の「外部参照」セクションに `@` 参照が追記されているか確認
+
+            ## 制約（違反禁止）
+
+            - ❌ `CLAUDE.md` と `.claude/rules/*.md` 以外のファイルを編集しない
+            - ❌ `git commit` / `git push` / `gh pr create` を実行しない（workflow 側の責務）
+            - ❌ `rm` / `git reset` 等の破壊的操作禁止
+            - ❌ `plugins/` / `docs/` / `.companies/` 配下は **読み取り専用**
+
+            ## 出力
+
+            - 編集した場合: 追加/更新した学びを簡潔に列挙（各 1-2 行）
+            - 編集不要な場合: 先頭行に `NO_CHANGES` と書き、理由を 1-2 行で説明
+          claude_args: |
+            --max-turns 30
+            --permission-mode bypassPermissions
+            --model claude-opus-4-6
+            --allowedTools "Read,Write,Edit,Bash,Grep,Glob"
+
+      # -----------------------------------------------------------------
+      # Step 5: 差分検知 + スコープ外変更の安全装置
+      # -----------------------------------------------------------------
+      - name: Detect changes and enforce scope
+        id: diff
+        run: |
+          # CLAUDE.md / rules/ の変更を検知
+          if git diff --quiet HEAD -- CLAUDE.md .claude/rules/; then
+            CHANGED=false
+            CHANGED_FILES=""
+          else
+            CHANGED=true
+            CHANGED_FILES=$(git diff --name-only HEAD -- CLAUDE.md .claude/rules/ | tr '\n' ' ')
+          fi
+
+          # スコープ外変更を検出（安全装置）
+          OUT_OF_SCOPE=$(git diff --name-only HEAD | grep -v -E '^(CLAUDE\.md$|\.claude/rules/)' || true)
+          if [ -n "$OUT_OF_SCOPE" ]; then
+            echo "::error::スコープ外ファイルが変更されています: $OUT_OF_SCOPE"
+            echo "これらの変更は自動で破棄されます"
+            git checkout -- .
+            # CLAUDE.md と .claude/rules/ 以外を破棄したあと再チェック
+            if git diff --quiet HEAD -- CLAUDE.md .claude/rules/; then
+              CHANGED=false
+              CHANGED_FILES=""
+            fi
+          fi
+
+          # CLAUDE.md 200行制限チェック
+          LINES=$(wc -l < CLAUDE.md)
+          if [ "$LINES" -gt 200 ]; then
+            echo "::error::CLAUDE.md が $LINES 行になりました（200 行以内必須）。変更を破棄します"
+            git checkout -- CLAUDE.md .claude/rules/
+            CHANGED=false
+            CHANGED_FILES=""
+          fi
+
+          {
+            echo "changed=$CHANGED"
+            echo "files=$CHANGED_FILES"
+            echo "claude_md_lines=$LINES"
+          } >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------
+      # Step 6: PR 作成（変更があった場合のみ）
+      # -----------------------------------------------------------------
+      - name: Create PR
+        id: pr
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.window.outputs.date_jst }}
+          PERIOD_JP: ${{ steps.window.outputs.period_jp }}
+          PERIOD: ${{ steps.window.outputs.period }}
+          SINCE: ${{ steps.window.outputs.since }}
+          PR_COUNT: ${{ steps.signals.outputs.pr_count }}
+          TASKLOG_COUNT: ${{ steps.signals.outputs.tasklog_count }}
+          CONVLOG_COUNT: ${{ steps.signals.outputs.convlog_count }}
+          COMMIT_COUNT: ${{ steps.signals.outputs.commit_count }}
+          CHANGED_FILES: ${{ steps.diff.outputs.files }}
+          CLAUDE_MD_LINES: ${{ steps.diff.outputs.claude_md_lines }}
+        run: |
+          BRANCH="docs/nightly-${DATE_JST}-claude-md-update"
+
+          git config user.email "claude-nightly[bot]@users.noreply.github.com"
+          git config user.name "Claude Nightly Bot"
+          git checkout -b "$BRANCH"
+          git add CLAUDE.md .claude/rules/
+          git commit -m "docs: nightly CLAUDE.md & rules update (${DATE_JST}, ${PERIOD})"
+          git push origin "$BRANCH"
+
+          # ラベル作成（存在しなければ）
+          gh label create "${{ env.NIGHTLY_PR_LABEL }}" --color "0366d6" --description "nightly CLAUDE.md/rules 自動更新" 2>/dev/null || true
+          gh label create "${{ env.REVIEW_LABEL }}" --color "fbca04" --description "人間によるレビューが必要" 2>/dev/null || true
+
+          PR_BODY=$(cat <<'EOF'
+          ## Summary
+
+          nightly-claude-md-update workflow による CLAUDE.md / .claude/rules/ 自動更新 PR。
+
+          ## 分析シグナル
+
+          | 項目 | 値 |
+          |---|---|
+          | 期間 | __PERIOD_JP__ |
+          | since | `__SINCE__` |
+          | Merged PR | __PR_COUNT__ 件 |
+          | Task-log | __TASKLOG_COUNT__ 件 |
+          | Conversation-log | __CONVLOG_COUNT__ 件 |
+          | 直接 commit | __COMMIT_COUNT__ 件 |
+
+          ## 変更ファイル
+
+          ```
+          __CHANGED_FILES__
+          ```
+
+          ## CLAUDE.md 行数
+
+          **__CLAUDE_MD_LINES__** / 200
+
+          ## レビュー観点
+
+          - [ ] 追加/更新された学びが実際の PR / task-log / 会話ログ / 直接 commit から導出されているか
+          - [ ] 既存 `.claude/rules/*.md` と重複していないか
+          - [ ] starter-kit の 8 セクション構成を維持しているか（CLAUDE.md 編集時）
+          - [ ] @参照記法 が正しく使われているか（新規 rules は CLAUDE.md の外部参照にも追記）
+          - [ ] kebab-case 命名か（新規 rules ファイル）
+          - [ ] 記述が具体的か（曖昧表現禁止）
+
+          ## 運用ステージ
+
+          **Phase 1 (現在)**: 保守型 — PR 作成のみ、手動マージ
+          - 2-4 週間運用して誤学習率と PR 品質を観察
+          - 安定したら Phase 2（L1/L2 セルフレビュー付き）→ Phase 3（auto-merge）へ昇格
+
+          ---
+
+          🤖 Generated by `.github/workflows/nightly-claude-md-update.yml`
+          EOF
+          )
+
+          # プレースホルダを環境変数で置換
+          PR_BODY="${PR_BODY//__PERIOD_JP__/$PERIOD_JP}"
+          PR_BODY="${PR_BODY//__SINCE__/$SINCE}"
+          PR_BODY="${PR_BODY//__PR_COUNT__/$PR_COUNT}"
+          PR_BODY="${PR_BODY//__TASKLOG_COUNT__/$TASKLOG_COUNT}"
+          PR_BODY="${PR_BODY//__CONVLOG_COUNT__/$CONVLOG_COUNT}"
+          PR_BODY="${PR_BODY//__COMMIT_COUNT__/$COMMIT_COUNT}"
+          PR_BODY="${PR_BODY//__CHANGED_FILES__/$CHANGED_FILES}"
+          PR_BODY="${PR_BODY//__CLAUDE_MD_LINES__/$CLAUDE_MD_LINES}"
+
+          PR_URL=$(gh pr create \
+            --title "docs: CLAUDE.md & rules nightly update ($DATE_JST, $PERIOD)" \
+            --body "$PR_BODY" \
+            --label "${{ env.NIGHTLY_PR_LABEL }},${{ env.REVIEW_LABEL }}")
+
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "::notice::PR created: $PR_URL"
+
+      # -----------------------------------------------------------------
+      # Step 7: 継続トラッキング Issue にコメント（変更有無に関わらず実行）
+      # -----------------------------------------------------------------
+      - name: Update tracking Issue
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.window.outputs.date_jst }}
+          PERIOD_JP: ${{ steps.window.outputs.period_jp }}
+          TOTAL: ${{ steps.signals.outputs.total }}
+          PR_COUNT: ${{ steps.signals.outputs.pr_count }}
+          TASKLOG_COUNT: ${{ steps.signals.outputs.tasklog_count }}
+          CONVLOG_COUNT: ${{ steps.signals.outputs.convlog_count }}
+          COMMIT_COUNT: ${{ steps.signals.outputs.commit_count }}
+          CHANGED: ${{ steps.diff.outputs.changed }}
+          CHANGED_FILES: ${{ steps.diff.outputs.files }}
+          CLAUDE_MD_LINES: ${{ steps.diff.outputs.claude_md_lines }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create "${{ env.TRACKING_ISSUE_LABEL }}" --color "5319e7" --description "nightly CLAUDE.md update の継続トラッキング" 2>/dev/null || true
+
+          # 既存 tracking issue を探す（なければ作成）
+          ISSUE_NUMBER=$(gh issue list \
+            --label "${{ env.TRACKING_ISSUE_LABEL }}" \
+            --state open \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUE_NUMBER" ]; then
+            ISSUE_URL=$(gh issue create \
+              --title "nightly: CLAUDE.md & rules 更新ログ（継続トラッキング）" \
+              --label "${{ env.TRACKING_ISSUE_LABEL }}" \
+              --body "この Issue は \`nightly-claude-md-update\` workflow の実行履歴を記録します。毎日 23:00 JST の実行結果がコメントとして追記されます。\n\n- 変更あり → PR作成（別途通知）\n- 変更なし → 本Issueにコメントのみ\n- シグナルなし → 本Issueにコメントのみ")
+            ISSUE_NUMBER="${ISSUE_URL##*/}"
+          fi
+
+          # 実行結果によってコメント本文を分岐
+          if [ "$TOTAL" = "0" ]; then
+            STATUS_ICON="🌙"
+            STATUS_TEXT="シグナルなし（分析対象ゼロ、Claude 実行スキップ）"
+          elif [ "$CHANGED" = "true" ]; then
+            STATUS_ICON="🆕"
+            STATUS_TEXT="更新 PR 作成: $PR_URL"
+          else
+            STATUS_ICON="✅"
+            STATUS_TEXT="変更不要（NO_CHANGES、シグナルはあったが追加学びなし）"
+          fi
+
+          COMMENT=$(cat <<EOF
+          $STATUS_ICON **$DATE_JST ($PERIOD_JP)**
+
+          $STATUS_TEXT
+
+          | 項目 | 件数 |
+          |---|---|
+          | Merged PR | $PR_COUNT |
+          | Task-log | $TASKLOG_COUNT |
+          | Conversation-log | $CONVLOG_COUNT |
+          | 直接 commit | $COMMIT_COUNT |
+          | **合計シグナル** | **$TOTAL** |
+
+          - job status: \`$JOB_STATUS\`
+          - CLAUDE.md 行数: $CLAUDE_MD_LINES / 200
+          - 変更ファイル: \`${CHANGED_FILES:-(なし)}\`
+          - workflow run: $RUN_URL
+          EOF
+          )
+
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT"
+          echo "::notice::tracking issue updated: #$ISSUE_NUMBER"
