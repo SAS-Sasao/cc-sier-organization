@@ -198,7 +198,12 @@ for t in data:
   fi
 
   if [ -n "$existing_issue" ]; then
-    echo "[found] $org $wbs_id -> Issue #$existing_issue"
+    # 既存 Issue あり → Project v2 への追加のみ試みる（冪等）
+    EXISTING_URL="https://github.com/${GITHUB_REPOSITORY:-SAS-Sasao/cc-sier-organization}/issues/$existing_issue"
+    echo "[found] $org $wbs_id -> Issue #$existing_issue (re-adding to project)"
+    gh_project item-add 1 --owner "@me" --url "$EXISTING_URL" 2>&1 | tail -1 || \
+      echo "::warning::Failed to add existing $EXISTING_URL to project"
+    sleep 0.5
     continue
   fi
 
