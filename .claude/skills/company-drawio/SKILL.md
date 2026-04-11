@@ -307,6 +307,30 @@ l2_scores:
 ---
 ```
 
+### `## judge` セクション追記（dashboard 統合のため必須）
+
+task-log YAML フロントマターに加えて、`## judge` セクションを以下の YAML 形式で**必ず**追記する。これは `rebuild-case-bank.sh` が読み取り、`/company-dashboard` の「judge スコア推移」グラフに反映される。
+
+6 軸 → 3 軸マッピング:
+- `completeness` = `(s1_structure + s5_index_update) / 2`
+- `accuracy` = `(s2_edge_penetration + s3_xml_html_consistency) / 2`
+- `clarity` = `(s4_design_points_specificity + s6_html_violations) / 2`
+- `total` = `l2_composite`
+
+```markdown
+## judge
+
+\`\`\`yaml
+completeness: {0.00}
+accuracy: {0.00}
+clarity: {0.00}
+total: {l2_composite}
+failure_reason: ""
+judge_comment: "/company-drawio l2_scores から自動マッピング: completeness=avg(s1_structure,s5_index_update), accuracy=avg(s2_edge_penetration,s3_xml_html_consistency), clarity=avg(s4_design_points_specificity,s6_html_violations)"
+judged_at: "{ISO8601 with TZ}"
+\`\`\`
+```
+
 ### Issue 作成
 
 ```bash

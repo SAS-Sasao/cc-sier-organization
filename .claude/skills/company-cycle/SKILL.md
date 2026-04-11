@@ -137,6 +137,32 @@ sub_skill_results:
 ---
 ```
 
+### 6.1.5 `## judge` セクション追記（dashboard 統合のため必須）
+
+cycle 自体には L2 レビューが無いため、**3 つの sub-skill の判定結果から合成 judge** を生成する。これは `rebuild-case-bank.sh` が読み取り、`/company-dashboard` の「judge スコア推移」グラフに反映される。
+
+合成ロジック（sub_skill_results から導出）:
+- `completeness` = `1.00 if (report.file && evolve.case_bank_count > 0 && dashboard.file) else 0.50`（3 sub-skill 全完了で 1.00）
+- `accuracy` = `report success ? 1.00 : 0.00`（report が判定の中核）
+- `clarity` = `dashboard success ? 1.00 : 0.00`（最終的に可視化されたか）
+- `total` = `(completeness + accuracy + clarity) / 3`
+
+**ただし** sub-skill が独自に judge を書いている場合は **追記しなくてよい**（重複防止）。cycle はオーケストレータなので、判定済みの sub-skill task-log を尊重し、cycle 自身の task-log には judge を書かないのもオプション。デフォルトは「合成 judge を書く」。
+
+```markdown
+## judge
+
+\`\`\`yaml
+completeness: {0.00}
+accuracy: {0.00}
+clarity: {0.00}
+total: {0.00}
+failure_reason: ""
+judge_comment: "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。詳細な L2 レビューは各 sub-skill の task-log を参照"
+judged_at: "{ISO8601 with TZ}"
+\`\`\`
+```
+
 ### 6.2 統合 tracking Issue にコメント
 
 label: `cycle-tracker`
