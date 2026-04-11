@@ -86,3 +86,14 @@ Phase 7 完了: PR #251 作成、gh pr merge --auto --squash --delete-branch 即
 
 ### [2026-04-11 13:16:00] secretary
 Phase 8 完了: label type:diagram 自動作成後 Issue #252 作成、task-log completed 更新。/company-diagram Skill 初回実運用フロー完走
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-11T13:18:05"
+```
