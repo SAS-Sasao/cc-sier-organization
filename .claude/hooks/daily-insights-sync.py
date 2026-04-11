@@ -69,6 +69,111 @@ CATEGORY_TITLE_PATTERNS = [
     (re.compile(r"^admin[:\(]"), "chore"),
 ]
 
+# ----------------------------------------------------------------------------
+# Automation filter (include/exclude 判定)
+# ----------------------------------------------------------------------------
+# 目的: Project 4 には "PR + WBS Issue" のみを残す。
+# cc-sier-bot 由来の自動 merge PR、tracker Issue、nightly PR 等を除外する。
+
+# 自動化由来を示すラベル (ラベルが 1 つでもあれば automation と判定)
+AUTOMATION_LABELS: set[str] = {
+    # workflow 実行ラベル
+    "daily-digest-automation",
+    "daily-todo-sync",
+    "daily-kanban-sync",
+    "daily-insights-sync",
+    "nightly-claude-md-update",
+    "daily-cycle-supplement",
+    # tracker Issue ラベル
+    "daily-digest-automation-tracker",
+    "daily-todo-sync-tracker",
+    "daily-kanban-sync-tracker",
+    "daily-insights-sync-tracker",
+    "nightly-claude-md-tracker",
+    "cycle-tracker",
+    "cycle-supplement-tracker",
+    # その他自動生成
+    "interaction-log",
+    "needs-human-review",  # nightly-claude-md PR に付く
+}
+
+# タイトル pattern (label が無くても automation と判定)
+AUTOMATION_TITLE_PATTERNS: list[re.Pattern] = [
+    re.compile(r"^chore: ダッシュボード更新"),
+    re.compile(r"^chore: TodoInsights HTML"),
+    re.compile(r"^chore: post-merge"),
+    re.compile(r"^chore: WBS.*自動同期"),
+    re.compile(r"^chore: cycle"),
+    re.compile(r"^chore: 日次ダイジェスト"),
+    re.compile(r"^nightly:", re.IGNORECASE),
+    re.compile(r"^daily-\w+:", re.IGNORECASE),
+    re.compile(r"^docs: nightly", re.IGNORECASE),
+    re.compile(r"^docs: CLAUDE\.md.*nightly", re.IGNORECASE),
+    re.compile(r"^ci: daily-"),
+    re.compile(r"^feat: 日次ダイジェスト"),  # daily-digest-automation PR
+]
+
+
+def is_automation(labels: list[str], title: str) -> bool:
+    """label 優先、title pattern fallback で automation 判定する。"""
+    # Label check
+    for lbl in labels:
+        if lbl in AUTOMATION_LABELS:
+            return True
+    # Title pattern check
+    for pat in AUTOMATION_TITLE_PATTERNS:
+        if pat.match(title):
+            return True
+    return False
+
+
+def pr_closes_wbs_issue(item: dict) -> bool:
+    """PR が閉じる Issue のいずれかに todo:wbs ラベルがあるか判定する。
+
+    GraphQL search クエリで PullRequest.closingIssuesReferences を取得しておく必要がある。
+    もし fetch 時にこのフィールドが取得されていなければ False を返す。
+    """
+    if item.get("__typename") != "PullRequest":
+        return False
+    closing_refs = item.get("closingIssuesReferences") or {}
+    refs = closing_refs.get("nodes") or []
+    for ref in refs:
+        if not ref:
+            continue
+        ref_labels = (ref.get("labels") or {}).get("nodes") or []
+        for lbl in ref_labels:
+            if (lbl or {}).get("name") == "todo:wbs":
+                return True
+    return False
+
+
+def should_include(item: dict) -> tuple[bool, str]:
+    """TodoInsights に含めるべきか判定。(include, reason) を返す。
+
+    ルール (さらに厳しく):
+        - Issue:  todo:wbs ラベル付きのみ (= WBS 用 Issue)
+        - PR:     closingIssuesReferences のいずれかに todo:wbs ラベル付き Issue があるもののみ
+                  (= WBS Issue を close する PR = WBS 起因 PR)
+        - automation は問答無用で除外
+    """
+    labels = [l.get("name", "") for l in ((item.get("labels") or {}).get("nodes") or [])]
+    title = item.get("title", "")
+    item_type = "PR" if item.get("__typename") == "PullRequest" else "Issue"
+
+    # まず automation 除外
+    if is_automation(labels, title):
+        return False, "automation"
+
+    if item_type == "Issue":
+        if "todo:wbs" in labels:
+            return True, "wbs-issue"
+        return False, "non-wbs-issue"
+
+    # PR: closingIssuesReferences で WBS Issue を close しているか
+    if pr_closes_wbs_issue(item):
+        return True, "wbs-pr"
+    return False, "non-wbs-pr"
+
 
 # ----------------------------------------------------------------------------
 # gh / GraphQL helpers
@@ -146,6 +251,12 @@ def fetch_closed_items(search_query: str, token: str) -> list[dict]:
             closedAt
             mergedAt
             labels(first: 30) { nodes { name } }
+            closingIssuesReferences(first: 10, userLinkedOnly: false) {
+              nodes {
+                number
+                labels(first: 20) { nodes { name } }
+              }
+            }
           }
         }
       }
@@ -322,6 +433,136 @@ def set_single_select_field(project_id: str, item_id: str, field_id: str, option
     })
 
 
+def delete_project_item(project_id: str, item_id: str, token: str) -> None:
+    """Project v2 から item を削除する。"""
+    query = """
+    mutation($projectId: ID!, $itemId: ID!) {
+      deleteProjectV2Item(input: {projectId: $projectId, itemId: $itemId}) {
+        deletedItemId
+      }
+    }
+    """
+    gh_graphql(query, token=token, variables={"projectId": project_id, "itemId": item_id})
+
+
+def fetch_project_items_for_filter(token: str) -> tuple[str, list[dict]]:
+    """cleanup-filter 用に Project 4 の全 items を取得する (content + labels + closingIssues)。"""
+    query = """
+    query($cursor: String) {
+      user(login: "%s") {
+        projectV2(number: %d) {
+          id
+          items(first: 100, after: $cursor) {
+            pageInfo { hasNextPage endCursor }
+            nodes {
+              id
+              content {
+                __typename
+                ... on Issue {
+                  number url title
+                  labels(first: 30) { nodes { name } }
+                }
+                ... on PullRequest {
+                  number url title
+                  labels(first: 30) { nodes { name } }
+                  closingIssuesReferences(first: 10, userLinkedOnly: false) {
+                    nodes {
+                      number
+                      labels(first: 20) { nodes { name } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """ % (OWNER, PROJECT_NUMBER)
+
+    all_nodes: list[dict] = []
+    project_id = None
+    cursor: str | None = None
+    page = 0
+    while True:
+        page += 1
+        resp = gh_graphql(query, token=token, variables={"cursor": cursor})
+        pv2 = resp["data"]["user"]["projectV2"]
+        if pv2 is None:
+            break
+        if project_id is None:
+            project_id = pv2["id"]
+        items_conn = pv2.get("items", {}) or {}
+        page_nodes = items_conn.get("nodes") or []
+        all_nodes.extend(page_nodes)
+        page_info = items_conn.get("pageInfo") or {}
+        if not page_info.get("hasNextPage"):
+            break
+        cursor = page_info.get("endCursor")
+        if not cursor:
+            break
+    return project_id, all_nodes
+
+
+def run_cleanup_filter(token: str) -> int:
+    """cleanup-filter mode: Project 4 の全 items を filter で再評価し、非マッチを削除する。"""
+    print("=== cleanup-filter mode ===")
+    print("Fetch all Project 4 items...")
+    project_id, items = fetch_project_items_for_filter(token)
+    if project_id is None:
+        print("::error::Project 4 not accessible", file=sys.stderr)
+        return 1
+
+    print(f"  Current items: {len(items)}")
+    print()
+
+    keep: list[dict] = []
+    remove: list[tuple[dict, str]] = []  # (item, reason)
+
+    for node in items:
+        content = node.get("content") or {}
+        if not content:
+            remove.append((node, "no-content"))
+            continue
+        include, reason = should_include(content)
+        if include:
+            keep.append(node)
+        else:
+            remove.append((node, reason))
+
+    # Reason 別集計
+    reason_counts: dict[str, int] = {}
+    for _, reason in remove:
+        reason_counts[reason] = reason_counts.get(reason, 0) + 1
+
+    print(f"Keep: {len(keep)} items (WBS-origin)")
+    print(f"Remove: {len(remove)} items")
+    print(f"  Reason breakdown: {reason_counts}")
+    print()
+
+    # 削除実行
+    print(f"Deleting {len(remove)} items...")
+    deleted = 0
+    failed = 0
+    for i, (node, reason) in enumerate(remove, 1):
+        try:
+            delete_project_item(project_id, node["id"], token)
+            deleted += 1
+            if i % 25 == 0 or i == len(remove):
+                print(f"  progress: {i}/{len(remove)}")
+        except Exception as e:
+            print(f"  FAILED to delete {node.get('id')}: {e}", file=sys.stderr)
+            failed += 1
+
+    print()
+    print(f"=== Summary (cleanup-filter) ===")
+    print(f"  Before: {len(items)}")
+    print(f"  Kept: {len(keep)}")
+    print(f"  Deleted: {deleted}")
+    print(f"  Failed: {failed}")
+    return 0
+
+
 # ----------------------------------------------------------------------------
 # Classification helpers
 # ----------------------------------------------------------------------------
@@ -368,7 +609,11 @@ def jst_date_from_utc(utc_iso: str | None) -> str | None:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="TodoInsights daily sync")
-    ap.add_argument("--mode", choices=["sync", "backfill", "dry-run"], default="sync")
+    ap.add_argument(
+        "--mode",
+        choices=["sync", "backfill", "dry-run", "cleanup-filter"],
+        default="sync",
+    )
     ap.add_argument("--since", type=str, default="", help="backfill start date YYYY-MM-DD (default: 2026-03-21)")
     ap.add_argument("--until", type=str, default="", help="backfill end date YYYY-MM-DD (default: today)")
     ap.add_argument("--window-hours", type=int, default=24, help="sync mode rolling window (default: 24)")
@@ -408,6 +653,14 @@ def main() -> int:
     print(f"=== TodoInsights Sync ===")
     print(f"Mode: {args.mode}")
     print(f"JST now: {now_jst.isoformat()}")
+    print()
+
+    # ---------------------------------------------------------------
+    # cleanup-filter mode: 既存 Project 4 items を filter で再評価して削除
+    # ---------------------------------------------------------------
+    if args.mode == "cleanup-filter":
+        return run_cleanup_filter(token)
+
     print(f"Search query: {search_query}")
     print()
 
@@ -419,6 +672,24 @@ def main() -> int:
 
     if not closed_items:
         print("No closed items in this window. Nothing to do.")
+        return 0
+
+    # Step 1.5: Filter (include only WBS-origin PRs and WBS Issues)
+    print("Step 1.5: Apply filter (only WBS-origin PR/Issue)")
+    filter_stats: dict[str, int] = {}
+    filtered_items: list[dict] = []
+    for it in closed_items:
+        include, reason = should_include(it)
+        filter_stats[reason] = filter_stats.get(reason, 0) + 1
+        if include:
+            filtered_items.append(it)
+    print(f"  Filter result: {filter_stats}")
+    print(f"  Kept: {len(filtered_items)} / {len(closed_items)}")
+    closed_items = filtered_items
+    print()
+
+    if not closed_items:
+        print("Nothing to add after filter.")
         return 0
 
     # Step 2: Fetch project state
