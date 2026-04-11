@@ -97,3 +97,15 @@ signals:
     retry_detected: false
 evaluated_at: "2026-04-11T13:18:05"
 ```
+
+## judge
+
+```yaml
+completeness: 1.00
+accuracy: 1.00
+clarity: 1.00
+total: 1.00
+failure_reason: ""
+judge_comment: "auto-mapped from /company-diagram l2_scores: completeness=avg(s1_structure,s5_index_update), accuracy=avg(s2_iac,s3_png_consistency), clarity=avg(s4_legend,s6_english_labels). 9フェーズ全 retry 0、PNG画像Read評価で全 6 軸満点、致命軸 s2 IaC生成 / s6 英語ラベルともに 1.00。"
+judged_at: "2026-04-11T13:16:00+09:00"
+```
