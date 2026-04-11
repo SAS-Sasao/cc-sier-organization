@@ -2,75 +2,105 @@
 name: company-drawio
 description: >
   draw.io MCP Server を使用してアプリケーション構成図・ER図・フローチャート・
-  シーケンス図等の汎用ダイアグラムを生成する。
+  シーケンス図等の汎用ダイアグラムを生成し、L0機械レビュー → L1構造ゲート →
+  L2独立レビュー → PR自動マージまでを統合実行する。
   「ER図」「フローチャート」「シーケンス図」「業務フロー」「draw.io」
-  「ネットワーク図」「C4モデル」と言われたときに使用する。
+  「ネットワーク図」「C4モデル」「/company-drawio」と言われたときに使用する。
   ※ AWS構成図は /company-diagram を使用すること。
 ---
 
-# draw.io ダイアグラム生成 Skill
+# draw.io ダイアグラム統合実行 Skill
 
-draw.io MCP Server（`@drawio/mcp`）を使い、
-汎用ダイアグラムを生成して GitHub Pages に公開する。
+draw.io MCP Server（`@drawio/mcp`）を使い、汎用ダイアグラムの「生成 → 3層レビュー → PR自動マージ」を 1 コマンドで完走する。
+
+## 1. 適用条件
+
+- `.companies/.active` に org-slug が存在する
+- `drawio`（`@drawio/mcp`）が `.mcp.json` に設定済み
+- `Node.js` / `npx` がインストール済み
+- `.claude/skills/company-drawio/references/review-drawio.js` が存在する
+- git status が clean（dirty なら中断）
 
 ---
 
-## 1. 起動
-
-1. `.companies/.active` から org-slug を取得
-2. `git config user.name` で operator を取得
-3. ユーザーの依頼から図の種類を判定
-
 ## 2. AWS Diagram MCP との使い分け
 
-| 用途 | 使用Skill |
-|------|----------|
+| 用途 | 使用 Skill |
+|---|---|
 | AWS構成図（AWSアイコン付き） | `/company-diagram` |
-| ER図・テーブル設計 | **本Skill（/company-drawio）** |
-| フローチャート・業務フロー | **本Skill** |
-| シーケンス図 | **本Skill** |
-| ネットワーク図（非AWS） | **本Skill** |
-| C4モデル・システム概要図 | **本Skill** |
-| 組織図・階層構造 | **本Skill** |
+| ER図・テーブル設計 | **本 Skill（/company-drawio）** |
+| フローチャート・業務フロー | **本 Skill** |
+| シーケンス図 | **本 Skill** |
+| ネットワーク図（非AWS） | **本 Skill** |
+| C4モデル・システム概要図 | **本 Skill** |
+| 組織図・階層構造 | **本 Skill** |
 
-## 3. draw.io MCP ツールの使い分け
+---
+
+## 3. 9フェーズ概要
+
+| Phase | 名称 | 中断条件 |
+|---|---|---|
+| 0 | ヒアリング | `--yes` でスキップ |
+| 1 | 前処理（branch / task-log） | git dirty |
+| 2 | MCP 生成（open_drawio_{mermaid|csv|xml}） | 生成失敗 |
+| 3 | ファイル配置（.drawio + HTML + index + .md） | - |
+| 4 | L0 機械レビュー（review-drawio.js） | 1回自動修正後も貫通検出 |
+| 5 | L1 セルフ構造ゲート（4セクション + 禁則 + ファイル網羅） | 1回自動修正後もfail |
+| 6 | L2 独立レビュー（fresh general-purpose + XML/HTML整合性） | composite<0.85 がリトライ後も継続 |
+| 7 | PR作成 & 自動マージ | gh pr merge失敗 |
+| 8 | task-log & Issue & 報告 | - |
+
+---
+
+## 4. Phase 0: ヒアリング
+
+依頼が不明確な場合のみ以下を確認する。`--yes` 指定時はスキップしてデフォルト値で進む。
+
+```
+Q1: どんな図を作りますか？（ER図、フローチャート、シーケンス図 等）
+Q2: 含めたい要素は？（テーブル名、処理ステップ、アクター 等）
+Q3: 図の名前は？（英語 kebab-case 推奨）
+```
+
+---
+
+## 5. Phase 1: 前処理
+
+```
+1. .active → {org-slug}
+2. git config user.name → {operator}
+3. git status --porcelain が空でなければ中断
+4. {date} = YYYY-MM-DD, {task-id} = YYYYMMDD-HHMMSS-drawio-{name}
+5. {branch} = {org-slug}/feat/{date}-add-drawio-{name}
+6. git checkout -b {branch}
+7. .task-log/{task-id}.md を YAML フロントマターで作成
+    subagents: [mcp-drawio-server, general-purpose-reviewer]
+```
+
+---
+
+## 6. Phase 2: MCP 生成
+
+### 6.1 MCP ツールの使い分け
 
 | ツール | 入力形式 | 推奨用途 |
-|--------|---------|---------|
-| `open_drawio_mermaid` | Mermaid記法 | フローチャート、シーケンス図、ER図、状態遷移図 |
+|---|---|---|
+| `open_drawio_mermaid` | Mermaid 記法 | フローチャート、シーケンス図、ER図、状態遷移図 |
 | `open_drawio_csv` | CSV | 組織図、ネットワークトポロジ、階層構造 |
-| `open_drawio_xml` | draw.io XML | 精密なレイアウトが必要な図、複雑なアーキテクチャ図 |
+| `open_drawio_xml` | draw.io XML | 精密なレイアウト、複雑なアーキテクチャ図 |
 
 **選択基準**:
-- シンプルなフロー・シーケンス図 → `open_drawio_mermaid`（最も簡潔）
-- 階層・ツリー構造 → `open_drawio_csv`（表形式でノード定義）
-- 精密な配置・スタイル制御 → `open_drawio_xml`（完全なレイアウト制御）
+- シンプルなフロー・シーケンス図 → `open_drawio_mermaid`
+- 階層・ツリー構造 → `open_drawio_csv`
+- 精密な配置・スタイル制御 → `open_drawio_xml`
 
-## 4. ダイアグラム生成フロー
+### 6.2 エッジ設計方針（貫通回避、Phase 4 で検証）
 
-### 4.1 ヒアリング（必要に応じて）
+**原則: waypoint ではなくノード配置とエッジスタイルで貫通を回避する。**
 
-```
-Q1: どんな図を作りますか？（ER図、フローチャート、シーケンス図等）
-Q2: 含めたい要素は？（テーブル名、処理ステップ、アクター等）
-Q3: 図の名前は？（英語kebab-case推奨）
-```
-
-### 4.2 ダイアグラム生成
-
-1. 依頼内容から最適なツール（mermaid/csv/xml）を選択
-2. ダイアグラムコンテンツを作成（4.2.1 のエッジ設計方針に従う）
-3. MCP ツールを呼び出し（ブラウザでdraw.ioエディタが開く）
-4. ソースコンテンツを `.drawio` ファイルとして保存
-5. **エッジ貫通レビュー**: レビュースクリプトを実行し、問題があれば修正して再保存
-
-### 4.2.1 エッジ設計方針（貫通回避）
-
-**原則: waypointではなくノード配置とエッジスタイルで貫通を回避する。**
-
-**エッジスタイルの使い分け**:
 - **層間エッジ**（コンテナをまたぐ接続）→ **直線**（`edgeStyle` を指定しない）
-- **層内エッジ**（同一コンテナ内の隣接ノード間）→ `edgeStyle=orthogonalEdgeStyle`（直角）
+- **層内エッジ**（同一コンテナ内の隣接ノード間）→ `edgeStyle=orthogonalEdgeStyle`
 
 ```
 NG: edgeStyle=orthogonalEdgeStyle を層間エッジに使う → 曲がり角が中間ノードを貫通する
@@ -79,55 +109,53 @@ OK: 層間は直線、層内の隣接ノード間のみ orthogonal
 
 **ノード配置の原則**:
 - 同一コンテナ内でエッジが中間ノードをスキップしない配置にする
-- 接続先が隣接するよう並び順を調整する（例: A→B→C なら A,B,C の順で配置）
-- 分岐があ���場合は2列配置にする（例: ゴールデンレコード→品質管理（左）/ カタログ（右））
-- 層間で多対一の接続がある場合、ターゲットを接続元の中央高さに配置する
+- 接続先が隣接するよう並び順を調整する（例: A→B→C なら A,B,C の順）
+- 分岐がある場合は 2 列配置
+- 層間で多対一の接続は、ターゲットを接続元の中央高さに配置
 
-**swimlane startSize オフセット（重要）**:
-レビュースクリプトはswimlane親ごとにstartSize分をY座標に加算する。
-座標設計時は**相対値ではなく絶対座標で貫通チェック**すること。
+### 6.3 swimlane 使用時の注意
 
-```
-絶対Y = ノードのy + Σ(親のy + 親のstartSize)
-例: mod(y=170) + layer(y=270,startSize=28) + sys(y=155,startSize=30)
-  = 170 + 270 + 28 + 155 + 30 = 653
-```
+`shape=swimlane` を使う場合は `startSize` の絶対座標オフセットを考慮すること（memory: feedback_drawio_swimlane_offset）。外部システムは swimlane 下方に配置する。
 
-**外部システム配置（C4/多層図）**:
-- 外部システムはモジュール行と**同じ高さや上方に置かない**
-- **モジュール行より下方**（Y値を大きく）に配置し、エッジを右下方向に流す
-- 中央列→右外部のエッジは右列モジュールを必ず横切るため、下方配置が必須
-- Shared Kernel の幅は右列モジュールの左端より狭くし、垂直エッジの通り道を確保
+---
 
-### 4.2.2 エッジ貫通レビュー
-
-`.drawio` ファイル保存後、以下のコマンドでチェック:
-
-```bash
-node .claude/skills/company-drawio/references/review-drawio.js docs/drawio/{filename}.drawio
-```
-
-- 終了コード `0`: 問題なし → 次のステップへ
-- 終了コード `1`: 貫通検出 �� 4.2.1 の方針に従いノード配置またはエッジスタイルを修正して再実行
-
-### 4.3 ファイル配置
+## 7. Phase 3: ファイル配置
 
 ```
 docs/drawio/
-├── index.html                        ← 一覧ページ（カードグリッド）
-├── {filename}.html                   ← 詳細ページ（draw.ioビューア埋め込み）
-├── {filename}.drawio                 ← draw.io XMLソース
-└── {filename}.png                    ← エクスポート画像（任意）
+├── {filename}.drawio              ← draw.io XML（必須）
+├── {filename}.html                ← 詳細ページ（必須、4セクション）
+├── index.html                     ← カード追記 + 件数更新
+└── {filename}.png                 ← エクスポート画像（任意）
 
 .companies/{org-slug}/docs/drawio/
-└── {filename}.md                     ← ソースメタデータ・Mermaid/XMLコード
+└── {filename}.md                  ← ソースメタデータ・Mermaid/XMLコード
 ```
 
-## 5. ページ構成
+### 7.1 `.drawio` ファイル保存の注意
 
-### 5.1 一覧ページ（index.html）のカードテンプレート
+- `open_drawio_xml` 使用時: XML をそのまま `docs/drawio/{filename}.drawio` に保存
+- `open_drawio_mermaid` 使用時: 同等の XML を `open_drawio_xml` でも生成し `.drawio` として保存する
 
-`<div class="grid">` 内に追記する:
+### 7.2 詳細ページの必須4セクション
+
+1. **draw.ioビューア** — Mermaid プレビュー + XMLダウンロードボタン
+2. **概要** — 図の目的・対象システム・スコープ
+3. **構成要素** — テーブル形式（要素名 / 種類 / 説明）
+4. **設計のポイント** — 設計判断・トレードオフ（2〜4項目）
+
+### 7.3 HTML 内 Mermaid 埋め込み禁則（Phase 4/5/6 で検証）
+
+- `<pre class="mermaid">` 内には**絵文字を使わない**（🌙🌅☀️等 → `★` 等 ASCII 文字で代替）
+- `\n`（改行エスケープ）を使わない。ノードテキストの区切りは半角スペース
+- `""`（ダブルクォート2つ）を使わない（`"` で代替）
+- `〜`（全角チルダ）は使用可
+- draw.io MCP に渡す Mermaid ソース（`.md` ファイル）では絵文字・`\n` を自由に使ってよい。**制約は HTML 埋め込み時のみ**
+
+### 7.4 一覧ページ（index.html）のカード追記
+
+`<div class="grid">` 内にカードを追記する:
+
 ```html
 <a href="./{filename}.html" class="card">
   <div class="card-body">
@@ -143,95 +171,12 @@ docs/drawio/
 </a>
 ```
 
-件数表示（`<p class="count">` 内の右側の数字のみ）も更新する。
-左側の数字（`<span id="match-count">`）はJSが自動制御するため変更不要。
+件数表示（`<p class="count">` の**右側の数字のみ**）も更新する。左側の `<span id="match-count">` は JS が自動制御。
 
-**注意**: 一覧ページには検索・フィルタ・ページネーション機能が実装済み。
-カード追加時にこの範囲を編集・削除しないこと。カードは `<div class="grid">` 内にのみ追記する。
+### 7.5 図の種類別アイコン
 
-### 5.2 詳細ページ（{filename}.html）の構成
-
-**以下のセクションは必須**:
-
-1. **draw.ioビューア** — iframe でdraw.io Viewerを埋め込み、インライン表示
-2. **概要** — 図の目的・対象システム・スコープ
-3. **構成要素** — テーブル形式（要素名 / 種類 / 説明）
-4. **設計のポイント** — 設計判断・トレードオフ（2〜4項目）
-5. **学習ポイント** — この図から得られる技術的・業務的知見を3〜5項目で記載（全図必須）。詳細は「学習ポイントセクション仕様」を参照
-
-共通要素:
-- ヘッダー: タイトル、タグ（案件名・図の種類）、生成日
-- 「draw.ioで編集」ボタン（エディタURLへのリンク）
-- 「一覧に戻る」リンク
-
-### 学習ポイントセクション仕様
-
-全詳細ページに必須。「設計のポイント」セクションの後に配置する。
-
-**記載ルール**:
-- 3〜5項目の要点。各項目は「タイトル（太字）＋説明文」の形式
-- この図を通じて理解すべき技術的・業務的知見を記載する
-- 設計パターンの背景、業務プロセスの構造、データの流れの意味など
-- 実案件（ストコン移行等）への適用が明確な場合は積極的に言及する
-
-HTMLテンプレート:
-```html
-<div class="section">
-  <h2>学習ポイント</h2>
-  <ul class="learning-points">
-    <li><strong>{要点タイトル}</strong> — {説明文}</li>
-    <li><strong>{要点タイトル}</strong> — {説明文}</li>
-    <li><strong>{要点タイトル}</strong> — {説明文}</li>
-  </ul>
-</div>
-```
-
-CSSスタイル（`<style>` 内に追加）:
-```css
-.learning-points { list-style: none; padding: 0; }
-.learning-points li { padding: 10px 0; border-bottom: 1px solid #e2e8f0; line-height: 1.7; }
-.learning-points li:last-child { border-bottom: none; }
-.learning-points li strong { color: #1e40af; }
-```
-
-### 5.3 ダイアグラム表示とアクションボタン
-
-詳細ページには **2つの機能** を配置する:
-
-1. **ページ内プレビュー** — Mermaid.js CDN でSVGレンダリング（すぐ確認用）
-2. **XMLダウンロードボタン** — `.drawio` ファイルをダウンロード（draw.ioアプリで編集用）
-
-```html
-<div class="diagram-container">
-  <div class="diagram-render">
-    <pre class="mermaid">{Mermaidソースコード}</pre>
-  </div>
-  <div class="diagram-actions">
-    <a href="./{filename}.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
-  </div>
-</div>
-```
-
-**ボタンの使い分け**:
-- ページを開くだけで図を確認できる（Mermaid.js プレビュー）
-- XMLダウンロード → draw.ioデスクトップアプリやWeb版で開いて編集（DB形状等を維持）
-
-**`.drawio` ファイルの保存**:
-- `open_drawio_xml` 使用時: XMLをそのまま `docs/drawio/{filename}.drawio` に保存
-- `open_drawio_mermaid` 使用時: MCP呼び出し後、同等のXMLを `open_drawio_xml` でも生成し `.drawio` として保存すること
-
-**HTML内Mermaidソースの注意事項（文字化け防止）**:
-- `<pre class="mermaid">` 内には絵文字（🌙🌅☀️等）を使わない。`★` 等のASCII文字で代替する
-- `\n`（改行エスケープ）を使わない。ノードテキストの区切りは半角スペースにする
-- `〜`（全角チルダ）は使用可。ただし `"` の代わりに `""`（ダブルクォート2つ）を使わない
-- draw.io MCP に渡すMermaidソース（.mdファイル）では絵文字・`\n` を自由に使ってよい。制約はHTML埋め込み時のみ
-
-### 5.4 図の種類別アイコン
-
-カードに表示するアイコン（絵文字）:
-
-| 図の種類 | アイコン | tag-type色 |
-|---------|---------|-----------|
+| 図の種類 | アイコン | tag-type 色 |
+|---|---|---|
 | ER図 | 🗄️ | `#8b5cf6`（紫） |
 | フローチャート | 🔀 | `#3b82f6`（青） |
 | シーケンス図 | 🔄 | `#22c55e`（緑） |
@@ -241,46 +186,176 @@ CSSスタイル（`<style>` 内に追加）:
 | 組織図 | 👥 | `#6b7280`（グレー） |
 | その他 | 📊 | `#6b7280`（グレー） |
 
-## 6. タスクログと Issue 作成
+---
 
-構成図の生成はファイル生成を伴う作業のため、必ずtask-logを記録する。
+## 8. Phase 4: L0 機械レビュー（エッジ貫通検出）
 
-### 6.1 タスクログ記録
-
-task-id: `YYYYMMDD-HHMMSS-drawio-{name}`
-
-### 6.2 Issue 作成
-
-タスク完了時に `gh issue create` で Issue を作成する。ラベル:
-- `org:{org-slug}`
-- `mode:direct`
-- `type:feat`
-- `dept:secretary`
-
-## 7. Git ワークフロー
-
-```
-1. ブランチ: {org-slug}/feat/{YYYY-MM-DD}-add-drawio-{name}
-2. git add docs/drawio/ .companies/{org-slug}/
-3. コミット: feat: draw.io図を追加（{name}）[{org-slug}] by {operator}
-4. PR作成 → URL報告（PR本文に draw.io エディタURL を記載すること）
-5. main に戻る
+```bash
+node .claude/skills/company-drawio/references/review-drawio.js docs/drawio/{filename}.drawio
 ```
 
-**PR本文に必ず含める項目**:
-- draw.io MCP ツール呼び出し時に返却されたエディタURL（`https://app.diagrams.net/...`）を `## draw.io エディタ` セクションとしてPR本文に記載する
-- レビュアーがワンクリックで図を確認・編集できるようにするため
+| exit code | 意味 | アクション |
+|---|---|---|
+| 0 | 問題なし | Phase 5 へ |
+| 1 | 貫通検出 | 検出ログを秘書にフィードバック → 1回自動修正 → 再実行 |
+| 2 | ファイルエラー | Phase 2 の配置ミス。Phase 3 からやり直し1回 |
 
-## 8. GitHub Pages 連携
+**致命判定**: 1回リトライ後も exit 1 なら中断して報告。L2 の s2 スコアにこの結果を反映させる。
 
-- ダイアグラムは `docs/drawio/` に配置（GitHub Pages 公開対象）
-- トップページ `docs/index.html` に紫枠のカードで自動リンク
-- `/company-dashboard` 実行時も `generate-dashboard.sh` が `docs/drawio/index.html` を検出してカードを維持
+---
 
-## 9. 前提条件
+## 9. Phase 5: L1 セルフ構造ゲート
 
-| 項目 | 要件 |
-|------|------|
-| MCP Server | `drawio`（`@drawio/mcp`）が `.mcp.json` に設定済み |
-| Node.js | インストール済み |
-| npx | インストール済み |
+| チェック項目 | 方法 |
+|---|---|
+| HTML 4セクション全存在 | grep で `draw.ioビューア`, `<h2>概要</h2>`, `<h2>構成要素</h2>`, `<h2>設計のポイント</h2>` |
+| `.drawio` ファイル存在 | ls で `docs/drawio/{filename}.drawio` |
+| index.html カード追記 | grep で `{filename}.html` リンク存在 |
+| 件数更新 | `<p class="count">` 右側数字が +1 |
+| Mermaid 埋め込み禁則 | grep で `<pre class="mermaid">` 内の絵文字・`\n`・`""` を検出 |
+| `.md` メタデータ存在 | ls で `.companies/{org}/docs/drawio/{filename}.md` |
+
+fail → 1回自動修正 → 再チェック → それでも fail なら中断。
+
+---
+
+## 10. Phase 6: L2 独立レビュー
+
+**fresh `general-purpose` agent** を起動し、`.drawio` XML と HTML を Read ツールで実際に読み込ませて整合性評価する。
+
+### 起動方法
+
+```
+Agent(
+  description: "drawio L2 review",
+  subagent_type: "general-purpose",
+  prompt: <references/review-prompt.md の内容 + 以下の情報>
+    - 詳細HTMLパス
+    - .drawio XMLパス
+    - 一覧 index.html パス
+    - 図の種類（ER図/フローチャート等）
+    - Phase 4 の review-drawio.js 実行結果（exit code + ログ）
+)
+```
+
+### 採点 6軸（詳細は `references/review-prompt.md`）
+
+| # | 軸 | 致命 |
+|---|---|---|
+| s1 | 構造準拠（HTML 4セクション） | - |
+| s2 | **エッジ貫通**（review-drawio.js 結果を反映） | ★ |
+| s3 | XML/HTML 整合性（ノードと構成要素表の一致） | - |
+| s4 | 設計ポイントの具体性 | - |
+| s5 | 一覧ページ更新（カード + 件数 + アイコン色） | - |
+| s6 | **HTML 埋め込み禁則**（絵文字・\n・""） | ★ |
+
+**判定**:
+- 致命軸 (s2, s6) が `< 0.5` → composite 強制 0, fail
+- それ以外は等重み平均 `≥ 0.85` で pass
+- fail → 1回自動修正 → 再レビュー → それでも fail なら **auto-merge 中止**
+
+---
+
+## 11. Phase 7: PR作成 & 自動マージ
+
+```bash
+git add docs/drawio/ .companies/{org-slug}/docs/drawio/ .companies/{org-slug}/.task-log/
+git commit -m "feat: draw.io図 {name} を追加 [{org-slug}] by {operator}"
+git push origin {branch}
+gh pr create --title "feat: draw.io図 {name} [{org-slug}]" --body "$(PR本文)"
+gh pr merge --auto --squash --delete-branch
+```
+
+### PR 本文に必ず含める項目
+
+- L0/L1/L2 全スコアと致命軸判定
+- draw.io MCP が返却したエディタ URL（`https://app.diagrams.net/...`）を `## draw.io エディタ` セクションに記載
+  - レビュアーがワンクリックで図を確認・編集できるように
+
+**注意**: 成果物はすべて `docs/drawio/` 配下（GitHub Pages 配信先）にあるため、マージ後の main 直コミットは不要。
+
+---
+
+## 12. Phase 8: task-log & Issue & 報告
+
+### task-log 更新（YAML フロントマター必須）
+
+```yaml
+---
+task_id: "{task-id}"
+status: completed
+mode: "direct"
+started: "..."
+completed: "..."
+request: "{ユーザー依頼原文}"
+issue_number: {n}
+pr_number: {n}
+subagents: [mcp-drawio-server, general-purpose-reviewer]
+l0_gate: pass
+l0_retries: {0|1}
+l1_gate: pass
+l1_retries: {0|1}
+l2_composite: 0.00
+l2_retries: {0|1}
+l2_scores:
+  s1_structure: 0.00
+  s2_edge_penetration: 0.00
+  s3_xml_html_consistency: 0.00
+  s4_design_points_specificity: 0.00
+  s5_index_update: 0.00
+  s6_html_violations: 0.00
+---
+```
+
+### Issue 作成
+
+```bash
+gh issue create \
+  --title "[{org-slug}] draw.io図 {name}" \
+  --label "org:{org-slug},mode:direct,type:drawio,dept:secretary" \
+  --body "$(Issue本文)"
+```
+
+### 最終報告フォーマット
+
+```
+✅ draw.io図 {name} を公開しました！
+
+L0エッジ貫通:    PASS（retry {0|1}）
+L1構造ゲート:    PASS（retry {0|1}）
+L2独立レビュー:  composite {score}（retry {0|1}）
+
+PR:     {pr_url} (merged)
+Issue:  {issue_url}
+図URL:  https://sas-sasao.github.io/cc-sier-organization/drawio/{filename}.html
+```
+
+---
+
+## 13. オプションフラグ
+
+| フラグ | 既定 | 効果 |
+|---|---|---|
+| `--force` | off | 同名ファイル既存時に上書き |
+| `--no-merge` | off | PR 作成まで実行し、`gh pr merge` をスキップ |
+| `--dry-run` | off | Phase 6 まで実行、Phase 7 以降スキップ |
+| `--yes` | off | Phase 0 ヒアリングをスキップしデフォルト値で進行 |
+
+---
+
+## 14. エラー時の中断ポリシー
+
+- 各 Phase で fail → task-log を `status: blocked` で保存
+- ユーザーへの報告に Phase 名・原因・手動復旧コマンドを含める
+- 部分作成済みのブランチ / PR は削除しない
+- MCP 呼び出し失敗時は 1 回リトライ。それでも失敗なら Phase 2 を中断報告
+
+---
+
+## 15. 参照ファイル
+
+| ファイル | 用途 |
+|---|---|
+| `references/review-prompt.md` | L2 独立レビュアー採点プロンプト（6軸、JSON出力） |
+| `references/review-drawio.js` | L0 エッジ貫通検出スクリプト（Phase 4） |
+| `.claude/skills/company/references/task-log-template.md` | task-log / Issue の共通スキーマ |
