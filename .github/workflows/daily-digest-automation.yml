@@ -1,0 +1,707 @@
+name: Daily Digest Automation (08:00 JST)
+
+# 毎朝 08:00 JST に /company-daily-digest 全 8 phase を自動実行し、
+# GitHub Pages に当日の日次ダイジェストを自動公開する。
+#
+# 対象組織: domain-tech-collection
+# 認証: CLAUDE_CODE_OAUTH_TOKEN (Max plan OAuth) 推奨
+#
+# Phase 構成:
+#   1. 前処理（ブランチ作成）             — shell
+#   2. Web 巡回（Agent Teams 並列）        — claude-code-action (Task + WebFetch)
+#   3. MD 集約                             — claude-code-action
+#   4. L1 セルフ構造ゲート                 — claude-code-action (Bash/Grep)
+#   5. L2 独立レビュー                     — claude-code-action (fresh Task)
+#   6. PR 作成 & auto-merge                — shell
+#   7. HTML 再生成（main 直コミット）      — shell (generate-daily-digest-html.sh)
+#   8. Issue 作成 + tracking issue         — shell
+#
+# 既知の課題への対策:
+#   - Issue #690 WebFetch 無効化:
+#       env と claude_args の両面で解除を試みる + Claude に Bash+curl fallback を明示
+#   - branch protection 不在:
+#       gh pr merge --auto は使わず --squash --delete-branch で即マージ
+#   - claude-code-action の env 上書き:
+#       認証は input parameter と job-level env の両方で渡す
+#   - git remote 書き換え:
+#       push 前に https://x-access-token:${GH_TOKEN}@... で再設定
+
+on:
+  schedule:
+    # 08:00 JST = 23:00 UTC (前日)
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "本日分 MD 既存でも上書きする"
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: "Phase 2-5 のみ実行（PR/HTML/Issue をスキップ）"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: daily-digest-automation
+  cancel-in-progress: false
+
+env:
+  ORG_SLUG: domain-tech-collection
+  TRACKING_ISSUE_LABEL: daily-digest-automation-tracker
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # 認証 env は job レベルで定義する。
+    # step レベルは post step に伝播しないため、claude-code-action の
+    # post-buffered-inline-comments.ts env validation が失敗する。
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      # issue #690 WebFetch/WebSearch 黙殺対策: DISALLOWED_TOOLS を明示的に空化
+      DISALLOWED_TOOLS: ""
+      CLAUDE_CODE_DISALLOWED_TOOLS: ""
+
+    steps:
+      # -----------------------------------------------------------------
+      # Step 1: Checkout
+      # -----------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # -----------------------------------------------------------------
+      # Step 2: Pre-flight auth check
+      # -----------------------------------------------------------------
+      - name: Pre-flight auth check
+        run: |
+          if [ -z "${ANTHROPIC_API_KEY:-}" ] && [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+            cat <<'MSG' >&2
+          ::error::認証情報が未設定です。
+          CLAUDE_CODE_OAUTH_TOKEN (Max/Pro plan OAuth) または
+          ANTHROPIC_API_KEY をリポジトリ Secrets に設定してください。
+          MSG
+            exit 1
+          fi
+          if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+            echo "::notice::Using CLAUDE_CODE_OAUTH_TOKEN (OAuth / Max plan)"
+          else
+            echo "::notice::Using ANTHROPIC_API_KEY (direct API)"
+          fi
+
+      # -----------------------------------------------------------------
+      # Step 3: 日付・ブランチ名を決定（JST 基準）
+      # -----------------------------------------------------------------
+      - name: Determine date & branch
+        id: date
+        run: |
+          DATE_JST=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          DOW_JST=$(TZ=Asia/Tokyo date +%u)
+          case $DOW_JST in
+            1) DOW_JP=月 ;; 2) DOW_JP=火 ;; 3) DOW_JP=水 ;;
+            4) DOW_JP=木 ;; 5) DOW_JP=金 ;; 6) DOW_JP=土 ;; 7) DOW_JP=日 ;;
+          esac
+          TIMESTAMP=$(TZ=Asia/Tokyo date +%Y%m%d-%H%M%S)
+          STARTED_ISO=$(TZ=Asia/Tokyo date +%Y-%m-%dT%H:%M:%S+09:00)
+          TASK_ID="${TIMESTAMP}-daily-digest-actions"
+          BRANCH="${ORG_SLUG}/feat/${DATE_JST}-daily-digest-actions"
+
+          {
+            echo "date_jst=$DATE_JST"
+            echo "dow_jp=$DOW_JP"
+            echo "timestamp=$TIMESTAMP"
+            echo "started_iso=$STARTED_ISO"
+            echo "task_id=$TASK_ID"
+            echo "branch=$BRANCH"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::target ${DATE_JST} (${DOW_JP}), task_id=${TASK_ID}, branch=${BRANCH}"
+
+      # -----------------------------------------------------------------
+      # Step 4: 本日分 MD 既存チェック（冪等性）
+      # -----------------------------------------------------------------
+      - name: Check existing digest
+        id: check
+        env:
+          FORCE: ${{ github.event.inputs.force }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+        run: |
+          MD=".companies/${ORG_SLUG}/docs/daily-digest/${DATE_JST}.md"
+          if [ -f "$MD" ] && [ "$FORCE" != "true" ]; then
+            echo "::notice::本日分 MD 既存のためスキップ: $MD"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # -----------------------------------------------------------------
+      # Step 5: Phase 1 前処理（ブランチ作成）
+      # -----------------------------------------------------------------
+      - name: Create branch (Phase 1)
+        if: steps.check.outputs.skip != 'true'
+        env:
+          BRANCH: ${{ steps.date.outputs.branch }}
+        run: |
+          git config user.email "daily-digest-bot@users.noreply.github.com"
+          git config user.name "Daily Digest Bot"
+          git checkout -b "$BRANCH"
+
+      # -----------------------------------------------------------------
+      # Step 6: Phase 2-5 + task-log を Claude Code Action で実行
+      #
+      # 注意:
+      #   - Task tool は allowedTools に明示指定しないと subagent spawn 不可
+      #   - WebFetch / WebSearch は issue #690 の対策として複数レイヤーで解除
+      #   - 万一 WebFetch が blocked の場合、Claude に Bash+curl fallback を明示指示
+      # -----------------------------------------------------------------
+      - name: Run Claude Code (Phase 2-5 + task-log)
+        id: claude
+        if: steps.check.outputs.skip != 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            あなたは /company-daily-digest Skill の Phase 2-5 を GitHub Actions 環境で実行する秘書エージェントです。
+            git / gh コマンドの実行は後続 shell step の責務なので、**一切実行禁止**です。
+
+            # 実行コンテキスト
+            - 組織: ${{ env.ORG_SLUG }}
+            - 対象日: ${{ steps.date.outputs.date_jst }} (${{ steps.date.outputs.dow_jp }})
+            - モード: agent-teams-actions
+            - task-id: ${{ steps.date.outputs.task_id }}
+            - operator: github-actions-bot
+            - started (JST): ${{ steps.date.outputs.started_iso }}
+
+            # 必読ファイル（作業開始前に Read ツールで必ず読むこと）
+
+            1. `.claude/skills/company-daily-digest/SKILL.md` — 本 Skill の全体仕様
+            2. `.claude/skills/company-daily-digest/references/review-prompt.md` — L2 採点プロンプト
+            3. `.companies/${{ env.ORG_SLUG }}/docs/info-source-master.md` — 巡回対象（優先度「高」）
+            4. `.companies/${{ env.ORG_SLUG }}/masters/quality-gates/by-type/daily-digest.md` — フォーマット仕様
+            5. `.companies/${{ env.ORG_SLUG }}/docs/daily-digest/2026-04-10.md` — **出力形式の参考実例**（フォーマットを真似ること）
+
+            # Phase 2: Web 巡回（Agent Teams 並列）
+
+            **Task ツール**で **同一メッセージ内** に 2 つの `general-purpose` agent を並列起動する。
+            subagent_type は必ず `"general-purpose"`（tech-researcher 等は WebFetch を持たないため不可）。
+
+            ## tech agent への prompt テンプレート
+
+            ```
+            あなたは技術系情報収集 agent です。
+            `.companies/${{ env.ORG_SLUG }}/docs/info-source-master.md` の B 章（技術スタック）の
+            優先度「高」ソースを全件 Web 巡回し、本日（${{ steps.date.outputs.date_jst }}）公開記事を収集せよ。
+
+            対象ソースの例（info-source-master.md を Read して優先度「高」を抽出）:
+            - Zenn トレンド
+            - Qiita トレンド
+            - はてなブックマーク テクノロジー
+            - DevelopersIO (Classmethod)
+            - AWS What's New
+
+            ## 取得方法
+            - **WebFetch ツールを第一選択**で使用
+            - WebFetch が失敗する場合は Bash ツールで `curl -sL -A "Mozilla/5.0" "$URL" | head -c 200000` の fallback を使用
+            - 両方失敗したソースは理由を併記して報告
+
+            ## 各記事について返却する情報
+            - タイトル（タイトル内の半角 `[...]` は必ず全角 `【...】` に置換）
+            - URL（`https://` で始まる絶対パス、必須）
+            - 1行の要約（句読点で終わる、情報密度高く）
+
+            ## 応答形式
+            以下のサブセクション別にテーブル形式で整理:
+            - A1. AI駆動開発・エージェント
+            - A2. AI・ML・LLM
+            - A3. クラウド・インフラ
+            - A4. データ基盤・DWH
+            - A5. 開発プラクティス・設計
+            - A6. セキュリティ
+
+            テーブル形式: `| # | 記事 | ソース | 要約 |`
+            ```
+
+            ## retail agent への prompt テンプレート
+
+            ```
+            あなたは小売ドメイン情報収集 agent です。
+            `.companies/${{ env.ORG_SLUG }}/docs/info-source-master.md` の A 章（小売ドメイン）の
+            優先度「高」ソースを全件 Web 巡回し、本日公開記事を収集せよ。
+
+            対象ソースの例:
+            - 流通ニュース
+            - ダイヤモンド・チェーンストア オンライン
+            - ネットショップ担当者フォーラム
+            - ECのミカタ
+            - ITmedia ビジネス（流通・小売）
+            - ロジスティクス・トゥデイ
+
+            取得方法・返却形式は tech agent と同じ（WebFetch → Bash+curl fallback）。
+
+            応答形式: 以下のサブセクション別にテーブル形式
+            - B1. 業態変革・新店
+            - B2. 経営・人事戦略
+            - B3. PB・商品戦略
+            - B4. EC・デジタル
+            - B5. 決算・統計
+            - B6. セキュリティ
+            ```
+
+            # Phase 3: MD 集約
+
+            2 agent の結果を統合し、以下のパスに MD を生成:
+            `.companies/${{ env.ORG_SLUG }}/docs/daily-digest/${{ steps.date.outputs.date_jst }}.md`
+
+            構成は `masters/quality-gates/by-type/daily-digest.md` に**厳密準拠**:
+            - H1 + blockquote ヘッダー 4 行（組織・生成方式・巡回ソース数・オペレーター=github-actions-bot）
+            - `## 本日のハイライト` — 5-7 件の番号付きリスト（**bold + em-dash で記述**）
+            - `## A. 技術スタック` — サブセクション A1〜A6、記事はテーブル形式 `| # | 記事 | ソース | 要約 |`
+            - `## B. 小売ドメイン` — サブセクション B1〜B6、同じテーブル形式
+            - `## C. クロスドメイン分析` — **パラグラフ形式**（テーブル形式禁止）、3-5 トピック、SIer 示唆含む
+            - `## D. 巡回メタデータ` — ソース別ステータステーブル + 末尾に **総記事数**
+
+            **必須**: 2026-04-10.md を Read してフォーマットを確認し、完全に同じ粒度・構造で記述すること。
+            リスト形式 `- [...](URL) — 要約` は禁止（テーブル形式のみ）。
+
+            # Phase 4: L1 セルフ構造ゲート
+
+            Bash/Grep で機械チェック:
+            - 全記事タイトルが `[タイトル](URL)` 形式
+            - URL が `https://` で始まる
+            - 章見出し存在: `# 日次ダイジェスト`, `## 本日のハイライト`, `## A\. 技術スタック`, `## B\. 小売ドメイン`, `## C\. クロスドメイン分析`, `## D\. 巡回メタデータ`
+            - 半角 `[...]` の残存チェック: `grep -P '\[[^\]【】]*\]\(' ${MD} | grep -v '【'` で 0 件
+
+            fail 項目があれば **1 回だけ** 自動修正 → 再チェック → それでも fail なら最終出力に `L1_FAIL` と書いて停止。
+
+            # Phase 5: L2 独立レビュー
+
+            **Task ツールで fresh な general-purpose agent を起動**し、
+            `.claude/skills/company-daily-digest/references/review-prompt.md` の内容を渡して L2 レビューを実施。
+
+            レビュアー prompt のテンプレート:
+            ```
+            {review-prompt.md の全文}
+
+            ## 評価対象
+            - 組織: ${{ env.ORG_SLUG }}
+            - 日付: ${{ steps.date.outputs.date_jst }}
+            - MD パス: .companies/${{ env.ORG_SLUG }}/docs/daily-digest/${{ steps.date.outputs.date_jst }}.md
+            - 上記パスを Read して本文を取得し、6 軸で採点せよ。
+
+            出力は指定の JSON 形式のみ（コードブロック不要）。
+            ```
+
+            判定ルール:
+            - 致命軸 (s2 ソースリンク完全性, s6 禁則違反) のいずれかが < 0.5 → composite 強制 0 / fail
+            - それ以外: composite = 等重み平均、≥ 0.85 で pass
+            - fail 時は findings/fix_suggestions を参考に MD を **1 回だけ** 修正 → 再レビュー → 再度 fail なら `L2_FAIL` を出力して停止
+
+            # Phase 8 (task-log 作成)
+
+            以下のパスに task-log を作成:
+            `.companies/${{ env.ORG_SLUG }}/.task-log/${{ steps.date.outputs.task_id }}.md`
+
+            YAML フロントマター必須（**Subagent 名は英字**、Case Bank 検出のため）:
+
+            ```yaml
+            ---
+            task_id: "${{ steps.date.outputs.task_id }}"
+            org: "${{ env.ORG_SLUG }}"
+            operator: "github-actions-bot"
+            status: completed
+            mode: "agent-teams-actions"
+            started: "${{ steps.date.outputs.started_iso }}"
+            completed: "<現在時刻 ISO8601+09:00>"
+            request: "daily-digest-automation.yml cron 08:00 JST"
+            issue_number: null
+            pr_number: null
+            subagents: [general-purpose-tech, general-purpose-retail, general-purpose-reviewer]
+            l1_gate: pass
+            l1_retries: <0 or 1>
+            l2_composite: <0.00>
+            l2_retries: <0 or 1>
+            l2_scores:
+              s1_structure: <0.00>
+              s2_links: <0.00>
+              s3_summary: <0.00>
+              s4_cross_domain: <0.00>
+              s5_dedup: <0.00>
+              s6_violations: <0.00>
+            ---
+            ```
+
+            frontmatter 直後に本文（実行計画・エージェント作業ログ）を記述し、
+            末尾に **`## judge` セクション**を以下の形式で追記（SKILL.md Section 10 準拠、6→3 軸マッピング）:
+
+            ```markdown
+            ## judge
+
+            ```yaml
+            completeness: <(s1_structure + s5_dedup) / 2>
+            accuracy: <(s2_links + s3_summary) / 2>
+            clarity: <(s4_cross_domain + s6_violations) / 2>
+            total: <l2_composite>
+            failure_reason: ""
+            judge_comment: "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング"
+            judged_at: "<ISO8601+09:00>"
+            ```
+            ```
+
+            # 絶対に守る禁止事項
+
+            - ❌ `git` / `gh` コマンドの実行（後続 shell step の責務）
+            - ❌ `docs/daily-digest/*.html` / `docs/index.html` の編集（Phase 7 の責務）
+            - ❌ 上記 MD ファイルと task-log 以外の編集（`.claude/`, `plugins/`, `masters/` は読み取り専用）
+            - ❌ `rm` / `git reset --hard` 等の破壊的操作
+
+            # 最終出力（stdout の最後に必ず以下のいずれかを書くこと）
+
+            成功時:
+            ```
+            DIGEST_READY tech_count=<N> retail_count=<M> total=<合計> l2_composite=<score>
+            ```
+
+            失敗時:
+            ```
+            DIGEST_FAILED phase=<2|3|4|5> reason=<原因>
+            ```
+          claude_args: |
+            --max-turns 150
+            --permission-mode bypassPermissions
+            --model claude-opus-4-6
+            --allowedTools "Read,Write,Edit,Bash,Grep,Glob,Task,WebFetch,WebSearch"
+
+      # -----------------------------------------------------------------
+      # Step 7: 生成物検証 + スコープ外変更を破棄
+      # -----------------------------------------------------------------
+      - name: Verify output & enforce scope
+        id: verify
+        if: steps.check.outputs.skip != 'true'
+        env:
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          TASK_ID: ${{ steps.date.outputs.task_id }}
+        run: |
+          MD_PATH=".companies/${ORG_SLUG}/docs/daily-digest/${DATE_JST}.md"
+          TASKLOG_PATH=".companies/${ORG_SLUG}/.task-log/${TASK_ID}.md"
+
+          echo "::group::git status (before scope enforcement)"
+          git status --porcelain || true
+          echo "::endgroup::"
+
+          # 必須ファイル存在チェック
+          if [ ! -f "$MD_PATH" ]; then
+            echo "::error::MD ファイル未生成: $MD_PATH"
+            echo "::group::daily-digest directory listing"
+            ls -la ".companies/${ORG_SLUG}/docs/daily-digest/" || true
+            echo "::endgroup::"
+            exit 1
+          fi
+          if [ ! -f "$TASKLOG_PATH" ]; then
+            echo "::error::task-log 未生成: $TASKLOG_PATH"
+            echo "::group::task-log directory listing"
+            ls -la ".companies/${ORG_SLUG}/.task-log/" || true
+            echo "::endgroup::"
+            exit 1
+          fi
+
+          # MD 基本品質チェック
+          MD_LINES=$(wc -l < "$MD_PATH")
+          if [ "$MD_LINES" -lt 50 ]; then
+            echo "::error::MD が短すぎます ($MD_LINES lines, 50 未満)"
+            exit 1
+          fi
+
+          # 章見出しの存在確認
+          for heading in "# 日次ダイジェスト" "## 本日のハイライト" "## A" "## B" "## C" "## D"; do
+            if ! grep -qF "$heading" "$MD_PATH"; then
+              echo "::error::必須見出し欠落: $heading"
+              exit 1
+            fi
+          done
+
+          # task-log から L1/L2 を抽出
+          L1_GATE=$(grep -E "^l1_gate:" "$TASKLOG_PATH" | head -1 | awk '{print $2}' | tr -d '"' || echo "unknown")
+          L2_COMPOSITE=$(grep -E "^l2_composite:" "$TASKLOG_PATH" | head -1 | awk '{print $2}' | tr -d '"' || echo "0.00")
+
+          if [ "$L1_GATE" != "pass" ]; then
+            echo "::error::L1 gate failed: $L1_GATE"
+            exit 1
+          fi
+
+          # L2 composite 0.85 未満は警告（エラーにはしない、Phase 5 で既に retry 済のはず）
+          if awk "BEGIN {exit !($L2_COMPOSITE < 0.85)}"; then
+            echo "::warning::L2 composite が 0.85 未満: $L2_COMPOSITE"
+          fi
+
+          # スコープ外変更を破棄（MD / task-log のみを残す）
+          # 1. すべてを一旦 add
+          # 2. 許可ファイルを reset (= unstage)
+          # 3. 残ったステージ = スコープ外 → checkout / rm で破棄
+          git add -A
+          git reset -- "$MD_PATH" "$TASKLOG_PATH" || true
+
+          # ステージに残ったもの（スコープ外）を破棄
+          STAGED_OUT=$(git diff --cached --name-only || true)
+          if [ -n "$STAGED_OUT" ]; then
+            echo "::warning::スコープ外変更を破棄します:"
+            echo "$STAGED_OUT"
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+                git checkout HEAD -- "$f" 2>/dev/null || true
+              else
+                rm -f "$f"
+              fi
+            done <<< "$STAGED_OUT"
+            git reset >/dev/null 2>&1 || true
+          fi
+
+          # Unstaged の変更も同様に破棄
+          UNSTAGED=$(git diff --name-only || true)
+          if [ -n "$UNSTAGED" ]; then
+            # MD と task-log 以外の unstaged は破棄
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              if [ "$f" != "$MD_PATH" ] && [ "$f" != "$TASKLOG_PATH" ]; then
+                git checkout HEAD -- "$f" 2>/dev/null || true
+              fi
+            done <<< "$UNSTAGED"
+          fi
+
+          {
+            echo "md_path=$MD_PATH"
+            echo "tasklog_path=$TASKLOG_PATH"
+            echo "md_lines=$MD_LINES"
+            echo "l1_gate=$L1_GATE"
+            echo "l2_composite=$L2_COMPOSITE"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::verify OK — MD $MD_LINES lines, L1=$L1_GATE, L2 composite=$L2_COMPOSITE"
+
+      # -----------------------------------------------------------------
+      # Step 8: Phase 6 PR 作成 & 即マージ
+      # -----------------------------------------------------------------
+      - name: Create PR and merge (Phase 6)
+        id: pr
+        if: steps.check.outputs.skip != 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          BRANCH: ${{ steps.date.outputs.branch }}
+          MD_PATH: ${{ steps.verify.outputs.md_path }}
+          TASKLOG_PATH: ${{ steps.verify.outputs.tasklog_path }}
+          L2_COMPOSITE: ${{ steps.verify.outputs.l2_composite }}
+          L1_GATE: ${{ steps.verify.outputs.l1_gate }}
+        run: |
+          # claude-code-action が git remote を書き換えている可能性があるため再設定
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git add "$MD_PATH" "$TASKLOG_PATH"
+
+          COMMIT_MSG=$(cat <<EOF
+          feat: 日次ダイジェスト ${DATE_JST} (${DOW_JP}) [${ORG_SLUG}] by github-actions
+
+          L1 gate: ${L1_GATE}
+          L2 composite: ${L2_COMPOSITE}
+
+          🤖 Generated by daily-digest-automation.yml
+          EOF
+          )
+          git commit -m "$COMMIT_MSG"
+          git push origin "$BRANCH"
+
+          gh label create "daily-digest-automation" --color "1d76db" \
+            --description "Actions による日次ダイジェスト自動生成" 2>/dev/null || true
+
+          PR_BODY=$(cat <<EOF
+          ## 概要
+          - 日次ダイジェスト **${DATE_JST} (${DOW_JP})**
+          - 組織: ${ORG_SLUG}
+          - 実行モード: agent-teams-actions
+          - workflow: \`.github/workflows/daily-digest-automation.yml\`
+
+          ## 品質ゲート結果
+          - L1 セルフ構造ゲート: ${L1_GATE}
+          - L2 独立レビュー composite: ${L2_COMPOSITE}
+
+          ## 成果物
+          - \`${MD_PATH}\`
+          - \`${TASKLOG_PATH}\`
+
+          ## Phase 7 (HTML 再生成)
+          PR マージ後、後続 shell step で \`.claude/hooks/generate-daily-digest-html.sh\` を実行し
+          main 直コミットで HTML を再生成。GitHub Pages に即反映される。
+
+          ---
+          🤖 Generated by \`daily-digest-automation.yml\` — https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}
+          EOF
+          )
+
+          PR_URL=$(gh pr create \
+            --title "feat: 日次ダイジェスト ${DATE_JST} [${ORG_SLUG}] (auto)" \
+            --body "$PR_BODY" \
+            --label "daily-digest-automation" \
+            --base main \
+            --head "$BRANCH")
+
+          PR_NUMBER="${PR_URL##*/}"
+
+          # 即マージ（branch protection 不在のため --auto は使わない）
+          gh pr merge "$PR_NUMBER" --squash --delete-branch
+
+          {
+            echo "pr_url=$PR_URL"
+            echo "pr_number=$PR_NUMBER"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::PR #$PR_NUMBER merged: $PR_URL"
+
+      # -----------------------------------------------------------------
+      # Step 9: Phase 7 HTML 再生成 → main 直コミット
+      # -----------------------------------------------------------------
+      - name: Regenerate HTML & push to main (Phase 7)
+        id: html
+        if: steps.check.outputs.skip != 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+        run: |
+          git checkout main
+          git pull origin main
+
+          if [ ! -f ".claude/hooks/generate-daily-digest-html.sh" ]; then
+            echo "::error::generate-daily-digest-html.sh が見つかりません"
+            exit 1
+          fi
+          chmod +x .claude/hooks/generate-daily-digest-html.sh
+
+          bash .claude/hooks/generate-daily-digest-html.sh "${ORG_SLUG}"
+
+          git add docs/daily-digest/ docs/index.html 2>/dev/null || true
+
+          if git diff --cached --quiet; then
+            echo "::notice::HTML 変更なし（既に最新）"
+          else
+            git commit -m "chore: ダッシュボード更新 [daily-digest-automation] (${DATE_JST})"
+            git push origin main
+            echo "::notice::HTML regenerated and pushed to main"
+          fi
+
+      # -----------------------------------------------------------------
+      # Step 10: Phase 8 Issue 作成
+      # -----------------------------------------------------------------
+      - name: Create Issue (Phase 8)
+        id: issue
+        if: steps.check.outputs.skip != 'true' && github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          L2_COMPOSITE: ${{ steps.verify.outputs.l2_composite }}
+        run: |
+          gh label create "org:${ORG_SLUG}" --color "0075ca" --force 2>/dev/null || true
+          gh label create "mode:agent-teams-actions" --color "e4e669" --force 2>/dev/null || true
+          gh label create "type:daily-digest" --color "008672" --force 2>/dev/null || true
+          gh label create "dept:secretary" --color "7057ff" --force 2>/dev/null || true
+
+          ISSUE_URL=$(gh issue create \
+            --title "[${ORG_SLUG}] 日次ダイジェスト ${DATE_JST} (${DOW_JP}) - auto" \
+            --label "org:${ORG_SLUG},mode:agent-teams-actions,type:daily-digest,dept:secretary" \
+            --body "## 概要
+          - 日付: ${DATE_JST} (${DOW_JP})
+          - 組織: ${ORG_SLUG}
+          - 実行: daily-digest-automation.yml (cron 08:00 JST)
+          - L2 composite: ${L2_COMPOSITE}
+
+          ## 成果物
+          - PR: ${PR_URL}
+          - HTML: https://sas-sasao.github.io/cc-sier-organization/daily-digest/#${DATE_JST}
+
+          🤖 Generated by \`.github/workflows/daily-digest-automation.yml\`")
+
+          echo "issue_url=$ISSUE_URL" >> "$GITHUB_OUTPUT"
+          echo "::notice::Issue created: $ISSUE_URL"
+
+      # -----------------------------------------------------------------
+      # Step 11: tracking Issue へコメント（成功・失敗問わず常時実行）
+      # -----------------------------------------------------------------
+      - name: Update tracking issue
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          JOB_STATUS: ${{ job.status }}
+          SKIP: ${{ steps.check.outputs.skip }}
+          L1_GATE: ${{ steps.verify.outputs.l1_gate }}
+          L2_COMPOSITE: ${{ steps.verify.outputs.l2_composite }}
+          MD_LINES: ${{ steps.verify.outputs.md_lines }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+          ISSUE_URL: ${{ steps.issue.outputs.issue_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create "${TRACKING_ISSUE_LABEL}" --color "fbca04" \
+            --description "daily-digest 自動生成トラッキング" 2>/dev/null || true
+
+          ISSUE_NUMBER=$(gh issue list --label "${TRACKING_ISSUE_LABEL}" --state open \
+            --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUE_NUMBER" ]; then
+            ISSUE_URL_CREATED=$(gh issue create \
+              --title "daily-digest: 自動生成トラッキング (08:00 JST)" \
+              --label "${TRACKING_ISSUE_LABEL}" \
+              --body "この Issue は \`daily-digest-automation.yml\` workflow の実行履歴を記録します。毎日 08:00 JST の実行結果がコメントとして追記されます。
+
+          ## ワークフローの目的
+          - /company-daily-digest の 8 phase を完全自動化
+          - GitHub Pages に当日の日次ダイジェストを自動公開
+          - 08:00 JST = 23:00 UTC (前日) に cron 発火
+          - Agent Teams 並列 (Task tool) + WebFetch で info-source-master を巡回
+
+          ## 失敗時のフォールバック
+          workflow が失敗した場合は、ローカル Claude Code で \`/company-daily-digest\` を手動実行してください。")
+            ISSUE_NUMBER="${ISSUE_URL_CREATED##*/}"
+          fi
+
+          if [ "$SKIP" = "true" ]; then
+            STATUS_ICON="⏭️"
+            STATUS_TEXT="スキップ（本日分 MD 既存）"
+          elif [ "$JOB_STATUS" = "success" ]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="完了 — L1=${L1_GATE} / L2=${L2_COMPOSITE} / PR: ${PR_URL}"
+          else
+            STATUS_ICON="❌"
+            STATUS_TEXT="失敗 — workflow run を確認: ${RUN_URL}"
+          fi
+
+          COMMENT=$(cat <<EOF
+          ${STATUS_ICON} **${DATE_JST} (${DOW_JP})** — ${STATUS_TEXT}
+
+          | 項目 | 値 |
+          |---|---|
+          | job status | \`${JOB_STATUS}\` |
+          | L1 gate | ${L1_GATE:-n/a} |
+          | L2 composite | ${L2_COMPOSITE:-n/a} |
+          | MD lines | ${MD_LINES:-n/a} |
+          | PR | ${PR_URL:-n/a} |
+          | Issue | ${ISSUE_URL:-n/a} |
+          | workflow run | ${RUN_URL} |
+          EOF
+          )
+
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT"
+          echo "::notice::tracking issue #$ISSUE_NUMBER updated"
