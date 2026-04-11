@@ -194,6 +194,92 @@ def fetch_all_items(token: str) -> tuple[list[dict], str]:
 
 
 # ----------------------------------------------------------------------------
+# WBS stats (parse-wbs.py を呼び出して WBS 全量を取得)
+# ----------------------------------------------------------------------------
+
+def fetch_wbs_stats() -> dict:
+    """parse-wbs.py を実行し WBS 全タスクの集計結果を返す。
+
+    Returns:
+        {
+            "total": int,
+            "done": int, "in_progress": int, "todo": int,
+            "progress_pct": float,
+            "by_org": {"domain-tech-collection": {"total": N, "done": M, ...}, ...},
+            "by_iteration": {"W1": {...}, "W2-3": {...}, ...},
+        }
+    """
+    try:
+        result = subprocess.run(
+            ["python3", str(REPO_ROOT / ".claude/hooks/parse-wbs.py")],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        tasks = json.loads(result.stdout)
+    except Exception as e:
+        print(f"  WARN: fetch_wbs_stats failed: {e}", file=sys.stderr)
+        return {
+            "total": 0,
+            "done": 0,
+            "in_progress": 0,
+            "todo": 0,
+            "progress_pct": 0.0,
+            "by_org": {},
+            "by_iteration": {},
+        }
+
+    total = len(tasks)
+    by_status: Counter[str] = Counter(t.get("status", "todo") for t in tasks)
+    done_count = by_status.get("done", 0)
+    in_progress_count = by_status.get("in-progress", 0)
+    todo_count = by_status.get("todo", 0)
+
+    # 組織別集計
+    by_org: dict[str, dict[str, int]] = defaultdict(lambda: {"total": 0, "done": 0, "in_progress": 0, "todo": 0})
+    for t in tasks:
+        org = t.get("org") or "unknown"
+        status_key = t.get("status", "todo").replace("-", "_")
+        by_org[org]["total"] += 1
+        if status_key in by_org[org]:
+            by_org[org][status_key] += 1
+
+    # Iteration 別集計 (sort key のため W番号で整理)
+    by_iter: dict[str, dict[str, int]] = defaultdict(lambda: {"total": 0, "done": 0, "in_progress": 0, "todo": 0})
+    for t in tasks:
+        it = (t.get("iteration") or "—").strip()
+        status_key = t.get("status", "todo").replace("-", "_")
+        by_iter[it]["total"] += 1
+        if status_key in by_iter[it]:
+            by_iter[it][status_key] += 1
+
+    # Iteration を W 番号で sort (W1 < W2-3 < W1-10 < —)
+    def iter_sort_key(it: str) -> tuple:
+        if it == "—":
+            return (999, 0, 0)
+        m = re.match(r"W(\d+)(?:-(\d+))?", it)
+        if m:
+            start = int(m.group(1))
+            end = int(m.group(2)) if m.group(2) else start
+            return (start, end - start, 0)
+        return (998, 0, 0)
+
+    by_iter_sorted = dict(sorted(by_iter.items(), key=lambda kv: iter_sort_key(kv[0])))
+
+    progress_pct = round(done_count / total * 100, 1) if total > 0 else 0.0
+
+    return {
+        "total": total,
+        "done": done_count,
+        "in_progress": in_progress_count,
+        "todo": todo_count,
+        "progress_pct": progress_pct,
+        "by_org": dict(by_org),
+        "by_iteration": by_iter_sorted,
+    }
+
+
+# ----------------------------------------------------------------------------
 # Aggregation
 # ----------------------------------------------------------------------------
 
@@ -425,6 +511,75 @@ h1 {
 .summary-delta.down { background: rgba(220,53,69,0.12); color: var(--red); }
 .summary-delta.flat { background: rgba(108,117,125,0.12); color: var(--muted); }
 
+/* WBS progress card */
+.wbs-progress-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px 24px 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+.wbs-progress-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--green), var(--teal));
+}
+.wbs-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.wbs-title {
+  font-size: 1.05rem; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.wbs-title .accent-bar {
+  width: 4px; height: 18px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--green), var(--teal));
+}
+.wbs-ratio {
+  font-size: 2rem; font-weight: 700;
+  color: var(--green);
+}
+.wbs-ratio .denom {
+  color: var(--muted); font-size: 1.1rem; font-weight: 500;
+}
+.wbs-pct-badge {
+  display: inline-block; margin-left: 8px;
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(25,135,84,0.12); color: var(--green);
+  font-size: 0.85rem; font-weight: 600;
+}
+.wbs-bar-outer {
+  background: rgba(128,128,128,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 28px;
+  display: flex;
+  margin-bottom: 12px;
+}
+.wbs-bar-done { background: linear-gradient(90deg, var(--green), var(--teal)); }
+.wbs-bar-progress { background: var(--yellow); }
+.wbs-bar-todo { background: rgba(128,128,128,0.25); }
+.wbs-bar-seg {
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 0.75rem; font-weight: 600;
+  transition: flex 0.3s;
+}
+.wbs-bar-todo { color: var(--muted); }
+.wbs-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-size: 0.8rem; color: var(--muted);
+}
+.wbs-legend-item {
+  display: flex; align-items: center; gap: 6px;
+}
+.wbs-legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.wbs-legend-done { background: var(--green); }
+.wbs-legend-progress { background: var(--yellow); }
+.wbs-legend-todo { background: rgba(128,128,128,0.4); }
+
 /* Charts */
 .chart-grid {
   display: grid;
@@ -523,9 +678,29 @@ h1 {
   <p class="subtitle">cc-sier-organization の活動インサイト｜最終更新: __LAST_UPDATED__｜収集期間: __FIRST_DATE__ 〜 __LAST_DATE__</p>
 </div>
 
+<div class="wbs-progress-card">
+  <div class="wbs-header">
+    <div class="wbs-title"><span class="accent-bar"></span>WBS 全体進捗</div>
+    <div>
+      <span class="wbs-ratio">__WBS_DONE__<span class="denom"> / __WBS_TOTAL__</span></span>
+      <span class="wbs-pct-badge">__WBS_PCT__%</span>
+    </div>
+  </div>
+  <div class="wbs-bar-outer">
+    <div class="wbs-bar-seg wbs-bar-done"   style="flex:__WBS_DONE_FLEX__">__WBS_DONE_LBL__</div>
+    <div class="wbs-bar-seg wbs-bar-progress" style="flex:__WBS_INPROG_FLEX__">__WBS_INPROG_LBL__</div>
+    <div class="wbs-bar-seg wbs-bar-todo"   style="flex:__WBS_TODO_FLEX__">__WBS_TODO_LBL__</div>
+  </div>
+  <div class="wbs-legend">
+    <div class="wbs-legend-item"><span class="wbs-legend-dot wbs-legend-done"></span>完了 __WBS_DONE__</div>
+    <div class="wbs-legend-item"><span class="wbs-legend-dot wbs-legend-progress"></span>進行中 __WBS_INPROG__</div>
+    <div class="wbs-legend-item"><span class="wbs-legend-dot wbs-legend-todo"></span>未着手 __WBS_TODO__</div>
+  </div>
+</div>
+
 <div class="summary-grid">
   <div class="summary-card">
-    <div class="summary-label">累計クローズ</div>
+    <div class="summary-label">累計クローズ (Project 4)</div>
     <div class="summary-value blue">__TOTAL__</div>
   </div>
   <div class="summary-card">
@@ -546,6 +721,16 @@ h1 {
 </div>
 
 <div class="chart-grid">
+  <div class="chart-card full">
+    <h2><span class="accent-bar"></span>WBS 組織別進捗 (完了 / 進行中 / 未着手)</h2>
+    <div class="chart-container"><canvas id="wbsOrgChart"></canvas></div>
+  </div>
+
+  <div class="chart-card full">
+    <h2><span class="accent-bar"></span>WBS Iteration 別進捗 (W1〜W10)</h2>
+    <div class="chart-container"><canvas id="wbsIterChart"></canvas></div>
+  </div>
+
   <div class="chart-card full">
     <h2><span class="accent-bar"></span>直近 30 日の完了件数 (Issue / PR)</h2>
     <div class="chart-container"><canvas id="dailyChart"></canvas></div>
@@ -620,6 +805,100 @@ const C = {
   pink: darkMode ? '#f783ac' : '#d63384',
   gray: mutedColor,
 };
+
+// 0-A. WBS Org progress (stacked horizontal bar)
+const wbsOrgs = Object.keys(DATA.wbs.by_org);
+new Chart(document.getElementById('wbsOrgChart'), {
+  type: 'bar',
+  data: {
+    labels: wbsOrgs,
+    datasets: [
+      {
+        label: '完了',
+        data: wbsOrgs.map(o => DATA.wbs.by_org[o].done || 0),
+        backgroundColor: C.green,
+        borderRadius: 4,
+      },
+      {
+        label: '進行中',
+        data: wbsOrgs.map(o => DATA.wbs.by_org[o].in_progress || 0),
+        backgroundColor: C.yellow,
+        borderRadius: 4,
+      },
+      {
+        label: '未着手',
+        data: wbsOrgs.map(o => DATA.wbs.by_org[o].todo || 0),
+        backgroundColor: darkMode ? 'rgba(158,158,158,0.5)' : 'rgba(108,117,125,0.4)',
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor } },
+      y: { stacked: true, grid: { display: false } }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10 } },
+      tooltip: {
+        callbacks: {
+          afterLabel: function(ctx) {
+            const org = ctx.label;
+            const total = DATA.wbs.by_org[org].total || 0;
+            const done = DATA.wbs.by_org[org].done || 0;
+            const pct = total ? Math.round(done / total * 1000) / 10 : 0;
+            return `完了率: ${pct}% (${done}/${total})`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// 0-B. WBS Iteration progress (stacked vertical bar)
+const wbsIters = Object.keys(DATA.wbs.by_iteration);
+new Chart(document.getElementById('wbsIterChart'), {
+  type: 'bar',
+  data: {
+    labels: wbsIters,
+    datasets: [
+      {
+        label: '完了',
+        data: wbsIters.map(i => DATA.wbs.by_iteration[i].done || 0),
+        backgroundColor: C.green,
+        borderRadius: 4,
+      },
+      {
+        label: '進行中',
+        data: wbsIters.map(i => DATA.wbs.by_iteration[i].in_progress || 0),
+        backgroundColor: C.yellow,
+        borderRadius: 4,
+      },
+      {
+        label: '未着手',
+        data: wbsIters.map(i => DATA.wbs.by_iteration[i].todo || 0),
+        backgroundColor: darkMode ? 'rgba(158,158,158,0.5)' : 'rgba(108,117,125,0.4)',
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor } }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10 } }
+    }
+  }
+});
 
 // 1. Daily chart (Issue + PR stack)
 new Chart(document.getElementById('dailyChart'), {
@@ -808,6 +1087,37 @@ def render_html(items: list[dict], aggregates: dict, now_jst: datetime) -> str:
             f'</tr>'
         )
 
+    # WBS stats for JS + placeholders
+    wbs = aggregates.get("wbs") or {
+        "total": 0, "done": 0, "in_progress": 0, "todo": 0,
+        "progress_pct": 0.0, "by_org": {}, "by_iteration": {},
+    }
+    wbs_total = wbs["total"]
+    wbs_done = wbs["done"]
+    wbs_inprog = wbs["in_progress"]
+    wbs_todo = wbs["todo"]
+
+    # bar セグメントの flex 値 (0 だと非表示になるよう min 0)
+    def safe_flex(n: int) -> str:
+        return str(n) if n > 0 else "0"
+
+    wbs_done_flex = safe_flex(wbs_done)
+    wbs_inprog_flex = safe_flex(wbs_inprog)
+    wbs_todo_flex = safe_flex(wbs_todo)
+
+    # bar 内ラベル (大きい時だけ数字を表示)
+    def bar_label(n: int, total: int) -> str:
+        if total == 0 or n == 0:
+            return ""
+        # 全体の 10% 未満ならラベル非表示 (スペース不足)
+        if n / total < 0.10:
+            return ""
+        return str(n)
+
+    wbs_done_lbl = bar_label(wbs_done, wbs_total)
+    wbs_inprog_lbl = bar_label(wbs_inprog, wbs_total)
+    wbs_todo_lbl = bar_label(wbs_todo, wbs_total)
+
     # Data JSON for charts
     data_for_js = {
         "daily30": aggregates["daily30"],
@@ -816,6 +1126,15 @@ def render_html(items: list[dict], aggregates: dict, now_jst: datetime) -> str:
         "category": aggregates["category"],
         "org": aggregates["org"],
         "type": aggregates["type"],
+        "wbs": {
+            "total": wbs_total,
+            "done": wbs_done,
+            "in_progress": wbs_inprog,
+            "todo": wbs_todo,
+            "progress_pct": wbs["progress_pct"],
+            "by_org": wbs["by_org"],
+            "by_iteration": wbs["by_iteration"],
+        },
     }
     data_json = json.dumps(data_for_js, ensure_ascii=False)
 
@@ -831,6 +1150,18 @@ def render_html(items: list[dict], aggregates: dict, now_jst: datetime) -> str:
     html = html.replace("__DELTA_LABEL__", delta_label)
     html = html.replace("__RECENT_ROWS__", "\n".join(recent_rows_html))
     html = html.replace("__DATA_JSON__", data_json)
+    # WBS placeholders
+    html = html.replace("__WBS_TOTAL__", f"{wbs_total:,}")
+    html = html.replace("__WBS_DONE__", f"{wbs_done:,}")
+    html = html.replace("__WBS_INPROG__", f"{wbs_inprog:,}")
+    html = html.replace("__WBS_TODO__", f"{wbs_todo:,}")
+    html = html.replace("__WBS_PCT__", f"{wbs['progress_pct']:.1f}")
+    html = html.replace("__WBS_DONE_FLEX__", wbs_done_flex)
+    html = html.replace("__WBS_INPROG_FLEX__", wbs_inprog_flex)
+    html = html.replace("__WBS_TODO_FLEX__", wbs_todo_flex)
+    html = html.replace("__WBS_DONE_LBL__", wbs_done_lbl)
+    html = html.replace("__WBS_INPROG_LBL__", wbs_inprog_lbl)
+    html = html.replace("__WBS_TODO_LBL__", wbs_todo_lbl)
     return html
 
 
@@ -909,15 +1240,24 @@ def main() -> int:
     print(f"  {len(items)} items")
     print()
 
-    # Step 2: Aggregate
+    # Step 2: Aggregate (Project 4 items + WBS 全量)
     print("Step 2: Compute aggregates")
     aggregates = compute_aggregates(items, now_jst.date())
-    print(f"  total: {aggregates['total']}")
+    print(f"  Project 4 total: {aggregates['total']}")
     print(f"  today: {aggregates['today']}")
     print(f"  this_week: {aggregates['this_week']} (last week: {aggregates['last_week']}, delta: {aggregates['week_delta_pct']}%)")
-    print(f"  avg_30d: {aggregates['avg_30d']}")
     print(f"  category breakdown: {aggregates['category']}")
     print(f"  org breakdown: {aggregates['org']}")
+    print()
+
+    print("Step 2.5: Fetch WBS stats (parse-wbs.py)")
+    wbs_stats = fetch_wbs_stats()
+    aggregates["wbs"] = wbs_stats
+    print(f"  WBS total: {wbs_stats['total']}")
+    print(f"  WBS done: {wbs_stats['done']} ({wbs_stats['progress_pct']}%)")
+    print(f"  WBS in_progress: {wbs_stats['in_progress']}")
+    print(f"  WBS todo: {wbs_stats['todo']}")
+    print(f"  WBS by_org: { {k: v['total'] for k, v in wbs_stats['by_org'].items()} }")
     print()
 
     # Step 3: Render HTML
