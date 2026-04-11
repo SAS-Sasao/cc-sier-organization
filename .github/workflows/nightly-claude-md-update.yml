@@ -45,6 +45,13 @@ jobs:
   update:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # 認証 env は job レベルで定義する。
+    # step レベルの env: は GitHub Actions の post step には伝播しないため、
+    # claude-code-action の post-buffered-inline-comments.ts の env validation が
+    # 失敗する。job レベルなら main / post 両方に伝播する。
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     steps:
       # -----------------------------------------------------------------
       # Step 1: リポジトリ取得（git log 用に全履歴）
@@ -60,9 +67,6 @@ jobs:
       # シークレット未登録なら早期に明示的なエラーで停止する
       # -----------------------------------------------------------------
       - name: Pre-flight auth check
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: |
           if [ -z "${ANTHROPIC_API_KEY:-}" ] && [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
             cat <<'MSG' >&2
@@ -180,9 +184,6 @@ jobs:
       - name: Run Claude Code
         if: steps.signals.outputs.total != '0'
         uses: anthropics/claude-code-action@v1
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         with:
           prompt: |
             あなたは cc-sier リポジトリの **CLAUDE.md / .claude/rules/** の nightly 更新担当です。
