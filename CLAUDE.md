@@ -160,6 +160,8 @@ cc-sier-organization/
 - ⚠️ claude-code-action を挟む workflow では post step にも env が必要なため env は **job レベル** に配置（step-level は post step に伝播しない）
 - ⚠️ claude-code-action 実行後の `git push` 前に `git remote set-url origin https://x-access-token:${GH_TOKEN}@...` を再設定（action が remote URL を書き換える可能性）
 - ⚠️ 必須セクションの**順序違反**も `critical_triggered = true` 扱い（欠落と同じく均し込み禁止）
+- ⚠️ nightly 系 workflow で Opus に複数シグナル（PR/task-log/commit 20件以上）を分析させる場合 `max-turns` は **60 以上**（30 だと Claude が全件丁寧に Read してツール呼び出し枯渇で timeout）。prompt 側にも「全件丁寧に読まない、優先順位をつけて効率重視」を明示する
+- ⚠️ third-party action の `with:`/`env:` 挙動が公式 docs と食い違う時は `action.yml` の raw ソース（例: `https://raw.githubusercontent.com/anthropics/claude-code-action/v1/action.yml`）を直接参照して真因特定（公式 docs の parameter table が不完全なケースあり）
 
 詳細: @.claude/rules/review-pattern.md
 
