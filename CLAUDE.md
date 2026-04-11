@@ -162,6 +162,11 @@ cc-sier-organization/
 - ⚠️ 必須セクションの**順序違反**も `critical_triggered = true` 扱い（欠落と同じく均し込み禁止）
 - ⚠️ nightly 系 workflow で Opus に複数シグナル（PR/task-log/commit 20件以上）を分析させる場合 `max-turns` は **60 以上**（30 だと Claude が全件丁寧に Read してツール呼び出し枯渇で timeout）。prompt 側にも「全件丁寧に読まない、優先順位をつけて効率重視」を明示する
 - ⚠️ third-party action の `with:`/`env:` 挙動が公式 docs と食い違う時は `action.yml` の raw ソース（例: `https://raw.githubusercontent.com/anthropics/claude-code-action/v1/action.yml`）を直接参照して真因特定（公式 docs の parameter table が不完全なケースあり）
+- ⚠️ `PROJECTS_PAT` は **Classic PAT 必須**（fine-grained は user-owned Project v2 非対応）。scope は `project` + `read:org` + `read:discussion`
+- ⚠️ `gh project` コマンドは `--owner "@me"` を使う（user 名ベタ書きは Classic PAT で `unknown owner type` エラー）。`gh project item-add` は冪等なので bootstrap hook の `[found]` 分岐でも必ず呼ぶ
+- ⚠️ Python→bash で区切りデータを渡す時は `\t` ではなく `\x1f` (ASCII Unit Separator) を使う（bash IFS whitespace で空フィールドが潰れ column shift 発生）
+- ⚠️ workflow の `permissions:` は使う scope を全て明示列挙し、`2>/dev/null` / `|| true` でエラー握り潰し禁止（silent fail で誤集計の実例あり）
+- ⚠️ gitignored データ（`.session-summaries/` `.case-bank/` 等）を参照する Skill は **ローカル実行専用** を SKILL.md に明記（Actions から読めないため完全 observability 不可）
 
 詳細: @.claude/rules/review-pattern.md
 
