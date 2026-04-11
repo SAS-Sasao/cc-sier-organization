@@ -89,6 +89,7 @@ Q3: 図の名前は？（英語 kebab-case 推奨）
 
 - `with Diagram(...)` 開始、import 不要（ランタイムが自動インポート）
 - **ラベルは必ず英語**（Phase 4 L0 機械チェックあり、日本語検出で fail）
+- **ラベルに `\n` 改行を含めない**（`generate_diagram` が silent error で失敗する。半角スペース区切りを使う）
 - `show=False` を必ず指定
 - `direction="LR"` 推奨（左→右のデータフロー）
 - `Cluster()` でレイヤーグルーピング
@@ -99,22 +100,32 @@ Q3: 図の名前は？（英語 kebab-case 推奨）
 ## 6. Phase 3: ファイル配置
 
 以下を**すべて**生成する。IaC生成工程の省略は禁止（memory: feedback_no_skip_iac）。
+**コスト概算の省略も禁止**（memory: feedback_diagram_cost_section_required）。
 
 ```
 1. generated-diagrams/{filename}.png → docs/diagrams/{filename}.png にコピー
-2. docs/diagrams/{filename}.html         ← 詳細ページ（5セクション）
+2. docs/diagrams/{filename}.html         ← 詳細ページ（6セクション）
 3. docs/diagrams/index.html              ← カード追記 + 件数更新
 4. docs/diagrams/{filename}.yaml         ← CFn または CDK YAML
 5. docs/diagrams/{filename}-iac.html     ← IaCビューア（YAML埋め込み）
 ```
 
-### 6.1 詳細ページの必須5セクション（順序固定）
+### 6.1 詳細ページの必須6セクション（順序固定）
 
 1. **凡例** — 構成図画像の直下。Edge色ごとのフロー種別を日本語で説明
 2. **概要** — 目的・背景・対象ユースケース
 3. **データフロー** — flow ステップ表示、複数パターン時はバッジで分類
 4. **レイヤー構成** — テーブル形式（レイヤー / AWSサービス / 用途）
-5. **設計のポイント** — 重要判断・トレードオフ・BP（2〜5項目）
+5. **コスト概算** — Dev/Prod 月額、USD + JPY 併記、合計行、前提条件、コスト最適化
+6. **設計のポイント** — 重要判断・トレードオフ・BP（2〜5項目）
+
+**コスト概算セクションの生成方法**:
+- `references/aws-cost-estimation.md` の「クイックリファレンス見積」テーブル・「構成パターン別の概算」・「表示フォーマット」セクションを必ず参照する
+- 使用する AWS サービスを構成図から洗い出し、Dev / Prod の 2 カラムで月額概算を記載
+- 為替レートは `aws-cost-estimation.md` の「為替レート」セクションの値を使用（$1 = 150円 基準、JPY は参考値）
+- 合計行を必ず付ける
+- 前提条件とコスト最適化のポイントを各 1 段落で記載
+- （任意）`awspricing` MCP が利用可能な場合はリアルタイム価格で補正可
 
 ### 6.2 一覧ページ（index.html）のカード追記
 
@@ -177,7 +188,9 @@ grep -P "[\p{Hiragana}\p{Katakana}\p{Han}]" <<< "$code" && FAIL=1
 
 | チェック項目 | 方法 |
 |---|---|
-| HTML 5セクション全存在 | grep で `<h2>凡例</h2>`, `<h2>概要</h2>`, `<h2>データフロー</h2>`, `<h2>レイヤー構成</h2>`, `<h2>設計のポイント</h2>` |
+| HTML 6セクション全存在 | grep で `<h2>凡例</h2>`, `<h2>概要</h2>`, `<h2>データフロー</h2>`, `<h2>レイヤー構成</h2>`, `<h2>コスト概算</h2>`, `<h2>設計のポイント</h2>` |
+| コスト概算テーブル | grep で `Dev (月額)` と `Prod (月額)` および `合計` 行の存在 |
+| 為替換算（JPY）記載 | grep で `円` を含むコストセル（USD単独記載は不可） |
 | index.html カード追記 | grep で `{filename}.html` リンク存在 |
 | 件数更新 | `<p class="count">` の右側数字が +1 されている |
 | PNG / YAML / iac.html 存在 | ls チェック |
@@ -209,7 +222,7 @@ Agent(
 
 | # | 軸 | 致命 |
 |---|---|---|
-| s1 | 構造準拠（HTML 5セクション） | - |
+| s1 | **構造準拠（HTML 6セクション）** — 1つでも欠落で critical_triggered | ★ |
 | s2 | **IaC生成** | ★ |
 | s3 | PNG整合性（画像Read × HTML × Pythonコード） | - |
 | s4 | 凡例完全性 | - |
@@ -321,4 +334,5 @@ Issue:  {issue_url}
 | ファイル | 用途 |
 |---|---|
 | `references/review-prompt.md` | L2 独立レビュアー採点プロンプト（6軸、JSON出力、画像Read指示） |
+| `references/aws-cost-estimation.md` | コスト概算セクション生成用リファレンス（クイックリファレンス、為替、HTMLフォーマット） |
 | `.claude/skills/company/references/task-log-template.md` | task-log / Issue の共通スキーマ |

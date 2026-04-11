@@ -169,6 +169,34 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>S3 (9バケット)</td><td>Raw×3 + Curated×3 + Athena結果 + Audit + KMS</td><td>$5-20 (750-3,000円)</td><td>$20-100 (3,000-15,000円)</td></tr>
+    <tr><td>AWS Glue (3 ETL Job)</td><td>3ドメインの ETL (2 DPU each)</td><td>$15-60 (2,250-9,000円)</td><td>$60-300 (9,000-45,000円)</td></tr>
+    <tr><td>Glue Data Catalog</td><td>3 Database + テーブル管理</td><td>$1-5 (150-750円)</td><td>$5-20 (750-3,000円)</td></tr>
+    <tr><td>Lake Formation</td><td>Tag-Based Access Control</td><td>$0 (無料)</td><td>$0 (無料)</td></tr>
+    <tr><td>Kinesis Data Streams</td><td>Ingestion (2 shards)</td><td>$30-60 (4,500-9,000円)</td><td>$60-150 (9,000-22,500円)</td></tr>
+    <tr><td>Lambda (3 Product API)</td><td>100万〜1000万req/月</td><td>$5-20 (750-3,000円)</td><td>$20-100 (3,000-15,000円)</td></tr>
+    <tr><td>API Gateway (REST)</td><td>Product API フロント</td><td>$3-10 (450-1,500円)</td><td>$10-50 (1,500-7,500円)</td></tr>
+    <tr><td>EventBridge</td><td>Domain Event Bus (カスタム)</td><td>$0-2 (0-300円)</td><td>$2-10 (300-1,500円)</td></tr>
+    <tr><td>Athena</td><td>Federated Query</td><td>$5-30 (750-4,500円)</td><td>$30-100 (4,500-15,000円)</td></tr>
+    <tr><td>QuickSight</td><td>BI Dashboards (ユーザー数依存)</td><td>$5-30 (750-4,500円)</td><td>$50-400 (7,500-60,000円)</td></tr>
+    <tr><td>SageMaker</td><td>ML Training/Inference</td><td>$50-150 (7,500-22,500円)</td><td>$100-500 (15,000-75,000円)</td></tr>
+    <tr><td>Bedrock</td><td>RAG / LLM 推論（トークン課金）</td><td>$5-50 (750-7,500円)</td><td>$50-500 (7,500-75,000円)</td></tr>
+    <tr><td>RAM</td><td>Resource Access Manager</td><td>$0 (無料)</td><td>$0 (無料)</td></tr>
+    <tr><td>IAM Identity Center</td><td>フェデレーテッド認証</td><td>$0 (無料)</td><td>$0 (無料)</td></tr>
+    <tr><td>CloudWatch</td><td>Metrics / Logs</td><td>$10-20 (1,500-3,000円)</td><td>$20-80 (3,000-12,000円)</td></tr>
+    <tr><td>CloudTrail</td><td>Audit Logs (LF権限変更追跡)</td><td>$2-10 (300-1,500円)</td><td>$10-50 (1,500-7,500円)</td></tr>
+    <tr><td>KMS</td><td>S3/Kinesis 暗号化キー</td><td>$1-5 (150-750円)</td><td>$5-20 (750-3,000円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$137-472 (約20,550-70,800円)</td><td>$442-2,380 (約66,300-357,000円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev = 3ドメイン × 500GB、Prod = 3ドメイン × 2TB、QuickSight 10ユーザー（Dev）/ 50ユーザー（Prod）、Bedrock = Claude Haiku相当の軽量RAG。本構成は単一アカウント簡略版のため、実運用の Multi-Account 展開時はアカウント間データ転送費（RAM/クロスアカウントS3 GET）が別途必要。</p>
+  <p><strong>コスト最適化</strong>: (1) S3 Intelligent-Tiering で Raw Zone のコールドデータを自動 Glacier 移行、(2) Glue Job を Spot Worker（-80%）+ Job Bookmarks で差分実行、(3) Athena Query Result Reuse で重複課金を回避、(4) SageMaker は Savings Plans で最大 64% 割引、(5) QuickSight は Capacity Pricing に切替で 51+ユーザーで Per-User より割安、(6) Bedrock は Prompt Caching（最大 90% 割引）を活用。Day90 以降の完全分散型展開時は、Control Tower の Budget Alert でアカウント単位の上限を自動設定すること。</p>
+</div>
+
+<div class="section">
   <h2>設計のポイント</h2>
   <p><strong>1. ドメイン自律性とガバナンスの両立（ハイブリッド設計の肝）</strong><br>
   純粋なデータメッシュは「中央は何も持たない」が理想だが、現実には Catalog・権限・監査が分散すると統制不能になる。本構成は <strong>共通サービスアカウントに「薄い中央」</strong> を置き、カタログとポリシーだけを集中させる。データ本体とコンピュートはドメインアカウントに残すことで、ドメインチームは自分たちの S3・Glue・Lambda を自由に運用できる。中央は「道路交通法」、ドメインは「各自の車両」という役割分担。</p>
