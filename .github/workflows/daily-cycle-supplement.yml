@@ -18,6 +18,7 @@ on:
 permissions:
   contents: read
   issues: write
+  pull-requests: read   # gh pr list で本日の merged PR を取得するため必須
 
 # 同時実行防止
 concurrency:
@@ -90,27 +91,38 @@ jobs:
           COMMIT_COUNT=$(git log --since="$SINCE" --format='%h' main 2>/dev/null | wc -l)
 
           # ---- merged PRs today ----
-          gh pr list --state merged \
+          # 注意: silent suppress (2>/dev/null) は権限不足等の本当のエラーを
+          # 隠してしまうので使わない。エラー時は notice で警告を出す。
+          if ! gh pr list --state merged \
             --search "merged:>=${DATE}" \
             --json number,title,mergedAt \
             --limit 50 \
-            > /tmp/signals/prs.json 2>/dev/null || echo '[]' > /tmp/signals/prs.json
+            > /tmp/signals/prs.json; then
+            echo "::warning::gh pr list failed (likely permissions issue), defaulting to empty"
+            echo '[]' > /tmp/signals/prs.json
+          fi
           PR_COUNT=$(jq length /tmp/signals/prs.json)
 
           # ---- opened Issues today (除外: tracking 系ラベル) ----
-          gh issue list --state all \
+          if ! gh issue list --state all \
             --search "created:>=${DATE} -label:cycle-supplement-tracker -label:nightly-claude-md-tracker -label:nightly-claude-md-update" \
             --json number,title,createdAt \
             --limit 50 \
-            > /tmp/signals/issues_opened.json 2>/dev/null || echo '[]' > /tmp/signals/issues_opened.json
+            > /tmp/signals/issues_opened.json; then
+            echo "::warning::gh issue list (opened) failed"
+            echo '[]' > /tmp/signals/issues_opened.json
+          fi
           ISSUE_OPENED_COUNT=$(jq length /tmp/signals/issues_opened.json)
 
           # ---- closed Issues today ----
-          gh issue list --state closed \
+          if ! gh issue list --state closed \
             --search "closed:>=${DATE}" \
             --json number,title,closedAt \
             --limit 50 \
-            > /tmp/signals/issues_closed.json 2>/dev/null || echo '[]' > /tmp/signals/issues_closed.json
+            > /tmp/signals/issues_closed.json; then
+            echo "::warning::gh issue list (closed) failed"
+            echo '[]' > /tmp/signals/issues_closed.json
+          fi
           ISSUE_CLOSED_COUNT=$(jq length /tmp/signals/issues_closed.json)
 
           # ---- /company-cycle がローカル実行されたか検知 ----
