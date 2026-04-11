@@ -176,15 +176,22 @@ jobs:
       # -----------------------------------------------------------------
       # Step 4: Claude Code Action による更新提案
       #
-      # v1 GA では `claude_code_oauth_token` という input parameter は無く、
-      # アクションの post-step は env から ANTHROPIC_API_KEY または
-      # CLAUDE_CODE_OAUTH_TOKEN を読む。両方を env: で渡しておけば、
-      # どちらか登録済みの secret が使われる。
+      # 認証は claude_code_oauth_token / anthropic_api_key の **input parameter**
+      # で渡す必要がある。v1 GA の action.yml は内部で
+      #   env:
+      #     ANTHROPIC_API_KEY: ${{ inputs.anthropic_api_key }}
+      #     CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude_code_oauth_token }}
+      # と input から env を「上書き」設定するため、input を渡さないと
+      # job-level env も空文字列で上書きされてしまう。
+      # 公式 docs の parameter table には載っていないが、action.yml では定義されている。
+      # 参考: https://raw.githubusercontent.com/anthropics/claude-code-action/v1/action.yml
       # -----------------------------------------------------------------
       - name: Run Claude Code
         if: steps.signals.outputs.total != '0'
         uses: anthropics/claude-code-action@v1
         with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
             あなたは cc-sier リポジトリの **CLAUDE.md / .claude/rules/** の nightly 更新担当です。
             過去 ${{ steps.window.outputs.period_jp }} のシグナルから「運用ルールに追加すべき学び」を
