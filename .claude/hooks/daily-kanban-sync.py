@@ -145,23 +145,64 @@ def select_today_tasks(
     top_n: int = 5,
     time_budget: int = 4,
 ) -> list[dict]:
-    """今日の top N タスクを選定する。"""
-    # Step 1: フィルタ (issue_number の有無は後段で lookup するのでここでは問わない)
+    """今日の top N タスクを **組織バランス** で選定する (案 B: org diversification)。
+
+    選定アルゴリズム:
+    1. フィルタ: status ∈ {todo, in-progress}, iteration が今週を含む
+    2. 優先度順にグループ分け (priority 1, 2, 3, 4)
+    3. 各優先度 tier 内で組織ごとに round-robin で拾う
+       → 結果: priority 1 内で org 間バランス、足りなければ priority 2 へ進む
+    4. top_n 件で打ち切り
+    """
+    from collections import defaultdict
+
+    # Step 1: フィルタ
     candidates = [
         t for t in tasks
         if t.get("status") in ("todo", "in-progress")
         and iteration_contains(t.get("iteration"), week)
     ]
 
-    # Step 2: ソート
-    candidates.sort(key=lambda t: (
-        t.get("priority") or 99,
-        TYPE_PRIORITY.get(t.get("type"), 99),
-        t["wbs_id"],
-    ))
+    if not candidates:
+        return []
 
-    # Step 3: 件数上限で切る（time_budget は参考値、強制しない）
-    selected = candidates[:top_n]
+    # Step 2: 優先度別にバケット化し、各バケット内を (type_priority, wbs_id) でソート
+    by_priority: dict[int, list[dict]] = defaultdict(list)
+    for t in candidates:
+        by_priority[t.get("priority") or 99].append(t)
+    for p in by_priority:
+        by_priority[p].sort(key=lambda t: (
+            TYPE_PRIORITY.get(t.get("type"), 99),
+            t["wbs_id"],
+        ))
+
+    # Step 3: 優先度 tier ごとに round-robin で選定
+    selected: list[dict] = []
+    for priority in sorted(by_priority.keys()):
+        if len(selected) >= top_n:
+            break
+
+        tier_tasks = by_priority[priority]
+        # この tier 内で org 別にバケット化 (ソート済み順序を保持)
+        tier_by_org: dict[str, list[dict]] = defaultdict(list)
+        for t in tier_tasks:
+            tier_by_org[t["org"]].append(t)
+
+        # org キー順 (安定性のため sorted)
+        org_order = sorted(tier_by_org.keys())
+
+        # round-robin で org をまわす
+        while len(selected) < top_n:
+            added_any = False
+            for org in org_order:
+                if len(selected) >= top_n:
+                    break
+                if tier_by_org[org]:
+                    selected.append(tier_by_org[org].pop(0))
+                    added_any = True
+            if not added_any:
+                break  # この tier は枯渇
+
     return selected
 
 
@@ -257,6 +298,35 @@ def item_has_wbs_label(item: dict) -> bool:
         return False
     labels = content.get("labels", {}).get("nodes", [])
     return any(l.get("name") == "todo:wbs" for l in labels)
+
+
+def item_issue_is_open(item: dict) -> bool:
+    """item の Issue が OPEN 状態か (closed な Issue や非 Issue は False)。"""
+    content = item.get("content") or {}
+    if content.get("__typename") != "Issue":
+        return False
+    return content.get("state") == "OPEN"
+
+
+def item_get_status(item: dict) -> str | None:
+    """item の Project 2 Status フィールド値を取得する。"""
+    for fv in item.get("fieldValues", {}).get("nodes", []):
+        if fv.get("__typename") != "ProjectV2ItemFieldSingleSelectValue":
+            continue
+        field_name = fv.get("field", {}).get("name")
+        if field_name == "Status":
+            return fv.get("name")
+    return None
+
+
+def item_is_completed(item: dict) -> bool:
+    """item が完了扱いか (Issue closed または Project 2 Status=Done)。"""
+    if not item_issue_is_open(item):
+        return True
+    status = item_get_status(item)
+    if status and status.lower() in ("done", "completed", "完了"):
+        return True
+    return False
 
 
 def find_field_id(project_info: dict, field_name: str) -> str | None:
@@ -479,52 +549,8 @@ def main() -> int:
     print(f"  {len(tasks)} tasks loaded")
     print()
 
-    # Step 2: 選定
-    print("Step 2: Select today's tasks")
-    selected = select_today_tasks(tasks, week, top_n=args.top_n, time_budget=args.time_budget)
-    print(f"  Selected {len(selected)}/{args.top_n} tasks for W{week}")
-
-    # Step 2.5: WBS ID → Issue lookup (GitHub Issue 検索)
-    print("Step 2.5: Lookup GitHub Issues by label")
-    # org ごとに分けて検索
-    by_org: dict[str, list[str]] = {}
-    for t in selected:
-        by_org.setdefault(t["org"], []).append(t["wbs_id"])
-
-    issue_map: dict[tuple[str, str], dict] = {}  # (org, wbs_id) -> issue info
-    # GITHUB_TOKEN で OK（Issue 読み取り）
-    issue_lookup_token = os.environ.get("GITHUB_TOKEN") or token
-    for org, wbs_ids in by_org.items():
-        found = lookup_issues_by_wbs_labels(wbs_ids, org, repo, token=issue_lookup_token)
-        for wbs_id, info in found.items():
-            issue_map[(org, wbs_id)] = info
-
-    # Issue 情報をタスクに付与
-    missing = []
-    for t in selected:
-        info = issue_map.get((t["org"], t["wbs_id"]))
-        if info:
-            t["issue_number"] = info["number"]
-            t["issue_url"] = info["url"]
-        else:
-            missing.append(t)
-            t["issue_number"] = None
-            t["issue_url"] = None
-
-    for i, t in enumerate(selected, 1):
-        issue_info = f"#{t['issue_number']}" if t.get('issue_number') else "NO ISSUE"
-        print(f"    {i}. [{t['org']}] {t['wbs_id']}: {t['task']}")
-        print(f"       priority={t.get('priority')} type={t.get('type')} iter={t.get('iteration')} {issue_info}")
-
-    if missing:
-        print(f"  WARN: {len(missing)} tasks have no matching GitHub Issue (will be skipped)")
-    print()
-
-    # Issue がない task は除外
-    selected = [t for t in selected if t.get("issue_number")]
-
-    # Step 3: Project 2 の情報取得
-    print("Step 3: Fetch Project 2 state")
+    # Step 2: Project 2 の情報取得
+    print("Step 2: Fetch Project 2 state")
     if args.mode == "dry-run" and not token:
         print("  [DRY] skipping GraphQL fetch")
         project_info = {"id": "DRY-RUN", "fields": {"nodes": []}, "items": {"nodes": []}}
@@ -541,70 +567,138 @@ def main() -> int:
     print(f"  Fields: Target date={target_date_field_id}, WBS-ID={wbs_id_field_id}, Priority={priority_field_id}")
     print()
 
-    # Step 4: Categorize existing items
-    wbs_items = [i for i in items if item_has_wbs_label(i)]
-    non_wbs_items = [i for i in items if not item_has_wbs_label(i)]
-    print(f"  Items classification: WBS={len(wbs_items)} non-WBS={len(non_wbs_items)}")
+    # Step 3: 現在の items を分類
+    #   keepers:    WBS items + Issue OPEN + Status != Done (= 未完了繰越し)
+    #   disposables: それ以外 (非 WBS, Issue closed, Status = Done)
+    keepers: list[dict] = []
+    disposables: list[dict] = []
+    for item in items:
+        if not item_has_wbs_label(item):
+            disposables.append(item)
+            continue
+        if item_is_completed(item):
+            disposables.append(item)
+            continue
+        keepers.append(item)
+
+    keeper_urls = {(i.get("content") or {}).get("url") for i in keepers}
+    keeper_urls.discard(None)
+
+    print(f"Step 3: Categorize {len(items)} current items")
+    print(f"  Keepers (WBS, open, not done): {len(keepers)}")
+    print(f"  Disposables (non-WBS or completed): {len(disposables)}")
     print()
 
-    # Step 5: Cleanup mode
+    # Step 4: Cleanup mode → disposables のみ削除して終了
     if args.mode == "cleanup":
-        print("Step 5: Cleanup non-WBS items")
-        print(f"  Deleting {len(non_wbs_items)} non-WBS items...")
-        for i, item in enumerate(non_wbs_items, 1):
+        print("Step 4: Cleanup mode — deleting disposables only")
+        for i, item in enumerate(disposables, 1):
             content = item.get("content") or {}
-            title = content.get("title", "—")[:60]
+            title = content.get("title", "—")[:50]
             try:
                 delete_item(project_id, item["id"], token)
-                print(f"    [{i}/{len(non_wbs_items)}] Deleted: {title}")
+                print(f"    [{i}/{len(disposables)}] Deleted: {title}")
             except Exception as e:
-                print(f"    [{i}/{len(non_wbs_items)}] FAILED: {title}: {e}", file=sys.stderr)
+                print(f"    [{i}/{len(disposables)}] FAILED: {title}: {e}", file=sys.stderr)
         print()
-        print("Cleanup complete")
+        print(f"=== Summary (cleanup) ===")
+        print(f"  Deleted: {len(disposables)}")
+        print(f"  Kept: {len(keepers)}")
         return 0
 
-    # Step 6: 昨日以前の WBS sync items を削除
-    print("Step 6: Delete stale WBS items (Target date != today)")
-    stale = []
-    for item in wbs_items:
-        td = item_get_target_date(item)
-        if td and td != today_str:
-            stale.append(item)
-    print(f"  {len(stale)} stale items to delete")
+    # Step 5: 新規選定枠の計算
+    remaining_slots = max(0, args.top_n - len(keepers))
+    print(f"Step 5: Remaining slots for new tasks: {remaining_slots} (top_n={args.top_n} - keepers={len(keepers)})")
+    print()
 
-    if args.mode != "dry-run":
-        for i, item in enumerate(stale, 1):
+    # Step 6: 新規選定 (十分な候補があるよう overshoot → keepers と重複除外 → cap)
+    print("Step 6: Select new today's tasks")
+    candidates = select_today_tasks(tasks, week, top_n=args.top_n + len(keepers) + 10, time_budget=args.time_budget)
+    print(f"  Candidates (top {len(candidates)}): {len(candidates)} tasks for W{week}")
+
+    # Step 7: Issue lookup
+    print("Step 7: Lookup GitHub Issues by label")
+    by_org: dict[str, list[str]] = {}
+    for t in candidates:
+        by_org.setdefault(t["org"], []).append(t["wbs_id"])
+
+    issue_map: dict[tuple[str, str], dict] = {}
+    issue_lookup_token = os.environ.get("GITHUB_TOKEN") or token
+    for org, wbs_ids in by_org.items():
+        found = lookup_issues_by_wbs_labels(wbs_ids, org, repo, token=issue_lookup_token)
+        for wbs_id, info in found.items():
+            issue_map[(org, wbs_id)] = info
+
+    for t in candidates:
+        info = issue_map.get((t["org"], t["wbs_id"]))
+        if info:
+            t["issue_number"] = info["number"]
+            t["issue_url"] = info["url"]
+
+    # Step 8: keepers 重複除外 + 枠数 cap
+    new_selected: list[dict] = []
+    for t in candidates:
+        if len(new_selected) >= remaining_slots:
+            break
+        if not t.get("issue_url"):
+            continue
+        if t["issue_url"] in keeper_urls:
+            continue  # keeper に含まれている
+        new_selected.append(t)
+
+    print(f"  Filtered new selection: {len(new_selected)} tasks")
+    for i, t in enumerate(new_selected, 1):
+        print(f"    {i}. [{t['org']}] {t['wbs_id']}: {t['task']}  #{t['issue_number']}")
+    print()
+
+    # Step 9: keepers の一覧表示
+    if keepers:
+        print(f"Step 9: Keepers (carry over from previous days): {len(keepers)}")
+        for i, item in enumerate(keepers, 1):
+            content = item.get("content") or {}
+            title = content.get("title", "—")[:60]
+            td = item_get_target_date(item) or "—"
+            print(f"    {i}. {title}  (original Target date={td})")
+        print()
+
+    # Step 10: Delete disposables
+    print(f"Step 10: Delete disposables ({len(disposables)} items)")
+    deleted_count = 0
+    if args.mode == "dry-run":
+        print(f"  [DRY] would delete {len(disposables)} items")
+    else:
+        for i, item in enumerate(disposables, 1):
+            content = item.get("content") or {}
+            title = content.get("title", "—")[:50]
             try:
                 delete_item(project_id, item["id"], token)
-                print(f"    [{i}/{len(stale)}] Deleted stale item (Target date={item_get_target_date(item)})")
+                deleted_count += 1
+                if i % 20 == 0 or i == len(disposables):
+                    print(f"    [{i}/{len(disposables)}] progress...")
             except Exception as e:
-                print(f"    [{i}/{len(stale)}] FAILED: {e}", file=sys.stderr)
+                print(f"    [{i}/{len(disposables)}] FAILED: {title}: {e}", file=sys.stderr)
+    print()
+
+    # Step 11: Update keepers の Target date を今日に (rolling target)
+    print(f"Step 11: Update keepers' Target date to {today_str}")
+    updated_keepers = 0
+    if args.mode == "dry-run":
+        print(f"  [DRY] would update {len(keepers)} keepers")
     else:
-        for item in stale:
-            print(f"    [DRY] would delete: Target date={item_get_target_date(item)}")
+        for item in keepers:
+            if target_date_field_id:
+                try:
+                    set_date_field(project_id, item["id"], target_date_field_id, today_str, token)
+                    updated_keepers += 1
+                except Exception as e:
+                    print(f"    WARN: Update failed: {e}", file=sys.stderr)
     print()
 
-    # Step 7: 既に今日の WBS items として入っている URL を収集 (冪等性)
-    today_wbs_urls = set()
-    for item in wbs_items:
-        td = item_get_target_date(item)
-        if td == today_str:
-            url = (item.get("content") or {}).get("url")
-            if url:
-                today_wbs_urls.add(url)
-    print(f"Step 7: Already in Project 2 with Target date={today_str}: {len(today_wbs_urls)} items")
-    print()
-
-    # Step 8: 選定した tasks を Project 2 に追加
-    print("Step 8: Add today's selected tasks")
+    # Step 12: Add new selected tasks
+    print(f"Step 12: Add {len(new_selected)} new tasks to Project 2")
     added_count = 0
-    skipped_count = 0
-    for t in selected:
+    for t in new_selected:
         issue_url = t.get("issue_url") or f"https://github.com/{repo}/issues/{t['issue_number']}"
-        if issue_url in today_wbs_urls:
-            print(f"  Skip (already in Project 2): {t['wbs_id']} #{t['issue_number']}")
-            skipped_count += 1
-            continue
 
         if args.mode == "dry-run":
             print(f"  [DRY] would add: {t['wbs_id']} {issue_url}")
@@ -634,7 +728,6 @@ def main() -> int:
             # Priority 設定 (SINGLE_SELECT)
             if priority_field_id and t.get("priority"):
                 option_id = find_option_id(project_info, "Priority", f"P{t['priority']}")
-                # fallback: 1/2/3/4 というラベル名
                 if not option_id:
                     option_id = find_option_id(project_info, "Priority", str(t["priority"]))
                 if option_id:
@@ -649,10 +742,12 @@ def main() -> int:
     print()
     print(f"=== Summary ===")
     print(f"  Mode: {args.mode}")
-    print(f"  Selected: {len(selected)}")
-    print(f"  Added: {added_count}")
-    print(f"  Skipped (already in): {skipped_count}")
-    print(f"  Stale deleted: {len(stale) if args.mode != 'dry-run' else 0}")
+    print(f"  Before: {len(items)} items (WBS={len(items)-len(disposables) if len(items)>=len(disposables) else 0}, disposables={len(disposables)})")
+    print(f"  Keepers (carry over): {len(keepers)}")
+    print(f"  Deleted (disposables): {deleted_count}")
+    print(f"  Keepers Target date updated: {updated_keepers}")
+    print(f"  New tasks added: {added_count}")
+    print(f"  Expected final count: {len(keepers) + added_count}")
     return 0
 
 
