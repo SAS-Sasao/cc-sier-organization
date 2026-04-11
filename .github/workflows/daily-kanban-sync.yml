@@ -1,0 +1,195 @@
+name: Daily Kanban Sync (05:30 JST)
+
+# 毎朝 05:30 JST (daily-todo-sync の 30 分後) に実行し、
+# Project 2 (TODOKANBAN) に今日の top N WBS タスクを同期する。
+#
+# 動作:
+#   1. parse-wbs.py で全組織の WBS parse (124 tasks)
+#   2. 今週 iteration + status!=done + issue_number あり でフィルタ
+#   3. priority ASC → type priority → wbs_id でソート
+#   4. 時間予算 4h / 件数上限 5 件
+#   5. Project 2 の WBS items で Target date が昨日以前のものを削除
+#   6. 選定した tasks を Project 2 に追加 + Target date=today / WBS-ID / Priority 設定
+#   7. 非 WBS items (label todo:wbs なし) は触らない
+#
+# モード:
+#   sync    (default)  — 通常の毎朝同期
+#   cleanup            — Project 2 から非 WBS items (会話ログ等) を全削除
+#   dry-run            — 計画のみ stdout 出力 (実変更なし)
+#
+# 認証:
+#   PROJECTS_PAT — Classic PAT (project, read:org, read:discussion scopes)
+#   GITHUB_TOKEN — auto (Issue/label 操作、shell 側)
+
+on:
+  schedule:
+    # 05:30 JST = 20:30 UTC (前日)
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "実行モード"
+        type: choice
+        default: "sync"
+        options:
+          - "sync"
+          - "cleanup"
+          - "dry-run"
+      top_n:
+        description: "選定件数 (default 5)"
+        required: false
+        type: string
+        default: "5"
+      time_budget:
+        description: "時間予算 hours (default 4)"
+        required: false
+        type: string
+        default: "4"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: daily-kanban-sync
+  cancel-in-progress: false
+
+env:
+  TRACKING_ISSUE_LABEL: daily-kanban-sync-tracker
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pre-flight auth check
+        run: |
+          if [ -z "${PROJECTS_PAT:-}" ]; then
+            echo "::error::PROJECTS_PAT required (Classic PAT with project + read:org + read:discussion scopes)"
+            exit 1
+          fi
+          echo "::notice::Auth OK"
+
+      - name: Determine date & iteration
+        id: date
+        run: |
+          DATE_JST=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          DOW_JST=$(TZ=Asia/Tokyo date +%u)
+          case $DOW_JST in
+            1) DOW_JP=月 ;; 2) DOW_JP=火 ;; 3) DOW_JP=水 ;;
+            4) DOW_JP=木 ;; 5) DOW_JP=金 ;; 6) DOW_JP=土 ;; 7) DOW_JP=日 ;;
+          esac
+          W1_START_EPOCH=$(date -d "2026-03-24" +%s)
+          TODAY_EPOCH=$(TZ=Asia/Tokyo date +%s)
+          DIFF_DAYS=$(( (TODAY_EPOCH - W1_START_EPOCH) / 86400 ))
+          CURRENT_WEEK=$(( DIFF_DAYS / 7 + 1 ))
+
+          {
+            echo "date_jst=$DATE_JST"
+            echo "dow_jp=$DOW_JP"
+            echo "iteration=W${CURRENT_WEEK}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "::notice::${DATE_JST} (${DOW_JP}) iteration=W${CURRENT_WEEK}"
+
+      - name: Detect mode
+        id: mode
+        run: |
+          MODE="${{ github.event.inputs.mode || 'sync' }}"
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "::notice::mode=$MODE"
+
+      - name: Run daily kanban sync
+        id: sync
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+        run: |
+          python3 .claude/hooks/daily-kanban-sync.py \
+            --mode "${{ steps.mode.outputs.mode }}" \
+            --top-n "${{ github.event.inputs.top_n || '5' }}" \
+            --time-budget "${{ github.event.inputs.time_budget || '4' }}" \
+            2>&1 | tee /tmp/kanban-sync.log
+
+          # Summary 抽出
+          SELECTED=$(grep -oP "Selected \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+          ADDED=$(grep -oP "Added: \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+          STALE=$(grep -oP "Stale deleted: \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+          SKIPPED=$(grep -oP "Skipped \(already in\): \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+
+          {
+            echo "selected=$SELECTED"
+            echo "added=$ADDED"
+            echo "stale=$STALE"
+            echo "skipped=$SKIPPED"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update tracking issue
+        if: always() && !cancelled()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DATE_JST: ${{ steps.date.outputs.date_jst }}
+          DOW_JP: ${{ steps.date.outputs.dow_jp }}
+          ITERATION: ${{ steps.date.outputs.iteration }}
+          MODE: ${{ steps.mode.outputs.mode }}
+          JOB_STATUS: ${{ job.status }}
+          SELECTED: ${{ steps.sync.outputs.selected }}
+          ADDED: ${{ steps.sync.outputs.added }}
+          STALE: ${{ steps.sync.outputs.stale }}
+          SKIPPED: ${{ steps.sync.outputs.skipped }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create "${TRACKING_ISSUE_LABEL}" --color "1d76db" \
+            --description "daily-kanban-sync workflow 継続トラッキング" 2>/dev/null || true
+
+          ISSUE_NUMBER=$(gh issue list --label "${TRACKING_ISSUE_LABEL}" --state open \
+            --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUE_NUMBER" ]; then
+            ISSUE_URL=$(gh issue create \
+              --title "daily-kanban-sync: 継続トラッキング (05:30 JST)" \
+              --label "${TRACKING_ISSUE_LABEL}" \
+              --body "この Issue は \`daily-kanban-sync.yml\` workflow の実行履歴を記録します。
+
+          毎朝 05:30 JST に以下を実行:
+          1. 全組織の WBS markdown を parse
+          2. 今週 iteration の未完了タスクから priority 順で top N (default 5) 選定
+          3. Project 2 (TODOKANBAN) から昨日以前の WBS items を削除
+          4. 選定タスクを Project 2 に追加 + Target date=today / WBS-ID / Priority 設定
+          5. 非 WBS items (todo:wbs ラベルなし) は触らない
+
+          手動操作:
+          - \`workflow_dispatch\` から \`mode=cleanup\` で非 WBS items 一括削除可
+          - \`mode=dry-run\` で計画プレビュー可")
+            ISSUE_NUMBER="${ISSUE_URL##*/}"
+          fi
+
+          if [ "$JOB_STATUS" = "success" ]; then
+            STATUS_ICON="✅"
+          else
+            STATUS_ICON="❌"
+          fi
+
+          COMMENT=$(cat <<EOF
+          ${STATUS_ICON} **${DATE_JST} (${DOW_JP})** — mode: \`${MODE}\` / iteration: ${ITERATION}
+
+          | 項目 | 値 |
+          |---|---|
+          | job status | \`${JOB_STATUS}\` |
+          | 選定 | ${SELECTED:-n/a} 件 |
+          | 追加 | ${ADDED:-n/a} 件 |
+          | 昨日分削除 | ${STALE:-n/a} 件 |
+          | 既存 skip | ${SKIPPED:-n/a} 件 |
+          | workflow run | ${RUN_URL} |
+
+          **Project 2**: https://github.com/users/SAS-Sasao/projects/2
+          EOF
+          )
+
+          gh issue comment "$ISSUE_NUMBER" --body "$COMMENT"
+          echo "::notice::tracking issue #$ISSUE_NUMBER updated"
