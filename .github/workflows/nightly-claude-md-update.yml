@@ -55,6 +55,40 @@ jobs:
           fetch-depth: 0
 
       # -----------------------------------------------------------------
+      # Step 1.5: Pre-flight 認証チェック
+      # 後続の Claude Code Action の post-step が env から token を読むため、
+      # シークレット未登録なら早期に明示的なエラーで停止する
+      # -----------------------------------------------------------------
+      - name: Pre-flight auth check
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: |
+          if [ -z "${ANTHROPIC_API_KEY:-}" ] && [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+            cat <<'MSG' >&2
+          ::error::認証情報が未設定です。以下のいずれかをセットアップしてください。
+
+          【選択肢A】CLAUDE_CODE_OAUTH_TOKEN（推奨、Pro/Max plan OAuth）
+            1. https://github.com/apps/claude をリポジトリにインストール
+            2. インストール時に CLAUDE_CODE_OAUTH_TOKEN シークレットが自動登録される
+            3. 詳細: https://code.claude.com/docs/ja/github-actions
+
+          【選択肢B】ANTHROPIC_API_KEY（直接 API、追加課金）
+            1. https://console.anthropic.com で API キーを発行
+            2. Settings → Secrets and variables → Actions に
+               ANTHROPIC_API_KEY という名前でシークレット登録
+            3. 注意: Pro/Max プラン契約とは別の API 従量課金になる
+          MSG
+            exit 1
+          fi
+
+          if [ -n "${CLAUDE_CODE_OAUTH_TOKEN:-}" ]; then
+            echo "::notice::Using CLAUDE_CODE_OAUTH_TOKEN (OAuth auth)"
+          elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "::notice::Using ANTHROPIC_API_KEY (direct API)"
+          fi
+
+      # -----------------------------------------------------------------
       # Step 2: 分析期間の決定（JST基準で日曜判定）
       # -----------------------------------------------------------------
       - name: Determine analysis window
@@ -137,12 +171,19 @@ jobs:
 
       # -----------------------------------------------------------------
       # Step 4: Claude Code Action による更新提案
+      #
+      # v1 GA では `claude_code_oauth_token` という input parameter は無く、
+      # アクションの post-step は env から ANTHROPIC_API_KEY または
+      # CLAUDE_CODE_OAUTH_TOKEN を読む。両方を env: で渡しておけば、
+      # どちらか登録済みの secret が使われる。
       # -----------------------------------------------------------------
       - name: Run Claude Code
         if: steps.signals.outputs.total != '0'
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             あなたは cc-sier リポジトリの **CLAUDE.md / .claude/rules/** の nightly 更新担当です。
             過去 ${{ steps.window.outputs.period_jp }} のシグナルから「運用ルールに追加すべき学び」を
