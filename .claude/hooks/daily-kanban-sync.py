@@ -80,12 +80,24 @@ def gh_graphql(query: str, token: str, variables: dict | None = None) -> dict:
     cmd = ["api", "graphql", "-f", f"query={query}"]
     if variables:
         for k, v in variables.items():
+            if v is None:
+                continue  # GraphQL では未指定で null 扱い
             if isinstance(v, int):
                 cmd += ["-F", f"{k}={v}"]
             else:
                 cmd += ["-f", f"{k}={v}"]
-    result = run_gh(cmd, token=token)
-    return json.loads(result.stdout)
+    try:
+        result = run_gh(cmd, token=token)
+    except subprocess.CalledProcessError as e:
+        print(f"::error::gh graphql failed:", file=sys.stderr)
+        print(f"::error::  stdout: {e.stdout}", file=sys.stderr)
+        print(f"::error::  stderr: {e.stderr}", file=sys.stderr)
+        raise
+    data = json.loads(result.stdout)
+    # GraphQL API はエラーを data と共に返すことがあるのでチェック
+    if data.get("errors"):
+        print(f"::warning::GraphQL errors: {data['errors']}", file=sys.stderr)
+    return data
 
 
 # ----------------------------------------------------------------------------
@@ -211,9 +223,13 @@ def select_today_tasks(
 # ----------------------------------------------------------------------------
 
 def fetch_project_info(token: str) -> dict:
-    """Project 2 の id / fields / items を全部取得する。"""
-    query = """
-    query {
+    """Project 2 の id / fields / items を取得する (items はページネーション対応)。
+
+    GraphQL API の `first:` 上限が 100 なので、100 件ずつ cursor を進めて全取得する。
+    """
+    # 1 ページ目: プロジェクト本体 + 最初の 100 items
+    first_query = """
+    query($cursor: String) {
       user(login: "%s") {
         projectV2(number: %d) {
           id
@@ -230,7 +246,8 @@ def fetch_project_info(token: str) -> dict:
               }
             }
           }
-          items(first: 500) {
+          items(first: 100, after: $cursor) {
+            pageInfo { hasNextPage endCursor }
             nodes {
               id
               content {
@@ -249,22 +266,16 @@ def fetch_project_info(token: str) -> dict:
                 nodes {
                   __typename
                   ... on ProjectV2ItemFieldDateValue {
-                    field {
-                      ... on ProjectV2FieldCommon { name }
-                    }
+                    field { ... on ProjectV2FieldCommon { name } }
                     date
                   }
                   ... on ProjectV2ItemFieldSingleSelectValue {
-                    field {
-                      ... on ProjectV2FieldCommon { name }
-                    }
+                    field { ... on ProjectV2FieldCommon { name } }
                     name
                     optionId
                   }
                   ... on ProjectV2ItemFieldTextValue {
-                    field {
-                      ... on ProjectV2FieldCommon { name }
-                    }
+                    field { ... on ProjectV2FieldCommon { name } }
                     text
                   }
                 }
@@ -276,8 +287,44 @@ def fetch_project_info(token: str) -> dict:
     }
     """ % (OWNER, PROJECT_NUMBER)
 
-    resp = gh_graphql(query, token=token)
-    return resp["data"]["user"]["projectV2"]
+    all_items: list[dict] = []
+    project_id = None
+    title = None
+    fields_nodes = None
+    cursor = None
+    page = 0
+
+    while True:
+        page += 1
+        resp = gh_graphql(first_query, token=token, variables={"cursor": cursor})
+        pv2 = resp["data"]["user"]["projectV2"]
+        if pv2 is None:
+            print("::error::Project not found or not accessible", file=sys.stderr)
+            break
+
+        if project_id is None:
+            project_id = pv2["id"]
+            title = pv2["title"]
+            fields_nodes = pv2["fields"]
+
+        items_conn = pv2.get("items", {})
+        page_nodes = items_conn.get("nodes") or []
+        all_items.extend(page_nodes)
+        print(f"  Fetched page {page}: {len(page_nodes)} items (total so far: {len(all_items)})", file=sys.stderr)
+
+        page_info = items_conn.get("pageInfo") or {}
+        if not page_info.get("hasNextPage"):
+            break
+        cursor = page_info.get("endCursor")
+        if not cursor:
+            break
+
+    return {
+        "id": project_id,
+        "title": title,
+        "fields": fields_nodes or {"nodes": []},
+        "items": {"nodes": all_items},
+    }
 
 
 def item_get_target_date(item: dict) -> str | None:

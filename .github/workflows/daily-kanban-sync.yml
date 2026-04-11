@@ -109,24 +109,39 @@ jobs:
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
+        shell: bash
         run: |
+          set -euo pipefail
+
+          # Python スクリプトを実行。エラーは exit code で検出するため pipe を分離
           python3 .claude/hooks/daily-kanban-sync.py \
             --mode "${{ steps.mode.outputs.mode }}" \
             --top-n "${{ github.event.inputs.top_n || '5' }}" \
             --time-budget "${{ github.event.inputs.time_budget || '4' }}" \
-            2>&1 | tee /tmp/kanban-sync.log
+            > /tmp/kanban-sync.log 2>&1 &
+          PY_PID=$!
+          # 進捗表示のためリアルタイムで log tail
+          tail -f /tmp/kanban-sync.log --pid=$PY_PID 2>/dev/null &
+          TAIL_PID=$!
+          wait $PY_PID
+          PY_EXIT=$?
+          kill $TAIL_PID 2>/dev/null || true
+          cat /tmp/kanban-sync.log
+
+          if [ $PY_EXIT -ne 0 ]; then
+            echo "::error::daily-kanban-sync.py exited with code $PY_EXIT"
+            exit $PY_EXIT
+          fi
 
           # Summary 抽出
-          SELECTED=$(grep -oP "Selected \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
-          ADDED=$(grep -oP "Added: \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
-          STALE=$(grep -oP "Stale deleted: \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
-          SKIPPED=$(grep -oP "Skipped \(already in\): \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+          ADDED=$(grep -oP "New tasks added: \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+          KEPT=$(grep -oP "Keepers \(carry over\): \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
+          DELETED=$(grep -oP "Deleted \(disposables\): \K\d+" /tmp/kanban-sync.log | tail -1 || echo "0")
 
           {
-            echo "selected=$SELECTED"
             echo "added=$ADDED"
-            echo "stale=$STALE"
-            echo "skipped=$SKIPPED"
+            echo "kept=$KEPT"
+            echo "deleted=$DELETED"
           } >> "$GITHUB_OUTPUT"
 
       - name: Update tracking issue
@@ -138,10 +153,9 @@ jobs:
           ITERATION: ${{ steps.date.outputs.iteration }}
           MODE: ${{ steps.mode.outputs.mode }}
           JOB_STATUS: ${{ job.status }}
-          SELECTED: ${{ steps.sync.outputs.selected }}
           ADDED: ${{ steps.sync.outputs.added }}
-          STALE: ${{ steps.sync.outputs.stale }}
-          SKIPPED: ${{ steps.sync.outputs.skipped }}
+          KEPT: ${{ steps.sync.outputs.kept }}
+          DELETED: ${{ steps.sync.outputs.deleted }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           gh label create "${TRACKING_ISSUE_LABEL}" --color "1d76db" \
@@ -181,10 +195,9 @@ jobs:
           | 項目 | 値 |
           |---|---|
           | job status | \`${JOB_STATUS}\` |
-          | 選定 | ${SELECTED:-n/a} 件 |
-          | 追加 | ${ADDED:-n/a} 件 |
-          | 昨日分削除 | ${STALE:-n/a} 件 |
-          | 既存 skip | ${SKIPPED:-n/a} 件 |
+          | 新規追加 | ${ADDED:-n/a} 件 |
+          | 繰越 (keepers) | ${KEPT:-n/a} 件 |
+          | 削除 (disposables) | ${DELETED:-n/a} 件 |
           | workflow run | ${RUN_URL} |
 
           **Project 2**: https://github.com/users/SAS-Sasao/projects/2
