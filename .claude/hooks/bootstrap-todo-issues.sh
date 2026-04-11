@@ -120,7 +120,7 @@ ensure_project_field() {
 
   # 既存フィールドチェック（Project 操作は PROJECTS_PAT）
   local existing
-  existing=$(gh_project field-list 1 --owner SAS-Sasao --format json 2>/dev/null \
+  existing=$(gh_project field-list 1 --owner "@me" --format json 2>/dev/null \
     | python3 -c "import json,sys; d=json.loads(sys.stdin.read()); print(' '.join(f['name'] for f in d.get('fields',[])))" 2>/dev/null || echo "")
 
   if echo " $existing " | grep -q " $field_name "; then
@@ -130,11 +130,11 @@ ensure_project_field() {
 
   case "$data_type" in
     TEXT|NUMBER|DATE)
-      gh_project field-create 1 --owner SAS-Sasao --name "$field_name" --data-type "$data_type" 2>&1 \
+      gh_project field-create 1 --owner "@me" --name "$field_name" --data-type "$data_type" 2>&1 \
         || echo "::warning::Failed to create field $field_name"
       ;;
     SINGLE_SELECT)
-      gh_project field-create 1 --owner SAS-Sasao --name "$field_name" --data-type SINGLE_SELECT \
+      gh_project field-create 1 --owner "@me" --name "$field_name" --data-type SINGLE_SELECT \
         --single-select-options "$options" 2>&1 \
         || echo "::warning::Failed to create field $field_name"
       ;;
@@ -150,15 +150,19 @@ ensure_project_field "Today" "SINGLE_SELECT" "Yes,No"
 echo "=== Phase 4: Create Issues and add to Project v2 ==="
 
 # タスク毎に処理
+# 注意: bash の `IFS=$'\t' read` は連続タブを単一デリミタとして扱うため、
+# 空フィールド (issue_num 等) があると column がシフトする既知の問題あり。
+# → 区切り文字に ASCII Unit Separator (\x1f, 非 whitespace) を使用。
+SEP=$'\x1f'
 python3 -c "import json,sys; print(json.dumps(json.loads(sys.stdin.read())))" <<< "$TASKS_JSON" \
   | python3 -c "
 import json,sys
+SEP = '\x1f'
 data = json.loads(sys.stdin.read())
 for t in data:
-    # tab-separated output for bash to read
-    print('\t'.join([
+    fields = [
         t['wbs_id'],
-        (t['task'] or '').replace('\t',' ').replace('\n',' '),
+        (t['task'] or '').replace(SEP,' ').replace('\n',' '),
         t['org'],
         str(t.get('priority') or 3),
         t.get('type') or 'learning',
@@ -166,12 +170,13 @@ for t in data:
         t.get('status') or 'todo',
         str(t.get('issue_number') or ''),
         t.get('wbs_file') or '',
-        t.get('section') or '',
-        t.get('subsection') or '',
-        (t.get('artifact') or '').replace('\t',' '),
-        (t.get('period') or '').replace('\t',' '),
-    ]))
-" | while IFS=$'\t' read -r wbs_id task org priority type iter status issue_num wbs_file section subsection artifact period; do
+        (t.get('section') or '').replace(SEP,' '),
+        (t.get('subsection') or '').replace(SEP,' '),
+        (t.get('artifact') or '').replace(SEP,' '),
+        (t.get('period') or '').replace(SEP,' '),
+    ]
+    print(SEP.join(fields))
+" | while IFS="$SEP" read -r wbs_id task org priority type iter status issue_num wbs_file section subsection artifact period; do
 
   # skip done tasks
   if [ "$status" = "done" ]; then
@@ -246,7 +251,7 @@ EOF
   echo "[created] $org $wbs_id -> #$ISSUE_NUMBER ($ISSUE_URL)"
 
   # Project v2 に追加 (Project 操作は PROJECTS_PAT)
-  gh_project item-add 1 --owner SAS-Sasao --url "$ISSUE_URL" 2>&1 | tail -1 || \
+  gh_project item-add 1 --owner "@me" --url "$ISSUE_URL" 2>&1 | tail -1 || \
     echo "::warning::Failed to add $ISSUE_URL to project"
 
   # 少し待機 (rate limit 対策)
