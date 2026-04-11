@@ -64,6 +64,12 @@ td { padding:10px 12px; border:1px solid var(--border); }
            color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
            transition:opacity .2s, transform .15s; }
 .iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+
+/* Learning Points */
+.learning-points { list-style:none; padding:0; margin:0; }
+.learning-points li { padding:12px 16px; margin-bottom:10px; background:var(--bg); border-left:4px solid var(--blue);
+                      border-radius:6px; font-size:.88rem; line-height:1.6; }
+.learning-points li strong { color:var(--blue); }
 </style>
 </head>
 <body>
@@ -169,6 +175,24 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. ドメイン自律性とガバナンスの両立（ハイブリッド設計の肝）</strong><br>
+  純粋なデータメッシュは「中央は何も持たない」が理想だが、現実には Catalog・権限・監査が分散すると統制不能になる。本構成は <strong>共通サービスアカウントに「薄い中央」</strong> を置き、カタログとポリシーだけを集中させる。データ本体とコンピュートはドメインアカウントに残すことで、ドメインチームは自分たちの S3・Glue・Lambda を自由に運用できる。中央は「道路交通法」、ドメインは「各自の車両」という役割分担。</p>
+
+  <p><strong>2. Lake Formation Tag-Based Access Control (LF-TBAC) によるスケーラブル権限管理</strong><br>
+  ドメインとデータプロダクトが増えても、個別 Grant を書かず <strong>LF タグ（例: domain=sales, sensitivity=pii）</strong> を付与するだけで権限が伝播する LF-TBAC が重要。実装では <code>aws lakeformation create-lf-tag</code> でタグ階層を先に設計し、タグ付与ルールを全ドメインで統一する。この設計を初期に固めないと、後から権限見直しで数週間溶ける。</p>
+
+  <p><strong>3. データプロダクトは「API」を持たせる（単なる S3 バケットで終わらせない）</strong><br>
+  データメッシュ原則の「Data as a Product」を実装する際に、Curated S3 + Glue テーブルだけだと「ただのデータレイク」と変わらない。本構成では <strong>各ドメインに Lambda + API Gateway の Product API</strong> を置き、データ仕様・SLA・ドキュメントを API レベルで約束する。消費側は「API として」データを購読するため、ドメイン側はスキーマ破壊的変更ができなくなり、契約ベースの開発が強制される。</p>
+
+  <p><strong>4. EventBridge をドメイン間連携の唯一の公式経路にする</strong><br>
+  ドメイン A が別ドメインのデータを直接参照するのは <strong>原則禁止</strong>（密結合の温床）。代わりに <strong>Domain Event を EventBridge に publish</strong> し、他ドメインは自分のタイミングで subscribe する。これにより、ドメイン間の実行順序依存・バッチウィンドウ合わせ・障害伝播が解消される。SageMaker・Bedrock も EventBridge を subscribe して、新規データプロダクト公開イベントを起点に ML 再学習や RAG インデックス再構築を自動化する。</p>
+
+  <p><strong>5. 段階的導入戦略（Day1 は中央集権寄り → Day90 で完全メッシュ化）</strong><br>
+  いきなり完全分散型に飛び込むと、ドメインチームが AWS 運用に慣れていない場合に頓挫する。推奨は <strong>3ステップ：(a) Day1 = 単一アカウント内でドメイン分離（本 IaC テンプレート）、(b) Day30 = Control Tower + 各ドメインアカウント切り出し、(c) Day90 = LF クロスアカウント共有＋各ドメインが独自 CI/CD 保有</strong>。各段階で ROI を出しながら組織の AWS 成熟度に合わせて移行する。</p>
+</div>
+
+<div class="section">
   <h2>コスト概算</h2>
   <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円（参考値）</p>
   <table>
@@ -197,21 +221,14 @@ td { padding:10px 12px; border:1px solid var(--border); }
 </div>
 
 <div class="section">
-  <h2>設計のポイント</h2>
-  <p><strong>1. ドメイン自律性とガバナンスの両立（ハイブリッド設計の肝）</strong><br>
-  純粋なデータメッシュは「中央は何も持たない」が理想だが、現実には Catalog・権限・監査が分散すると統制不能になる。本構成は <strong>共通サービスアカウントに「薄い中央」</strong> を置き、カタログとポリシーだけを集中させる。データ本体とコンピュートはドメインアカウントに残すことで、ドメインチームは自分たちの S3・Glue・Lambda を自由に運用できる。中央は「道路交通法」、ドメインは「各自の車両」という役割分担。</p>
-
-  <p><strong>2. Lake Formation Tag-Based Access Control (LF-TBAC) によるスケーラブル権限管理</strong><br>
-  ドメインとデータプロダクトが増えても、個別 Grant を書かず <strong>LF タグ（例: domain=sales, sensitivity=pii）</strong> を付与するだけで権限が伝播する LF-TBAC が重要。実装では <code>aws lakeformation create-lf-tag</code> でタグ階層を先に設計し、タグ付与ルールを全ドメインで統一する。この設計を初期に固めないと、後から権限見直しで数週間溶ける。</p>
-
-  <p><strong>3. データプロダクトは「API」を持たせる（単なる S3 バケットで終わらせない）</strong><br>
-  データメッシュ原則の「Data as a Product」を実装する際に、Curated S3 + Glue テーブルだけだと「ただのデータレイク」と変わらない。本構成では <strong>各ドメインに Lambda + API Gateway の Product API</strong> を置き、データ仕様・SLA・ドキュメントを API レベルで約束する。消費側は「API として」データを購読するため、ドメイン側はスキーマ破壊的変更ができなくなり、契約ベースの開発が強制される。</p>
-
-  <p><strong>4. EventBridge をドメイン間連携の唯一の公式経路にする</strong><br>
-  ドメイン A が別ドメインのデータを直接参照するのは <strong>原則禁止</strong>（密結合の温床）。代わりに <strong>Domain Event を EventBridge に publish</strong> し、他ドメインは自分のタイミングで subscribe する。これにより、ドメイン間の実行順序依存・バッチウィンドウ合わせ・障害伝播が解消される。SageMaker・Bedrock も EventBridge を subscribe して、新規データプロダクト公開イベントを起点に ML 再学習や RAG インデックス再構築を自動化する。</p>
-
-  <p><strong>5. 段階的導入戦略（Day1 は中央集権寄り → Day90 で完全メッシュ化）</strong><br>
-  いきなり完全分散型に飛び込むと、ドメインチームが AWS 運用に慣れていない場合に頓挫する。推奨は <strong>3ステップ：(a) Day1 = 単一アカウント内でドメイン分離（本 IaC テンプレート）、(b) Day30 = Control Tower + 各ドメインアカウント切り出し、(c) Day90 = LF クロスアカウント共有＋各ドメインが独自 CI/CD 保有</strong>。各段階で ROI を出しながら組織の AWS 成熟度に合わせて移行する。</p>
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>データメッシュの 4 原則</strong> — Zhamak Dehghani が提唱した ①ドメイン所有権、②Data as a Product、③セルフサービス基盤、④連邦計算ガバナンスの 4 原則を押さえる。純粋分散と完全集中の間のトレードオフを意識し、組織の成熟度に応じて「どこまで中央集権にするか」を設計段階で決めることが、プロジェクトの成否を左右する。</li>
+    <li><strong>IAM と Lake Formation の役割分担</strong> — IAM はサービス認証、Lake Formation はデータ認可（テーブル・列・行レベル）を担当する。両者を混同すると権限設計が破綻する。特に LF-TBAC（Tag-Based Access Control）は 50 テーブルを超えた段階で個別 Grant が破綻するため、最初から必須で導入する。タグ階層設計は後戻りが非常に高コスト。</li>
+    <li><strong>契約ベースのデータプロダクト設計</strong> — 生 S3 バケットを直接共有すると、消費者が schema-on-read で勝手に使い、ドメイン側がスキーマ変更できなくなる。Lambda + API Gateway で Product API を挟むことで、スキーマ・SLA・ドキュメントを契約として明示でき、Producer/Consumer の責任分界点を API 層で固定できる。これはマイクロサービスアーキテクチャと同じ発想。</li>
+    <li><strong>Pub/Sub で密結合を解消する原則</strong> — ドメイン間の同期 API 呼び出しは密結合の温床で、障害伝播・実行順序依存・バッチウィンドウ調整の問題を引き起こす。EventBridge / Kafka / SNS などの Pub/Sub アーキテクチャで時間的・空間的デカップリングを実現することで、ドメインが独立に進化できるようになる。データメッシュ以外にも普遍的に通用する設計思想。</li>
+    <li><strong>大規模組織変革は段階的に導入する</strong> — Big Bang 移行は組織のスキル・ツール習熟度・運用体制が追いつかず頓挫する典型パターン。Day1（単一アカウントでドメイン分離） → Day30（Control Tower でアカウント切り出し） → Day90（LF クロスアカウント + 各ドメイン独自 CI/CD）のような段階設計で、各フェーズで ROI を出しながら進める。これは SIer の提案書作成時にも必ず意識すべき原則。</li>
+  </ul>
 </div>
 
 <div class="section">
