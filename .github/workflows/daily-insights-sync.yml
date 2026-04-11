@@ -28,6 +28,7 @@ on:
           - "backfill"
           - "dry-run"
           - "html-only"
+          - "cleanup-filter"
       since:
         description: "backfill 開始日 YYYY-MM-DD (backfill モード時のみ)"
         required: false
