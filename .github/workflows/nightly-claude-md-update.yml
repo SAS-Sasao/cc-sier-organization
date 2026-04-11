@@ -220,13 +220,23 @@ jobs:
             3. 全 `.claude/rules/*.md` を Read して既存カバー範囲を把握
             4. `grep -l "{キーワード}" .claude/rules/*.md` で類似記述を検索
 
-            ### Step 1: シグナル分析
-            1. `cat /tmp/signals/recent-prs.json | jq '.[] | {number, title, body}'` で PR を 1 件ずつ読む
-               - 特に fix: / docs: / refactor: 系の body 内「根本原因」「修正内容」「今後の期待動作」に注目
-            2. recent-tasklog-paths.txt の各ファイルを Read し、YAML frontmatter の `judge` / `reward` / `l2_composite` / `findings` を確認
-               - reward が 0.5 以下 / judge が fail のものは失敗パターン
-            3. recent-convlog-paths.txt で直近の対話を読み、繰り返し指摘されたパターンを探す
-            4. recent-commits.txt で PR 番号のない直接 commit を特定し、`git show {hash}` で差分を見る
+            ### Step 1: シグナル分析（効率重視）
+
+            **方針**: 全件丁寧に読まない。優先順位を付けて、明らかに学び候補がありそうなものだけ詳細確認する。
+
+            1. **PR 一覧 first pass**: `jq -r '.[] | "\(.number) \(.title)"' /tmp/signals/recent-prs.json` で title だけ一覧表示
+               - title から `fix:` / `docs:` / `refactor:` 系を 5-10 件選ぶ（多すぎる場合はさらに絞る）
+               - 選んだ PR のみ `jq '.[] | select(.number==N) | .body'` で body 詳細を読む
+               - 「根本原因」「修正内容」「今後の期待動作」セクションがある PR を優先
+
+            2. **task-log first pass**: `recent-tasklog-paths.txt` の全パスのうち、ファイル名やパスから興味深そうなものを 3 件以内 Read する
+               - reward が 0.5 以下 / judge が fail / l2_composite < 0.85 を優先（YAML frontmatter のみ確認）
+
+            3. **会話ログ**: 件数が多い場合は最新 1 件のみ Read。なければスキップ
+
+            4. **直接 commit**: `recent-commits.txt` から PR 番号のない subject (`(#数字)` を含まない行) を grep で抽出。**興味深そうな 1-2 件** だけ `git show {hash}` で差分確認
+
+            **重要**: 各 step の途中で「もう十分学びの候補が見えた」「既存 rules で全部カバー済」と判断したら**早めに Step 2 に移って**良い。完璧主義禁止。
 
             ### Step 2: 学び抽出の判定基準
 
@@ -289,7 +299,7 @@ jobs:
             - 編集した場合: 追加/更新した学びを簡潔に列挙（各 1-2 行）
             - 編集不要な場合: 先頭行に `NO_CHANGES` と書き、理由を 1-2 行で説明
           claude_args: |
-            --max-turns 30
+            --max-turns 60
             --permission-mode bypassPermissions
             --model claude-opus-4-6
             --allowedTools "Read,Write,Edit,Bash,Grep,Glob"
