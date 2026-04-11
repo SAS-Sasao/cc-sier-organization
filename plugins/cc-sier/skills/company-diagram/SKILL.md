@@ -100,24 +100,25 @@ Q3: 図の名前は？（英語 kebab-case 推奨）
 ## 6. Phase 3: ファイル配置
 
 以下を**すべて**生成する。IaC生成工程の省略は禁止（memory: feedback_no_skip_iac）。
-**コスト概算の省略も禁止**（memory: feedback_diagram_cost_section_required）。
+**コスト概算・学習ポイントの省略も禁止**（memory: feedback_diagram_required_sections）。
 
 ```
 1. generated-diagrams/{filename}.png → docs/diagrams/{filename}.png にコピー
-2. docs/diagrams/{filename}.html         ← 詳細ページ（6セクション）
+2. docs/diagrams/{filename}.html         ← 詳細ページ（7セクション）
 3. docs/diagrams/index.html              ← カード追記 + 件数更新
 4. docs/diagrams/{filename}.yaml         ← CFn または CDK YAML
 5. docs/diagrams/{filename}-iac.html     ← IaCビューア（YAML埋め込み）
 ```
 
-### 6.1 詳細ページの必須6セクション（順序固定）
+### 6.1 詳細ページの必須7セクション（順序固定）
 
 1. **凡例** — 構成図画像の直下。Edge色ごとのフロー種別を日本語で説明
 2. **概要** — 目的・背景・対象ユースケース
 3. **データフロー** — flow ステップ表示、複数パターン時はバッジで分類
 4. **レイヤー構成** — テーブル形式（レイヤー / AWSサービス / 用途）
-5. **コスト概算** — Dev/Prod 月額、USD + JPY 併記、合計行、前提条件、コスト最適化
-6. **設計のポイント** — 重要判断・トレードオフ・BP（2〜5項目）
+5. **設計のポイント** — 重要判断・トレードオフ・BP（2〜5項目、この構成固有の判断理由）
+6. **コスト概算** — Dev/Prod 月額、USD + JPY 併記、合計行、前提条件、コスト最適化
+7. **学習ポイント** — エンジニア/PM が得るべき普遍的な学び（`<ul class="learning-points">` で 3〜5 項目）
 
 **コスト概算セクションの生成方法**:
 - `references/aws-cost-estimation.md` の「クイックリファレンス見積」テーブル・「構成パターン別の概算」・「表示フォーマット」セクションを必ず参照する
@@ -126,6 +127,13 @@ Q3: 図の名前は？（英語 kebab-case 推奨）
 - 合計行を必ず付ける
 - 前提条件とコスト最適化のポイントを各 1 段落で記載
 - （任意）`awspricing` MCP が利用可能な場合はリアルタイム価格で補正可
+
+**学習ポイントセクションの生成方法**:
+- 3〜5 項目、各項目は `<li><strong>テーマ</strong> &#8212; 解説文（2〜4行）</li>` 形式
+- **設計のポイント との違い**: 設計のポイントは「この構成でなぜ X を選んだか」（prescriptive）、学習ポイントは「この図から学べる普遍的な知見」（transferable / 汎用的）
+- 他の類似案件にも通用する「原理原則」を書く（固有名詞依存の話ではなく、設計思想・パターン・トレードオフの一般化）
+- `learning-points` クラスの `<ul>` を使い、CSS で左ボーダー強調・番号なしリスト表示にする
+- 例: 「IAM と Lake Formation の役割分担」「Pub/Sub で密結合を解消する原則」「段階的導入戦略の重要性」等
 
 ### 6.2 一覧ページ（index.html）のカード追記
 
@@ -188,9 +196,11 @@ grep -P "[\p{Hiragana}\p{Katakana}\p{Han}]" <<< "$code" && FAIL=1
 
 | チェック項目 | 方法 |
 |---|---|
-| HTML 6セクション全存在 | grep で `<h2>凡例</h2>`, `<h2>概要</h2>`, `<h2>データフロー</h2>`, `<h2>レイヤー構成</h2>`, `<h2>コスト概算</h2>`, `<h2>設計のポイント</h2>` |
+| HTML 7セクション全存在 | grep で `<h2>凡例</h2>`, `<h2>概要</h2>`, `<h2>データフロー</h2>`, `<h2>レイヤー構成</h2>`, `<h2>設計のポイント</h2>`, `<h2>コスト概算</h2>`, `<h2>学習ポイント</h2>` |
+| 7セクションの順序 | 上記の順で並んでいること（設計のポイント → コスト概算 → 学習ポイント） |
 | コスト概算テーブル | grep で `Dev (月額)` と `Prod (月額)` および `合計` 行の存在 |
 | 為替換算（JPY）記載 | grep で `円` を含むコストセル（USD単独記載は不可） |
+| 学習ポイントリスト | grep で `class="learning-points"` と 3 件以上の `<li>` |
 | index.html カード追記 | grep で `{filename}.html` リンク存在 |
 | 件数更新 | `<p class="count">` の右側数字が +1 されている |
 | PNG / YAML / iac.html 存在 | ls チェック |
@@ -222,7 +232,7 @@ Agent(
 
 | # | 軸 | 致命 |
 |---|---|---|
-| s1 | **構造準拠（HTML 6セクション）** — 1つでも欠落で critical_triggered | ★ |
+| s1 | **構造準拠（HTML 7セクション）** — 1つでも欠落で critical_triggered | ★ |
 | s2 | **IaC生成** | ★ |
 | s3 | PNG整合性（画像Read × HTML × Pythonコード） | - |
 | s4 | 凡例完全性 | - |
