@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hybrid Data Mesh Platform - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./hybrid-data-mesh-platform.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./hybrid-data-mesh-platform.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>Hybrid Data Mesh Platform - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-04-11</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>311 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">hybrid-data-mesh-platform.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">311 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Powered by AWS IaC MCP Server</p>
+<script>
+const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: |\n  [Hybrid Data Mesh Platform]\n  \u30c7\u30fc\u30bf\u30e1\u30c3\u30b7\u30e5\u539f\u5247\uff08\u30c9\u30e1\u30a4\u30f3\u6240\u6709\u30fb\u30c7\u30fc\u30bf\u30d7\u30ed\u30c0\u30af\u30c8\u30fb\u30bb\u30eb\u30d5\u30b5\u30fc\u30d3\u30b9\u57fa\u76e4\u30fb\n  \u9023\u90a6\u8a08\u7b97\u30ac\u30d0\u30ca\u30f3\u30b9\uff09\u3092 AWS \u3067\u5b9f\u88c5\u3059\u308b\u53c2\u7167\u69cb\u6210\u3002\u4e00\u90e8\u4e2d\u592e\u96c6\u6a29\uff08Shared Services\n  Account \u306b Lake Formation / Glue Data Catalog / RAM / IAM Identity Center \u3092\u914d\u7f6e\uff09\n  + \u5206\u6563\u30c9\u30e1\u30a4\u30f3\uff08Sales / Inventory / Customer\uff09\u3002\n\n  \u6559\u80b2\u30fb\u53c2\u7167\u7528\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u3002\u5b9f\u904b\u7528\u6642\u306f\u4ee5\u4e0b\u306e TODO \u3092\u78ba\u8a8d\u3059\u308b\u3053\u3068\u3002\n  - \u30de\u30eb\u30c1\u30a2\u30ab\u30a6\u30f3\u30c8\u5206\u96e2\uff08AWS Organizations + AWS Control Tower\uff09\n  - \u30c9\u30e1\u30a4\u30f3\u30a2\u30ab\u30a6\u30f3\u30c8\u6bce\u306e S3 / Glue / Lambda \u5206\u96e2\n  - Lake Formation Data Lake Settings \u306e fine-grained \u6a29\u9650\u8a2d\u8a08\n  - \u672c\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u306f\u5358\u4e00\u30a2\u30ab\u30a6\u30f3\u30c8\u7c21\u7565\u7248\u3002\u5b9f\u904b\u7528\u3067\u306f Landing Zone \u4e0a\u3067\u5c55\u958b\u3059\u308b\u3053\u3068\n\n# ==============================================================================\n# \u30d1\u30e9\u30e1\u30fc\u30bf\u5b9a\u7fa9\n# ==============================================================================\nParameters:\n  EnvironmentName:\n    Type: String\n    Default: dev  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\uff08dev / stg / prod\uff09\n    AllowedValues:\n      - dev\n      - stg\n      - prod\n    Description: \u30c7\u30d7\u30ed\u30a4\u74b0\u5883\u540d\n\n  ProjectName:\n    Type: String\n    Default: data-mesh  # TODO: \u5b9f\u904b\u7528\u6642\u306b\u5909\u66f4\u3057\u3066\u304f\u3060\u3055\u3044\n    Description: \u30d7\u30ed\u30b8\u30a7\u30af\u30c8\u540d\uff08\u30ea\u30bd\u30fc\u30b9\u547d\u540d\u306b\u4f7f\u7528\uff09\n\n  KinesisShardCount:\n    Type: Number\n    Default: 2  # TODO: \u30b9\u30eb\u30fc\u30d7\u30c3\u30c8\u8981\u4ef6\u306b\u5408\u308f\u305b\u3066\u5909\u66f4\n    Description: Kinesis Data Stream \u306e\u30b7\u30e3\u30fc\u30c9\u6570\n\n# ==============================================================================\n# \u30ea\u30bd\u30fc\u30b9\u5b9a\u7fa9\n# ==============================================================================\nResources:\n\n  # ----------------------------------------------------------------------------\n  # \u4e2d\u592e\u30ac\u30d0\u30ca\u30f3\u30b9\u5c64\uff08Shared Services Account \u60f3\u5b9a\uff09\n  # ----------------------------------------------------------------------------\n\n  # Unified Data Catalog \u2014 Glue Data Catalog \u306f\u30a2\u30ab\u30a6\u30f3\u30c8\u5358\u4f4d\u306e\u65e2\u5b9a\u30ea\u30bd\u30fc\u30b9\n  # \u672c\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u3067\u306f Database \u5358\u4f4d\u3067\u5404\u30c9\u30e1\u30a4\u30f3\u3092\u5206\u96e2\n  SalesCatalogDatabase:\n    Type: AWS::Glue::Database\n    Properties:\n      CatalogId: !Ref AWS::AccountId\n      DatabaseInput:\n        Name: !Sub ${ProjectName}-${EnvironmentName}-sales-domain\n        Description: Sales domain data products\n\n  InventoryCatalogDatabase:\n    Type: AWS::Glue::Database\n    Properties:\n      CatalogId: !Ref AWS::AccountId\n      DatabaseInput:\n        Name: !Sub ${ProjectName}-${EnvironmentName}-inventory-domain\n        Description: Inventory domain data products\n\n  CustomerCatalogDatabase:\n    Type: AWS::Glue::Database\n    Properties:\n      CatalogId: !Ref AWS::AccountId\n      DatabaseInput:\n        Name: !Sub ${ProjectName}-${EnvironmentName}-customer-domain\n        Description: Customer domain data products\n\n  # Lake Formation Data Lake Settings\uff08\u7c21\u7565\u7248\uff09\n  # TODO: \u5b9f\u904b\u7528\u3067\u306f Admin, Grants, Tag-based Access Control (LF-TBAC) \u3092\u8a2d\u8a08\n  LakeFormationSettings:\n    Type: AWS::LakeFormation::DataLakeSettings\n    Properties:\n      Admins:\n        - DataLakePrincipalIdentifier: !Sub arn:aws:iam::${AWS::AccountId}:root  # TODO: \u5b9f\u904b\u7528\u3067\u306f IAM Role \u3092\u6307\u5b9a\n\n  # ----------------------------------------------------------------------------\n  # \u30c9\u30e1\u30a4\u30f3\u5c64\uff08\u5404\u30c9\u30e1\u30a4\u30f3\u306e\u30c7\u30fc\u30bf\u30d7\u30ed\u30c0\u30af\u30c8\uff09\n  # ----------------------------------------------------------------------------\n\n  # --- Sales Domain ---\n  SalesRawBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-sales-raw-${AWS::AccountId}\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n\n  SalesCuratedBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-sales-curated-${AWS::AccountId}\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n\n  SalesGlueJob:\n    Type: AWS::Glue::Job\n    Properties:\n      Name: !Sub ${ProjectName}-${EnvironmentName}-sales-etl\n      Role: !GetAtt GlueExecutionRole.Arn\n      Command:\n        Name: glueetl\n        ScriptLocation: !Sub s3://${SalesRawBucket}/scripts/sales-etl.py  # TODO: \u5b9f\u88c5\u3092\u914d\u7f6e\n        PythonVersion: \"3\"\n      GlueVersion: \"4.0\"\n      MaxCapacity: 2.0\n      DefaultArguments:\n        \"--TempDir\": !Sub s3://${SalesRawBucket}/temp/\n        \"--job-language\": python\n\n  # --- Inventory Domain ---\n  InventoryRawBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-inventory-raw-${AWS::AccountId}\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n\n  InventoryCuratedBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-inventory-curated-${AWS::AccountId}\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n\n  InventoryGlueJob:\n    Type: AWS::Glue::Job\n    Properties:\n      Name: !Sub ${ProjectName}-${EnvironmentName}-inventory-etl\n      Role: !GetAtt GlueExecutionRole.Arn\n      Command:\n        Name: glueetl\n        ScriptLocation: !Sub s3://${InventoryRawBucket}/scripts/inventory-etl.py\n        PythonVersion: \"3\"\n      GlueVersion: \"4.0\"\n      MaxCapacity: 2.0\n\n  # --- Customer Domain ---\n  CustomerRawBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-customer-raw-${AWS::AccountId}\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n\n  CustomerCuratedBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-customer-curated-${AWS::AccountId}\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n\n  CustomerGlueJob:\n    Type: AWS::Glue::Job\n    Properties:\n      Name: !Sub ${ProjectName}-${EnvironmentName}-customer-etl\n      Role: !GetAtt GlueExecutionRole.Arn\n      Command:\n        Name: glueetl\n        ScriptLocation: !Sub s3://${CustomerRawBucket}/scripts/customer-etl.py\n        PythonVersion: \"3\"\n      GlueVersion: \"4.0\"\n      MaxCapacity: 2.0\n\n  # Glue \u5171\u901a IAM Role\n  GlueExecutionRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: glue.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole\n      Policies:\n        - PolicyName: DataMeshS3Access\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - s3:GetObject\n                  - s3:PutObject\n                  - s3:ListBucket\n                Resource:\n                  - !Sub arn:aws:s3:::${ProjectName}-${EnvironmentName}-*/*\n                  - !Sub arn:aws:s3:::${ProjectName}-${EnvironmentName}-*\n\n  # ----------------------------------------------------------------------------\n  # \u53d6\u308a\u8fbc\u307f\u5c64\uff08\u5171\u901a Kinesis\uff09\n  # ----------------------------------------------------------------------------\n  IngestionStream:\n    Type: AWS::Kinesis::Stream\n    Properties:\n      Name: !Sub ${ProjectName}-${EnvironmentName}-ingestion-stream\n      ShardCount: !Ref KinesisShardCount\n      StreamEncryption:\n        EncryptionType: KMS\n        KeyId: alias/aws/kinesis\n\n  # ----------------------------------------------------------------------------\n  # \u30a4\u30d9\u30f3\u30c8\u30d0\u30c3\u30af\u30dc\u30fc\u30f3\uff08\u30c9\u30e1\u30a4\u30f3\u9593\u9023\u643a\uff09\n  # ----------------------------------------------------------------------------\n  DomainEventBus:\n    Type: AWS::Events::EventBus\n    Properties:\n      Name: !Sub ${ProjectName}-${EnvironmentName}-domain-events\n\n  # ----------------------------------------------------------------------------\n  # \u6d88\u8cbb\u5c64\uff08Athena Workgroup \u3067\u5206\u6790\u3092\u4e00\u5143\u5316\uff09\n  # ----------------------------------------------------------------------------\n  AthenaQueryResultsBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-athena-results-${AWS::AccountId}\n      LifecycleConfiguration:\n        Rules:\n          - Id: ExpireOldResults\n            Status: Enabled\n            ExpirationInDays: 30\n\n  AthenaWorkgroup:\n    Type: AWS::Athena::WorkGroup\n    Properties:\n      Name: !Sub ${ProjectName}-${EnvironmentName}-consumer\n      State: ENABLED\n      WorkGroupConfiguration:\n        ResultConfiguration:\n          OutputLocation: !Sub s3://${AthenaQueryResultsBucket}/results/\n        EnforceWorkGroupConfiguration: true\n\n  # ----------------------------------------------------------------------------\n  # \u89b3\u6e2c\u5c64\n  # ----------------------------------------------------------------------------\n  DataMeshLogGroup:\n    Type: AWS::Logs::LogGroup\n    Properties:\n      LogGroupName: !Sub /${ProjectName}/${EnvironmentName}/data-mesh\n      RetentionInDays: 30\n\n  # CloudTrail for audit\uff08Lake Formation \u6a29\u9650\u5909\u66f4\u306e\u8ffd\u8de1\uff09\n  AuditTrailBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub ${ProjectName}-${EnvironmentName}-audit-trail-${AWS::AccountId}\n      LifecycleConfiguration:\n        Rules:\n          - Id: TransitionToGlacier\n            Status: Enabled\n            Transitions:\n              - StorageClass: GLACIER\n                TransitionInDays: 90\n\n# ==============================================================================\n# Outputs\n# ==============================================================================\nOutputs:\n  IngestionStreamName:\n    Description: Kinesis ingestion stream name\n    Value: !Ref IngestionStream\n    Export:\n      Name: !Sub ${AWS::StackName}-IngestionStream\n\n  DomainEventBusArn:\n    Description: EventBridge domain event bus ARN\n    Value: !GetAtt DomainEventBus.Arn\n\n  AthenaWorkgroupName:\n    Description: Athena workgroup for cross-domain federated query\n    Value: !Ref AthenaWorkgroup\n\n  SalesCatalogDatabase:\n    Description: Sales domain Glue catalog database\n    Value: !Ref SalesCatalogDatabase\n\n  InventoryCatalogDatabase:\n    Description: Inventory domain Glue catalog database\n    Value: !Ref InventoryCatalogDatabase\n\n  CustomerCatalogDatabase:\n    Description: Customer domain Glue catalog database\n    Value: !Ref CustomerCatalogDatabase\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

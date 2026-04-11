@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hybrid Data Mesh Platform - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-ingest { background:#3b82f6; color:#fff; }
+.badge-product { background:#22c55e; color:#fff; }
+.badge-govern { background:#8b5cf6; color:#fff; }
+.badge-event { background:#e67e22; color:#fff; }
+.badge-consume { background:#16a34a; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+
+/* Legend */
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.legend-dotted { height:0; border-top:3px dotted; background:none !important; }
+
+/* IaC Button */
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>Hybrid Data Mesh Platform</h1>
+<div class="meta">
+  <span class="tag tag-project">データ基盤</span>
+  <span class="tag tag-area">Data Mesh / Governance</span>
+  <span>生成日: 2026-04-11</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./hybrid-data-mesh-platform.png" alt="Hybrid Data Mesh Platform on AWS" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./hybrid-data-mesh-platform-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:darkblue"></span> Ingest — ソースシステムからの生データ取り込み</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkgreen"></span> Data Access — 消費側へのデータアクセス（Athena 経由）</div>
+    <div class="legend-item"><span class="legend-line" style="background:darkorange"></span> Event — ドメイン間イベント発行（EventBridge）</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:gray"></span> Metadata — データプロダクトのカタログ登録</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:purple"></span> Policy — Lake Formation による権限委譲</div>
+    <div class="legend-item"><span class="legend-line legend-dotted" style="border-color:gray"></span> Auth / Audit — 認証・監視・監査ログ</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>データメッシュ（Data Mesh）は Zhamak Dehghani が提唱した分散型データアーキテクチャの原則で、<strong>①ドメイン所有権、②データ as a プロダクト、③セルフサービス基盤、④連邦計算ガバナンス</strong> の4原則で構成される。中央集権的なデータレイク／DWHに起因する「ボトルネック化・文脈ロス・オーナーシップ欠如」を解消し、ドメイン組織にデータの所有権と説明責任を委譲する。</p>
+  <p>本構成は<strong>「ハイブリッド（一部中央集権）型」</strong>のデータメッシュ実装例である。純粋な分散型は運用コストとガバナンス設計の難易度が高いため、<strong>共通サービスアカウント</strong>に Lake Formation / Glue Data Catalog / RAM / IAM Identity Center を集約し、<strong>ドメインアカウント</strong>側で S3・Glue・Lambda による独自のデータプロダクト開発を可能にする。中央が「踏み台」ではなく「ガバナンス基盤」として機能し、ドメインの自律性を阻害しない構造が特徴。</p>
+  <p>中堅 SIer の顧客案件（複数部門横断のデータ活用）では、完全分散型よりこのハイブリッド型の方が段階的導入と運用移管がしやすく、Day1 から ROI を出しやすい。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-ingest">Ingest</span> ソースシステムからの取り込み</h3>
+  <div class="flow">
+    <span class="flow-step">ERP / CRM / POS</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Data Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">各ドメインの Raw Zone (S3)</span>
+  </div>
+
+  <h3><span class="badge badge-product">Product</span> ドメイン内データプロダクト生成</h3>
+  <div class="flow">
+    <span class="flow-step">Raw Zone (S3)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue ETL</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Curated Data Product (S3)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda Product API</span>
+  </div>
+
+  <h3><span class="badge badge-govern">Govern</span> 中央カタログ登録とポリシー適用</h3>
+  <div class="flow">
+    <span class="flow-step">Curated S3</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Glue Data Catalog</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lake Formation (LF-TBAC)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">RAM クロスアカウント共有</span>
+  </div>
+
+  <h3><span class="badge badge-event">Event</span> ドメイン間イベント連携</h3>
+  <div class="flow">
+    <span class="flow-step">Lambda Product API</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EventBridge Domain Event Bus</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">他ドメイン / SageMaker / Bedrock</span>
+  </div>
+
+  <h3><span class="badge badge-consume">Consume</span> 消費側フェデレーテッドクエリ</h3>
+  <div class="flow">
+    <span class="flow-step">IAM Identity Center</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Athena (Federated Query)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">QuickSight / SageMaker / Bedrock</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>ソースシステム</td><td>ERP / CRM / POS（S3 Export）</td><td>既存業務システムからの日次/リアルタイム Export</td></tr>
+    <tr><td>取り込み <span class="badge badge-ingest">Ingest</span></td><td>Kinesis Data Streams</td><td>ストリーミング取り込み、各ドメイン Raw Zone へファンアウト</td></tr>
+    <tr><td style="background:#dcfce7"><strong>ドメイン層</strong><br>(Federated Ownership)</td><td>S3 (Raw + Curated), AWS Glue, AWS Lambda, API Gateway</td><td>各ドメインチームが独自に所有・運用。Raw → ETL → Curated → Product API の一気通貫</td></tr>
+    <tr><td style="background:#e0e7ff"><strong>中央ガバナンス</strong><br>(Shared Services)</td><td>Glue Data Catalog, Lake Formation, Resource Access Manager (RAM), IAM Identity Center</td><td>統一メタデータ・権限管理・クロスアカウント共有・フェデレーテッド認証</td></tr>
+    <tr><td>イベントバックボーン</td><td>Amazon EventBridge (Custom Event Bus)</td><td>ドメイン間のイベント駆動連携。Domain Event 発行と購読</td></tr>
+    <tr><td>消費層 <span class="badge badge-consume">Consume</span></td><td>Amazon Athena, QuickSight, SageMaker, Bedrock</td><td>フェデレーテッドクエリ、BI、ML 学習、RAG/LLM アプリ</td></tr>
+    <tr><td>観測層</td><td>CloudWatch Metrics, CloudTrail Audit Logs</td><td>ETL メトリクス・LF 権限変更監査・クロスアカウント操作ログ</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. ドメイン自律性とガバナンスの両立（ハイブリッド設計の肝）</strong><br>
+  純粋なデータメッシュは「中央は何も持たない」が理想だが、現実には Catalog・権限・監査が分散すると統制不能になる。本構成は <strong>共通サービスアカウントに「薄い中央」</strong> を置き、カタログとポリシーだけを集中させる。データ本体とコンピュートはドメインアカウントに残すことで、ドメインチームは自分たちの S3・Glue・Lambda を自由に運用できる。中央は「道路交通法」、ドメインは「各自の車両」という役割分担。</p>
+
+  <p><strong>2. Lake Formation Tag-Based Access Control (LF-TBAC) によるスケーラブル権限管理</strong><br>
+  ドメインとデータプロダクトが増えても、個別 Grant を書かず <strong>LF タグ（例: domain=sales, sensitivity=pii）</strong> を付与するだけで権限が伝播する LF-TBAC が重要。実装では <code>aws lakeformation create-lf-tag</code> でタグ階層を先に設計し、タグ付与ルールを全ドメインで統一する。この設計を初期に固めないと、後から権限見直しで数週間溶ける。</p>
+
+  <p><strong>3. データプロダクトは「API」を持たせる（単なる S3 バケットで終わらせない）</strong><br>
+  データメッシュ原則の「Data as a Product」を実装する際に、Curated S3 + Glue テーブルだけだと「ただのデータレイク」と変わらない。本構成では <strong>各ドメインに Lambda + API Gateway の Product API</strong> を置き、データ仕様・SLA・ドキュメントを API レベルで約束する。消費側は「API として」データを購読するため、ドメイン側はスキーマ破壊的変更ができなくなり、契約ベースの開発が強制される。</p>
+
+  <p><strong>4. EventBridge をドメイン間連携の唯一の公式経路にする</strong><br>
+  ドメイン A が別ドメインのデータを直接参照するのは <strong>原則禁止</strong>（密結合の温床）。代わりに <strong>Domain Event を EventBridge に publish</strong> し、他ドメインは自分のタイミングで subscribe する。これにより、ドメイン間の実行順序依存・バッチウィンドウ合わせ・障害伝播が解消される。SageMaker・Bedrock も EventBridge を subscribe して、新規データプロダクト公開イベントを起点に ML 再学習や RAG インデックス再構築を自動化する。</p>
+
+  <p><strong>5. 段階的導入戦略（Day1 は中央集権寄り → Day90 で完全メッシュ化）</strong><br>
+  いきなり完全分散型に飛び込むと、ドメインチームが AWS 運用に慣れていない場合に頓挫する。推奨は <strong>3ステップ：(a) Day1 = 単一アカウント内でドメイン分離（本 IaC テンプレート）、(b) Day30 = Control Tower + 各ドメインアカウント切り出し、(c) Day90 = LF クロスアカウント共有＋各ドメインが独自 CI/CD 保有</strong>。各段階で ROI を出しながら組織の AWS 成熟度に合わせて移行する。</p>
+</div>
+
+<div class="section">
+  <h2>データレイクハウスとの違い（一言）</h2>
+  <table>
+    <tr><th>観点</th><th>Data Lakehouse（Medallion）</th><th>Data Mesh（本構成）</th></tr>
+    <tr><td>所有権</td><td>中央データ基盤チーム</td><td>各ドメインチーム（分散）</td></tr>
+    <tr><td>データ配置</td><td>中央 S3 に集約</td><td>各ドメインの S3 に分散、カタログのみ中央</td></tr>
+    <tr><td>主役</td><td>Medallion 層（Bronze/Silver/Gold）</td><td>Data Product（Curated S3 + Product API）</td></tr>
+    <tr><td>適合ケース</td><td>単一ドメインの品質段階管理</td><td>複数ドメイン横断・組織スケール対応</td></tr>
+    <tr><td>中央の役割</td><td>全データを管理</td><td>カタログ・権限・認証のみ（本構成）</td></tr>
+  </table>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server | Generated via /company-diagram Skill</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>

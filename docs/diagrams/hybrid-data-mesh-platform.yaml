@@ -1,0 +1,311 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: |
+  [Hybrid Data Mesh Platform]
+  データメッシュ原則（ドメイン所有・データプロダクト・セルフサービス基盤・
+  連邦計算ガバナンス）を AWS で実装する参照構成。一部中央集権（Shared Services
+  Account に Lake Formation / Glue Data Catalog / RAM / IAM Identity Center を配置）
+  + 分散ドメイン（Sales / Inventory / Customer）。
+
+  教育・参照用テンプレート。実運用時は以下の TODO を確認すること。
+  - マルチアカウント分離（AWS Organizations + AWS Control Tower）
+  - ドメインアカウント毎の S3 / Glue / Lambda 分離
+  - Lake Formation Data Lake Settings の fine-grained 権限設計
+  - 本テンプレートは単一アカウント簡略版。実運用では Landing Zone 上で展開すること
+
+# ==============================================================================
+# パラメータ定義
+# ==============================================================================
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: dev  # TODO: 実運用時に変更（dev / stg / prod）
+    AllowedValues:
+      - dev
+      - stg
+      - prod
+    Description: デプロイ環境名
+
+  ProjectName:
+    Type: String
+    Default: data-mesh  # TODO: 実運用時に変更してください
+    Description: プロジェクト名（リソース命名に使用）
+
+  KinesisShardCount:
+    Type: Number
+    Default: 2  # TODO: スループット要件に合わせて変更
+    Description: Kinesis Data Stream のシャード数
+
+# ==============================================================================
+# リソース定義
+# ==============================================================================
+Resources:
+
+  # ----------------------------------------------------------------------------
+  # 中央ガバナンス層（Shared Services Account 想定）
+  # ----------------------------------------------------------------------------
+
+  # Unified Data Catalog — Glue Data Catalog はアカウント単位の既定リソース
+  # 本テンプレートでは Database 単位で各ドメインを分離
+  SalesCatalogDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub ${ProjectName}-${EnvironmentName}-sales-domain
+        Description: Sales domain data products
+
+  InventoryCatalogDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub ${ProjectName}-${EnvironmentName}-inventory-domain
+        Description: Inventory domain data products
+
+  CustomerCatalogDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Sub ${ProjectName}-${EnvironmentName}-customer-domain
+        Description: Customer domain data products
+
+  # Lake Formation Data Lake Settings（簡略版）
+  # TODO: 実運用では Admin, Grants, Tag-based Access Control (LF-TBAC) を設計
+  LakeFormationSettings:
+    Type: AWS::LakeFormation::DataLakeSettings
+    Properties:
+      Admins:
+        - DataLakePrincipalIdentifier: !Sub arn:aws:iam::${AWS::AccountId}:root  # TODO: 実運用では IAM Role を指定
+
+  # ----------------------------------------------------------------------------
+  # ドメイン層（各ドメインのデータプロダクト）
+  # ----------------------------------------------------------------------------
+
+  # --- Sales Domain ---
+  SalesRawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-sales-raw-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  SalesCuratedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-sales-curated-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  SalesGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub ${ProjectName}-${EnvironmentName}-sales-etl
+      Role: !GetAtt GlueExecutionRole.Arn
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${SalesRawBucket}/scripts/sales-etl.py  # TODO: 実装を配置
+        PythonVersion: "3"
+      GlueVersion: "4.0"
+      MaxCapacity: 2.0
+      DefaultArguments:
+        "--TempDir": !Sub s3://${SalesRawBucket}/temp/
+        "--job-language": python
+
+  # --- Inventory Domain ---
+  InventoryRawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-inventory-raw-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  InventoryCuratedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-inventory-curated-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  InventoryGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub ${ProjectName}-${EnvironmentName}-inventory-etl
+      Role: !GetAtt GlueExecutionRole.Arn
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${InventoryRawBucket}/scripts/inventory-etl.py
+        PythonVersion: "3"
+      GlueVersion: "4.0"
+      MaxCapacity: 2.0
+
+  # --- Customer Domain ---
+  CustomerRawBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-customer-raw-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  CustomerCuratedBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-customer-curated-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  CustomerGlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Name: !Sub ${ProjectName}-${EnvironmentName}-customer-etl
+      Role: !GetAtt GlueExecutionRole.Arn
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub s3://${CustomerRawBucket}/scripts/customer-etl.py
+        PythonVersion: "3"
+      GlueVersion: "4.0"
+      MaxCapacity: 2.0
+
+  # Glue 共通 IAM Role
+  GlueExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole
+      Policies:
+        - PolicyName: DataMeshS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${ProjectName}-${EnvironmentName}-*/*
+                  - !Sub arn:aws:s3:::${ProjectName}-${EnvironmentName}-*
+
+  # ----------------------------------------------------------------------------
+  # 取り込み層（共通 Kinesis）
+  # ----------------------------------------------------------------------------
+  IngestionStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Sub ${ProjectName}-${EnvironmentName}-ingestion-stream
+      ShardCount: !Ref KinesisShardCount
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: alias/aws/kinesis
+
+  # ----------------------------------------------------------------------------
+  # イベントバックボーン（ドメイン間連携）
+  # ----------------------------------------------------------------------------
+  DomainEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub ${ProjectName}-${EnvironmentName}-domain-events
+
+  # ----------------------------------------------------------------------------
+  # 消費層（Athena Workgroup で分析を一元化）
+  # ----------------------------------------------------------------------------
+  AthenaQueryResultsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-athena-results-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldResults
+            Status: Enabled
+            ExpirationInDays: 30
+
+  AthenaWorkgroup:
+    Type: AWS::Athena::WorkGroup
+    Properties:
+      Name: !Sub ${ProjectName}-${EnvironmentName}-consumer
+      State: ENABLED
+      WorkGroupConfiguration:
+        ResultConfiguration:
+          OutputLocation: !Sub s3://${AthenaQueryResultsBucket}/results/
+        EnforceWorkGroupConfiguration: true
+
+  # ----------------------------------------------------------------------------
+  # 観測層
+  # ----------------------------------------------------------------------------
+  DataMeshLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /${ProjectName}/${EnvironmentName}/data-mesh
+      RetentionInDays: 30
+
+  # CloudTrail for audit（Lake Formation 権限変更の追跡）
+  AuditTrailBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-${EnvironmentName}-audit-trail-${AWS::AccountId}
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Transitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 90
+
+# ==============================================================================
+# Outputs
+# ==============================================================================
+Outputs:
+  IngestionStreamName:
+    Description: Kinesis ingestion stream name
+    Value: !Ref IngestionStream
+    Export:
+      Name: !Sub ${AWS::StackName}-IngestionStream
+
+  DomainEventBusArn:
+    Description: EventBridge domain event bus ARN
+    Value: !GetAtt DomainEventBus.Arn
+
+  AthenaWorkgroupName:
+    Description: Athena workgroup for cross-domain federated query
+    Value: !Ref AthenaWorkgroup
+
+  SalesCatalogDatabase:
+    Description: Sales domain Glue catalog database
+    Value: !Ref SalesCatalogDatabase
+
+  InventoryCatalogDatabase:
+    Description: Inventory domain Glue catalog database
+    Value: !Ref InventoryCatalogDatabase
+
+  CustomerCatalogDatabase:
+    Description: Customer domain Glue catalog database
+    Value: !Ref CustomerCatalogDatabase
