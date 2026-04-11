@@ -615,8 +615,12 @@ def main() -> int:
     print()
 
     # Step 3: 現在の items を分類
-    #   keepers:    WBS items + Issue OPEN + Status != Done (= 未完了繰越し)
-    #   disposables: それ以外 (非 WBS, Issue closed, Status = Done)
+    #   keepers:    WBS items + Issue OPEN + Status != Done + Target date が設定済み
+    #              (= 過去の daily-kanban-sync で追加された未完了タスク = 繰越し対象)
+    #   disposables: それ以外 (非 WBS / 完了済み / Target date 未設定 = bootstrap 由来)
+    #
+    # Target date 未設定の WBS items は bootstrap などで一括投入されたものであり、
+    # daily-kanban-sync の管理対象外なので disposables 扱いで削除する。
     keepers: list[dict] = []
     disposables: list[dict] = []
     for item in items:
@@ -624,6 +628,10 @@ def main() -> int:
             disposables.append(item)
             continue
         if item_is_completed(item):
+            disposables.append(item)
+            continue
+        if not item_get_target_date(item):
+            # Target date 未設定 = daily-kanban-sync が追加したものではない
             disposables.append(item)
             continue
         keepers.append(item)
