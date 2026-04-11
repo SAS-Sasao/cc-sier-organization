@@ -358,6 +358,12 @@ jobs:
         run: |
           BRANCH="docs/nightly-${DATE_JST}-claude-md-update"
 
+          # claude-code-action が git config / remote を変更している可能性が
+          # あるため、push する前に GITHUB_TOKEN 付きの remote URL を再設定する。
+          # actions/checkout の persist-credentials が無効化されたケースの保険。
+          git remote set-url origin \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
           git config user.email "claude-nightly[bot]@users.noreply.github.com"
           git config user.name "Claude Nightly Bot"
           git checkout -b "$BRANCH"
