@@ -3,22 +3,30 @@
 #
 # 前提:
 #   - WBS markdown が拡張スキーマ (Iter/Pri/Type/Issue/ステータス) に移行済み
-#   - PROJECTS_PAT (fine-grained PAT, project:write) が設定済み
-#   - gh CLI が PROJECTS_PAT で認証済み、または GH_TOKEN/GITHUB_TOKEN env 経由で auth
+#   - PROJECTS_PAT (Classic PAT, project scope) が設定済み ※user-owned Project v2 の制約
+#   - GITHUB_TOKEN (Issues/labels 操作用、Actions 環境では自動注入)
+#
+# 認証トークンの役割分担（最小権限原則）:
+#   - GITHUB_TOKEN (fine-grained / auto):
+#       gh issue create, gh label create, gh issue list
+#       → Repository の Contents/Issues/Pull requests 権限で OK
+#   - PROJECTS_PAT (Classic PAT, project scope のみ):
+#       gh project item-add, gh project field-list, gh project field-create
+#       → user-owned Project v2 は fine-grained PAT 非対応 (GitHub 既知の制約)
 #
 # 動作:
 #   1. parse-wbs.py で全組織の WBS タスクを取得
 #   2. 各タスクについて対応 Issue を検索（label: wbs:{wbs_id}, org:{slug}）
-#   3. 未作成なら gh issue create で新規作成
-#   4. 作成した Issue を Project v2 (PROJECT_V2_NODE_ID) に追加
+#   3. 未作成なら gh issue create で新規作成（GITHUB_TOKEN で）
+#   4. 作成した Issue を Project v2 (PROJECT_V2_NODE_ID) に追加（PROJECTS_PAT で）
 #   5. Project v2 のフィールド (Status/Iteration/Priority/Org/WBS-ID/Type) を設定
 #   6. WBS markdown の Issue# 列を更新 (新規 Issue の番号を埋め込み)
 #
 # 環境変数:
-#   PROJECTS_PAT (required)     — Fine-grained PAT
-#   PROJECT_V2_NODE_ID (required) — 既存の Project v2 node ID
-#   GH_TOKEN (optional)         — GitHub Issue 作成用 (= PROJECTS_PAT でも可)
-#   DRY_RUN=1                   — 何もせず計画だけ表示
+#   GITHUB_TOKEN or GH_TOKEN (required) — Issue/label 操作用
+#   PROJECTS_PAT (required)             — Classic PAT (scope: project のみ)
+#   PROJECT_V2_NODE_ID (optional)       — 既存の Project v2 node ID (default: 既存)
+#   DRY_RUN=1                           — 何もせず計画だけ表示
 
 set -euo pipefail
 
@@ -29,15 +37,30 @@ cd "$REPO_ROOT"
 DRY_RUN="${DRY_RUN:-0}"
 PROJECT_V2_NODE_ID="${PROJECT_V2_NODE_ID:-PVT_kwHODAtE_84BUTl8}"
 
-if [ -z "${PROJECTS_PAT:-}" ] && [ "$DRY_RUN" != "1" ]; then
-  echo "::error::PROJECTS_PAT が未設定です" >&2
-  exit 1
+# Issues/labels 用のトークン（fine-grained or GITHUB_TOKEN）
+ISSUES_TOKEN="${GITHUB_TOKEN:-${GH_TOKEN:-}}"
+# Project v2 用のトークン（Classic PAT, project scope）
+PROJECTS_TOKEN="${PROJECTS_PAT:-}"
+
+if [ "$DRY_RUN" != "1" ]; then
+  if [ -z "$ISSUES_TOKEN" ]; then
+    echo "::error::GITHUB_TOKEN または GH_TOKEN が必要 (Issues/labels 操作用)" >&2
+    exit 1
+  fi
+  if [ -z "$PROJECTS_TOKEN" ]; then
+    echo "::error::PROJECTS_PAT (Classic PAT, project scope) が必要" >&2
+    echo "::error::user-owned Project v2 は fine-grained PAT では操作できない制約のため" >&2
+    exit 1
+  fi
 fi
 
-# gh CLI は PROJECTS_PAT で認証する
-if [ "$DRY_RUN" != "1" ]; then
-  export GH_TOKEN="${PROJECTS_PAT}"
-fi
+# デフォルトは Issues 用トークンで auth
+export GH_TOKEN="$ISSUES_TOKEN"
+
+# Project v2 操作用の wrapper (トークンを一時的に切り替え)
+gh_project() {
+  GH_TOKEN="$PROJECTS_TOKEN" gh project "$@"
+}
 
 echo "=== Phase 1: WBS parse ==="
 TASKS_JSON=$(python3 .claude/hooks/parse-wbs.py 2>/dev/null || echo '[]')
@@ -95,9 +118,9 @@ ensure_project_field() {
     return 0
   fi
 
-  # 既存フィールドチェック
+  # 既存フィールドチェック（Project 操作は PROJECTS_PAT）
   local existing
-  existing=$(gh project field-list 1 --owner SAS-Sasao --format json 2>/dev/null \
+  existing=$(gh_project field-list 1 --owner SAS-Sasao --format json 2>/dev/null \
     | python3 -c "import json,sys; d=json.loads(sys.stdin.read()); print(' '.join(f['name'] for f in d.get('fields',[])))" 2>/dev/null || echo "")
 
   if echo " $existing " | grep -q " $field_name "; then
@@ -107,11 +130,11 @@ ensure_project_field() {
 
   case "$data_type" in
     TEXT|NUMBER|DATE)
-      gh project field-create 1 --owner SAS-Sasao --name "$field_name" --data-type "$data_type" 2>&1 \
+      gh_project field-create 1 --owner SAS-Sasao --name "$field_name" --data-type "$data_type" 2>&1 \
         || echo "::warning::Failed to create field $field_name"
       ;;
     SINGLE_SELECT)
-      gh project field-create 1 --owner SAS-Sasao --name "$field_name" --data-type SINGLE_SELECT \
+      gh_project field-create 1 --owner SAS-Sasao --name "$field_name" --data-type SINGLE_SELECT \
         --single-select-options "$options" 2>&1 \
         || echo "::warning::Failed to create field $field_name"
       ;;
@@ -222,8 +245,8 @@ EOF
   ISSUE_NUMBER="${ISSUE_URL##*/}"
   echo "[created] $org $wbs_id -> #$ISSUE_NUMBER ($ISSUE_URL)"
 
-  # Project v2 に追加 (gh project item-add)
-  gh project item-add 1 --owner SAS-Sasao --url "$ISSUE_URL" 2>&1 | tail -1 || \
+  # Project v2 に追加 (Project 操作は PROJECTS_PAT)
+  gh_project item-add 1 --owner SAS-Sasao --url "$ISSUE_URL" 2>&1 | tail -1 || \
     echo "::warning::Failed to add $ISSUE_URL to project"
 
   # 少し待機 (rate limit 対策)

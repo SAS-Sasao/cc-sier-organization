@@ -14,9 +14,20 @@ name: Daily TODO Sync (05:00 JST)
 #   - mode: bootstrap        : 初回 Issue バルク作成 + Project v2 setup
 #
 # 認証:
-#   - PROJECTS_PAT (required)           : Fine-grained PAT, project:write + issues:write + contents:write
+#   - PROJECTS_PAT (required)           : **Classic PAT, scope: project のみ**
+#                                         （user-owned Project v2 は fine-grained PAT 非対応）
 #   - CLAUDE_CODE_OAUTH_TOKEN (required): Max plan OAuth
-#   - GITHUB_TOKEN                      : 自動注入、PR 作成用
+#   - GITHUB_TOKEN                      : 自動注入、Issue/label/PR 作成用 (Issues/Contents/PR 権限)
+#
+# トークンの役割分担:
+#   Issues/labels/PR の作成・操作 → GITHUB_TOKEN (auto-injected)
+#   Project v2 (user-owned) の操作 → PROJECTS_PAT (Classic PAT with 'project' scope)
+#
+# PROJECTS_PAT 発行手順:
+#   1. https://github.com/settings/tokens (Classic, NOT fine-grained)
+#   2. Generate new token (classic)
+#   3. Select scopes: [project] のみチェック（最小権限）
+#   4. Generate → copy → repo secret 'PROJECTS_PAT' に登録
 
 on:
   schedule:
@@ -82,14 +93,16 @@ jobs:
       - name: Pre-flight auth check
         run: |
           if [ -z "${PROJECTS_PAT:-}" ]; then
-            echo "::error::PROJECTS_PAT が未設定です (Fine-grained PAT, project:write)"
+            echo "::error::PROJECTS_PAT が未設定です"
+            echo "::error::user-owned Project v2 の操作には Classic PAT (scope: project) が必要"
+            echo "::error::発行手順: https://github.com/settings/tokens → Generate (classic) → project スコープのみ選択"
             exit 1
           fi
           if [ -z "${CLAUDE_CODE_OAUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
             echo "::error::CLAUDE_CODE_OAUTH_TOKEN または ANTHROPIC_API_KEY が必要"
             exit 1
           fi
-          echo "::notice::Auth OK"
+          echo "::notice::Auth OK (GITHUB_TOKEN for Issues/PR, PROJECTS_PAT for Project v2)"
 
       # -----------------------------------------------------------------
       # Step 3: 日付計算
@@ -141,6 +154,8 @@ jobs:
         if: steps.mode.outputs.mode == 'bootstrap'
         env:
           DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECTS_PAT: ${{ secrets.PROJECTS_PAT }}
         run: |
           chmod +x .claude/hooks/bootstrap-todo-issues.sh
           bash .claude/hooks/bootstrap-todo-issues.sh 2>&1 | tee /tmp/bootstrap.log
