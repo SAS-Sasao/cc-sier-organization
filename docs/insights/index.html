@@ -88,6 +88,75 @@ h1 {
 .summary-delta.down { background: rgba(220,53,69,0.12); color: var(--red); }
 .summary-delta.flat { background: rgba(108,117,125,0.12); color: var(--muted); }
 
+/* WBS progress card */
+.wbs-progress-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px 24px 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+  margin-bottom: 28px;
+  position: relative; overflow: hidden;
+}
+.wbs-progress-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--green), var(--teal));
+}
+.wbs-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.wbs-title {
+  font-size: 1.05rem; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.wbs-title .accent-bar {
+  width: 4px; height: 18px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--green), var(--teal));
+}
+.wbs-ratio {
+  font-size: 2rem; font-weight: 700;
+  color: var(--green);
+}
+.wbs-ratio .denom {
+  color: var(--muted); font-size: 1.1rem; font-weight: 500;
+}
+.wbs-pct-badge {
+  display: inline-block; margin-left: 8px;
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(25,135,84,0.12); color: var(--green);
+  font-size: 0.85rem; font-weight: 600;
+}
+.wbs-bar-outer {
+  background: rgba(128,128,128,0.15);
+  border-radius: 6px;
+  overflow: hidden;
+  height: 28px;
+  display: flex;
+  margin-bottom: 12px;
+}
+.wbs-bar-done { background: linear-gradient(90deg, var(--green), var(--teal)); }
+.wbs-bar-progress { background: var(--yellow); }
+.wbs-bar-todo { background: rgba(128,128,128,0.25); }
+.wbs-bar-seg {
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 0.75rem; font-weight: 600;
+  transition: flex 0.3s;
+}
+.wbs-bar-todo { color: var(--muted); }
+.wbs-legend {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-size: 0.8rem; color: var(--muted);
+}
+.wbs-legend-item {
+  display: flex; align-items: center; gap: 6px;
+}
+.wbs-legend-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.wbs-legend-done { background: var(--green); }
+.wbs-legend-progress { background: var(--yellow); }
+.wbs-legend-todo { background: rgba(128,128,128,0.4); }
+
 /* Charts */
 .chart-grid {
   display: grid;
@@ -183,12 +252,32 @@ h1 {
 
 <div class="hero">
   <h1>TodoInsights</h1>
-  <p class="subtitle">cc-sier-organization の活動インサイト｜最終更新: 2026-04-11 22:13 JST｜収集期間: 2026-04-11 〜 2026-04-11</p>
+  <p class="subtitle">cc-sier-organization の活動インサイト｜最終更新: 2026-04-11 22:21 JST｜収集期間: 2026-04-11 〜 2026-04-11</p>
+</div>
+
+<div class="wbs-progress-card">
+  <div class="wbs-header">
+    <div class="wbs-title"><span class="accent-bar"></span>WBS 全体進捗</div>
+    <div>
+      <span class="wbs-ratio">4<span class="denom"> / 124</span></span>
+      <span class="wbs-pct-badge">3.2%</span>
+    </div>
+  </div>
+  <div class="wbs-bar-outer">
+    <div class="wbs-bar-seg wbs-bar-done"   style="flex:4"></div>
+    <div class="wbs-bar-seg wbs-bar-progress" style="flex:3"></div>
+    <div class="wbs-bar-seg wbs-bar-todo"   style="flex:117">117</div>
+  </div>
+  <div class="wbs-legend">
+    <div class="wbs-legend-item"><span class="wbs-legend-dot wbs-legend-done"></span>完了 4</div>
+    <div class="wbs-legend-item"><span class="wbs-legend-dot wbs-legend-progress"></span>進行中 3</div>
+    <div class="wbs-legend-item"><span class="wbs-legend-dot wbs-legend-todo"></span>未着手 117</div>
+  </div>
 </div>
 
 <div class="summary-grid">
   <div class="summary-card">
-    <div class="summary-label">累計クローズ</div>
+    <div class="summary-label">累計クローズ (Project 4)</div>
     <div class="summary-value blue">6</div>
   </div>
   <div class="summary-card">
@@ -209,6 +298,16 @@ h1 {
 </div>
 
 <div class="chart-grid">
+  <div class="chart-card full">
+    <h2><span class="accent-bar"></span>WBS 組織別進捗 (完了 / 進行中 / 未着手)</h2>
+    <div class="chart-container"><canvas id="wbsOrgChart"></canvas></div>
+  </div>
+
+  <div class="chart-card full">
+    <h2><span class="accent-bar"></span>WBS Iteration 別進捗 (W1〜W10)</h2>
+    <div class="chart-container"><canvas id="wbsIterChart"></canvas></div>
+  </div>
+
   <div class="chart-card full">
     <h2><span class="accent-bar"></span>直近 30 日の完了件数 (Issue / PR)</h2>
     <div class="chart-container"><canvas id="dailyChart"></canvas></div>
@@ -265,7 +364,7 @@ h1 {
 </div>
 
 <script>
-const DATA = {"daily30": {"labels": ["2026-03-13", "2026-03-14", "2026-03-15", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-21", "2026-03-22", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11"], "issue": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6], "pr": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "weekly": {"labels": ["2026-01-19", "2026-01-26", "2026-02-02", "2026-02-09", "2026-02-16", "2026-02-23", "2026-03-02", "2026-03-09", "2026-03-16", "2026-03-23", "2026-03-30", "2026-04-06"], "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]}, "cumulative": {"labels": ["2026-04-11"], "values": [6]}, "category": {"wbs": 6}, "org": {"domain-tech-collection": 3, "standardization-initiative": 3}, "type": {"Issue": 6}};
+const DATA = {"daily30": {"labels": ["2026-03-13", "2026-03-14", "2026-03-15", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-21", "2026-03-22", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11"], "issue": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6], "pr": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}, "weekly": {"labels": ["2026-01-19", "2026-01-26", "2026-02-02", "2026-02-09", "2026-02-16", "2026-02-23", "2026-03-02", "2026-03-09", "2026-03-16", "2026-03-23", "2026-03-30", "2026-04-06"], "values": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6]}, "cumulative": {"labels": ["2026-04-11"], "values": [6]}, "category": {"wbs": 6}, "org": {"domain-tech-collection": 3, "standardization-initiative": 3}, "type": {"Issue": 6}, "wbs": {"total": 124, "done": 4, "in_progress": 3, "todo": 117, "progress_pct": 3.2, "by_org": {"domain-tech-collection": {"total": 48, "done": 4, "in_progress": 3, "todo": 41}, "standardization-initiative": {"total": 76, "done": 0, "in_progress": 0, "todo": 76}}, "by_iteration": {"W1": {"total": 6, "done": 3, "in_progress": 0, "todo": 3}, "W1-2": {"total": 4, "done": 1, "in_progress": 0, "todo": 3}, "W1-10": {"total": 4, "done": 0, "in_progress": 3, "todo": 1}, "W2": {"total": 7, "done": 0, "in_progress": 0, "todo": 7}, "W3": {"total": 9, "done": 0, "in_progress": 0, "todo": 9}, "W3-4": {"total": 2, "done": 0, "in_progress": 0, "todo": 2}, "W4": {"total": 9, "done": 0, "in_progress": 0, "todo": 9}, "W4-5": {"total": 1, "done": 0, "in_progress": 0, "todo": 1}, "W4-6": {"total": 1, "done": 0, "in_progress": 0, "todo": 1}, "W5": {"total": 11, "done": 0, "in_progress": 0, "todo": 11}, "W5-6": {"total": 1, "done": 0, "in_progress": 0, "todo": 1}, "W5-8": {"total": 1, "done": 0, "in_progress": 0, "todo": 1}, "W6": {"total": 5, "done": 0, "in_progress": 0, "todo": 5}, "W7": {"total": 9, "done": 0, "in_progress": 0, "todo": 9}, "W7-8": {"total": 2, "done": 0, "in_progress": 0, "todo": 2}, "W8": {"total": 9, "done": 0, "in_progress": 0, "todo": 9}, "W9": {"total": 8, "done": 0, "in_progress": 0, "todo": 8}, "W10": {"total": 7, "done": 0, "in_progress": 0, "todo": 7}, "—": {"total": 28, "done": 0, "in_progress": 0, "todo": 28}}}};
 
 // Chart.js 共通設定
 const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -288,6 +387,100 @@ const C = {
   pink: darkMode ? '#f783ac' : '#d63384',
   gray: mutedColor,
 };
+
+// 0-A. WBS Org progress (stacked horizontal bar)
+const wbsOrgs = Object.keys(DATA.wbs.by_org);
+new Chart(document.getElementById('wbsOrgChart'), {
+  type: 'bar',
+  data: {
+    labels: wbsOrgs,
+    datasets: [
+      {
+        label: '完了',
+        data: wbsOrgs.map(o => DATA.wbs.by_org[o].done || 0),
+        backgroundColor: C.green,
+        borderRadius: 4,
+      },
+      {
+        label: '進行中',
+        data: wbsOrgs.map(o => DATA.wbs.by_org[o].in_progress || 0),
+        backgroundColor: C.yellow,
+        borderRadius: 4,
+      },
+      {
+        label: '未着手',
+        data: wbsOrgs.map(o => DATA.wbs.by_org[o].todo || 0),
+        backgroundColor: darkMode ? 'rgba(158,158,158,0.5)' : 'rgba(108,117,125,0.4)',
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor } },
+      y: { stacked: true, grid: { display: false } }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10 } },
+      tooltip: {
+        callbacks: {
+          afterLabel: function(ctx) {
+            const org = ctx.label;
+            const total = DATA.wbs.by_org[org].total || 0;
+            const done = DATA.wbs.by_org[org].done || 0;
+            const pct = total ? Math.round(done / total * 1000) / 10 : 0;
+            return `完了率: ${pct}% (${done}/${total})`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// 0-B. WBS Iteration progress (stacked vertical bar)
+const wbsIters = Object.keys(DATA.wbs.by_iteration);
+new Chart(document.getElementById('wbsIterChart'), {
+  type: 'bar',
+  data: {
+    labels: wbsIters,
+    datasets: [
+      {
+        label: '完了',
+        data: wbsIters.map(i => DATA.wbs.by_iteration[i].done || 0),
+        backgroundColor: C.green,
+        borderRadius: 4,
+      },
+      {
+        label: '進行中',
+        data: wbsIters.map(i => DATA.wbs.by_iteration[i].in_progress || 0),
+        backgroundColor: C.yellow,
+        borderRadius: 4,
+      },
+      {
+        label: '未着手',
+        data: wbsIters.map(i => DATA.wbs.by_iteration[i].todo || 0),
+        backgroundColor: darkMode ? 'rgba(158,158,158,0.5)' : 'rgba(108,117,125,0.4)',
+        borderRadius: 4,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: gridColor } }
+    },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 10 } }
+    }
+  }
+});
 
 // 1. Daily chart (Issue + PR stack)
 new Chart(document.getElementById('dailyChart'), {
