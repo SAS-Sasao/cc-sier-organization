@@ -167,6 +167,8 @@ cc-sier-organization/
 - ⚠️ Python→bash で区切りデータを渡す時は `\t` ではなく `\x1f` (ASCII Unit Separator) を使う（bash IFS whitespace で空フィールドが潰れ column shift 発生）
 - ⚠️ workflow の `permissions:` は使う scope を全て明示列挙し、`2>/dev/null` / `|| true` でエラー握り潰し禁止（silent fail で誤集計の実例あり）
 - ⚠️ gitignored データ（`.session-summaries/` `.case-bank/` 等）を参照する Skill は **ローカル実行専用** を SKILL.md に明記（Actions から読めないため完全 observability 不可）
+- ⚠️ GitHub Projects v2 GraphQL API の `items(first: N)` は **N ≤ 100**（100 超で `EXCESSIVE_PAGINATION` エラー）。100 超取得は `pageInfo { hasNextPage endCursor }` の cursor-based pagination 必須
+- ⚠️ workflow shell で `cmd | tee log.txt` を使うと **pipefail なしでは cmd の非 0 exit code が潰され success 偽装**される。`set -euo pipefail` を冒頭に入れるか、実行と log 表示を分離する
 
 詳細: @.claude/rules/review-pattern.md
 
