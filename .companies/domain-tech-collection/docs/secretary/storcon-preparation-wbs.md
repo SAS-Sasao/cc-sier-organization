@@ -95,8 +95,13 @@
 | 2.5.4 | ストコンAWS移行 技術Deep Diveの読み込み | 自学 | W4 | 3h | `industry-reports/storcon-aws-tech-deep-dive-2026-03-25.md` | 読了メモ | W4 | 2 | learning | — | [ ] |
 | 2.5.5 | ストコン モダナイゼーション業務シナリオの読み込み | 自学 | W4 | 3h | `industry-reports/storcon-modernization-business-scenarios-2026-03-26.md` | 読了メモ | W4 | 2 | learning | — | [ ] |
 | 2.5.6 | ストコン最新動向・深掘り概要の読み込み | 自学 | W4 | 1h | `industry-reports/storcon-deep-dive-2026-03-25.md` + `storecomputer-latest-trends-2024-2026.md` | 読了メモ | W4 | 3 | learning | — | [ ] |
+| 2.5.7 | NEC中期経営計画リサーチの理解 | 自学 | W4 | 1h | `industry-reports/nec-midterm-plan-research-2026-04-09.md` | 読了メモ | W4 | 1 | learning | — | [ ] |
+| 2.5.8 | NEC中期経営計画 財務ブレイクダウンの理解 | 自学 | W4 | 2h | `industry-reports/nec-midterm-plan-financial-breakdown-2026-04-10.md` | 読了メモ | W4 | 1 | learning | — | [ ] |
+| 2.5.9 | BluStellar リテール向けシナリオの理解 | 自学 | W4 | 2h | `industry-reports/blustellar-retail-deep-dive-2026-04-10.md` | 読了メモ | W4 | 1 | learning | — | [ ] |
+| 2.5.10 | NEC cotomi & Agentic AI 戦略の理解 | 自学 | W4 | 2h | `industry-reports/cotomi-agentic-ai-deep-dive-2026-04-10.md` | 読了メモ | W4 | 2 | learning | — | [ ] |
+| 2.5.11 | 映像認識AI × 売上向上 弾込めリサーチの理解 | 自学 | W4 | 1h | `industry-reports/video-ai-sales-uplift-ammo-2026-04-09.md` | 読了メモ | W4 | 2 | learning | — | [ ] |
 
-**到達目標**: NEC×ローソンの協業体制（NEC本体・LDI・KDDI合弁UCF）を説明でき、ストコン移行の業務シナリオとAWS技術スタックを紐付けて語れる
+**到達目標**: NEC×ローソンの協業体制（NEC本体・LDI・KDDI合弁UCF）を説明でき、NEC中計の財務目標→リテール部門→BluStellar/cotomi戦略→ストコン移行の位置付けを一気通貫で語れる
 
 ---
 
