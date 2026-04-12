@@ -2,7 +2,7 @@
 
 > **対象案件**: コンビニストアコンピューター オンプレ→AWSクラウド移行（2026年6月参画）
 > **最終更新**: 2026-04-12
-> **総ファイル数**: 37 / **総容量**: 829 KB
+> **総ファイル数**: 38 / **総容量**: 863 KB
 
 **種別の見方**: 📝 ノート = 学習の要点整理 / 📄 ソース = 元の調査レポート
 
@@ -21,7 +21,8 @@
 | 2.5.1 | [KDDI WAKONXプラットフォーム深堀り調査](wbs-2-5-1-kddi-wakonx-platform.md) | 📝 ノート | 16 KB |
 | 2.5.1 | [WBS 2.5.1 — NEC×ローソン DX戦略の理解](wbs-2-5-1-nec-lawson-dx-strategy.md) | 📝 ノート | 15 KB |
 | 2.5.1 | [ローソンDX戦略・NEC×ローソン案件 調査レポート](wbs-2-5-1-nec-lawson-dx-strategy-source.md) | 📄 ソース | 7 KB |
-| 2.5.2 | [ローソンデジタルイノベーション（LDI）の実態分析](wbs-2-5-2-lawson-ldi-analysis.md) | 📝 ノート | 18 KB |
+| 2.5.2 | [WBS 2.5.2 — LDI実態分析の理解](wbs-2-5-2-lawson-ldi-understanding.md) | 📝 ノート | 27 KB |
+| 2.5.2 | [ローソンデジタルイノベーション（LDI）の実態分析](wbs-2-5-2-lawson-ldi-analysis.md) | 📄 ソース | 18 KB |
 | 2.5.3 | [WBS 2.5.3 — ローソン店舗システム現行アーキテクチャの理解](wbs-2-5-3-lawson-store-system.md) | 📝 ノート | 28 KB |
 | 2.5.3 | [ローソン店舗システムの現行アーキテクチャ](wbs-2-5-3-lawson-store-system-source.md) | 📄 ソース | 22 KB |
 | 2.5.4 | [ストアコンピューター AWS移行 技術スタック深堀り調査レポート](wbs-2-5-4-storcon-aws-tech-deep-dive.md) | 📝 ノート | 40 KB |
@@ -87,7 +88,7 @@
 ### ローソンを知る（経営 → 店舗 → システム）
 
 1. [NEC×ローソン DX戦略](wbs-2-5-1-nec-lawson-dx-strategy.md) ← 📝 ノート
-2. [LDI 実態分析](wbs-2-5-2-lawson-ldi-analysis.md) ← 📄 ソース
+2. [LDI 実態分析の理解](wbs-2-5-2-lawson-ldi-understanding.md) ← 📝 ノート
 3. [ローソン店舗システム](wbs-2-5-3-lawson-store-system.md) ← 📝 ノート
 4. [KDDI WAKONX](wbs-2-5-1-kddi-wakonx-platform.md) ← 📄 ソース
 
@@ -112,7 +113,6 @@
 
 | WBS番号 | タスク名 | Issue番号 | ソースレポート |
 |---------|---------|----------|-------------|
-| 2.5.2 | LDI実態分析の理解 | #416 | ✅ あり |
 | 2.5.4 | ストコンAWS移行 技術Deep Dive | #418 | ✅ あり |
 | 2.5.5 | ストコン モダナイゼーション業務シナリオ | #419 | ✅ あり |
 | 2.5.6 | ストコン最新動向・深掘り概要 | #420 | ✅ あり |
