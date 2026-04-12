@@ -80,6 +80,24 @@
 | 2.4.1 | ケーススタディ（ローソン・ファミマ等のAWS活用事例） | 自学 | W10 | 3h | AWS小売業界事例 | 事例まとめ | W10 | 3 | learning | — | [ ] |
 | 2.4.R1 | 主要チェーンのIT戦略・DX事例の最新調査 | 小売+リサーチ | W10 | - | Web調査 | `docs/retail-domain/` 配下レポート | W10 | 3 | research | — | [ ] |
 
+**到達目標**: ストコン案件の顧客（ローソン）とNECの協業構造、主要チェーンのIT投資動向を語れる
+
+### Phase 5: NEC×コンビニ業界 深堀り学習（W4〜）— 12h
+
+既存の industry-reports を読み込み、NEC×ローソン案件の文脈を深く理解する。
+レポートはリサーチ室が既に生成済みのため、自学者が「読了→要点メモ→理解確認」のサイクルで消化する。
+
+| WBS | タスク | 担当 | 期間 | 時間 | リソース | 成果物 | Iter | Pri | Type | Issue | ステータス |
+|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+| 2.5.1 | NEC×ローソン DX戦略の理解 | 自学 | W4 | 1h | `industry-reports/lawson-dx-strategy-2026-04-09.md` | 読了メモ | W4 | 1 | learning | — | [ ] |
+| 2.5.2 | LDI（ローソンデジタルイノベーション）実態分析の理解 | 自学 | W4 | 2h | `industry-reports/lawson-ldi-analysis-2026-04-09.md` | 読了メモ | W4 | 1 | learning | — | [ ] |
+| 2.5.3 | ローソン店舗システム現行アーキテクチャの理解 | 自学 | W4 | 2h | `industry-reports/lawson-store-system-architecture-2026-04-09.md` | 読了メモ | W4 | 1 | learning | — | [ ] |
+| 2.5.4 | ストコンAWS移行 技術Deep Diveの読み込み | 自学 | W4 | 3h | `industry-reports/storcon-aws-tech-deep-dive-2026-03-25.md` | 読了メモ | W4 | 2 | learning | — | [ ] |
+| 2.5.5 | ストコン モダナイゼーション業務シナリオの読み込み | 自学 | W4 | 3h | `industry-reports/storcon-modernization-business-scenarios-2026-03-26.md` | 読了メモ | W4 | 2 | learning | — | [ ] |
+| 2.5.6 | ストコン最新動向・深掘り概要の読み込み | 自学 | W4 | 1h | `industry-reports/storcon-deep-dive-2026-03-25.md` + `storecomputer-latest-trends-2024-2026.md` | 読了メモ | W4 | 3 | learning | — | [ ] |
+
+**到達目標**: NEC×ローソンの協業体制（NEC本体・LDI・KDDI合弁UCF）を説明でき、ストコン移行の業務シナリオとAWS技術スタックを紐付けて語れる
+
 ---
 
 ## 3. 技術スタック習得（AWS・移行技術）
