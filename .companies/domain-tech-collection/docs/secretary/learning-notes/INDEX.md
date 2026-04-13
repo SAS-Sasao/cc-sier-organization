@@ -1,8 +1,8 @@
 # 学習ノート インデックス
 
 > **対象案件**: コンビニストアコンピューター オンプレ→AWSクラウド移行（2026年6月参画）
-> **最終更新**: 2026-04-13
-> **総ファイル数**: 46 / **総容量**: 1,134 KB
+> **最終更新**: 2026-04-12
+> **総ファイル数**: 48 / **総容量**: 1,220 KB
 
 **種別の見方**: 📝 ノート = 学習の要点整理 / 📄 ソース = 元の調査レポート
 
@@ -64,6 +64,8 @@
 |---------|-----------|------|------|
 | 5.2 | [ストアコンピューター AWS移行 技術スタック・学習リソース調査レポート](wbs-5-2-storcon-aws-migration-tech.md) | 📝 ノート | 26 KB |
 | 5.2 | [ストコンAWS移行 モダナイゼーション＆データ分析 技術調査レポート](wbs-5-2-storcon-aws-modernization-analytics.md) | 📝 ノート | 41 KB |
+| 5.2 | [AWS サービス選定と設計パターン詳細調査 — ストコン移行版](wbs-5-2-aws-service-design-patterns.md) | 📝 ノート | 43 KB |
+| 5.2 | [AWS 移行ベストプラクティス — 大規模小売システム版](wbs-5-2-aws-migration-best-practices.md) | 📝 ノート | 45 KB |
 | 5.3 | [WBS 5.3 — コンビニ各チェーンDX・IT投資動向調査（技術視点）](wbs-5-3-convenience-dx-investment-tech.md) | 📝 ノート | 29 KB |
 | 5.3 | [WBS 5.3 — コンビニ各チェーンDX・IT投資動向調査（小売ドメイン視点）](wbs-5-3-convenience-dx-investment-retail.md) | 📝 ノート | 38 KB |
 | 5.1 | [WBS 5.1 — コンビニのサプライチェーン・物流システム詳解](wbs-5-1-convenience-supply-chain.md) | 📝 ノート | 46 KB |
@@ -105,8 +107,9 @@
 1. [ストコン ドメイン知識](wbs-2-1-1-storcon-domain-knowledge-source.md) ← 📄 ソース
 2. [コンビニ業務プロセス](wbs-2-1-2-convenience-business-processes.md) ← 📄 ソース
 3. [コンビニ サプライチェーン・物流システム](wbs-5-1-convenience-supply-chain.md) ← 📝 ノート
-4a. [食品安全・温度管理 法規制要件（HACCP/食品衛生法）](wbs-5-1-food-safety-temperature.md) ← 📝 ノート（NEW）
+4a. [食品安全・温度管理 法規制要件（HACCP/食品衛生法）](wbs-5-1-food-safety-temperature.md) ← 📝 ノート
 4. [ストコンAWS技術Deep Dive](wbs-2-5-4-storcon-aws-tech-deep-dive.md) ← 📄 ソース
+4b. [AWS サービス選定と設計パターン詳細](wbs-5-2-aws-service-design-patterns.md) ← 📝 ノート（NEW）
 5. [リスク管理基礎](wbs-4-1-3-risk-management.md) ← 📝 ノート
 
 ### PM として備える
