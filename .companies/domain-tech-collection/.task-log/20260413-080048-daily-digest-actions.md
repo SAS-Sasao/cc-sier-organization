@@ -81,3 +81,14 @@ Phase 8: タスクログ作成・完了報告
 | completeness | 0.93 | (s1_structure 0.95 + s5_dedup 0.90) / 2 = 0.925 → 0.93。章構成・サブセクション完全準拠、テーマ別分類妥当、ファミマTV軽微重複のみ |
 | accuracy | 1.00 | (s2_links 1.00 + s3_summary 0.95) / 2 = 0.975 → 1.00。全96記事がhttpsリンク付き、要約は情報密度高く句読点終止 |
 | clarity | 0.88 | (s4_cross_domain 0.95 + s6_violations 0.80) / 2 = 0.875 → 0.88。C章4トピック全てにSIer示唆あり、D章絵文字が唯一の禁則違反 |
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-04-13T10:39:42"
+```
