@@ -52,6 +52,7 @@ Conventional Commits 準拠:
 
 - ダッシュボード HTML 再生成（`/company-dashboard`）
 - ダイジェスト HTML 再生成（`/company-digest-html`）
+- TodoInsights HTML 再生成（`daily-insights-sync` workflow 経由、`docs/insights/index.html` + `docs/index.html`）
 - Case Bank 自動報酬スコア追記（hook 経由）
 - プラグインランタイム同期（`.claude/skills/` ↔ `plugins/cc-sier/skills/`）
 - マージ後のタスクログ `completed` 更新（Issue/PR番号追記）
