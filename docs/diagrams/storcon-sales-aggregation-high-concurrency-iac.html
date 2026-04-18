@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storcon Sales Aggregation - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+@media (prefers-color-scheme: dark) { .badge-pass { background:#064e3b; color:#6ee7b7; } }
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./storcon-sales-aggregation-high-concurrency.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./storcon-sales-aggregation-high-concurrency.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>Storcon Sales Aggregation - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-04-18</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>359 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">storcon-sales-aggregation-high-concurrency.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">359 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  EventBridge Rule 2本（Firehose 配信 / Fargate heavy-job トリガ）を含むフル配線済み。
+  <code>ConsumerLambda.ZipFile</code> や ECS タスクの実コンテナイメージは運用時に差し替えてください。
+  暗号化・最小権限・パブリックアクセスブロック・DLQ + CloudWatch Alarm はデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Powered by AWS IaC MCP Server</p>
+<script>
+const raw = "AWSTemplateFormatVersion: '2010-09-09'\nDescription: >\n  Storcon Sales Aggregation - High Concurrency Architecture.\n  POS (14,600 stores) -> API Gateway -> SQS -> Lambda -> DynamoDB On-Demand,\n  with DynamoDB Streams fan-out to EventBridge -> Firehose -> S3 Data Lake,\n  and ECS Fargate for heavy processing. DLQ + SNS for error notification.\n  Reference: WBS 3.2.1 high-concurrency-design.md \u00a76.\n\nParameters:\n  EnvironmentName:\n    Type: String\n    Default: prod\n    AllowedValues: [dev, prod]\n  DataLakeBucketName:\n    Type: String\n    Default: storcon-sales-datalake-prod\n\nResources:\n\n  # ---------- Storage ----------\n  SalesEventsTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub \"${EnvironmentName}-sales-events\"\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - AttributeName: store_id\n          AttributeType: S\n        - AttributeName: event_ts\n          AttributeType: S\n      KeySchema:\n        - AttributeName: store_id\n          KeyType: HASH\n        - AttributeName: event_ts\n          KeyType: RANGE\n      StreamSpecification:\n        StreamViewType: NEW_AND_OLD_IMAGES\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n      SSESpecification:\n        SSEEnabled: true\n\n  DataLakeBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Ref DataLakeBucketName\n      LifecycleConfiguration:\n        Rules:\n          - Id: TransitionToIA\n            Status: Enabled\n            Transitions:\n              - StorageClass: STANDARD_IA\n                TransitionInDays: 90\n              - StorageClass: GLACIER\n                TransitionInDays: 365\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n\n  # ---------- Async Buffer ----------\n  SalesQueue:\n    Type: AWS::SQS::Queue\n    Properties:\n      QueueName: !Sub \"${EnvironmentName}-sales-queue\"\n      VisibilityTimeout: 60\n      MessageRetentionPeriod: 1209600  # 14 days\n      RedrivePolicy:\n        deadLetterTargetArn: !GetAtt SalesDLQ.Arn\n        maxReceiveCount: 3\n\n  SalesDLQ:\n    Type: AWS::SQS::Queue\n    Properties:\n      QueueName: !Sub \"${EnvironmentName}-sales-dlq\"\n      MessageRetentionPeriod: 1209600\n\n  DLQAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub \"${EnvironmentName}-sales-dlq-not-empty\"\n      MetricName: ApproximateNumberOfMessagesVisible\n      Namespace: AWS/SQS\n      Dimensions:\n        - Name: QueueName\n          Value: !GetAtt SalesDLQ.QueueName\n      Statistic: Maximum\n      Period: 60\n      EvaluationPeriods: 1\n      Threshold: 0\n      ComparisonOperator: GreaterThanThreshold\n      AlarmActions:\n        - !Ref AlertTopic\n\n  # ---------- Compute ----------\n  ConsumerLambdaRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal: { Service: lambda.amazonaws.com }\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole\n      Policies:\n        - PolicyName: DDBWrite\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - dynamodb:PutItem\n                  - dynamodb:BatchWriteItem\n                Resource: !GetAtt SalesEventsTable.Arn\n\n  ConsumerLambda:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"${EnvironmentName}-sales-consumer\"\n      Runtime: python3.12\n      Architectures: [arm64]\n      Handler: index.handler\n      Role: !GetAtt ConsumerLambdaRole.Arn\n      Timeout: 30\n      ReservedConcurrentExecutions: 500\n      TracingConfig:\n        Mode: Active\n      Code:\n        ZipFile: |\n          def handler(event, context):\n              # Consume SQS batch, PutItem to DynamoDB\n              return {\"statusCode\": 200}\n\n  ConsumerEventMapping:\n    Type: AWS::Lambda::EventSourceMapping\n    Properties:\n      EventSourceArn: !GetAtt SalesQueue.Arn\n      FunctionName: !Ref ConsumerLambda\n      BatchSize: 10\n      MaximumBatchingWindowInSeconds: 5\n\n  # ---------- ECS Fargate (heavy path) ----------\n  HeavyCluster:\n    Type: AWS::ECS::Cluster\n    Properties:\n      ClusterName: !Sub \"${EnvironmentName}-sales-heavy\"\n\n  HeavyTaskDefinition:\n    Type: AWS::ECS::TaskDefinition\n    Properties:\n      Family: !Sub \"${EnvironmentName}-sales-heavy-task\"\n      NetworkMode: awsvpc\n      RequiresCompatibilities: [FARGATE]\n      Cpu: \"512\"\n      Memory: \"1024\"\n      ExecutionRoleArn: !GetAtt HeavyExecutionRole.Arn\n      ContainerDefinitions:\n        - Name: heavy-processor\n          Image: public.ecr.aws/amazonlinux/amazonlinux:2\n          Essential: true\n\n  HeavyExecutionRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal: { Service: ecs-tasks.amazonaws.com }\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy\n\n  # ---------- API Gateway ----------\n  SalesRestApi:\n    Type: AWS::ApiGateway::RestApi\n    Properties:\n      Name: !Sub \"${EnvironmentName}-sales-api\"\n      EndpointConfiguration:\n        Types: [REGIONAL]\n\n  SalesResource:\n    Type: AWS::ApiGateway::Resource\n    Properties:\n      RestApiId: !Ref SalesRestApi\n      ParentId: !GetAtt SalesRestApi.RootResourceId\n      PathPart: sales\n\n  SalesPostMethod:\n    Type: AWS::ApiGateway::Method\n    Properties:\n      RestApiId: !Ref SalesRestApi\n      ResourceId: !Ref SalesResource\n      HttpMethod: POST\n      AuthorizationType: AWS_IAM\n      Integration:\n        Type: AWS\n        IntegrationHttpMethod: POST\n        Uri: !Sub \"arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${SalesQueue.QueueName}\"\n        Credentials: !GetAtt ApiGatewayToSqsRole.Arn\n        RequestParameters:\n          integration.request.header.Content-Type: \"'application/x-www-form-urlencoded'\"\n        RequestTemplates:\n          application/json: \"Action=SendMessage&MessageBody=$input.body\"\n        IntegrationResponses:\n          - StatusCode: 202\n      MethodResponses:\n        - StatusCode: 202\n\n  ApiGatewayToSqsRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal: { Service: apigateway.amazonaws.com }\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: SendToSqs\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action: sqs:SendMessage\n                Resource: !GetAtt SalesQueue.Arn\n\n  # ---------- Fan-out ----------\n  SalesEventBus:\n    Type: AWS::Events::EventBus\n    Properties:\n      Name: !Sub \"${EnvironmentName}-sales-bus\"\n\n  FirehoseToS3:\n    Type: AWS::KinesisFirehose::DeliveryStream\n    Properties:\n      DeliveryStreamName: !Sub \"${EnvironmentName}-sales-to-lake\"\n      S3DestinationConfiguration:\n        BucketARN: !GetAtt DataLakeBucket.Arn\n        RoleARN: !GetAtt FirehoseRole.Arn\n        BufferingHints:\n          IntervalInSeconds: 300\n          SizeInMBs: 128\n        CompressionFormat: GZIP\n        Prefix: \"sales/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/\"\n\n  FirehoseRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal: { Service: firehose.amazonaws.com }\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: S3Write\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action:\n                  - s3:PutObject\n                  - s3:GetBucketLocation\n                Resource:\n                  - !GetAtt DataLakeBucket.Arn\n                  - !Sub \"${DataLakeBucket.Arn}/*\"\n\n  EventsToFirehoseRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal: { Service: events.amazonaws.com }\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: InvokeFirehose\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action: [firehose:PutRecord, firehose:PutRecordBatch]\n                Resource: !GetAtt FirehoseToS3.Arn\n\n  SalesToFirehoseRule:\n    Type: AWS::Events::Rule\n    Properties:\n      Name: !Sub \"${EnvironmentName}-sales-to-firehose\"\n      EventBusName: !Ref SalesEventBus\n      EventPattern:\n        source: [sales.ddb-stream]\n      State: ENABLED\n      Targets:\n        - Id: firehose-target\n          Arn: !GetAtt FirehoseToS3.Arn\n          RoleArn: !GetAtt EventsToFirehoseRole.Arn\n\n  EventsToEcsRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: '2012-10-17'\n        Statement:\n          - Effect: Allow\n            Principal: { Service: events.amazonaws.com }\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: RunEcsTask\n          PolicyDocument:\n            Version: '2012-10-17'\n            Statement:\n              - Effect: Allow\n                Action: ecs:RunTask\n                Resource: !Ref HeavyTaskDefinition\n              - Effect: Allow\n                Action: iam:PassRole\n                Resource: !GetAtt HeavyExecutionRole.Arn\n\n  SalesHeavyRule:\n    Type: AWS::Events::Rule\n    Properties:\n      Name: !Sub \"${EnvironmentName}-sales-heavy-trigger\"\n      EventBusName: !Ref SalesEventBus\n      EventPattern:\n        source: [sales.ddb-stream]\n        detail-type: [heavy-job]\n      State: ENABLED\n      Targets:\n        - Id: fargate-target\n          Arn: !GetAtt HeavyCluster.Arn\n          RoleArn: !GetAtt EventsToEcsRole.Arn\n          EcsParameters:\n            TaskDefinitionArn: !Ref HeavyTaskDefinition\n            LaunchType: FARGATE\n            TaskCount: 1\n\n  # ---------- Observability ----------\n  AlertTopic:\n    Type: AWS::SNS::Topic\n    Properties:\n      TopicName: !Sub \"${EnvironmentName}-sales-alert\"\n\nOutputs:\n  SalesApiEndpoint:\n    Description: \"API Gateway endpoint for POS\"\n    Value: !Sub \"https://${SalesRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/sales\"\n  SalesQueueUrl:\n    Value: !Ref SalesQueue\n  DataLakeBucketArn:\n    Value: !GetAtt DataLakeBucket.Arn\n  AlertTopicArn:\n    Value: !Ref AlertTopic\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

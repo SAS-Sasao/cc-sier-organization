@@ -68,7 +68,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count"><span id="match-count">1-20 / 21</span> 件の構成図</p>
+<p class="count"><span id="match-count">1-20 / 22</span> 件の構成図</p>
 
 <!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
 <div class="search-bar">
@@ -79,6 +79,18 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <!-- ▲ 検索・フィルタ ここまで -->
 
 <div class="grid">
+  <a href="./storcon-sales-aggregation-high-concurrency.html" class="card">
+    <img class="card-thumb" src="./storcon-sales-aggregation-high-concurrency.png" alt="Storcon Sales Aggregation High Concurrency">
+    <div class="card-body">
+      <div class="card-title">ストコン売上集約 大規模同時接続アーキテクチャ</div>
+      <div class="card-meta">
+        <span class="tag tag-project">ストコンAWS移行</span>
+        <span class="tag tag-area">High Concurrency</span>
+      </div>
+      <div class="card-desc">14,600店×2,433 TPS を API Gateway+SQS+Lambda+DynamoDB On-Demand で捌く構成。Fan-out + DLQ 観測セット</div>
+      <div class="card-date">2026-04-18</div>
+    </div>
+  </a>
   <a href="./hybrid-data-mesh-platform.html" class="card">
     <img class="card-thumb" src="./hybrid-data-mesh-platform.png" alt="Hybrid Data Mesh Platform">
     <div class="card-body">
