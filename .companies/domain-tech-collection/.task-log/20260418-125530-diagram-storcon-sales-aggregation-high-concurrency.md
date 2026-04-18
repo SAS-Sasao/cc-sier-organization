@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-04-18T12:55:30"
 completed: "2026-04-18T13:10:00"
 request: "/company-diagram → ストコン売上集約 大規模同時接続アーキテクチャ（WBS 3.2.1 §6 の図化）"
-issue_number: null
-pr_number: null
+issue_number: 472
+pr_number: 471
 subagents: [mcp-aws-diagram-server, general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 0
