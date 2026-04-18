@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ストコン売上集約 大規模同時接続アーキテクチャ - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:4px; }
+.badge-main { background:#3b82f6; color:#fff; }
+.badge-stream { background:#22c55e; color:#fff; }
+.badge-heavy { background:#8b5cf6; color:#fff; }
+.badge-error { background:#ef4444; color:#fff; }
+.badge-obs { background:#6b7280; color:#fff; }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.learning-points { list-style:none; padding:0; margin:0; }
+.learning-points li { background:var(--bg); border-left:4px solid var(--blue); border-radius:4px;
+                      padding:12px 16px; margin-bottom:10px; font-size:.9rem; line-height:1.7; }
+.learning-points li strong { color:var(--blue); }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>ストコン売上集約 大規模同時接続アーキテクチャ</h1>
+<div class="meta">
+  <span class="tag tag-project">ストコンAWS移行</span>
+  <span class="tag tag-area">High Concurrency</span>
+  <span>生成日: 2026-04-18</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./storcon-sales-aggregation-high-concurrency.png" alt="Storcon Sales Aggregation High Concurrency Architecture" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./storcon-sales-aggregation-high-concurrency-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:#3b82f6"></span> Main — POS → API Gateway → SQS → Lambda → DynamoDB の主パス</div>
+    <div class="legend-item"><span class="legend-line" style="background:#22c55e"></span> Stream — DynamoDB Streams → EventBridge → Firehose → S3 データレイク配信</div>
+    <div class="legend-item"><span class="legend-line" style="background:#8b5cf6"></span> Heavy — EventBridge → ECS Fargate（重処理、Auto Scaling で追随）</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#ef4444"></span> Error — DLQ / SNS 障害通知経路</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#6b7280"></span> Obs — CloudWatch / X-Ray / SNS 観測経路</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p><strong>対象ユースケース</strong>: コンビニ大手（ローソン想定、約14,600店）のストコン AWS 移行案件における<strong>売上データ集約</strong>。全店から売上イベントが秒単位で同時に飛んでくる環境で、<strong>平均 2,433 TPS・ピーク 10,000 TPS</strong>を AWS マネージドサービスで捌く構成。</p>
+  <p><strong>設計思想</strong>: 同期的に DB まで書くのではなく、<strong>API Gateway と DynamoDB の間に SQS を挟んで非同期化</strong>することで、スパイク吸収・リトライ責任分界・DB throttling の緩衝材とする。DynamoDB Streams 経由で EventBridge に fan-out し、重処理は ECS Fargate に、データレイクは Firehose で S3 に、と<strong>責務を分離</strong>する。</p>
+  <p><strong>関連学習ノート</strong>: <a href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/secretary/learning-notes/wbs-3-2-1-high-concurrency-design.md" style="color:var(--blue)">WBS 3.2.1 大規模同時接続設計（ハンズオンメモ）</a> §6 の統合アーキテクチャを図化。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+
+  <h3><span class="badge badge-main">Main</span> POS → DynamoDB（主パス）</h3>
+  <div class="flow">
+    <span class="flow-step">POS 店舗端末 (14,600店)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Route53 DNS</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront Edge</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway (10k RPS throttle, WAF)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SQS Standard (2,433 TPS)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Consumer Lambda (Reserved 500)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB On-Demand</span>
+  </div>
+
+  <h3><span class="badge badge-stream">Stream</span> DynamoDB Streams → データレイク</h3>
+  <div class="flow">
+    <span class="flow-step">DynamoDB Streams</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EventBridge custom bus</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Kinesis Firehose (batched)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 Data Lake (raw, partitioned)</span>
+  </div>
+
+  <h3><span class="badge badge-heavy">Heavy</span> 重処理（集計・突合）</h3>
+  <div class="flow">
+    <span class="flow-step">EventBridge</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">ECS Fargate (CPU 70% target AS)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB On-Demand</span>
+  </div>
+
+  <h3><span class="badge badge-error">Error</span> 障害時経路</h3>
+  <div class="flow">
+    <span class="flow-step">SQS (poison message)</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DLQ</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SNS Alert Topic (オンコール通知)</span>
+  </div>
+
+  <h3><span class="badge badge-obs">Obs</span> 観測経路</h3>
+  <div class="flow">
+    <span class="flow-step">Lambda / Fargate</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudWatch Metrics &amp; Alarms</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SNS</span>
+    <span class="flow-arrow">&nbsp;&nbsp;</span>
+    <span class="flow-step">API Gateway</span>
+    <span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">X-Ray Tracing</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>店舗（オンプレ）</td><td>POS 店舗コントローラ × 14,600</td><td>各店舗で売上イベント生成、HTTPS で AWS 送信</td></tr>
+    <tr><td>エッジ</td><td>Route53, CloudFront</td><td>DNS フェイルオーバ・エッジキャッシュ（静的コンテンツのみ）</td></tr>
+    <tr><td>Ingress</td><td>API Gateway (REST), WAF</td><td>API throttling（デフォルト 10,000 RPS / region）・認証（IAM または API Key）・不正アクセス防御</td></tr>
+    <tr><td>非同期バッファ</td><td>SQS Standard + DLQ</td><td>スパイク吸収、リトライ責任分界、at-least-once 配信、poison メッセージ隔離</td></tr>
+    <tr><td>主コンピュート</td><td>Lambda (Reserved Concurrency 500)</td><td>SQS からのイベント pull、DynamoDB への PutItem。同時実行上限で DB throttling を制御</td></tr>
+    <tr><td>重コンピュート</td><td>ECS Fargate + Application Auto Scaling</td><td>集計・突合など Lambda 15分制限を超える処理。CPU 70% target で自動追随</td></tr>
+    <tr><td>主ストレージ</td><td>DynamoDB On-Demand (sales-events)</td><td>書き込み毎にキャパ自動調整。ピーク 40,000 WCU まで対応</td></tr>
+    <tr><td>Fan-out</td><td>DynamoDB Streams, EventBridge custom bus</td><td>下流への非同期配信。ストリーム消費者の追加が既存パスに影響しない</td></tr>
+    <tr><td>データレイク配信</td><td>Kinesis Firehose, S3</td><td>バッチ書き込みで S3 コスト最適化、Parquet 変換、日付パーティション</td></tr>
+    <tr><td>観測</td><td>CloudWatch, X-Ray, SNS</td><td>メトリクス・ログ・分散トレーシング・アラート通知（夜間オンコール接続）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <p><strong>1. API Gateway の直後に SQS を挟む理由</strong><br>
+  Lambda を直接 API Gateway に繋ぐと、同期実行の同時実行数上限（default 1,000）に張り付いた瞬間にクライアント 429 が出る。SQS を挟むことで書き込み側に背圧を吸収させ、Lambda 側は Reserved Concurrency 500 で DB throttling を上流から制御できる。年末年始・GW のピーク時もクライアント側には成功レスポンス（202 Accepted）を返しつつ、内部で非同期処理できる。</p>
+  <p><strong>2. SQS は Standard 選択、FIFO にしない</strong><br>
+  売上データは「イベント単位で idempotent」（店舗 ID + タイムスタンプでユニーク化可能）なので、順序保証より throughput 優先。Standard は unlimited throughput、FIFO は 3,000 msg/s（batch化で）まで。14,600店×10イベント/分 = 2,433 TPS は Standard の得意領域。</p>
+  <p><strong>3. DynamoDB On-Demand を選択、Provisioned にしない</strong><br>
+  全店一斉棚卸や月次締めなど<strong>アクセスパターンが予測困難</strong>なため、On-Demand の自動スケール（30秒以内に2倍まで）を優先。Provisioned で Auto Scaling を組むとスケール遅延でスロットリングが発生する。ただし月額コストは On-Demand のほうが2〜3倍高いため、定常運用が見えた Phase で Provisioned 移行を検討。</p>
+  <p><strong>4. DynamoDB Streams + EventBridge で fan-out</strong><br>
+  主パス（Lambda PutItem）と下流処理（データレイク配信・重処理）を<strong>疎結合</strong>にする。Lambda は DynamoDB に書くだけで責任完了。Streams が変更をキャプチャ、EventBridge が rule で下流にルーティング。新しい消費者（例: リアルタイムダッシュボード）を追加しても主パスに影響しない。</p>
+  <p><strong>5. DLQ + CloudWatch + SNS の最小観測セット</strong><br>
+  poison メッセージは SQS visibility timeout と maxReceiveCount（3回）超過で自動的に DLQ へ。DLQ のメッセージ数を CloudWatch Alarm で監視し、SNS トピック経由で PagerDuty/Slack に通知。店舗運用を止めないため<strong>夜間オンコール必須</strong>。</p>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p style="color:#888;font-size:.85rem;">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。為替レート: $1 = 150円</p>
+  <table>
+    <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    <tr><td>API Gateway (REST)</td><td>$3.50/100万リクエスト</td><td>$10-30 (1,500-4,500円)</td><td>$250-500 (37,500-75,000円)</td></tr>
+    <tr><td>CloudFront</td><td>エッジキャッシュ + 転送</td><td>$5-15 (750-2,250円)</td><td>$50-200 (7,500-30,000円)</td></tr>
+    <tr><td>Route53</td><td>Hosted Zone + Query</td><td>$1-3 (150-450円)</td><td>$5-15 (750-2,250円)</td></tr>
+    <tr><td>WAF</td><td>Web ACL + ルール</td><td>$5-10 (750-1,500円)</td><td>$15-30 (2,250-4,500円)</td></tr>
+    <tr><td>SQS Standard + DLQ</td><td>$0.40/100万リクエスト</td><td>$5-15 (750-2,250円)</td><td>$80-150 (12,000-22,500円)</td></tr>
+    <tr><td>Lambda (Consumer)</td><td>Reserved 500, 200ms/実行</td><td>$20-50 (3,000-7,500円)</td><td>$400-800 (60,000-120,000円)</td></tr>
+    <tr><td>ECS Fargate</td><td>0.5 vCPU × 平均 4 task</td><td>$30-60 (4,500-9,000円)</td><td>$200-400 (30,000-60,000円)</td></tr>
+    <tr><td>DynamoDB On-Demand</td><td>$1.25/100万WCU</td><td>$50-150 (7,500-22,500円)</td><td>$2,500-5,000 (375,000-750,000円)</td></tr>
+    <tr><td>DynamoDB Streams</td><td>含む（On-Demand 内）</td><td>$0 (0円)</td><td>$50-100 (7,500-15,000円)</td></tr>
+    <tr><td>EventBridge</td><td>$1.00/100万イベント</td><td>$2-5 (300-750円)</td><td>$80-150 (12,000-22,500円)</td></tr>
+    <tr><td>Kinesis Firehose</td><td>$0.029/GB 取り込み</td><td>$5-15 (750-2,250円)</td><td>$100-250 (15,000-37,500円)</td></tr>
+    <tr><td>S3 Data Lake</td><td>Standard + Infrequent Access</td><td>$10-30 (1,500-4,500円)</td><td>$300-800 (45,000-120,000円)</td></tr>
+    <tr><td>CloudWatch + X-Ray + SNS</td><td>メトリクス + ログ + トレース</td><td>$20-40 (3,000-6,000円)</td><td>$200-400 (30,000-60,000円)</td></tr>
+    <tr style="font-weight:bold;border-top:2px solid #555"><td colspan="2">合計</td><td>$163-423 (約24,450-63,450円)</td><td>$4,230-8,795 (約634,500-1,319,250円)</td></tr>
+  </table>
+  <p style="margin-top:12px;"><strong>前提条件</strong>: Dev=10店舗試験、Prod=14,600店 × 売上イベント10件/分 × 24h = 約2.1億件/月。データレイク保存2TB/月、Hot データ 500GB。重処理 Fargate は平均 4 task・ピーク 20 task。</p>
+  <p><strong>コスト最適化</strong>: DynamoDB On-Demand は定常運用後に Provisioned + Auto Scaling に切替で 40-60% 削減可能。Firehose のバッチ化（buffer size 128MB / interval 900s）で S3 PUT リクエスト料金削減。Lambda は ARM64 (Graviton2) で 20% 削減。年末年始凍結期間は Fargate 最小 task を 2→1 に絞ってコスト削減。</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>非同期ミドルウェアを挟む原則</strong> &#8212; リクエスト層と永続化層の間にキュー（SQS/Kinesis/SNS）を挟むと、書き込み側のスパイクと DB キャパのミスマッチを吸収できる。同期構成だとピーク時にクライアントまでエラーが波及するが、非同期構成ではクライアントに 202 Accepted を返しつつ内部で時間稼ぎができる。「急ぎじゃない書き込みは非同期」は大規模システムの基本原則。</li>
+    <li><strong>責任分界と疎結合の設計（Pub/Sub 原則）</strong> &#8212; DynamoDB Streams + EventBridge によって、主パス（書き込み）と下流処理（データレイク・集計・通知）を完全に分離。新しい消費者を追加しても主パスに影響しない。これは Pub/Sub の教科書的なパターンで、案件を問わず適用できる。</li>
+    <li><strong>Throughput を数値で試算する習慣</strong> &#8212; 「14,600店×10件/分 = 2,433 TPS」を起点に、各 AWS サービスのデフォルトキャパ（API Gateway 10k RPS / SQS unlimited / DynamoDB On-Demand 40k WCU）と比較してボトルネック候補を洗い出す。設計前に数値試算するだけでサイジング議論が具体化する。</li>
+    <li><strong>On-Demand と Provisioned の選択基準</strong> &#8212; On-Demand は「予測困難な高バースト」に最適、Provisioned は「定常的に高スループット」に最適。コストは Provisioned のほうが 40-60% 安いが、スケール遅延を吸収できない。PoC/Pilot は On-Demand で開始、定常運用が見えた段階で Provisioned 移行、が定石。</li>
+    <li><strong>DLQ + Alarm + 通知の最小観測セット</strong> &#8212; 分散システムで「メッセージが消えた」「詰まった」を検出する最小構成は DLQ + CloudWatch Alarm + SNS の3点セット。これをテンプレ化して全案件に適用する。コンビニのような 24/365 運用では夜間オンコール接続まで含めて観測基盤の一部。</li>
+  </ul>
+</div>
+
+<p class="updated">Powered by AWS Diagram MCP Server | Reviewed by general-purpose agent</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="拡大表示">
+</div>
+
+<script>
+function openLightbox(src) {
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLightbox();
+});
+</script>
+</body>
+</html>

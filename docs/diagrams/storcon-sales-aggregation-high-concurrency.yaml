@@ -1,0 +1,358 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Storcon Sales Aggregation - High Concurrency Architecture.
+  POS (14,600 stores) -> API Gateway -> SQS -> Lambda -> DynamoDB On-Demand,
+  with DynamoDB Streams fan-out to EventBridge -> Firehose -> S3 Data Lake,
+  and ECS Fargate for heavy processing. DLQ + SNS for error notification.
+  Reference: WBS 3.2.1 high-concurrency-design.md §6.
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, prod]
+  DataLakeBucketName:
+    Type: String
+    Default: storcon-sales-datalake-prod
+
+Resources:
+
+  # ---------- Storage ----------
+  SalesEventsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${EnvironmentName}-sales-events"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: store_id
+          AttributeType: S
+        - AttributeName: event_ts
+          AttributeType: S
+      KeySchema:
+        - AttributeName: store_id
+          KeyType: HASH
+        - AttributeName: event_ts
+          KeyType: RANGE
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+
+  DataLakeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref DataLakeBucketName
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToIA
+            Status: Enabled
+            Transitions:
+              - StorageClass: STANDARD_IA
+                TransitionInDays: 90
+              - StorageClass: GLACIER
+                TransitionInDays: 365
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ---------- Async Buffer ----------
+  SalesQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${EnvironmentName}-sales-queue"
+      VisibilityTimeout: 60
+      MessageRetentionPeriod: 1209600  # 14 days
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SalesDLQ.Arn
+        maxReceiveCount: 3
+
+  SalesDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "${EnvironmentName}-sales-dlq"
+      MessageRetentionPeriod: 1209600
+
+  DLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${EnvironmentName}-sales-dlq-not-empty"
+      MetricName: ApproximateNumberOfMessagesVisible
+      Namespace: AWS/SQS
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt SalesDLQ.QueueName
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref AlertTopic
+
+  # ---------- Compute ----------
+  ConsumerLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
+      Policies:
+        - PolicyName: DDBWrite
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:BatchWriteItem
+                Resource: !GetAtt SalesEventsTable.Arn
+
+  ConsumerLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${EnvironmentName}-sales-consumer"
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: index.handler
+      Role: !GetAtt ConsumerLambdaRole.Arn
+      Timeout: 30
+      ReservedConcurrentExecutions: 500
+      TracingConfig:
+        Mode: Active
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              # Consume SQS batch, PutItem to DynamoDB
+              return {"statusCode": 200}
+
+  ConsumerEventMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt SalesQueue.Arn
+      FunctionName: !Ref ConsumerLambda
+      BatchSize: 10
+      MaximumBatchingWindowInSeconds: 5
+
+  # ---------- ECS Fargate (heavy path) ----------
+  HeavyCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${EnvironmentName}-sales-heavy"
+
+  HeavyTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${EnvironmentName}-sales-heavy-task"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: "512"
+      Memory: "1024"
+      ExecutionRoleArn: !GetAtt HeavyExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: heavy-processor
+          Image: public.ecr.aws/amazonlinux/amazonlinux:2
+          Essential: true
+
+  HeavyExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  # ---------- API Gateway ----------
+  SalesRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${EnvironmentName}-sales-api"
+      EndpointConfiguration:
+        Types: [REGIONAL]
+
+  SalesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref SalesRestApi
+      ParentId: !GetAtt SalesRestApi.RootResourceId
+      PathPart: sales
+
+  SalesPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref SalesRestApi
+      ResourceId: !Ref SalesResource
+      HttpMethod: POST
+      AuthorizationType: AWS_IAM
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:sqs:path/${AWS::AccountId}/${SalesQueue.QueueName}"
+        Credentials: !GetAtt ApiGatewayToSqsRole.Arn
+        RequestParameters:
+          integration.request.header.Content-Type: "'application/x-www-form-urlencoded'"
+        RequestTemplates:
+          application/json: "Action=SendMessage&MessageBody=$input.body"
+        IntegrationResponses:
+          - StatusCode: 202
+      MethodResponses:
+        - StatusCode: 202
+
+  ApiGatewayToSqsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: apigateway.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: SendToSqs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: sqs:SendMessage
+                Resource: !GetAtt SalesQueue.Arn
+
+  # ---------- Fan-out ----------
+  SalesEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub "${EnvironmentName}-sales-bus"
+
+  FirehoseToS3:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Sub "${EnvironmentName}-sales-to-lake"
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt DataLakeBucket.Arn
+        RoleARN: !GetAtt FirehoseRole.Arn
+        BufferingHints:
+          IntervalInSeconds: 300
+          SizeInMBs: 128
+        CompressionFormat: GZIP
+        Prefix: "sales/year=!{timestamp:yyyy}/month=!{timestamp:MM}/day=!{timestamp:dd}/"
+
+  FirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: firehose.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3Write
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetBucketLocation
+                Resource:
+                  - !GetAtt DataLakeBucket.Arn
+                  - !Sub "${DataLakeBucket.Arn}/*"
+
+  EventsToFirehoseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: events.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeFirehose
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [firehose:PutRecord, firehose:PutRecordBatch]
+                Resource: !GetAtt FirehoseToS3.Arn
+
+  SalesToFirehoseRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${EnvironmentName}-sales-to-firehose"
+      EventBusName: !Ref SalesEventBus
+      EventPattern:
+        source: [sales.ddb-stream]
+      State: ENABLED
+      Targets:
+        - Id: firehose-target
+          Arn: !GetAtt FirehoseToS3.Arn
+          RoleArn: !GetAtt EventsToFirehoseRole.Arn
+
+  EventsToEcsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: events.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: RunEcsTask
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ecs:RunTask
+                Resource: !Ref HeavyTaskDefinition
+              - Effect: Allow
+                Action: iam:PassRole
+                Resource: !GetAtt HeavyExecutionRole.Arn
+
+  SalesHeavyRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub "${EnvironmentName}-sales-heavy-trigger"
+      EventBusName: !Ref SalesEventBus
+      EventPattern:
+        source: [sales.ddb-stream]
+        detail-type: [heavy-job]
+      State: ENABLED
+      Targets:
+        - Id: fargate-target
+          Arn: !GetAtt HeavyCluster.Arn
+          RoleArn: !GetAtt EventsToEcsRole.Arn
+          EcsParameters:
+            TaskDefinitionArn: !Ref HeavyTaskDefinition
+            LaunchType: FARGATE
+            TaskCount: 1
+
+  # ---------- Observability ----------
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${EnvironmentName}-sales-alert"
+
+Outputs:
+  SalesApiEndpoint:
+    Description: "API Gateway endpoint for POS"
+    Value: !Sub "https://${SalesRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/sales"
+  SalesQueueUrl:
+    Value: !Ref SalesQueue
+  DataLakeBucketArn:
+    Value: !GetAtt DataLakeBucket.Arn
+  AlertTopicArn:
+    Value: !Ref AlertTopic
