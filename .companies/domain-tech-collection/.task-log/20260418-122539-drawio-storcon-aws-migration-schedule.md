@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-04-18T12:25:39"
 completed: "2026-04-18T12:55:00"
 request: "AWSへのシステム移行のスケジュール感のサマリを壁打ち → /company-drawio でガントチャート図化"
-issue_number: null
-pr_number: null
+issue_number: 469
+pr_number: 468
 subagents: [mcp-drawio-server, general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 0
