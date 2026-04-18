@@ -8,7 +8,7 @@ started: "2026-04-18T12:43:32"
 completed: "2026-04-18T12:55:00"
 request: "WBS 3.2.1 大規模同時接続設計（API Gateway+SQS、Auto Scaling、DynamoDB On-Demand）のハンズオンメモ自動作成"
 issue_number: 295
-pr_number: null
+pr_number: 470
 subagents: [tech-researcher]
 l0_gate: null
 l0_retries: 0
