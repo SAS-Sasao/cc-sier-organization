@@ -154,6 +154,7 @@ cc-sier-organization/
 - ❌ `--no-verify` でのフック skip
 - ⚠️ `/company-diagram` 詳細ページは **必須 7 セクション固定順序**: 凡例 → 概要 → データフロー → レイヤー構成 → 設計のポイント → コスト概算 → 学習ポイント
 - ⚠️ 日次ダイジェストは章順固定（A → B → C → D）・テーブル形式・テーマ別分類
+- ⚠️ 日次ダイジェスト D章ステータスは文字列（`成功`/`失敗`/`0件`）で記載、絵文字（`✅`等）は L2 s6 致命軸 fail。B章は該当記事なしでも B1-B6 全サブセクション記載（4/13・4/19 で L2 retry 発生）
 - ⚠️ AWS Diagram Python コードのラベルに `\n` 改行を含めない（silent error）
 - ⚠️ Subagent 名は task-log に英字で記録（日本語名だと Case Bank 検出不可）
 - ⚠️ `claude-code-action@v1` は `claude_code_oauth_token` / `anthropic_api_key` を **input parameter で渡す**（action.yml が env を input で上書きするため env block だけでは効かない）
