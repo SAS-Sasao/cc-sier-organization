@@ -53,7 +53,14 @@ Skill ごとに軸の中身は変わるが、**共通で必ず 6軸 + composite 
 
 | Skill | 致命軸 | 備考 |
 |---|---|---|
-| `/company-daily-digest` | s2 リンク完全性 / s6 禁則違反 | L2 2層（L0 なし） |
+| `/company-daily-digest` | s2 リンク完全性 / s6 禁則違反 | L2 2層（L0 なし）。s6 頻出パターン下記参照 |
+
+### `/company-daily-digest` s6 禁則違反の頻出パターン
+
+2026-04-13（s6=0.80）・2026-04-19（s6=0.65 → retry 後 0.95）で再発した L2 retry 原因:
+
+1. **D章ステータス列の絵文字**: quality-gate テンプレートに `✅ 成功` の記載があるが、L2 review-prompt は「絵文字禁止」を明記。生成時は文字列 `成功` / `失敗` / `0件` を使用すること
+2. **B章サブセクション省略**: quality-gate は「該当記事がないサブセクションは省略可」と記載するが、L2 reviewer は全サブセクション（B1-B6）の存在を期待する。該当記事なしの場合は `該当する記事はありませんでした` と明記して残す
 | `/company-diagram` | s1 構造準拠 / s2 IaC生成 / s6 英語ラベル | L0: IaC存在+英語ラベル、L1: HTML 7セクション |
 | `/company-drawio` | s2 エッジ貫通 / s6 HTML埋め込み禁則 | L0: `review-drawio.js` 実行 |
 
