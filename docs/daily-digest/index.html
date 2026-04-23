@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全33件 ｜ 最終更新: 2026-04-22 23:36</p>
+<p class="subtitle">domain-tech-collection ｜ 全34件 ｜ 最終更新: 2026-04-23 23:29</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">2831</div>
+    <div class="summary-value blue">2925</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-04-23</div>
+    <div class="summary-value">2026-04-24</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">33</div>
+    <div class="summary-value green">34</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-04-23" onclick="switchTab('2026-04-23')">2026-04-23</button>
+<button class="tab-btn active" data-date="2026-04-24" onclick="switchTab('2026-04-24')">2026-04-24</button>
+<button class="tab-btn" data-date="2026-04-23" onclick="switchTab('2026-04-23')">2026-04-23</button>
 <button class="tab-btn" data-date="2026-04-22" onclick="switchTab('2026-04-22')">2026-04-22</button>
 <button class="tab-btn" data-date="2026-04-21" onclick="switchTab('2026-04-21')">2026-04-21</button>
 <button class="tab-btn" data-date="2026-04-20" onclick="switchTab('2026-04-20')">2026-04-20</button>
@@ -169,7 +170,182 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-04-23" class="digest-panel" style="display:block">
+<div id="digest-2026-04-24" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 8件（技術5件+小売3件）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 94件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>Claude Opus 4.7 が Amazon Bedrock で利用可能に</strong> — SWE-bench Pro 64.3%達成の Anthropic 最新モデルが Bedrock 対応、NEC×Anthropic 提携で法人 AI 市場開拓も同時発表</li><li><strong>Google Cloud Next '26 大量発表</strong> — Gemini Enterprise Agent Platform・Spanner Omni・Cross-cloud Lakehouse 等、エージェント基盤とデータ基盤の大型アップデートが一斉公開</li><li><strong>Bitwarden npm パッケージ侵害と MCP 脆弱性</strong> — サプライチェーン攻撃で SSH 鍵窃取、MCP 関連ソフト1.5億ダウンロード超に深刻な脆弱性が発見</li><li><strong>Microsoft 365 エージェントモード一般提供</strong> — Word・Excel・PowerPoint で AI エージェントが自然言語による高度操作を実現</li><li><strong>PPIH 新業態「ロビン・フッド」1号店オープン</strong> — ユニー生鮮×ドンキ非食品の融合型食品スーパー、2035年までに200〜300店舗計画</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>Claude Opus 4.7 が Amazon Bedrock で利用可能に</strong> — SWE-bench Pro 64.3%達成の Anthropic 最新モデルが Bedrock 対応、NEC×Anthropic 提携で法人 AI 市場開拓も同時発表</li>
+<li><strong>Google Cloud Next '26 大量発表</strong> — Gemini Enterprise Agent Platform・Spanner Omni・Cross-cloud Lakehouse 等、エージェント基盤とデータ基盤の大型アップデートが一斉公開</li>
+<li><strong>Bitwarden npm パッケージ侵害と MCP 脆弱性</strong> — サプライチェーン攻撃で SSH 鍵窃取、MCP 関連ソフト1.5億ダウンロード超に深刻な脆弱性が発見</li>
+<li><strong>Microsoft 365 エージェントモード一般提供</strong> — Word・Excel・PowerPoint で AI エージェントが自然言語による高度操作を実現</li>
+<li><strong>PPIH 新業態「ロビン・フッド」1号店オープン</strong> — ユニー生鮮×ドンキ非食品の融合型食品スーパー、2035年までに200〜300店舗計画</li>
+<li><strong>ドラッグストア3月度全社プラス継続</strong> — コスモス薬品6.3%増・スギHD5.7%増・ツルハ3.3%増と好調、セブンイレブンは日販80万円目標の新商品戦略を発表</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/claude-code-security-basics/" target="_blank" rel="noopener">Claude Code を安全に使おう【社内勉強会スライド】</a></td><td>DevelopersIO</td><td>Claude Code のセキュリティ対策として、CLAUDE.md による抑止・settings.json による制限・サンドボックスによる隔離の3層防御を解説した社内勉強会資料。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/kamo-shika/items/6c4e74972eeb0d1a6fb2" target="_blank" rel="noopener">Claude Code のスキルを「中央集権しない」で配る、chezmoi dotfiles スターターキット</a></td><td>Qiita</td><td>chezmoi を使い Claude Code の Skills や設定を dotfiles として分散管理・配布する手法を紹介。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/i-inose/items/e644e9b620ee1c8d3c1b" target="_blank" rel="noopener">【初心者必見】今から追いつくClaude Code 入門・徹底解説</a></td><td>Qiita</td><td>Claude Code の概要からインストール・活用方法までを初心者向けに網羅的に解説した入門記事。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/nogataka/items/59cc72e55e037d77225f" target="_blank" rel="noopener">Claude Codeのノウハウをサンプルコードで学ぶ ── 入門編（初心者向け）</a></td><td>Qiita</td><td>具体的なサンプルコードを通じて Claude Code の基本操作と実践的なノウハウを学べる入門チュートリアル。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/take-yoda/items/00f05b0b517ee3a7c427" target="_blank" rel="noopener">Claude Code実行中にターミナルを閉じても大丈夫にする方法（tmux）</a></td><td>Qiita</td><td>tmux を活用して Claude Code の長時間実行タスクをターミナル切断から保護する方法を解説。</td></tr>
+<tr><td>6</td><td><a href="https://acro-engineer.hatenablog.com/entry/2026/04/23/120000" target="_blank" rel="noopener">大AIエージェント時代！AG-UI準拠でアプリを構築する</a></td><td>はてブ</td><td>CopilotKit チームが策定した AI エージェント-UI 間通信プロトコル AG-UI を用いたアプリ構築手法と Human-in-the-Loop 実装を紹介。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/galirage/articles/claude-managed-agents-quickstart" target="_blank" rel="noopener">Claude Managed Agents入門【概要と使い方】</a></td><td>Zenn</td><td>Anthropic のクラウドホスト型エージェント基盤 Claude Managed Agents の概要と、Notion検索+Slack投稿エージェントの構築手順を解説。</td></tr>
+<tr><td>8</td><td><a href="https://zenn.dev/chmod644/articles/claude-code-official-plugins-guide" target="_blank" rel="noopener">Claude Code 公式プラグイン全解説</a></td><td>Zenn</td><td>公式マーケットプレイスで公開されている全123プラグインを MCP/Skill/Agent/Hook/LSP の種別ごとに分類・解説した網羅的ガイド。</td></tr>
+<tr><td>9</td><td><a href="https://akspot.april-knights.com/technology/21135/" target="_blank" rel="noopener">【kintone×Claude Code】非エンジニアの人事が書類選考自動化システムを構築</a></td><td>はてブ</td><td>非エンジニアの人事担当者が kintone と Claude Code を組み合わせて書類選考プロセスを自動化した実例レポート。</td></tr>
+<tr><td>10</td><td><a href="https://dev.classmethod.jp/articles/26-next-vegas-session-report-multi-agent-systems/" target="_blank" rel="noopener">Build multi-agent systems that actually work の発表内容まとめ</a></td><td>DevelopersIO</td><td>Google Cloud Next '26 のセッションレポートで、実用的なマルチエージェントシステム構築のベストプラクティスをまとめた記事。</td></tr>
+<tr><td>11</td><td><a href="https://speakerdeck.com/minorun365/ze-ren-aruaieziento-kosozi-she-dekai-fa-siyou" target="_blank" rel="noopener">「責任あるAIエージェント」こそ自社で開発しよう！</a></td><td>はてブ</td><td>責任あるAIエージェントを自社開発する意義と設計指針を解説した登壇スライド。</td></tr>
+<tr><td>12</td><td><a href="https://www.itmedia.co.jp/news/articles/2604/23/news107.html" target="_blank" rel="noopener">AIエージェントがGmailやスプレッドシート横断し情報収集・業務支援</a></td><td>はてブ</td><td>Google の AIエージェントが Gmail やスプレッドシートを横断して情報収集・業務支援を行う機能の紹介。</td></tr>
+<tr><td>13</td><td><a href="https://forest.watch.impress.co.jp/docs/news/2103998.html" target="_blank" rel="noopener">「エージェント モード」が「Word」「Excel」「PowerPoint」で一般提供</a></td><td>はてブ</td><td>Microsoft 365 の Word/Excel/PowerPoint にエージェントモードが一般提供開始され、自然言語で高度な操作が可能に。</td></tr>
+<tr><td>14</td><td><a href="https://cloud.watch.impress.co.jp/docs/event/2103890.html" target="_blank" rel="noopener">ターゲットは「人間」から「AIエージェント」へ。Adobe CX Enterprise</a></td><td>はてブ</td><td>Adobe がカスタマーエクスペリエンス基盤のターゲットを人間からAIエージェントへ移行する戦略を発表。</td></tr>
+<tr><td>15</td><td><a href="https://dev.classmethod.jp/articles/gemini-enterprise-agent-platform/" target="_blank" rel="noopener">Gemini Enterprise Agent Platformが登場しました</a></td><td>DevelopersIO</td><td>Google Cloud Next '26 で発表された Gemini Enterprise Agent Platform のノーコードエージェントデザイナー等の新機能を紹介。</td></tr>
+<tr><td>16</td><td><a href="https://dev.classmethod.jp/articles/gemini-enterprise-agent-identity-ga/" target="_blank" rel="noopener">Gemini Enterprise Agent RuntimeのAgent IdentityがGAとなりました</a></td><td>DevelopersIO</td><td>Gemini Enterprise Agent Runtime のエージェント認証機能 Agent Identity が一般提供開始されたことを解説。</td></tr>
+<tr><td>17</td><td><a href="https://www.nikkei.com/article/DGXZQOGN223ZH0S6A420C2000000/" target="_blank" rel="noopener">イーロン・マスク氏、米AI新興「Cursor」10兆円買収へ</a></td><td>はてブ</td><td>イーロン・マスク氏が AI コードエディタ Cursor の開発企業を約10兆円で買収する方針と報道。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://aws.amazon.com/blogs/aws/introducing-anthropic-claude-opus-4-7-model-in-amazon-bedrock/" target="_blank" rel="noopener">Claude Opus 4.7 in Amazon Bedrock</a></td><td>AWS</td><td>Anthropic の最新モデル Claude Opus 4.7 が Amazon Bedrock で利用可能に、SWE-bench Pro 64.3%達成・1Mトークンコンテキスト対応。</td></tr>
+<tr><td>2</td><td><a href="https://www.anthropic.com/engineering/april-23-postmortem" target="_blank" rel="noopener">An update on recent Claude Code quality reports</a></td><td>はてブ</td><td>Anthropic が Claude Code の品質に関する最近の報告についてポストモーテムを公開し、改善策を説明。</td></tr>
+<tr><td>3</td><td><a href="https://atmarkit.itmedia.co.jp/ait/articles/2604/23/news011.html" target="_blank" rel="noopener">Claude Opus 4.7は"最強で最恐"？</a></td><td>はてブ</td><td>Claude Opus 4.7 の性能評価と、その高度な能力がもたらす可能性とリスクを分析した解説記事。</td></tr>
+<tr><td>4</td><td><a href="https://gigazine.net/news/20260423-qwen-3-6-27b/" target="_blank" rel="noopener">ローカルPCで動作するQwen3.6-27B登場</a></td><td>はてブ</td><td>Alibaba の Qwen3.6-27B がローカル PC で動作可能なサイズで公開され、高い推論性能を実現。</td></tr>
+<tr><td>5</td><td><a href="https://gigazine.net/news/20260423-flipbook-knowledge-image/" target="_blank" rel="noopener">知識を文章ではなくイラストで教えてくれるAI「Flipbook」が登場</a></td><td>はてブ</td><td>テキストではなくイラスト形式で知識を提示する新しい AI サービス Flipbook が公開。</td></tr>
+<tr><td>6</td><td><a href="https://gigazine.net/news/20260423-openai-privacy-filter/" target="_blank" rel="noopener">OpenAIが「OpenAI Privacy Filter」をオープンソースでリリース</a></td><td>はてブ</td><td>OpenAI がプライバシー保護フィルターをオープンソースで公開し、AIモデルへの個人情報流出を防止する仕組みを提供。</td></tr>
+<tr><td>7</td><td><a href="https://gigazine.net/news/20260423-openai-chatgpt-for-clinicians/" target="_blank" rel="noopener">OpenAIが臨床現場向けAI「ChatGPT for Clinicians」をリリース</a></td><td>はてブ</td><td>OpenAI が医療従事者向けの専用 AI ツール ChatGPT for Clinicians を公開し、臨床現場での意思決定支援を実現。</td></tr>
+<tr><td>8</td><td><a href="https://www.itmedia.co.jp/aiplus/articles/2604/23/news061.html" target="_blank" rel="noopener">Google Cloud Next 2026での発表内容まとめ 自律型AIエージェントへ</a></td><td>はてブ</td><td>Google Cloud Next 2026 の主要発表を網羅し、自律型AIエージェントへの進化方針をまとめた記事。</td></tr>
+<tr><td>9</td><td><a href="https://www.watch.impress.co.jp/docs/news/2104171.html" target="_blank" rel="noopener">グーグルのAI認定講座、先着1万人に無料提供</a></td><td>はてブ</td><td>Google が AI 認定講座を先着1万人に無料提供するキャンペーンを開始。</td></tr>
+<tr><td>10</td><td><a href="https://dev.classmethod.jp/articles/whats-new-gemini-enterprise-app-google-cloud-next/" target="_blank" rel="noopener">What's new with Gemini Enterprise app まとめ</a></td><td>DevelopersIO</td><td>Google Cloud Next '26 の Gemini Enterprise セッションレポートで、ノーコードエージェントデザイナーやInbox機能等の新機能を紹介。</td></tr>
+<tr><td>11</td><td><a href="https://www.nikkei.com/article/DGXZQOUC228XJ0S6A420C2000000/" target="_blank" rel="noopener">NEC、米アンソロピックと提携 法人向けAI需要を開拓</a></td><td>はてブ</td><td>NEC が Anthropic と提携し、法人向け AI ソリューション市場の開拓を加速する方針を発表。</td></tr>
+<tr><td>12</td><td><a href="https://www.itmedia.co.jp/enterprise/articles/2604/23/news019.html" target="_blank" rel="noopener">「AIを使えば全員同じになる」羽生善治九段が語るAI時代の差別化</a></td><td>はてブ</td><td>将棋棋士の羽生善治九段が AI 時代における人間の差別化戦略と創造性の重要性を語ったインタビュー。</td></tr>
+<tr><td>13</td><td><a href="https://gigazine.net/news/20260423-anthropic-ai-economics/" target="_blank" rel="noopener">「AIを使う仕事ほど危機感」「高収入ほどAIによる恩恵」などAnthropicの調査結果</a></td><td>はてブ</td><td>Anthropic の調査で、AI 活用度が高い職種ほど危機感が強く、高収入層ほど恩恵を感じている実態が判明。</td></tr>
+<tr><td>14</td><td><a href="https://aws.amazon.com/blogs/machine-learning/introducing-granular-cost-attribution-for-amazon-bedrock/" target="_blank" rel="noopener">Introducing granular cost attribution for Amazon Bedrock</a></td><td>AWS</td><td>Amazon Bedrock の推論コストを IAM プリンシパル単位で自動帰属させ CUR 2.0 で可視化する機能を紹介。</td></tr>
+<tr><td>15</td><td><a href="https://zenn.dev/sktt_panda/articles/claude-code-pro-plan-removal-2026-04" target="_blank" rel="noopener">【個人開発者必見】Claude Codeが使えなくなる！？ Proプラン剥奪騒動（2026年4月）の全容と備え</a></td><td>Zenn</td><td>2026年4月に発生した Claude Code Pro プラン剥奪騒動の経緯と、個人開発者向けの対応策をまとめた記事。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/cloudwatch-logs-insights-join-sub-query/" target="_blank" rel="noopener">CloudWatch Logs Insights のクエリ言語に JOIN とサブクエリが追加</a></td><td>DevelopersIO</td><td>CloudWatch Logs Insights QL に JOIN/サブクエリが追加され、異なるロググループ間の相関分析が単一クエリで可能に。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/s3-new-checksum-algorithms-ec2-benchmark/" target="_blank" rel="noopener">Amazon S3 の新チェックサムアルゴリズムを Intel/AMD/Graviton4 最新世代EC2で性能計測</a></td><td>DevelopersIO</td><td>S3 の新チェックサムアルゴリズム5種を c8i/c8a/c8g の3アーキテクチャで計測し、ネットワークI/Oがボトルネックであることを検証。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/ec2-managed-resource-visibility-lmi/" target="_blank" rel="noopener">Amazon EC2 Managed Resource Visibility の設定を Lambda Managed Instances で確認</a></td><td>DevelopersIO</td><td>EC2 の新機能 Managed Resource Visibility で Lambda/EKS 等が裏で起動するインスタンスの表示/非表示を制御する機能を検証。</td></tr>
+<tr><td>4</td><td><a href="https://aws.amazon.com/blogs/aws/aws-interconnect-is-now-generally-available-with-a-new-option-to-simplify-last-mile-connectivity/" target="_blank" rel="noopener">AWS Interconnect General Availability</a></td><td>AWS</td><td>AWS Interconnect が GA に到達、Multicloud（他クラウドへのL3プライベート接続）と Last Mile（1-100Gbps の拠点接続）の2種を提供。</td></tr>
+<tr><td>5</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/04/amazon-ec2-c8in-c8ib-instances-ga/" target="_blank" rel="noopener">Amazon EC2 C8in and C8ib Instances GA</a></td><td>AWS</td><td>第6世代 Intel Xeon + Nitro搭載の EC2 C8in/C8ib が GA、C6in 比43%性能向上・最大600Gbpsネットワーク帯域を提供。</td></tr>
+<tr><td>6</td><td><a href="https://dev.classmethod.jp/articles/26-next-vegas-session-report-whats-new-cloud-run/" target="_blank" rel="noopener">What's new Cloud Run の発表内容まとめ</a></td><td>DevelopersIO</td><td>Google Cloud Next '26 で発表された Cloud Run の最新機能アップデートをまとめたセッションレポート。</td></tr>
+<tr><td>7</td><td><a href="https://dev.classmethod.jp/articles/spanner-omni-google-cloud-next26/" target="_blank" rel="noopener">Spanner のダウンロード版である Spanner Omni が発表されました</a></td><td>DevelopersIO</td><td>Google Cloud Next '26 で Cloud Spanner のオンプレミス/マルチクラウド版 Spanner Omni が発表。</td></tr>
+<tr><td>8</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/04/aws-transform-kiro-vscode/" target="_blank" rel="noopener">AWS Transform in Kiro and VS Code</a></td><td>AWS</td><td>エージェント型マイグレーションツール AWS Transform が Kiro と VS Code から利用可能に、Java/Python/Node.js のバージョンアップ等を自動化。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/blogs/storage/accelerate-development-workflows-with-amazon-ebs-volume-clones/" target="_blank" rel="noopener">Amazon EBS Volume Clones</a></td><td>AWS</td><td>EBS ボリュームの即時クローンが可能に、dev/test 環境の高速構築や DR テストのワークフローを加速。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/04/aws-secrets-manager-post-quantum-tls/" target="_blank" rel="noopener">AWS Secrets Manager Post-Quantum TLS</a></td><td>AWS</td><td>Secrets Manager がポスト量子暗号 ML-KEM に対応したハイブリッド TLS をサポート開始、量子コンピュータ脅威への先行対策。</td></tr>
+<tr><td>11</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/04/amazon-corretto-april-2026-quarterly-updates/" target="_blank" rel="noopener">Amazon Corretto April 2026 Quarterly Updates</a></td><td>AWS</td><td>Amazon Corretto の2026年4月四半期セキュリティアップデートが公開、JDK 8/11/17/21/25/26 の各バージョンを更新。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/cross-cloud-lakehouse-preview-bigquery-aws-iceberg/" target="_blank" rel="noopener">BigLake 改め Google Cloud Lakehouse で AWS 側の Iceberg を BigQuery から直接アクセス可能に</a></td><td>DevelopersIO</td><td>Google Cloud Lakehouse（旧BigLake）の Cross-cloud Lakehouse 機能で、AWS 上の Apache Iceberg データを BigQuery から直接クエリ可能に。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/miruky/items/f67bd754c1f7a5116a7c" target="_blank" rel="noopener">【徹底解説】DBスペシャリストなりぞこないが教える、データベースの教科書（設計もあるよ）</a></td><td>Qiita</td><td>データベース設計の基礎から実践までを体系的にまとめた教科書的な解説記事。</td></tr>
+<tr><td>3</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/04/aurora-dsql-connector-for-php/" target="_blank" rel="noopener">Aurora DSQL PHP Connector</a></td><td>AWS</td><td>Aurora DSQL 向け PHP コネクタが公開、IAM トークン自動生成・コネクションプーリング・楽観的同時実行制御リトライを提供。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://agilejourney.uzabase.com/entry/2026/04/23/103000" target="_blank" rel="noopener">ボトルネックは「人と人の間」に移動する</a></td><td>はてブ</td><td>AI 時代の開発において技術的ボトルネックが解消される一方、組織間コミュニケーションが新たなボトルネックになるという考察。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/masa20057/items/5144c0d01539ccd6a881" target="_blank" rel="noopener">【初心者エンジニア向け】開発業務の視野を広げる運用のはなし</a></td><td>Qiita</td><td>初心者エンジニア向けに、開発だけでなく運用まで含めた視座の広げ方を実務ベースで解説した記事。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/hitomin_poke/items/befed7f99c8d90b649b9" target="_blank" rel="noopener">【前編】9割の新人エンジニアがやっている 「承知しました」の落とし穴</a></td><td>Qiita</td><td>新人エンジニアが陥りがちなコミュニケーションパターン「承知しました」の問題点と、正しい確認手法を解説。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/acntechjp/articles/8c99076b93d621" target="_blank" rel="noopener">PMP（Project Management Professional）を取ろうとしている人に読んでほしい、PMPの話</a></td><td>Zenn</td><td>PMP資格は暗記ではなく「判断のための共通プロトコル」を習得するものだという10の原則を解説。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/kawasima/books/software-yogacara" target="_blank" rel="noopener">ソフトウェア唯識論</a></td><td>Zenn</td><td>ソフトウェア開発を仏教哲学の唯識思想になぞらえて体系的に論じたZenn Book。</td></tr>
+<tr><td>6</td><td><a href="https://speakerdeck.com/otakakot/where-does-tsting-t-come-from" target="_blank" rel="noopener">t *testing.T は どこからやってくるの？</a></td><td>はてブ</td><td>Go言語のテストフレームワークにおける testing.T の内部実装と生成メカニズムを深掘りした登壇スライド。</td></tr>
+<tr><td>7</td><td><a href="https://domaindesign.co/column/the-loss-of-vibe-design/" target="_blank" rel="noopener">Vibe Designは何を失っているか</a></td><td>はてブ</td><td>AI によるバイブコーディング/デザインの流行が構造的な設計知識の喪失を招くリスクについての考察。</td></tr>
+<tr><td>8</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/04/amazon-ecr-pull-through-cache-referrers/" target="_blank" rel="noopener">Amazon ECR Pull Through Cache がOCI Referrers を自動同期</a></td><td>AWS</td><td>ECR のプルスルーキャッシュが OCI referrers（署名・SBOM・アテステーション）を上流レジストリから自動検出・同期する機能を追加。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/blogs/migration-and-modernization/migrating-and-decomposing-apis-with-zero-downtime-using-cloudfront/" target="_blank" rel="noopener">Zero-Downtime API Migration with CloudFront</a></td><td>AWS</td><td>CloudFront Functions と KeyValueStore を使った Strangler Fig パターンによるゼロダウンタイム API 移行手法を紹介。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://blog.flatt.tech/entry/bitwarden_compromise" target="_blank" rel="noopener">Bitwarden ソフトウェアサプライチェーン攻撃の概要と対応指針</a></td><td>はてブ</td><td>2026年4月23日に npm パッケージ @bitwarden/cli@2026.4.0 が侵害され、SSH鍵やAPIキーを窃取するマルウェアが混入された事件の詳細と対応策。</td></tr>
+<tr><td>2</td><td><a href="https://atmarkit.itmedia.co.jp/ait/articles/2604/23/news038.html" target="_blank" rel="noopener">MCPに深刻な脆弱性 関連ソフトウェアのダウンロード数は1億5000万件超え</a></td><td>はてブ</td><td>Model Context Protocol（MCP）に深刻な脆弱性が発見され、関連ソフトウェアのダウンロード数が1.5億件を超える中での影響を解説。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/store/s042341.html" target="_blank" rel="noopener">PPIH／愛知県あま市に「ロビン・フッド甚目寺店」オープン、食品強化型ドンキ1号店</a></td><td>流通ニュース</td><td>PPIHがユニーの生鮮調達力とドンキの非食品を融合した新業態「ロビン・フッド」1号店を4月24日オープン、2035年までに200〜300店舗を計画。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/store/s042377.html" target="_blank" rel="noopener">ベイシア／都内に12年ぶりの出店「Beisia Foods Park 東村山店」5月20日オープン</a></td><td>流通ニュース</td><td>ベイシアが東京都内に12年ぶりとなる新店舗を東村山市に5月20日オープン予定。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/store/s0423011.html" target="_blank" rel="noopener">ベイシア／群馬県伊勢崎市に「Beisia Foods Park 伊勢崎境保泉店」2028年2月新設</a></td><td>流通ニュース</td><td>ベイシアが群馬県伊勢崎市に店舗面積3785平方メートルの新店舗を2028年2月に開設予定。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/store/s0423012.html" target="_blank" rel="noopener">トライアル／栃木県さくら市に「スーパーセンタートライアル氏家さくら店」11月新設</a></td><td>流通ニュース</td><td>トライアルが栃木県さくら市に店舗面積4317平方メートルの新店舗を11月にオープン予定。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/store/s042376.html" target="_blank" rel="noopener">イケア／イオンモール岡山に新店舗4月24日オープン、岡山初出店</a></td><td>流通ニュース</td><td>イケアが岡山県に初出店、イオンモール岡山内に4月24日オープン。</td></tr>
+<tr><td>6</td><td><a href="https://www.ryutsuu.biz/store/s042383.html" target="_blank" rel="noopener">ディアモール大阪／全国初出店のアパレル含む5店舗が今春オープン</a></td><td>流通ニュース</td><td>ディアモール大阪に全国初出店を含むアパレル等5店舗が2026年春にオープン。</td></tr>
+<tr><td>7</td><td><a href="https://www.ryutsuu.biz/store/s042380.html" target="_blank" rel="noopener">ゲオHD／新業態2号店「ゲオデジタルベース川口元郷店」4月25日オープン</a></td><td>流通ニュース</td><td>ゲオHDがデジタル特化型の新業態2号店を埼玉県川口市に4月25日オープン。</td></tr>
+<tr><td>8</td><td><a href="https://www.ryutsuu.biz/store/s042374.html" target="_blank" rel="noopener">ハートフレンド／大阪府枚方市「フレスコ枚方公園駅前店」をリニューアルオープン</a></td><td>流通ニュース</td><td>ハートフレンドが大阪府枚方市の既存店舗をリニューアルオープン。</td></tr>
+<tr><td>9</td><td><a href="https://www.ryutsuu.biz/store/s042375.html" target="_blank" rel="noopener">ビームス／東京「ららぽーと豊洲」千葉「イクスピアリ」に4月24・25日オープン</a></td><td>流通ニュース</td><td>ビームスが東京・千葉の大型商業施設に2店舗を4月24日・25日に新規出店。</td></tr>
+<tr><td>10</td><td><a href="https://www.ryutsuu.biz/store/s042313.html" target="_blank" rel="noopener">ニトリ／大阪府枚方市に「デコホーム 枚方ビオルネ店」4月29日オープン</a></td><td>流通ニュース</td><td>ニトリのインテリア雑貨業態「デコホーム」が大阪府枚方市に4月29日オープン。</td></tr>
+<tr><td>11</td><td><a href="https://www.ryutsuu.biz/store/s042381.html" target="_blank" rel="noopener">米子しんまち天満屋／コスメセレクト店「フルーツギャザリング」5月20日オープン</a></td><td>流通ニュース</td><td>米子しんまち天満屋にコスメセレクトショップが5月20日にオープン予定。</td></tr>
+<tr><td>12</td><td><a href="https://www.ryutsuu.biz/store/s042379.html" target="_blank" rel="noopener">オリジン東秀／東京都青梅市に「れんげ食堂Toshu 青梅店」4月26日オープン</a></td><td>流通ニュース</td><td>オリジン東秀が東京都青梅市に中華食堂業態の新店舗を4月26日にオープン。</td></tr>
+<tr><td>13</td><td><a href="https://www.ryutsuu.biz/store/s042378.html" target="_blank" rel="noopener">すたみな太郎／山形県「PREMIUM BUFFET 鶴岡店」4月29日オープン</a></td><td>流通ニュース</td><td>すたみな太郎のプレミアムビュッフェ業態が山形県鶴岡市に4月29日オープン。</td></tr>
+<tr><td>14</td><td><a href="https://diamond-rm.net/store/newstorereport/542985/" target="_blank" rel="noopener">ハローズがついに神戸市に進出！「ハローズ伊川谷店」の売場を解説</a></td><td>DCS</td><td>関西有力スーパーのハローズが神戸市に初出店、新店舗の売場構成と商品戦略を詳細にレポート。</td></tr>
+<tr><td>15</td><td><a href="https://diamond-rm.net/store/newstorereport/543270/" target="_blank" rel="noopener">総菜が大進化!?　関西最新店「MEGAドン・キホーテ交野店」の食品売場をレポート</a></td><td>DCS</td><td>MEGAドン・キホーテ交野店の食品売場における総菜強化の取り組みを詳細にレポート。</td></tr>
+<tr><td>16</td><td><a href="https://diamond-rm.net/store/newstorereport/541864/" target="_blank" rel="noopener">さいたま市の激戦区になぐり込み！「生鮮市場TOP大成店」の注目ポイント</a></td><td>DCS</td><td>さいたま市の競合ひしめくエリアに出店した生鮮市場TOP大成店の差別化戦略を紹介。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/strategy/s042315.html" target="_blank" rel="noopener">セブンイレブン／30年度日販80万円目指し「ターゲット×シーン」明確にした商品強化</a></td><td>流通ニュース</td><td>セブンイレブンが2030年度に日販80万円達成を目指し、ターゲットとシーン別の商品戦略を強化。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/strategy/s042312.html" target="_blank" rel="noopener">ツルハHD／「店舗開発調達部」新設、ウエルシアとの統合シナジー追求</a></td><td>流通ニュース</td><td>ツルハHDがウエルシアとの経営統合を踏まえ5月1日付で店舗開発調達部を新設、コスト最適化と環境対応を推進。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/management/businessplan/541933/" target="_blank" rel="noopener">来たときよりもよい店に――平和堂の旗艦店「アル・プラザつかしん」西村直志支配人の信念</a></td><td>DCS</td><td>平和堂の旗艦店「アル・プラザつかしん」支配人が顧客満足と店舗経営の哲学を語るインタビュー。</td></tr>
+<tr><td>4</td><td><a href="https://diamond-rm.net/management/businessplan/543598/" target="_blank" rel="noopener">新社長就任、新業態開発、AJS加盟……沖縄の食品スーパー・野嵩商会の成長戦略</a></td><td>DCS</td><td>沖縄の食品スーパー野嵩商会が新社長のもと新業態開発とAJS加盟による成長戦略を展開。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/management/topinterview/543157/" target="_blank" rel="noopener">サンデー大南淳二社長が激白！イオングループのリソース活用による「聖域なき事業改革」の全容</a></td><td>DCS</td><td>ホームセンターのサンデーがイオングループのリソースを活用し事業構造改革を推進する全容を社長が語る。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/sales-promotion/542591/" target="_blank" rel="noopener">発売3カ月で2万着突破！洋服の青山「みんなのスーツ」が示した紳士服市場の新たな勝ち筋</a></td><td>DCS</td><td>洋服の青山が発売した「みんなのスーツ」が3カ月で2万着を突破し、紳士服市場における新たな成功モデルを提示。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/sales-promotion/540473/" target="_blank" rel="noopener">一大トレンドとなったウェルネス関連商品　ターゲットとホールフーズが品揃えを拡充！</a></td><td>DCS</td><td>ウェルネス商品の市場拡大を受け、米国大手小売のターゲットとホールフーズが品揃え強化に注力。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/sales-promotion/item-trend/542057/" target="_blank" rel="noopener">「不変」と「変革」が共存するロングセラーの正体</a></td><td>DCS</td><td>ロングセラー商品がブランドの核を維持しながら時代に合わせて進化し続ける戦略を分析。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/n/2026/04/24/15974" target="_blank" rel="noopener">越境EC支援のバイイーコネクト、トレカの流通額が35%増加。背景にコレクション熱の高まり</a></td><td>ネッ担</td><td>越境EC支援のバイイーコネクトでトレーディングカード流通額が35%増加、世界的なコレクション需要の高まりが背景。</td></tr>
+<tr><td>2</td><td><a href="https://netshop.impress.co.jp/n/2026/04/24/15975" target="_blank" rel="noopener">【大手ECサイト100社のサイト内検索調査＋2026年の展望】約7割が検索精度に課題、次の行動を促す案内をしていないのは約5割</a></td><td>ネッ担</td><td>大手ECサイト100社の調査で約7割がサイト内検索精度に課題を抱え、検索後の誘導施策も不十分な状況が判明。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/strategy/s042382.html" target="_blank" rel="noopener">LINEヤフー／ヤフーフリマ・オークションで「転売対策ポリシー」策定</a></td><td>流通ニュース</td><td>LINEヤフーがYahoo!フリマ・オークションにおける不正な買い占めや高額転売を防止する新ポリシーを策定。</td></tr>
+<tr><td>4</td><td><a href="https://netshop.impress.co.jp/n/2026/04/23/15973" target="_blank" rel="noopener">楽天グループ、「楽天市場」で「Makuake」から誕生のアイテムなどをストーリーコンテンツで紹介する特設ページ「Diggly」を公開</a></td><td>ネッ担</td><td>楽天市場がMakuake発のアイテム等をストーリー形式で紹介する特設ページ「Diggly」を新設。</td></tr>
+<tr><td>5</td><td><a href="https://netshop.impress.co.jp/n/2026/04/23/15971" target="_blank" rel="noopener">QVCジャパンが始めたオンライン限定の「QVCポイントクラブ」とは？</a></td><td>ネッ担</td><td>QVCジャパンがオンライン限定のポイントプログラム「QVCポイントクラブ」を開始。</td></tr>
+<tr><td>6</td><td><a href="https://netshop.impress.co.jp/n/2026/04/23/15970" target="_blank" rel="noopener">米QVCグループが破産法に基づき再建手続きへ。日本など海外子会社は手続きの対象外</a></td><td>ネッ担</td><td>米QVCグループが破産法に基づく再建手続きを開始、日本を含む海外子会社は対象外で事業継続。</td></tr>
+<tr><td>7</td><td><a href="https://netshop.impress.co.jp/e/2026/04/23/15969" target="_blank" rel="noopener">AIが生む消費行動のジレンマ。AIの"お薦め"に86%が懸念、その一方で高まるオンラインレビューの信頼度</a></td><td>ネッ担</td><td>AI推薦に対し86%の消費者が懸念を示す一方、オンラインレビューへの信頼度は向上している調査結果。</td></tr>
+<tr><td>8</td><td><a href="https://netshop.impress.co.jp/n/2026/04/23/15967" target="_blank" rel="noopener">エアークローゼット、買取サービス「エアクロ買取」を開始</a></td><td>ネッ担</td><td>ファッションサブスクのエアークローゼットが新たに買取サービス「エアクロ買取」を開始。</td></tr>
+<tr><td>9</td><td><a href="https://netshop.impress.co.jp/n/2026/04/23/15968" target="_blank" rel="noopener">大都、トラスコ中山との在庫連携を強化。倉庫即日受け取りの「トラノテピットイン」を2拠点同時開設</a></td><td>ネッ担</td><td>DIY用品ECの大都がトラスコ中山との在庫連携を強化し、倉庫即日受け取り拠点を2カ所開設。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/sales/s042371.html" target="_blank" rel="noopener">ドラッグストア／3月既存店売上ツルハ3.3%増、コスモス薬品6.3%増</a></td><td>流通ニュース</td><td>主要ドラッグストア5社の3月既存店売上はコスモス薬品6.3%増が最も好調、スギHD5.7%増、ツルハ3.3%増と全社プラス。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/sales/s042373.html" target="_blank" rel="noopener">サミット／3月の売上高311億円、既存店は1.2%減</a></td><td>流通ニュース</td><td>スーパーのサミットが3月度売上高311億4200万円を発表、全店0.2%増も既存店は1.2%減。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/sales/s042311.html" target="_blank" rel="noopener">東急ストア／3月の売上高168億円、既存店0.4%減</a></td><td>流通ニュース</td><td>東急ストアの3月度売上高は168億円で既存店0.4%減と微減。</td></tr>
+<tr><td>4</td><td><a href="https://diamond-rm.net/retaildata/543591/" target="_blank" rel="noopener">業態別　主要店舗月次実績＝2026年3月度</a></td><td>DCS</td><td>小売各業態の3月度月次実績まとめ、ワークマン既存店22.7%増が突出、しまむら8.5%増、コスモス薬品6.3%増。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<p>該当する記事はありませんでした。</p>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. エンタープライズAIエージェント競争と小売DXの接点</h3>
+<p>Google Cloud Next '26 で Gemini Enterprise Agent Platform が発表され、Microsoft 365 のエージェントモードも一般提供に入った。Adobe は CX 基盤のターゲットを「人間からAIエージェントへ」と明確にシフトさせている。一方、小売側ではAI推薦に対し86%の消費者が懸念を示す調査結果が出ており、エージェント基盤導入と消費者受容性のギャップが顕在化している。SIerとしては、エージェント基盤の技術選定だけでなく、店舗/EC双方における段階的なAIエージェント導入設計と消費者コミュニケーション戦略の提案が差別化ポイントになる。</p>
+<h3>2. サプライチェーンセキュリティの流通横断リスク</h3>
+<p>Bitwarden の npm パッケージ侵害（SSH鍵・APIキー窃取）と MCP の深刻な脆弱性発見は、OSS エコシステムの信頼モデルに疑問を投げかける。小売側では LINEヤフーの転売対策ポリシー策定にみられるように、プラットフォームの健全性維持が経営課題化している。EC基盤や POS 連携システムも npm/Python パッケージに依存するケースが多く、ソフトウェアサプライチェーン全体のセキュリティガバナンス再設計が SIer の提案機会となる。</p>
+<h3>3. NEC×Anthropic提携が示す国内SIerのAI戦略転換</h3>
+<p>NEC と Anthropic の提携発表は、Claude Opus 4.7 の Amazon Bedrock 対応と同日に報じられた。Bedrock のコスト配分機能（IAMプリンシパル単位）も整備が進み、法人向けAI基盤としての実用性が急速に高まっている。小売チェーンの本部/店舗横断でのAI活用提案において、コスト可視化と部門別配賦の仕組みまで含めた提案設計が求められる。国内SIerにとって Claude 基盤を選択肢に加えることは、マルチモデル戦略の具体的な一手となる。</p>
+<h3>4. 新業態開発ラッシュとクラウドネイティブ基盤の需要</h3>
+<p>PPIH の「ロビン・フッド」（200〜300店舗計画）、ベイシアの都内12年ぶり再進出、ハローズの神戸進出と、小売各社が新業態・新市場への展開を加速している。急速な多店舗展開にはクラウドネイティブな POS・在庫管理・データ分析基盤が不可欠であり、AWS Interconnect GA や Spanner Omni の登場はマルチクラウド/ハイブリッド構成の選択肢を広げる。ツルハHD×ウエルシア統合後の新組織に伴うシステム統合案件も含め、大規模チェーンのインフラ設計需要が拡大する見通しである。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>5件</td><td>Claude Code・エージェント関連が上位、JS動的ページのためWebSearch併用</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>7件</td><td>Claude Code入門・DB設計・開発プラクティス</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>23件</td><td>AIエージェント・セキュリティ・Google Cloud Next関連が注目</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>11件</td><td>Google Cloud Next '26 セッションレポート多数、AWS新機能検証</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>11件</td><td>Interconnect GA・EC2 C8in/C8ib・Secrets Manager PQ-TLS等</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>19件</td><td>新店オープン情報多数、3月度月次実績、ツルハHD組織改編</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>10件</td><td>新店レポート・経営戦略インタビュー・商品戦略</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>8件</td><td>EC検索課題調査・越境EC・AI消費者懸念</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術57件 + 小売37件 = 94件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-04-23" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、10件成功/1件0件）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 138件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>Google Cloud Next '26 でAIエージェント基盤が大量発表</strong> — Gemini Enterprise Agent Platform、ダウンロード版Spanner「Spanner Omni」、マルチクラウドデータ統合「Agentic Data Cloud」など新サービスが続々公開</li><li><strong>ノジマが日立の家電事業を1100億円で買収</strong> — 日立GLSとの合弁会社設立で家電小売を強化、HC業界ではジョイフル本田とアークランズの経営統合も発表</li><li><strong>ローソンがミニスーパー新業態「Lミニマート」を26年度上期に開始</strong> — 手頃な価格の生鮮食品を提供しコンビニの競争に新局面</li><li><strong>Claude Opus 4.7がAmazon Bedrockで利用可能に</strong> — エージェントコーディング性能が向上、Zenn/QiitaではCLAUDE.md最適化やSkills活用の実践記事が大量出現</li><li><strong>CLO（最高物流責任者）設置義務化が4月から開始</strong> — 物流を経営の核に据える法制度改正が始動、セイノーと丸和も物流ネットワーク連携で合意</li></ol></div>
@@ -5940,11 +6116,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-04-22 23:36 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-04-23 23:29 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
