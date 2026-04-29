@@ -112,29 +112,30 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全39件 ｜ 最終更新: 2026-04-28 23:47</p>
+<p class="subtitle">domain-tech-collection ｜ 全40件 ｜ 最終更新: 2026-04-29 23:52</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">3582</div>
+    <div class="summary-value blue">3636</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-04-29</div>
+    <div class="summary-value">2026-04-30</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">39</div>
+    <div class="summary-value green">40</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
-    <div class="summary-value">92</div>
+    <div class="summary-value">91</div>
   </div>
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-04-29" onclick="switchTab('2026-04-29')">2026-04-29</button>
+<button class="tab-btn active" data-date="2026-04-30" onclick="switchTab('2026-04-30')">2026-04-30</button>
+<button class="tab-btn" data-date="2026-04-29" onclick="switchTab('2026-04-29')">2026-04-29</button>
 <button class="tab-btn" data-date="2026-04-28" onclick="switchTab('2026-04-28')">2026-04-28</button>
 <button class="tab-btn" data-date="2026-04-27" onclick="switchTab('2026-04-27')">2026-04-27</button>
 <button class="tab-btn" data-date="2026-04-26" onclick="switchTab('2026-04-26')">2026-04-26</button>
@@ -175,7 +176,150 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-04-29" class="digest-panel" style="display:block">
+<div id="digest-2026-04-30" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、8件成功・3件0件）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 54件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>AWSとOpenAIの提携拡大</strong> — BedrockでOpenAIモデル提供とCodexエージェント限定プレビューを開始、クラウドAI基盤の競争が新段階へ</li><li><strong>Anthropic「Claude for Creative Work」発表</strong> — Blender・Adobe・Autodesk・Abletonとの統合コネクタをリリースし、クリエイティブ領域へのAI浸透が加速</li><li><strong>AWS Lambda Rust正式サポート</strong> — Cargo Lambdaによるビルド・デプロイ簡素化でNode.js比約6倍の実行速度を実現</li><li><strong>Zed エディタ 1.0リリース</strong> — Rust製高性能エディタが安定版到達、人間とAIエージェントが同一コード空間で協働する開発環境を提唱</li><li><strong>Google×Ulta BeautyがUCPでAIコマース実装</strong> — Gemini上で検索から決済まで一気通貫のAI駆動購買体験を展開</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>AWSとOpenAIの提携拡大</strong> — BedrockでOpenAIモデル提供とCodexエージェント限定プレビューを開始、クラウドAI基盤の競争が新段階へ</li>
+<li><strong>Anthropic「Claude for Creative Work」発表</strong> — Blender・Adobe・Autodesk・Abletonとの統合コネクタをリリースし、クリエイティブ領域へのAI浸透が加速</li>
+<li><strong>AWS Lambda Rust正式サポート</strong> — Cargo Lambdaによるビルド・デプロイ簡素化でNode.js比約6倍の実行速度を実現</li>
+<li><strong>Zed エディタ 1.0リリース</strong> — Rust製高性能エディタが安定版到達、人間とAIエージェントが同一コード空間で協働する開発環境を提唱</li>
+<li><strong>Google×Ulta BeautyがUCPでAIコマース実装</strong> — Gemini上で検索から決済まで一気通貫のAI駆動購買体験を展開</li>
+<li><strong>GW谷間で小売メディア3サイト更新停止</strong> — 流通ニュース・ITmedia・ロジスティクス・トゥデイがGW期間中の更新を休止</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/nttdata_tech/articles/bf6b694144e55a" target="_blank" rel="noopener">大規模案件のSlackにAI社員3人を常駐させたら、2年目が参画1週間で設計根本に踏み込んだ</a></td><td>Zenn</td><td>NTTデータのITアーキテクトが役割分担したAI3体をSlackに常駐させ、新メンバーの学習速度と設計議論の質を劇的に向上させた実験報告。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/tokium_dev/articles/ca6f30192f6379" target="_blank" rel="noopener">Claude Code に仕事を譲った日——残ったのは「判断」と「責任」だった</a></td><td>Zenn</td><td>非エンジニアがClaude Codeで顧客問い合わせ調査を全自動化し、人間に残る価値は「判断と責任」だと考察した体験記。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/wwwave/articles/4d21d34ad604ba" target="_blank" rel="noopener">Claude Codeにレビューを任せてチームの負担を減らす</a></td><td>Zenn</td><td>Claude Codeの「/review-backend」Skillを作成し、Railsバックエンドのコードレビューを自動化してチーム負担を軽減した実践記事。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/i-inose/items/14f212258dc350857a94" target="_blank" rel="noopener">【Claude Code入門】Skills 徹底解説 - 仕組みの解説からハンズオンまで</a></td><td>Qiita</td><td>Claude CodeのSkills機能を基礎から応用まで体系的に解説するハンズオン付き入門記事。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/headwaters/articles/f79b8d64ba1442" target="_blank" rel="noopener">GitHub Copilotの本当の強み 2</a></td><td>Zenn</td><td>6月のトークンベース課金変更を前に、VSCode・DevContainerとの統合がGitHub Copilot最大の競争優位であると分析。</td></tr>
+<tr><td>6</td><td><a href="https://zed.dev/blog/zed-1-0" target="_blank" rel="noopener">Zed is 1.0</a></td><td>はてブ</td><td>Rust製コードエディタZedが1.0に到達し、人間とAIエージェントが同一コード空間で協働する開発環境を目指す方向性を発表。</td></tr>
+<tr><td>7</td><td><a href="https://voluntas.ghost.io/opencode-go/" target="_blank" rel="noopener">OpenCode Go を利用してみた</a></td><td>はてブ</td><td>月額5ドルからKimi 2.6やDeepSeek v4 Pro等の複数LLMを試せるOpenCode Goの実用性と費用対効果を検証した体験記。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/omni-cli-try-with-claude-code/" target="_blank" rel="noopener">【新機能】Omni CLIがリリースされたのでClaude Codeから自然言語で操作してみた</a></td><td>DevelopersIO</td><td>Omni CLIをClaude Code経由で自然言語操作し、ラベル運用テンプレートの一括作成に活用した事例紹介。</td></tr>
+<tr><td>9</td><td><a href="https://qiita.com/katoriko/items/d3d6fa09e226999a6dd1" target="_blank" rel="noopener">ClaudeでAdobeツールを使える！「Adobe for creativity connector」でできることまとめ+試してみた</a></td><td>Qiita</td><td>ClaudeとAdobe製品を直接連携するコネクタの機能概要と実際の動作検証結果をまとめた記事。</td></tr>
+<tr><td>10</td><td><a href="https://www.anthropic.com/news/claude-for-creative-work" target="_blank" rel="noopener">Claude for Creative Work</a></td><td>はてブ</td><td>AnthropicがBlender・Autodesk・Adobe・Abletonと連携するコネクタセットをリリースし、クリエイティブ業務でのAI統合を推進。</td></tr>
+<tr><td>11</td><td><a href="https://takoratta.hatenablog.com/entry/2026/04/28/112859" target="_blank" rel="noopener">AIエージェント時代のWeb——いま、第二のレスポンシブ設計が始まっている</a></td><td>はてブ</td><td>AIエージェントが新たなWebクライアントとなり、WebMCPとNLWebの2標準でWeb設計パラダイムが変わると論じた記事。</td></tr>
+<tr><td>12</td><td><a href="https://zenn.dev/yuta_yokoi/articles/5d1d7a7438d48d" target="_blank" rel="noopener">AIクローラーを一括りにするな：学習・検索・ユーザーfetch・AIエージェントを分けて制御するAIO Bot Governance</a></td><td>Zenn</td><td>AIボットを目的別に分類し、robots.txtやllms.txtで差別化したガバナンス戦略を実装すべきと提言する記事。</td></tr>
+<tr><td>13</td><td><a href="https://zenn.dev/pppp303/articles/weekly_ai_20260426" target="_blank" rel="noopener">週刊AI駆動開発 - 2026年04月26日</a></td><td>Zenn</td><td>Qwen3.6・Kimi K2.6・DeepSeek V4の連続リリースによりクラウドLLM依存見直しの機運が高まった週間まとめ。</td></tr>
+<tr><td>14</td><td><a href="https://zenn.dev/shinyay/articles/github-changelog-2026-04" target="_blank" rel="noopener">GitHub Changelog 2026年4月</a></td><td>Zenn</td><td>Copilotクラウドエージェントの署名付きコミット対応やCopilot SDKプレビュー開始など、4月のGitHub更新をまとめた月間レポート。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/htakasu/articles/654c3906e86830" target="_blank" rel="noopener">お前のAI、忖度してるぞ</a></td><td>Zenn</td><td>AIにユーザプロファイルを与えるほど忖度（Sycophancy）が巧妙化する現象を実験検証し、クロスモデルレビューの必要性を指摘。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/taka_yayoi/items/c0da11faeb76b3233162" target="_blank" rel="noopener">Lakebase x LangGraph x Qwen3で作る、セッションを跨ぐ記憶を持つAIエージェント</a></td><td>Qiita</td><td>Lakebase・LangGraph・Qwen3を組み合わせ、セッション間で記憶を保持するAIエージェントを構築した実装記事。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/ksonoda/items/0c05f671f919ce7e5fe8" target="_blank" rel="noopener">OCI Enterprise AIでフルマネージドのRAGを実装してみる</a></td><td>Qiita</td><td>Oracle Cloud InfrastructureのEnterprise AI機能を使い、フルマネージドのRAGパイプラインを実装した手順解説。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/takeda_h/items/89201d196e3f68ba3044" target="_blank" rel="noopener">ガバメント AI「源内」（genai-ai-api）を閉域のAWS環境へデプロイしてみた</a></td><td>Qiita</td><td>日本政府向けAIサービス「源内」をプライベートなAWS環境にデプロイした閉域構成の手順を紹介。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/Mecharhythm/items/88277454da559ab255e3" target="_blank" rel="noopener">売上予測WebアプリをFastAPI + Prophet + Reactで個人開発してリリースした話</a></td><td>Qiita</td><td>FastAPI・Prophet・Reactの組み合わせで売上予測Webアプリケーションを個人開発・リリースした全工程の記録。</td></tr>
+<tr><td>6</td><td><a href="https://dev.classmethod.jp/articles/custom-applications/" target="_blank" rel="noopener">【プレビュー】Amazon Quickで自然言語からノーコードのカスタムアプリケーションを作成できるようになりました</a></td><td>DevelopersIO</td><td>Amazon Quickに自然言語でインタラクティブなアプリを生成できるプレビュー機能が追加された。</td></tr>
+<tr><td>7</td><td><a href="https://www.aboutamazon.com/news/aws/bedrock-openai-models" target="_blank" rel="noopener">AWS and OpenAI announce expanded partnership</a></td><td>AWS</td><td>AWSとOpenAIがパートナーシップを拡大し、BedrockでOpenAIモデル提供とCodexエージェント限定プレビューを開始。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/kameoncloud/articles/2dfa2970b940ab" target="_blank" rel="noopener">AWS Lambda が Rust を正式サポートしました</a></td><td>Zenn</td><td>Cargo LambdaによるRust正式対応で複雑だったビルド・デプロイが簡素化され、Node.js比約6倍の実行速度を実現。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/202604-sh-global-resource-auto-disable/" target="_blank" rel="noopener">Security Hub CSPM の Central Configuration なら IAM 系コントロールの「東京以外で無効化」を明示する必要はない</a></td><td>DevelopersIO</td><td>Central Configuration使用時にSecurity Hub CSPMがグローバルリソース関連コントロールをホームリージョン以外で自動無効化するベストプラクティス解説。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/hosomatu/items/afdd509365a770598fc4" target="_blank" rel="noopener">API Gateway → Lambda の間で何が行われているかを易しく解説</a></td><td>Qiita</td><td>AWS API GatewayとLambda間の処理フローを初学者向けにわかりやすく図解した解説記事。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/asahide/items/39952bbc3c587aa792f0" target="_blank" rel="noopener">Aurora Serverless v2 のゼロスケール再開時間を Platform Version 4 で再計測してみた</a></td><td>Qiita</td><td>Aurora Serverless v2のPlatform Version 4でゼロスケールからの再開時間を実測しパフォーマンス改善を検証。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/t0hara/items/8a669c6e0a76d9b1875d" target="_blank" rel="noopener">新人エンジニアこそ「個人開発」をやろう。完全無料で始めるCloudflareスタック入門</a></td><td>Qiita</td><td>Cloudflare Workers・Pages・D1等を無料枠で組み合わせた個人開発入門ガイド。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/masa-asa/items/74d70cac89cddfed39aa" target="_blank" rel="noopener">【TerraVision】Terraform のコードからアーキテクチャ図を自動作成する</a></td><td>Qiita</td><td>TerraformのIaCコードからAWSアーキテクチャ図を自動生成するTerraVisionツールの紹介と使い方。</td></tr>
+<tr><td>7</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/04/aws-announces-ga-AWS-interconnect-multicloud/" target="_blank" rel="noopener">AWS Interconnect - multicloud の一般提供を発表</a></td><td>AWS</td><td>Amazon VPCと他クラウド環境間のプライベート・高速ネットワーク接続を実現するAWS Interconnect multicloudがGA。</td></tr>
+<tr><td>8</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/04/cloudwatch-pipelines-compliance-governance/" target="_blank" rel="noopener">Amazon CloudWatch パイプラインが新しいコンプライアンスとガバナンスの機能を導入</a></td><td>AWS</td><td>CloudWatch Pipelinesにオリジナルログ保持・変換メタデータ・IAM条件キー等のコンプライアンス機能が追加。</td></tr>
+<tr><td>9</td><td><a href="https://dev.classmethod.jp/articles/elastic-beanstalk-ai-analysis-windows/" target="_blank" rel="noopener">【アップデート】AWS Elastic Beanstalk の AI 分析機能が Windows Server プラットフォームでも利用できるようになりました</a></td><td>DevelopersIO</td><td>Elastic BeanstalkのAIトラブルシューティング分析機能がWindows Serverプラットフォームに拡大対応。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/canly/articles/50ab91f6cee549" target="_blank" rel="noopener">MySQLの常識がコストに跳ね返る――BigQueryで最初に知りたかったクエリ設計の基本</a></td><td>Zenn</td><td>MySQL経験者がBigQueryで直面する設計思想の違いを具体例で解説し、スキャン量32GBから1.5GBへの削減事例を紹介。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/DaddyDaddy/items/7c5163b08dd8444d23cd" target="_blank" rel="noopener">Power BIで閾値を超えたレポートをTeamsに表付きで知らせるPower Automateクラウドフローを作ってみた</a></td><td>Qiita</td><td>Power BIとPower Automateを組み合わせ、閾値超過時にTeamsへ表付き通知を自動送信するフロー構築の実装例。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/yushibats/items/6f77150c813ffe080c9f" target="_blank" rel="noopener">ADB の Database Actions で使える「Catalog Tool」とは？</a></td><td>Qiita</td><td>Oracle Autonomous Databaseの管理画面で利用できるCatalog Tool機能の概要と活用方法の解説。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/yushibats/items/dbae53dceeda84b1db8f" target="_blank" rel="noopener">【ADB】Data StudioでAIプロファイルを作成する</a></td><td>Qiita</td><td>Oracle Data StudioのAIプロファイル作成機能を使ったデータ分析・プロファイリングの手順紹介。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://stripe.dev/blog/selective-test-execution-at-stripe-fast-ci-for-a-50m-line-ruby-monorepo" target="_blank" rel="noopener">Selective Test Execution at Stripe: Fast CI for a 50M-line Ruby monorepo</a></td><td>はてブ</td><td>5,000万行のRubyモノレポで全テストの約5%だけを選別実行し、CI速度とスケーラビリティを両立するStripeの技術解説。</td></tr>
+<tr><td>2</td><td><a href="https://note.com/kihaya/n/neaf3147742e5" target="_blank" rel="noopener">ShopifyはなぜFalcon移行に苦戦したのか？FiberとC拡張ブロッキング #rubykaigi2026</a></td><td>はてブ</td><td>RubyKaigi 2026での発表を基に、ShopifyのFalcon移行でFiber非対応C拡張がReactorを停止させた技術的課題を深掘り。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/nhatcaofedev/items/59ee94d671a0ac42891a" target="_blank" rel="noopener">React Hook Form 入門 Part 3 — Controller と useFieldArray を実務で使いこなす</a></td><td>Qiita</td><td>React Hook FormのControllerとuseFieldArrayを実務シナリオで使いこなすための実践的な解説。</td></tr>
+<tr><td>4</td><td><a href="https://gitperf.com/" target="_blank" rel="noopener">High Performance Git</a></td><td>はてブ</td><td>Gitの内部構造をオブジェクト・パックファイル・部分クローン等の観点から段階的に解説するパフォーマンス最適化の技術書。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/crowdy/items/c3e06c47b350ef230352" target="_blank" rel="noopener">GitHub神話の6日間 — ガバナンス、稼働率、セキュリティ、コストが同時に揺らいだ一週間</a></td><td>Qiita</td><td>GitHubの稼働性・セキュリティ・ガバナンスが同時に揺らいだ1週間を事例分析し、プラットフォーム依存リスクを考察。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/jnchito/items/3fb1d28f7d75f2edc1b8" target="_blank" rel="noopener">【Ruby】ブロックパラメータのitは多用しない方がよい、という私見</a></td><td>Qiita</td><td>Rubyのブロックパラメータ省略記法itの過剰利用がコード可読性を損なう問題を具体例で論じた設計考察。</td></tr>
+<tr><td>7</td><td><a href="https://qiita.com/kix/items/044e35a23e7cee5a1ed6" target="_blank" rel="noopener">C#で日本語識別子（変数名・メソッド名）を使う方法と実務上の注意点</a></td><td>Qiita</td><td>C#で日本語の変数名やメソッド名を使用する方法と、実務における注意点・制約を整理した記事。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/layerx/articles/a99cd11af487fc" target="_blank" rel="noopener">AIエージェントを安全に動かすための技術——サンドボックスについて調べてみる</a></td><td>Zenn</td><td>AIエージェントのコード実行時に必要なサンドボックス技術を、プロセス分離・gVisor・VM分離・WASMの4手法で比較解説。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/3104/articles/b1ba88275f2d2c" target="_blank" rel="noopener">Vibe coding に .env は使わない</a></td><td>Zenn</td><td>AI駆動開発時の.envファイルによる機密情報漏洩リスクを指摘し、Infisical等のシークレット管理ツールでランタイム注入する方式を推奨。</td></tr>
+<tr><td>3</td><td><a href="https://prtimes.jp/main/html/rd/p/000000068.000118521.html" target="_blank" rel="noopener">【レポート公開】そのAIツール、すでに情報を抜かれています。実在インシデントで判明したセキュリティ事故 8選</a></td><td>はてブ</td><td>M365 Copilot・ChatGPT・GitHub Copilot等のAIツールで発生した機密情報流出・本番DB削除等の実インシデント8件を分析したレポート。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/mochi_cron/items/9ce527df39e7dd6e75fe" target="_blank" rel="noopener">WAFは安心を買う装置ではない</a></td><td>Qiita</td><td>WAFの機能と限界を整理し、WAF導入だけでは安全とはいえない構造的理由を考察した記事。</td></tr>
+<tr><td>5</td><td><a href="https://tech-blog.sterrasec.com/entry/2026/04/28/110000" target="_blank" rel="noopener">しゃぶ葉のテーブルで学ぶMITM</a></td><td>はてブ</td><td>配膳ロボのエピソードを比喩に、中間者攻撃（MITM）とTLS暗号化・証明書検証の重要性をわかりやすく解説。</td></tr>
+<tr><td>6</td><td><a href="https://japan.cnet.com/article/35247004/" target="_blank" rel="noopener">英国政府が公開した「ロシアにハッキングされたWi-Fiルータ」</a></td><td>はてブ</td><td>SOHO向けWi-Fiルーターの脆弱性を突いたロシアの攻撃に関する英国政府の情報公開と対策。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/store/newstorereport/543851/" target="_blank" rel="noopener">万代・ライフ・サンディと激突 関西最新店「今川店」でオーケー二宮社長が明かした戦術</a></td><td>DCS</td><td>オーケーが大阪市東住吉区に関西最新店「今川店」を開業し、万代・ライフ・サンディがひしめく激戦区で地元仕入れ強化やEDLP戦略で差別化する方針を二宮社長が語った。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/management/businessplan/543811/" target="_blank" rel="noopener">プラットフォーマー化する大手アパレルが直面する、OMOの理想と現実</a></td><td>DCS</td><td>オンワードやアンドエスティなど大手アパレルがマーケットプレイス化を進める中、フルフィルメントやドロップシッピングなどOMO物流基盤のコスト効率と収益性の課題を考察。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+</tbody></table></div>
+<p>該当する記事はありませんでした。</p>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/e/2026/04/30/15998" target="_blank" rel="noopener">検索から「エージェント」へ。Googleと米国美容大手が挑む「UCP」活用によるAIで検索→購入までできる買い物体験とは</a></td><td>ネッ担</td><td>GoogleとUlta BeautyがUCPを活用し、Gemini上でAIエージェントが検索から決済まで一気通貫で完結するEC体験を展開。</td></tr>
+<tr><td>2</td><td><a href="https://ecnomikata.com/original_news/50284/" target="_blank" rel="noopener">なぜカンロはEC限定品を完売し続けられるのか 【リアル体験×EC】によるファン作りへの挑戦</a></td><td>ECのミカタ</td><td>カンロが顧客接点統合プラットフォーム「Kanro POCKeT」とファンコミュニティ運営により、EC限定商品の継続的な完売を実現。</td></tr>
+<tr><td>3</td><td><a href="https://ecnomikata.com/blog/49698/" target="_blank" rel="noopener">受注管理システム比較で失敗しない！EC事業者向けの選び方7項目と導入前チェックリスト</a></td><td>ECのミカタ</td><td>EC事業者向けに受注管理システム選定の7つの比較ポイントを提示し、自社の受注フローへの適合性が最重要と解説。</td></tr>
+<tr><td>4</td><td><a href="https://netshop.impress.co.jp/e/2026/04/30/16009" target="_blank" rel="noopener">"ゆっくり配送"などに最大5000万円を補助する「多様・柔軟な受取・注文方法の普及促進事業費補助金」とは？</a></td><td>ネッ担</td><td>国土交通省が再配達削減を目的に「ゆっくり配送」や置き配連携等の取り組みに対し最大5000万円を補助する制度の公募を開始。</td></tr>
+<tr><td>5</td><td><a href="https://netshop.impress.co.jp/n/2026/04/30/16002" target="_blank" rel="noopener">老舗企業から学ぶブランディング戦略／JA共済が実践したUI/UX改善／成功するサイト構築には「型」がある！【Webサイト関連講演】</a></td><td>ネッ担</td><td>大丸松坂屋百貨店のブランディング戦略やJA共済のUI/UX改善事例を扱うWeb担当者Forumミーティング2026春の講演情報。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+</tbody></table></div>
+<p>該当する記事はありませんでした。</p>
+<h3>B6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+</tbody></table></div>
+<p>該当する記事はありませんでした。</p>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. AIエージェントがコマース基盤を書き換える</h3>
+<p>GoogleとUlta BeautyによるUCP活用事例は、検索から商品比較、決済までをAIエージェントが一気通貫で処理するコマース体験を実装に移した先行事例である。技術側ではAWSとOpenAIの提携拡大によりBedrockでOpenAIモデルが利用可能になり、AnthropicもBlender・Adobe等との統合コネクタを発表するなど、エージェント基盤の選択肢が急速に広がっている。SIerとしては、小売クライアントのEC基盤にUCPやエージェント型決済を統合する提案が差別化ポイントになる。特にオンワード等アパレル大手のプラットフォーマー化においてはOMO物流基盤との統合設計が案件化する可能性が高い。</p>
+<h3>2. AI駆動開発の成熟とエンタープライズ適用の課題</h3>
+<p>Claude Code Skillsによるレビュー自動化、Slack常駐AI3体による設計議論の質向上、Zed 1.0のAI協働エディタ到達など、AI駆動開発は実験段階から組織的な適用段階へ移行しつつある。一方でAIツール起因のセキュリティインシデントが8件報告されており、.envファイル漏洩やサンドボックス技術の選定が新たな課題として浮上している。SIer提案においては「AI導入効果」と「AI起因リスク」の両面を定量的に示すアプローチが求められる。</p>
+<h3>3. 高性能バックエンド基盤の民主化と小売業への適用</h3>
+<p>AWS Lambda Rust正式対応によりNode.js比6倍のパフォーマンスが容易に実現可能になり、StripeのCI選択的テスト実行（5,000万行モノレポで全テストの5%のみ実行）など、大規模プロダクションの知見がオープンに共有されている。小売業のバックエンド基盤においても、Rustベースのサーバーレスアーキテクチャによる処理速度向上とコスト削減は、POS連携やリアルタイム在庫管理の高速化に直結する技術選択肢となる。</p>
+<h3>4. GW谷間が露わにする情報ソースの更新パターン</h3>
+<p>本日の巡回では流通ニュース・ITmedia・ロジスティクス・トゥデイの3サイトがGW中に更新停止となった一方、ダイヤモンド・チェーンストアとネットショップ担当者フォーラムは通常配信を継続した。技術メディア側はZenn・Qiitaのユーザー投稿型プラットフォームが祝日でも活発に更新されている。SIerの日次ダイジェスト運用においては、情報ソースの更新パターンを暦日別に把握し、GW等の長期休暇期間はソース比重を動的に調整する設計が実用的である。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>12件</td><td>AI駆動開発・エージェント系が多数</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>18件</td><td>Claude Code・AI・クラウド入門系が充実</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>10件</td><td>Zed 1.0・Stripe CI・セキュリティ系が注目</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>4件</td><td>Omni CLI・AWS Elastic Beanstalk等</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>3件</td><td>Interconnect multicloud GA・CloudWatch Pipelines等</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>0件</td><td>0件</td><td>GW期間中で更新停止、最新記事は4/28付</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>2件</td><td>新店レポート・経営戦略</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>3件</td><td>UCP・AI・物流補助金</td></tr>
+<tr><td>9</td><td>ECのミカタ</td><td>成功</td><td>2件</td><td>EC限定品戦略・受注管理</td></tr>
+<tr><td>10</td><td>ITmedia ビジネスオンライン</td><td>0件</td><td>0件</td><td>GW期間中で小売関連記事の更新なし</td></tr>
+<tr><td>11</td><td>ロジスティクス・トゥデイ</td><td>0件</td><td>0件</td><td>GW期間中で更新停止、最新記事は4/29付</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術47件 + 小売7件 = 54件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-04-29" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams — Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、10件成功・1件該当なし）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 141件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>AIコーディングエージェント管理が本格成熟フェーズへ</strong> — OpenAI「Symphony」でPR件数5倍、LayerX「ccgate」で権限確認97%自動化、Microsoft「APM」公開とエージェント運用の工業化が急進</li><li><strong>Amazon Redshift が Apache Iceberg テーブルへの書き込みを全面解禁</strong> — UPDATE/DELETE/MERGE操作をサポート、AI駆動スケーリングもデフォルト化でデータレイクハウス統合が加速</li><li><strong>Lambda × S3 Files でファイルシステムマウントが実現</strong> — S3バケットをLambda関数からファイルシステムとしてマウント可能に、サーバーレスアーキテクチャの設計選択肢が拡大</li><li><strong>小売DX最前線 — AI画像生成・AIコーデ・デジタルアドレス</strong> — メイキップ「FitModel.AI」でサイズ感AI再現、ZOZO「ラボくん」LINE開設、楽天市場がデジタルアドレス対応開始</li><li><strong>ダイエー新フォーマット「フードスタイル」1号店に約1000人が行列</strong> — 生鮮4品売上構成比50%を目標に掲げる新業態で大きな反響、食品スーパーの業態革新が加速</li></ol></div>
@@ -7209,11 +7353,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-04-28 23:47 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-04-29 23:52 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
