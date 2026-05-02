@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cc-sier-organization Webアプリ アーキテクチャ図 - draw.io ダイアグラム</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --red:#ef4444; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.5rem; margin-bottom:8px; }
+.meta { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-type { color:#fff; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) { .tag-project { background:#78350f; color:#fde68a; } }
+.date { font-size:.82rem; color:var(--muted); margin-bottom:24px; }
+.dl-btn { display:inline-block; padding:8px 20px; border-radius:8px; background:var(--blue);
+          color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; }
+.diagram-render { overflow-x:auto; }
+.diagram-render svg { max-width:100%; height:auto; }
+.diagram-actions { display:flex; gap:12px; justify-content:center; margin-top:16px; }
+h2 { font-size:1.15rem; margin:32px 0 12px; border-bottom:1px solid var(--border); padding-bottom:6px; }
+p, li { font-size:.9rem; line-height:1.7; color:var(--text); }
+ul { padding-left:24px; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; margin:12px 0 24px; font-size:.85rem; }
+th { background:var(--bg); text-align:left; padding:8px 12px; border:1px solid var(--border); font-weight:600; }
+td { padding:8px 12px; border:1px solid var(--border); }
+tr:nth-child(even) td { background:var(--bg); }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./" class="back-btn">&larr; 一覧に戻る</a>
+
+<h1>cc-sier-organization Webアプリ アーキテクチャ図</h1>
+<div class="meta">
+  <span class="tag tag-project">CC-SIer WebApp</span>
+  <span class="tag tag-type" style="background:#ef4444;">UMLコンポーネント</span>
+</div>
+<p class="date">作成日: 2026-05-02 / 作成者: SAS-Sasao</p>
+
+<h2>draw.ioビューア</h2>
+
+<div class="diagram-container">
+  <div class="diagram-render">
+    <pre class="mermaid">
+graph TD
+    subgraph L1["Actor Layer (利用者)"]
+        USR(("社員ユーザー (一般)"))
+        ADM(("管理者 (自分)"))
+    end
+    subgraph L2["device Browser (社員PC)"]
+        NEXTC["Next.js Client (React + Mermaid + 履歴)"]
+        GAL["管理画面 /admin"]
+    end
+    subgraph L3["device Vercel (Next.js 15 App Router)"]
+        NEXTS["Next.js Server"]
+        AUTH["Auth.js (Entra / Google SSO)"]
+        SACT["Server Actions /api/runs"]
+        SSEP["SSE Proxy"]
+        GUARDV{"policy Budget Rate Pre-check"}
+    end
+    subgraph L4["device Railway (Docker: node22 + python3 + bash + uv + graphviz)"]
+        HONO["Hono Server /api/execute"]
+        SDK["Agent SDK (claude-agent-sdk)"]
+        AUDR["Audit Logger"]
+        subgraph PKG["package 三層 Plugins Overlay (後勝ち)"]
+            P1["cc-sier-organization (会社共通)"]
+            P2["_dept_ 部門レイヤ"]
+            P3["user-slug 個人レイヤ"]
+        end
+        POL{"policy KILL_SWITCH Budget Cap Rate Limit"}
+        BAT1[/"batch Catalog 自動upsert"/]
+        BAT2[/"batch Case Bank Indexer"/]
+        BAT3[/"batch Blob TTL Cleanup"/]
+    end
+    subgraph L5["Data Layer (Managed)"]
+        DB[("database Neon Postgres + pgvector")]
+        BLOB[("storage Vercel Blob")]
+        REDIS{{"cache Upstash Redis"}}
+    end
+    subgraph L6["External Services"]
+        IDP(("external Microsoft Entra ID"))
+        ANT(("AI service Anthropic API"))
+        SLACK(("external Slack Webhook"))
+    end
+
+    USR --> NEXTC
+    ADM --> GAL
+    NEXTC --> NEXTS
+    NEXTC -.->|SSE| SSEP
+    GAL --> GUARDV
+    AUTH -.->|OIDC| IDP
+    SACT -.->|HMAC internal| HONO
+    SSEP -.->|SSE relay| HONO
+    HONO --> SDK
+    HONO --> POL
+    SDK -.-> P1
+    P1 -.-> P2
+    P2 -.-> P3
+    SDK -->|Anthropic API key| ANT
+    NEXTS -->|Drizzle ORM| DB
+    GUARDV --> REDIS
+    HONO -->|run_events INSERT| DB
+    SDK -->|artifact upload| BLOB
+    BAT1 --> DB
+    BAT2 --> BLOB
+    BAT3 --> REDIS
+
+    classDef actor fill:#dae8fc,stroke:#6c8ebf,stroke-width:2px;
+    classDef vercel fill:#d5e8d4,stroke:#82b366;
+    classDef railway fill:#e1d5e7,stroke:#9673a6;
+    classDef data fill:#ffe6cc,stroke:#d79b00;
+    classDef external fill:#f8cecc,stroke:#b85450;
+    classDef policy fill:#f8cecc,stroke:#b85450,stroke-width:2px;
+    classDef batch fill:#ffe6cc,stroke:#d79b00,stroke-dasharray:4 2;
+    classDef pkg fill:#fff2cc,stroke:#d6b656;
+    class USR,ADM actor;
+    class NEXTC,GAL pkg;
+    class NEXTS,AUTH,SACT,SSEP vercel;
+    class HONO,SDK,AUDR railway;
+    class P1,P2,P3 pkg;
+    class POL,GUARDV policy;
+    class BAT1,BAT2,BAT3 batch;
+    class DB,BLOB,REDIS data;
+    class IDP,ANT,SLACK external;
+    </pre>
+  </div>
+  <div class="diagram-actions">
+    <a href="./cc-sier-webapp-architecture.drawio" download class="dl-btn">draw.io XML をダウンロード</a>
+  </div>
+</div>
+
+<h2>概要</h2>
+<p>cc-sier-organization の機能を Claude Code 非ユーザーがブラウザから利用できる Web アプリ「<strong>CC-SIer WebApp Phase 1</strong>」のアーキテクチャ図。<strong>UML デプロイメント図 + コンポーネント図のハイブリッド表現</strong>で、6 層構成（Actor → Browser → Vercel → Railway → Data → External Services）と、その上を貫く三層 Plugins Overlay（会社共通 → 部門 → 個人 / 後勝ち）を可視化している。</p>
+<p>個人 API キーを社員に使わせる構造的リスクに対し、<strong>多層 Budget Cap・Rate Limit・KILL_SWITCH・Audit Log を「«policy»」ステレオタイプの赤色矩形で明示</strong>し、運用観点で見落としやすいバッチ／スケジューラ系処理（Catalog 自動 upsert・Case Bank Indexer・Blob TTL Cleanup）も「«batch»」ステレオタイプの平行四辺形で可視化している。</p>
+<p>図形ステレオタイプを以下のように厳密に使い分けることで、DB / バッチ / AI / ユーザー / セキュリティ機構の役割が一目で識別できる。</p>
+
+<h2>構成要素</h2>
+<table>
+  <tr><th>要素</th><th>図形 / ステレオタイプ</th><th>レイヤー</th><th>説明</th></tr>
+  <tr><td>社員ユーザー / 管理者</td><td>UML Actor (棒人間)</td><td>Actor</td><td>社員 (一般 / admin)。ブラウザから利用</td></tr>
+  <tr><td>Browser (社員PC)</td><td>Swimlane «device»</td><td>Browser</td><td>Next.js Client / Mermaid レンダラ / 履歴ギャラリーをホスト</td></tr>
+  <tr><td>Next.js Client</td><td>UML Component «component»</td><td>Browser</td><td>React 19 製の SPA フロントエンド</td></tr>
+  <tr><td>Vercel (Pro Plan)</td><td>Swimlane «device» (緑)</td><td>Vercel</td><td>Next.js 15 App Router 実行環境</td></tr>
+  <tr><td>Auth.js</td><td>UML Component</td><td>Vercel</td><td>社内 SSO (Microsoft Entra ID / Google) 認証</td></tr>
+  <tr><td>Server Actions /api/runs</td><td>UML Component</td><td>Vercel</td><td>セッション確認 → Budget チェック → Railway 呼び出し</td></tr>
+  <tr><td>SSE Proxy</td><td>UML Component</td><td>Vercel</td><td>Railway → Browser のイベントストリーム中継</td></tr>
+  <tr><td>Budget / Rate-limit Pre-check</td><td>«policy» 赤色矩形</td><td>Vercel</td><td>Vercel 側でも事前チェック (二重防御)</td></tr>
+  <tr><td>Railway (Docker)</td><td>Swimlane «device» (紫)</td><td>Railway</td><td>node22 + python3 + bash + uv + graphviz の Docker コンテナ</td></tr>
+  <tr><td>Hono Server</td><td>UML Component</td><td>Railway</td><td>/api/execute エンドポイント (Vercel から内部 API で呼ばれる)</td></tr>
+  <tr><td>Claude Agent SDK</td><td>UML Component «component»</td><td>Railway</td><td>@anthropic-ai/claude-agent-sdk — query() で Claude を実行</td></tr>
+  <tr><td>三層 Plugins Overlay</td><td>folder «package»</td><td>Railway</td><td>会社共通 → 部門 → 個人 の順で読み込み (後勝ち)</td></tr>
+  <tr><td>KILL_SWITCH / Budget Cap / Rate Limit / allowedTools</td><td>«policy» 赤色矩形 (太枠)</td><td>Railway</td><td>個人 API キー暴走防止のための多層セキュリティ機構</td></tr>
+  <tr><td>Audit Logger</td><td>UML Component</td><td>Railway</td><td>全リクエスト・ツール呼び出し・予算到達を audit_logs に記録</td></tr>
+  <tr><td>Catalog 自動 upsert</td><td>«batch» 平行四辺形</td><td>Railway</td><td>.claude/skills/* を定期スキャンしカタログに反映</td></tr>
+  <tr><td>Case Bank Indexer</td><td>«batch» 平行四辺形</td><td>Railway</td><td>過去 task-log を embedding 化し pgvector へ</td></tr>
+  <tr><td>Blob TTL Cleanup</td><td>«batch» 平行四辺形</td><td>Railway</td><td>90 日経過した成果物を自動削除</td></tr>
+  <tr><td>Neon Postgres + pgvector</td><td>シリンダー «database» (青)</td><td>Data</td><td>users / runs / catalog_items / audit_logs / case_bank(vector) 等</td></tr>
+  <tr><td>Vercel Blob</td><td>シリンダー «storage» (緑)</td><td>Data</td><td>PNG / .drawio / IaC zip / signed URL TTL 付き</td></tr>
+  <tr><td>Upstash Redis</td><td>ヘキサゴン «cache» (黄)</td><td>Data</td><td>per-user 5 runs/h / global 50 runs/h の rate limit KVS</td></tr>
+  <tr><td>Microsoft Entra ID</td><td>クラウド «external»</td><td>External</td><td>社内 IdP (OIDC)</td></tr>
+  <tr><td>Anthropic API (Claude)</td><td>クラウド «AI service / external»</td><td>External</td><td>Claude Sonnet 4.6 / Opus 4.7 — Agent SDK が HTTPS で呼ぶ</td></tr>
+  <tr><td>Slack Webhook</td><td>クラウド «external»</td><td>External</td><td>運用アラート (1 日 $10 超 / エラー率 10% / KILL_SWITCH 動作)</td></tr>
+</table>
+
+<h2>設計のポイント</h2>
+<ul>
+  <li><strong>図形ステレオタイプによる役割の明確化</strong>: ユーザー (Actor 棒人間) / 実行環境 («device» Swimlane) / モジュール («component») / DB («database» シリンダー) / キャッシュ («cache» ヘキサゴン) / 外部 AI («cloud」クラウド形) / セキュリティ機構 («policy» 赤色矩形) / バッチ («batch» 平行四辺形) / パッケージ («package» folder形) を 9 種類の図形で厳密に使い分け、図を見るだけで要素の性質と責務境界が把握できる。</li>
+  <li><strong>Vercel + Railway 分離の必然性を視覚化</strong>: Vercel Functions は実行時間 800 秒上限・ephemeral filesystem であるため、数分の長時間実行と <code>.claude/skills/</code> filesystem 依存をもつ Agent SDK は動かせない。Hono Server を Railway 側 Docker に分離し、Vercel ↔ Railway 間を「«internal API» HMAC 共有 secret」の点線エッジで明示することで、なぜ 2 サービス構成なのかが一目でわかる。</li>
+  <li><strong>多層 Budget Cap を二重に配置</strong>: Vercel 側 (pre-check) と Railway 側 (enforce) の両方に «policy» ブロックを配置し、個人 API キー暴走の構造的リスクを「per-request $2 → per-user $20/月 → pool $200/月」の 3 段階で抑える設計を可視化。KILL_SWITCH を Railway 環境変数で即停止できる「朝起きて青ざめないための装置」として明示し、見落としを防ぐ。</li>
+  <li><strong>三層 Plugins Overlay を package ステレオタイプで強調</strong>: 会社共通 (cc-sier-organization) → 部門 (_dept_*) → 個人 (user-slug) の重ね合わせを folder 形 + 点線 association で表現。<code>.claude/skills/</code> 追加だけでメニュー自動拡張する核心メカニズムを 1 つのブロックに集約することで、Phase 2 以降の機能追加方針が説明しやすくなる。</li>
+  <li><strong>バッチ / スケジューラ系を平行四辺形で独立可視化</strong>: 通常のリクエスト動線とは異なる時間軸で動く「Catalog 自動 upsert」「Case Bank Indexer」「Blob TTL Cleanup」を平行四辺形で別レイヤー扱いし、運用設計時の見落としを防ぐ。各バッチの宛先 (DB / Blob) も矢印で明示。</li>
+</ul>
+
+<p class="updated">Powered by draw.io MCP Server</p>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({startOnLoad:true, theme:'default', securityLevel:'loose'});</script>
+</body>
+</html>
