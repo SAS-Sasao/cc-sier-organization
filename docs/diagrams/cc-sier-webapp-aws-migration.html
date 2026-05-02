@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC-SIer WebApp AWS Migration (Phase 4) - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container img { max-width:100%; height:auto; border-radius:8px; cursor:pointer; transition:transform .2s; }
+.diagram-container img:hover { transform:scale(1.01); }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.legend-dotted { height:0; border-top:3px dotted; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+ul.learning-points { list-style:none; padding-left:0; }
+ul.learning-points li { border-left:4px solid var(--blue); padding:8px 14px; margin-bottom:10px; background:var(--bg); border-radius:4px; font-size:.88rem; line-height:1.65; }
+ul.learning-points strong { color:var(--blue); }
+.cost-total td { background:var(--bg); font-weight:600; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+.lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.88);
+            z-index:1000; align-items:center; justify-content:center; cursor:zoom-out; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:95%; max-height:95%; border-radius:8px; }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>CC-SIer WebApp AWS Migration (Phase 4)</h1>
+<div class="meta">
+  <span class="tag tag-project">CC-SIer WebApp</span>
+  <span class="tag tag-area">AWS Migration / Internal SaaS</span>
+  <span>生成日: 2026-05-02</span>
+</div>
+
+<div class="diagram-container">
+  <img src="./cc-sier-webapp-aws-migration.png" alt="CC-SIer WebApp AWS Migration (Phase 4)" onclick="openLightbox(this.src)">
+  <div class="hint">クリックで拡大表示</div>
+  <div style="margin-top:16px"><a href="./cc-sier-webapp-aws-migration-iac.html" class="iac-btn">IaCソースコードを見る</a></div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:#3b82f6"></span> HTTPS UI / Drizzle ORM — ユーザーHTTPS と Vercel→Aurora メタデータアクセス</div>
+    <div class="legend-item"><span class="legend-line" style="background:#f59e0b"></span> Admin / Rate-limit — 管理画面アクセスと ElastiCache レート制限チェック</div>
+    <div class="legend-item"><span class="legend-line" style="background:#9333ea"></span> Internal API / DB Write — App Runner→ALB→Fargate と Fargate→Aurora 実行履歴</div>
+    <div class="legend-item"><span class="legend-line" style="background:#dc2626"></span> AI Invoke / Alert / KILL_SWITCH — Bedrock 呼び出し / アラート / 緊急停止</div>
+    <div class="legend-item"><span class="legend-line" style="background:#10b981"></span> Artifact / Schedule — S3 アップロード / EventBridge 定期実行</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#6366f1"></span> OIDC Federation — Cognito ↔ Microsoft Entra ID 認証連携</div>
+    <div class="legend-item"><span class="legend-line legend-dotted" style="border-color:#64748b"></span> Encryption / Audit / Secret — KMS 暗号化 / CloudWatch 監査 / Secrets 取得</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>cc-sier-organization Web アプリの <strong>Phase 4「AWS 移行検討」フェーズ</strong>に対応する将来構成図。Phase 1（Vercel + Railway 版）が利用人数 50 人超 / 月額 API > $500 / セキュリティ要件アップ等で発動した場合に到達する想定アーキテクチャ。</p>
+  <p>Phase 1 の各 PaaS を AWS マネージドサービスへ等価置換: Vercel→<strong>App Runner</strong>、Railway Docker→<strong>ECS Fargate</strong>、Neon Postgres→<strong>Aurora PostgreSQL Serverless v2 (pgvector)</strong>、Vercel Blob→<strong>S3</strong>、Upstash Redis→<strong>ElastiCache for Redis Serverless</strong>、Anthropic API 直叩き→<strong>Amazon Bedrock</strong> (Claude on Bedrock)、Microsoft Entra ID は <strong>Cognito User Pool で OIDC Federation</strong>。Phase 1 の多層 Budget Cap・KILL_SWITCH・Audit Log・3 種バッチは AWS ネイティブ機能（Secrets Manager / SSM Parameter Store / CloudWatch Logs / EventBridge Scheduler）で再実装し、運用観測性とセキュリティ境界を強化する。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+  <div class="flow">
+    <span class="flow-step">Employees</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Route 53</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">WAF</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">App Runner (Next.js)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Internal ALB</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Fargate (Hono + Agent SDK)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Bedrock</span>
+  </div>
+  <p><strong>認証フロー</strong>: ユーザー → App Runner → Cognito User Pool（OIDC）→ Microsoft Entra ID（Federation）→ Cognito → JWT 発行 → App Runner</p>
+  <p><strong>データ永続化フロー</strong>: Fargate → Aurora（run_events / runs / cost_pool / case_bank vector）/ S3（artifact: PNG / .drawio / IaC zip）/ ElastiCache（rate-limit KVS）</p>
+  <p><strong>運用イベントフロー</strong>: EventBridge Scheduler → Fargate（cron: Catalog upsert / Case Bank Indexer / Blob TTL Cleanup）。SSM Parameter Store の <code>KILL_SWITCH=on</code> 切替 → EventBridge → Fargate に即停止指示。</p>
+  <p><strong>監査・アラートフロー</strong>: Fargate audit logs → CloudWatch Logs（90 日保持）→ CloudWatch Alarms（コスト > $10/日 / エラー率 > 10%）→ SNS → AWS Chatbot → Slack Webhook。</p>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>Edge (Global)</td><td>Route 53 / CloudFront / AWS WAF</td><td>DNS / CDN / OWASP Top 10 防御 + DDoS</td></tr>
+    <tr><td>Frontend Tier</td><td>AWS App Runner</td><td>Next.js 15 SSR + Server Actions + SSE Proxy + Auth.js</td></tr>
+    <tr><td>Identity</td><td>Cognito User Pool / Microsoft Entra ID</td><td>OIDC Federation。Cognito で JWT 発行、Entra ID は外部 IdP として連携</td></tr>
+    <tr><td>Backend Tier</td><td>Internal ALB + ECS Fargate</td><td>Hono (/api/execute) + Claude Agent SDK コンテナ。プライベートサブネット Multi-AZ</td></tr>
+    <tr><td>Data Tier</td><td>Aurora PostgreSQL Serverless v2 + pgvector</td><td>users / virtual_organizations / catalog_items / runs / run_events / artifacts / cost_pool / user_budgets / audit_logs / case_bank(vector)</td></tr>
+    <tr><td>Data Tier</td><td>ElastiCache for Redis Serverless</td><td>per-user 5 runs/h / global 50 runs/h レート制限 KVS</td></tr>
+    <tr><td>Data Tier</td><td>S3 Artifact Bucket</td><td>PNG / .drawio / IaC zip。Lifecycle 90 日 expiration、signed URL 配信</td></tr>
+    <tr><td>AI</td><td>Amazon Bedrock</td><td>Claude Sonnet 4.6 / Opus 4.7 を Agent SDK が VPC Endpoint 経由で呼び出し</td></tr>
+    <tr><td>Security</td><td>Secrets Manager / KMS</td><td>DB credentials / Bedrock IAM フォールバック / 全データの暗号化キー管理</td></tr>
+    <tr><td>Operations</td><td>CloudWatch Logs / Alarms</td><td>監査ログ 90 日保持 + コスト・エラー率アラーム</td></tr>
+    <tr><td>Operations</td><td>SSM Parameter Store</td><td>KILL_SWITCH フラグ（環境変数代替）</td></tr>
+    <tr><td>Operations</td><td>EventBridge Scheduler</td><td>Catalog 自動 upsert / Case Bank Indexer / Blob TTL Cleanup の cron 定期実行</td></tr>
+    <tr><td>Operations</td><td>SNS + AWS Chatbot</td><td>CloudWatch Alarm → Slack 通知（運用アラート）</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul>
+    <li><strong>App Runner で Next.js を最小運用負荷でホスト</strong> — Vercel から最小の差分で移行できる SSR + Server Actions + SSE 対応のマネージド ECS。VPC Connector で Backend Tier (ALB) へ private 接続し、IGW 経由の余計な出口を作らない。</li>
+    <li><strong>Bedrock 化で個人 API キー暴走リスクを完全排除</strong> — Phase 1 の Anthropic API 直叩きを Bedrock InvokeModel に置換し、IAM ポリシー + Service Quota + CloudWatch Bedrock メトリクスで「per-request / per-user / pool」3 段階の Budget Cap を AWS ネイティブに再実装。Phase 1 の `maxBudgetUsd` ロジックは Application 側に残しつつ二重防御。</li>
+    <li><strong>Aurora Serverless v2 で pgvector を維持しつつ自動スケール</strong> — Neon の課金体系から Aurora に移行することで Multi-AZ + 自動バックアップ + IAM 認証を獲得。pgvector 拡張は v15 以降ネイティブ対応で Phase 1 の Case Bank 索引互換性を維持。最小 0.5 ACU から課金、夜間スリープ可。</li>
+    <li><strong>SSM Parameter Store + EventBridge で KILL_SWITCH を即時伝播</strong> — Phase 1 の Railway 環境変数 `KILL_SWITCH=on` を SSM Parameter Store の <code>/cc-sier/kill-switch</code> に置換。値変更を EventBridge で検知して Fargate にイベント送信、再デプロイなしで即停止。Phase 1 の「朝起きて青ざめないための装置」設計思想を維持。</li>
+    <li><strong>EventBridge Scheduler で 3 バッチを統一管理</strong> — Phase 1 の Catalog 自動 upsert / Case Bank Indexer / Blob TTL Cleanup を EventBridge Scheduler の単一管理画面に集約。CloudWatch メトリクス連動で SLA 監視、失敗時 SNS → Slack 通知。Lambda 化も将来オプションとして残す。</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p>30 ユーザー想定（Phase 1 と同規模）の月額概算。為替 1 USD = 150 JPY 換算。</p>
+  <table>
+    <tr><th>サービス</th><th>Dev (月額)</th><th>Prod (月額)</th><th>備考</th></tr>
+    <tr><td>App Runner (Next.js)</td><td>$8 (¥1,200)</td><td>$50 (¥7,500)</td><td>Dev: 0.25 vCPU / 0.5 GB on-pause、Prod: 1 vCPU / 2 GB 常時</td></tr>
+    <tr><td>ECS Fargate (Agent SDK)</td><td>$15 (¥2,250)</td><td>$70 (¥10,500)</td><td>Dev: 0.5 vCPU / 1 GB × 1 タスク、Prod: 1 vCPU / 2 GB × 2 タスク Multi-AZ</td></tr>
+    <tr><td>Internal ALB</td><td>$18 (¥2,700)</td><td>$22 (¥3,300)</td><td>$0.025/h + LCU 課金（Prod 数 LCU）</td></tr>
+    <tr><td>Aurora PostgreSQL Serverless v2</td><td>$45 (¥6,750)</td><td>$200 (¥30,000)</td><td>Dev: 0.5-1 ACU、Prod: 1-4 ACU + I/O 最適化</td></tr>
+    <tr><td>ElastiCache Redis Serverless</td><td>$18 (¥2,700)</td><td>$50 (¥7,500)</td><td>最小 1 GB ECPU 課金、Multi-AZ</td></tr>
+    <tr><td>S3 Artifact Bucket</td><td>$1 (¥150)</td><td>$5 (¥750)</td><td>30 GB 想定 + リクエスト課金、Lifecycle 90 日</td></tr>
+    <tr><td>CloudFront + WAF</td><td>$8 (¥1,200)</td><td>$25 (¥3,750)</td><td>WAF Web ACL $5 + ルール数 + リクエスト課金</td></tr>
+    <tr><td>Route 53</td><td>$1 (¥150)</td><td>$1 (¥150)</td><td>ホストゾーン + クエリ課金</td></tr>
+    <tr><td>Cognito</td><td>$0 (¥0)</td><td>$0 (¥0)</td><td>50,000 MAU 無料枠内</td></tr>
+    <tr><td>Bedrock (Claude)</td><td>$50 (¥7,500)</td><td>$300 (¥45,000)</td><td>Phase 1 の Anthropic API pool $200 + 30% AWS マークアップ想定</td></tr>
+    <tr><td>CloudWatch Logs / Alarms / SNS</td><td>$5 (¥750)</td><td>$20 (¥3,000)</td><td>取り込み課金 + アラーム数 × $0.10</td></tr>
+    <tr><td>Secrets Manager / KMS / SSM</td><td>$2 (¥300)</td><td>$8 (¥1,200)</td><td>シークレット数 + KMS リクエスト</td></tr>
+    <tr><td>EventBridge Scheduler</td><td>$0 (¥0)</td><td>$1 (¥150)</td><td>無料枠（月 14M イベント）内</td></tr>
+    <tr><td>NAT Gateway / VPC Endpoint</td><td>$33 (¥4,950)</td><td>$66 (¥9,900)</td><td>NAT $33/月、VPC Endpoint $7/月 × 4 (S3/Bedrock/Secrets/Logs)</td></tr>
+    <tr class="cost-total"><td><strong>合計</strong></td><td><strong>$204 (¥30,600)</strong></td><td><strong>$818 (¥122,700)</strong></td><td>Phase 1 ($245-272) と比較し約 3 倍だが全社 SaaS 化と引き換え</td></tr>
+  </table>
+  <h3>前提条件</h3>
+  <p>東京リージョン (ap-northeast-1) で全サービスを構成。Prod は 30 ユーザー × 平均 5 runs/h × 8h = 1,200 runs/日想定。Bedrock は Claude Sonnet 4.6 主体（Opus 4.7 は管理者承認時のみ）で計算。Aurora は I/O 最適化を有効化、ElastiCache は Multi-AZ。</p>
+  <h3>コスト最適化</h3>
+  <p>Aurora Serverless v2 の最小 ACU を夜間 0.5 にスケールダウン（年間 ~30% 削減）、CloudFront のキャッシュ最適化で WAF リクエスト数削減、Bedrock の Provisioned Throughput を Prod でも避け On-Demand 維持（小規模では不利）、S3 Intelligent-Tiering で artifact の自動階層化、未使用時間帯は App Runner を on-pause に。</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>PaaS to AWS 移行の本質はコスト構造の置換</strong> &#8212; Vercel/Railway/Neon は使った分だけ + Pro プラン課金で最小コスト、AWS は IGW・NAT・ALB・VPC Endpoint 等の「インフラ常駐コスト」が乗る。利用人数 50 人超で API コスト > $500/月になったときに「常駐コストの相対比率が下がる」損益分岐点を計算してから移行判断する。本構成では Phase 1 $272 → Phase 4 $818（3 倍）。</li>
+    <li><strong>個人 API キーから IAM への移行はガバナンスの段階的成熟</strong> &#8212; Phase 1 は ANTHROPIC_API_KEY 個人キー + アプリ層 Budget Cap という「実装で守る」設計。Phase 4 は Bedrock IAM ポリシー + Service Quota + CloudWatch Bedrock メトリクスで「インフラで守る」設計に進化。3 段階 Budget Cap（per-req / per-user / pool）の概念は両方で維持しつつ実装層が変わる。</li>
+    <li><strong>マネージドサービスの粒度選択が運用負荷を決める</strong> &#8212; Next.js を Lambda + API Gateway にせず App Runner を選んだのは「Server Actions / SSE / 中規模トラフィック」のスイートスポット。逆に Backend は ECS Fargate でコンテナ単位の柔軟性を維持し、cold start を避ける。1 つのアプリでも Tier ごとに最適なサーバーレス度合いが異なる。</li>
+    <li><strong>VPC Endpoint で外部接続コストとリスクを最小化</strong> &#8212; Bedrock / S3 / Secrets Manager / CloudWatch Logs を VPC Endpoint 化することで NAT Gateway 経由のデータ転送料金を削減 + プライベート通信化。本構成では月 4 × $7 = $28 のエンドポイント代でデータ転送 $50+ を削減。セキュリティ境界が IGW から VPC 内に閉じる副次効果も。</li>
+    <li><strong>Phase 移行は「同じ設計思想を別の実装で再現」する練習</strong> &#8212; KILL_SWITCH（env var → SSM）/ Budget Cap（app code → IAM Quota）/ Audit Log（DB → CloudWatch Logs）/ Batch（自前 cron → EventBridge）といったコンセプトは普遍的で、PaaS と AWS で実装が変わるだけ。「動く設計を別レイヤで再構築できるか」が SIer の腕の見せどころで、本図はその対比教材としても利用できる。</li>
+  </ul>
+</div>
+
+<p class="updated">生成: AWS Diagram MCP Server (awslabs.aws-diagram-mcp-server) / 元設計書: cc-sier-organization Webアプリ 設計書【Vercel版 / Phase 1】v0.1 §13 Phase 4</p>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()"><img id="lightbox-img" src=""></div>
+<script>
+function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>

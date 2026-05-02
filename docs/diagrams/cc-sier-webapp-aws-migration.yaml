@@ -1,0 +1,414 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  CC-SIer WebApp AWS Migration (Phase 4) reference architecture.
+  Renders the future-state migration of the cc-sier-organization webapp
+  from Vercel + Railway + Neon to AWS-native managed services.
+
+  Tier: Edge (Route53/CloudFront/WAF) -> Frontend (App Runner) ->
+        Backend (ALB + ECS Fargate) -> Data (Aurora + ElastiCache + S3) ->
+        AI (Bedrock) + Auth (Cognito) + Ops (CloudWatch/SNS/EventBridge/SSM).
+
+  Note: This template captures the network + compute + data shells.
+  Application-level resources (App Runner service config, Fargate task
+  definitions, Bedrock IAM role attachments) are intentionally minimal
+  reference declarations. Production deployment requires additional
+  parameters (VPC CIDR, container image URI, secret ARNs, etc.).
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, prod]
+    Default: dev
+    Description: Deployment environment name (dev / prod).
+  AppName:
+    Type: String
+    Default: cc-sier-webapp
+    Description: Application identifier used for resource naming.
+  VpcCidr:
+    Type: String
+    Default: 10.50.0.0/16
+    Description: VPC CIDR block.
+
+Resources:
+
+  # ---------- Network ----------
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - {Key: Name, Value: !Sub "${AppName}-${Environment}-vpc"}
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.50.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.50.1.0/24
+      AvailabilityZone: !Select [2, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.50.10.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.50.11.0/24
+      AvailabilityZone: !Select [2, !GetAZs ""]
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  IgwAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  NatEip:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEip.AllocationId
+      SubnetId: !Ref PublicSubnetA
+
+  # ---------- Edge ----------
+  WafWebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: !Sub "${AppName}-${Environment}-waf"
+      Scope: CLOUDFRONT
+      DefaultAction: {Allow: {}}
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: !Sub "${AppName}-waf"
+      Rules:
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 0
+          OverrideAction: {None: {}}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWSManagedRulesCommonRuleSet
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        WebACLId: !GetAtt WafWebAcl.Arn
+        Origins:
+          - Id: AppRunnerOrigin
+            DomainName: !GetAtt AppRunnerService.ServiceUrl
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols: [TLSv1.2]
+        DefaultCacheBehavior:
+          TargetOriginId: AppRunnerOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # CachingDisabled
+          OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3  # AllViewer
+
+  # ---------- Frontend (App Runner) ----------
+  AppRunnerService:
+    Type: AWS::AppRunner::Service
+    Properties:
+      ServiceName: !Sub "${AppName}-${Environment}-frontend"
+      SourceConfiguration:
+        AutoDeploymentsEnabled: true
+        ImageRepository:
+          ImageIdentifier: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}-frontend:latest"
+          ImageRepositoryType: ECR
+          ImageConfiguration:
+            Port: "3000"
+            RuntimeEnvironmentVariables:
+              ENVIRONMENT: !Ref Environment
+              BACKEND_URL: !Sub "http://${BackendAlb.DNSName}"
+      InstanceConfiguration:
+        Cpu: !If [IsProd, 1024, 256]
+        Memory: !If [IsProd, 2048, 512]
+
+  # ---------- Backend (ALB + ECS Fargate) ----------
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${AppName}-${Environment}-cluster"
+
+  BackendAlb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${AppName}-${Environment}-alb"
+      Scheme: internal
+      Subnets: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]
+      SecurityGroups: [!Ref BackendSg]
+
+  BackendSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow internal HTTPS from App Runner VPC connector
+      VpcId: !Ref Vpc
+
+  AgentSdkTaskDef:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${AppName}-${Environment}-agent-sdk"
+      RequiresCompatibilities: [FARGATE]
+      Cpu: !If [IsProd, "1024", "512"]
+      Memory: !If [IsProd, "2048", "1024"]
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !GetAtt FargateExecRole.Arn
+      TaskRoleArn: !GetAtt FargateTaskRole.Arn
+      ContainerDefinitions:
+        - Name: hono-agent-sdk
+          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}-agent-sdk:latest"
+          Essential: true
+          PortMappings:
+            - {ContainerPort: 8080}
+          Environment:
+            - {Name: ENVIRONMENT, Value: !Ref Environment}
+          Secrets:
+            - {Name: DATABASE_URL, ValueFrom: !Ref DbCredentialsSecret}
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref BackendLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: agent-sdk
+
+  # ---------- Data Tier ----------
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      EngineVersion: "15.4"
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !If [IsProd, 1.0, 0.5]
+        MaxCapacity: !If [IsProd, 4.0, 2.0]
+      DatabaseName: cc_sier
+      MasterUsername: cc_sier_admin
+      ManageMasterUserPassword: true
+      VpcSecurityGroupIds: [!Ref DataSg]
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      StorageEncrypted: true
+
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Aurora subnet group
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]
+
+  DataSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Aurora + ElastiCache from Fargate only
+      VpcId: !Ref Vpc
+
+  ElastiCacheServerless:
+    Type: AWS::ElastiCache::ServerlessCache
+    Properties:
+      ServerlessCacheName: !Sub "${AppName}-${Environment}-redis"
+      Engine: redis
+      MajorEngineVersion: "7"
+      SecurityGroupIds: [!Ref DataSg]
+      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AppName}-${Environment}-artifacts-${AWS::AccountId}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldArtifacts
+            Status: Enabled
+            ExpirationInDays: 90
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: aws:kms}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # ---------- IAM ----------
+  FargateExecRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ecs-tasks.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  FargateTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ecs-tasks.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: BedrockInvoke
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                  - bedrock:InvokeModelWithResponseStream
+                Resource:
+                  - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-sonnet-4-6*"
+                  - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-opus-4-7*"
+        - PolicyName: ArtifactBucketRW
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: [s3:PutObject, s3:GetObject, s3:DeleteObject]
+                Resource: !Sub "arn:aws:s3:::${ArtifactBucket}/*"
+
+  # ---------- Auth ----------
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${AppName}-${Environment}"
+      AdminCreateUserConfig: {AllowAdminCreateUserOnly: true}
+
+  EntraIdProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      UserPoolId: !Ref CognitoUserPool
+      ProviderName: MicrosoftEntraID
+      ProviderType: OIDC
+      ProviderDetails:
+        client_id: PLACEHOLDER_ENTRA_CLIENT_ID
+        client_secret: PLACEHOLDER_ENTRA_CLIENT_SECRET
+        attributes_request_method: GET
+        oidc_issuer: https://login.microsoftonline.com/PLACEHOLDER_TENANT/v2.0
+        authorize_scopes: "openid email profile"
+
+  # ---------- Secrets / Ops ----------
+  DbCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "${AppName}-${Environment}-db"
+      GenerateSecretString: {SecretStringTemplate: '{"username":"cc_sier_admin"}', GenerateStringKey: password, ExcludePunctuation: true}
+
+  KillSwitchParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/${Environment}/kill-switch"
+      Type: String
+      Value: "off"
+      Description: Master kill switch (off / on). Setting to 'on' triggers EventBridge to stop Fargate tasks.
+
+  BackendLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/ecs/${AppName}-${Environment}-agent-sdk"
+      RetentionInDays: 90
+
+  CostAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AppName}-${Environment}-daily-cost-over-10usd"
+      AlarmDescription: Daily Bedrock cost exceeded $10
+      MetricName: EstimatedCharges
+      Namespace: AWS/Billing
+      Statistic: Maximum
+      Period: 21600
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: [!Ref OpsTopic]
+
+  OpsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "${AppName}-${Environment}-ops-alerts"
+
+  CronScheduleGroup:
+    Type: AWS::Scheduler::ScheduleGroup
+    Properties:
+      Name: !Sub "${AppName}-${Environment}-cron"
+
+  CatalogUpsertSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: !Sub "${AppName}-${Environment}-catalog-upsert"
+      GroupName: !Ref CronScheduleGroup
+      ScheduleExpression: "cron(0 5 * * ? *)"
+      ScheduleExpressionTimezone: Asia/Tokyo
+      FlexibleTimeWindow: {Mode: "OFF"}
+      Target:
+        Arn: !GetAtt EcsCluster.Arn
+        RoleArn: !GetAtt SchedulerInvokeRole.Arn
+        EcsParameters:
+          TaskDefinitionArn: !Ref AgentSdkTaskDef
+          LaunchType: FARGATE
+
+  SchedulerInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal: {Service: scheduler.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ECSRunTask
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: [ecs:RunTask]
+                Resource: !Ref AgentSdkTaskDef
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, "prod"]
+
+Outputs:
+  CloudFrontDomain:
+    Description: Public-facing domain
+    Value: !GetAtt CloudFrontDistribution.DomainName
+  AppRunnerUrl:
+    Description: Internal App Runner URL (origin)
+    Value: !GetAtt AppRunnerService.ServiceUrl
+  AuroraEndpoint:
+    Description: Aurora cluster writer endpoint
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+  RedisEndpoint:
+    Description: ElastiCache Redis Serverless endpoint
+    Value: !GetAtt ElastiCacheServerless.Endpoint.Address
+  ArtifactBucket:
+    Description: S3 artifact bucket name
+    Value: !Ref ArtifactBucket
+  CognitoUserPoolId:
+    Description: Cognito User Pool ID (federate Entra ID via OIDC provider)
+    Value: !Ref CognitoUserPool

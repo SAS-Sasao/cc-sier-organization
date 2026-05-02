@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC-SIer WebApp AWS Migration (Phase 4) - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./cc-sier-webapp-aws-migration.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./cc-sier-webapp-aws-migration.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>CC-SIer WebApp AWS Migration (Phase 4) - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-05-02</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>414 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">cc-sier-webapp-aws-migration.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">414 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは Phase 4「AWS 移行検討」アーキテクチャの参照実装です。
+  プレースホルダー（<code>PLACEHOLDER_*</code>）は Microsoft Entra ID テナント情報、
+  ECR イメージ URI、KMS Key ARN 等を実運用時に差し込んでください。
+  暗号化（KMS / S3 SSE-KMS）・パブリックアクセスブロック・最小権限 IAM ロールはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Powered by AWS IaC MCP Server</p>
+<script>
+const raw = "AWSTemplateFormatVersion: \"2010-09-09\"\nDescription: >\n  CC-SIer WebApp AWS Migration (Phase 4) reference architecture.\n  Renders the future-state migration of the cc-sier-organization webapp\n  from Vercel + Railway + Neon to AWS-native managed services.\n\n  Tier: Edge (Route53/CloudFront/WAF) -> Frontend (App Runner) ->\n        Backend (ALB + ECS Fargate) -> Data (Aurora + ElastiCache + S3) ->\n        AI (Bedrock) + Auth (Cognito) + Ops (CloudWatch/SNS/EventBridge/SSM).\n\n  Note: This template captures the network + compute + data shells.\n  Application-level resources (App Runner service config, Fargate task\n  definitions, Bedrock IAM role attachments) are intentionally minimal\n  reference declarations. Production deployment requires additional\n  parameters (VPC CIDR, container image URI, secret ARNs, etc.).\n\nParameters:\n  Environment:\n    Type: String\n    AllowedValues: [dev, prod]\n    Default: dev\n    Description: Deployment environment name (dev / prod).\n  AppName:\n    Type: String\n    Default: cc-sier-webapp\n    Description: Application identifier used for resource naming.\n  VpcCidr:\n    Type: String\n    Default: 10.50.0.0/16\n    Description: VPC CIDR block.\n\nResources:\n\n  # ---------- Network ----------\n  Vpc:\n    Type: AWS::EC2::VPC\n    Properties:\n      CidrBlock: !Ref VpcCidr\n      EnableDnsHostnames: true\n      EnableDnsSupport: true\n      Tags:\n        - {Key: Name, Value: !Sub \"${AppName}-${Environment}-vpc\"}\n\n  PublicSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.50.0.0/24\n      AvailabilityZone: !Select [0, !GetAZs \"\"]\n      MapPublicIpOnLaunch: true\n\n  PublicSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.50.1.0/24\n      AvailabilityZone: !Select [2, !GetAZs \"\"]\n      MapPublicIpOnLaunch: true\n\n  PrivateSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.50.10.0/24\n      AvailabilityZone: !Select [0, !GetAZs \"\"]\n\n  PrivateSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.50.11.0/24\n      AvailabilityZone: !Select [2, !GetAZs \"\"]\n\n  InternetGateway:\n    Type: AWS::EC2::InternetGateway\n\n  IgwAttach:\n    Type: AWS::EC2::VPCGatewayAttachment\n    Properties:\n      VpcId: !Ref Vpc\n      InternetGatewayId: !Ref InternetGateway\n\n  NatEip:\n    Type: AWS::EC2::EIP\n    Properties:\n      Domain: vpc\n\n  NatGateway:\n    Type: AWS::EC2::NatGateway\n    Properties:\n      AllocationId: !GetAtt NatEip.AllocationId\n      SubnetId: !Ref PublicSubnetA\n\n  # ---------- Edge ----------\n  WafWebAcl:\n    Type: AWS::WAFv2::WebACL\n    Properties:\n      Name: !Sub \"${AppName}-${Environment}-waf\"\n      Scope: CLOUDFRONT\n      DefaultAction: {Allow: {}}\n      VisibilityConfig:\n        SampledRequestsEnabled: true\n        CloudWatchMetricsEnabled: true\n        MetricName: !Sub \"${AppName}-waf\"\n      Rules:\n        - Name: AWSManagedRulesCommonRuleSet\n          Priority: 0\n          OverrideAction: {None: {}}\n          Statement:\n            ManagedRuleGroupStatement:\n              VendorName: AWS\n              Name: AWSManagedRulesCommonRuleSet\n          VisibilityConfig:\n            SampledRequestsEnabled: true\n            CloudWatchMetricsEnabled: true\n            MetricName: AWSManagedRulesCommonRuleSet\n\n  CloudFrontDistribution:\n    Type: AWS::CloudFront::Distribution\n    Properties:\n      DistributionConfig:\n        Enabled: true\n        WebACLId: !GetAtt WafWebAcl.Arn\n        Origins:\n          - Id: AppRunnerOrigin\n            DomainName: !GetAtt AppRunnerService.ServiceUrl\n            CustomOriginConfig:\n              OriginProtocolPolicy: https-only\n              OriginSSLProtocols: [TLSv1.2]\n        DefaultCacheBehavior:\n          TargetOriginId: AppRunnerOrigin\n          ViewerProtocolPolicy: redirect-to-https\n          AllowedMethods: [GET, HEAD, OPTIONS, PUT, POST, PATCH, DELETE]\n          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # CachingDisabled\n          OriginRequestPolicyId: 216adef6-5c7f-47e4-b989-5492eafa07d3  # AllViewer\n\n  # ---------- Frontend (App Runner) ----------\n  AppRunnerService:\n    Type: AWS::AppRunner::Service\n    Properties:\n      ServiceName: !Sub \"${AppName}-${Environment}-frontend\"\n      SourceConfiguration:\n        AutoDeploymentsEnabled: true\n        ImageRepository:\n          ImageIdentifier: !Sub \"${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}-frontend:latest\"\n          ImageRepositoryType: ECR\n          ImageConfiguration:\n            Port: \"3000\"\n            RuntimeEnvironmentVariables:\n              ENVIRONMENT: !Ref Environment\n              BACKEND_URL: !Sub \"http://${BackendAlb.DNSName}\"\n      InstanceConfiguration:\n        Cpu: !If [IsProd, 1024, 256]\n        Memory: !If [IsProd, 2048, 512]\n\n  # ---------- Backend (ALB + ECS Fargate) ----------\n  EcsCluster:\n    Type: AWS::ECS::Cluster\n    Properties:\n      ClusterName: !Sub \"${AppName}-${Environment}-cluster\"\n\n  BackendAlb:\n    Type: AWS::ElasticLoadBalancingV2::LoadBalancer\n    Properties:\n      Name: !Sub \"${AppName}-${Environment}-alb\"\n      Scheme: internal\n      Subnets: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]\n      SecurityGroups: [!Ref BackendSg]\n\n  BackendSg:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Allow internal HTTPS from App Runner VPC connector\n      VpcId: !Ref Vpc\n\n  AgentSdkTaskDef:\n    Type: AWS::ECS::TaskDefinition\n    Properties:\n      Family: !Sub \"${AppName}-${Environment}-agent-sdk\"\n      RequiresCompatibilities: [FARGATE]\n      Cpu: !If [IsProd, \"1024\", \"512\"]\n      Memory: !If [IsProd, \"2048\", \"1024\"]\n      NetworkMode: awsvpc\n      ExecutionRoleArn: !GetAtt FargateExecRole.Arn\n      TaskRoleArn: !GetAtt FargateTaskRole.Arn\n      ContainerDefinitions:\n        - Name: hono-agent-sdk\n          Image: !Sub \"${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AppName}-agent-sdk:latest\"\n          Essential: true\n          PortMappings:\n            - {ContainerPort: 8080}\n          Environment:\n            - {Name: ENVIRONMENT, Value: !Ref Environment}\n          Secrets:\n            - {Name: DATABASE_URL, ValueFrom: !Ref DbCredentialsSecret}\n          LogConfiguration:\n            LogDriver: awslogs\n            Options:\n              awslogs-group: !Ref BackendLogGroup\n              awslogs-region: !Ref AWS::Region\n              awslogs-stream-prefix: agent-sdk\n\n  # ---------- Data Tier ----------\n  AuroraCluster:\n    Type: AWS::RDS::DBCluster\n    Properties:\n      Engine: aurora-postgresql\n      EngineMode: provisioned\n      EngineVersion: \"15.4\"\n      ServerlessV2ScalingConfiguration:\n        MinCapacity: !If [IsProd, 1.0, 0.5]\n        MaxCapacity: !If [IsProd, 4.0, 2.0]\n      DatabaseName: cc_sier\n      MasterUsername: cc_sier_admin\n      ManageMasterUserPassword: true\n      VpcSecurityGroupIds: [!Ref DataSg]\n      DBSubnetGroupName: !Ref DbSubnetGroup\n      StorageEncrypted: true\n\n  DbSubnetGroup:\n    Type: AWS::RDS::DBSubnetGroup\n    Properties:\n      DBSubnetGroupDescription: Aurora subnet group\n      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]\n\n  DataSg:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Aurora + ElastiCache from Fargate only\n      VpcId: !Ref Vpc\n\n  ElastiCacheServerless:\n    Type: AWS::ElastiCache::ServerlessCache\n    Properties:\n      ServerlessCacheName: !Sub \"${AppName}-${Environment}-redis\"\n      Engine: redis\n      MajorEngineVersion: \"7\"\n      SecurityGroupIds: [!Ref DataSg]\n      SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]\n\n  ArtifactBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub \"${AppName}-${Environment}-artifacts-${AWS::AccountId}\"\n      LifecycleConfiguration:\n        Rules:\n          - Id: ExpireOldArtifacts\n            Status: Enabled\n            ExpirationInDays: 90\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault: {SSEAlgorithm: aws:kms}\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n\n  # ---------- IAM ----------\n  FargateExecRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Statement:\n          - Effect: Allow\n            Principal: {Service: ecs-tasks.amazonaws.com}\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy\n\n  FargateTaskRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Statement:\n          - Effect: Allow\n            Principal: {Service: ecs-tasks.amazonaws.com}\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: BedrockInvoke\n          PolicyDocument:\n            Statement:\n              - Effect: Allow\n                Action:\n                  - bedrock:InvokeModel\n                  - bedrock:InvokeModelWithResponseStream\n                Resource:\n                  - !Sub \"arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-sonnet-4-6*\"\n                  - !Sub \"arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-opus-4-7*\"\n        - PolicyName: ArtifactBucketRW\n          PolicyDocument:\n            Statement:\n              - Effect: Allow\n                Action: [s3:PutObject, s3:GetObject, s3:DeleteObject]\n                Resource: !Sub \"arn:aws:s3:::${ArtifactBucket}/*\"\n\n  # ---------- Auth ----------\n  CognitoUserPool:\n    Type: AWS::Cognito::UserPool\n    Properties:\n      UserPoolName: !Sub \"${AppName}-${Environment}\"\n      AdminCreateUserConfig: {AllowAdminCreateUserOnly: true}\n\n  EntraIdProvider:\n    Type: AWS::Cognito::UserPoolIdentityProvider\n    Properties:\n      UserPoolId: !Ref CognitoUserPool\n      ProviderName: MicrosoftEntraID\n      ProviderType: OIDC\n      ProviderDetails:\n        client_id: PLACEHOLDER_ENTRA_CLIENT_ID\n        client_secret: PLACEHOLDER_ENTRA_CLIENT_SECRET\n        attributes_request_method: GET\n        oidc_issuer: https://login.microsoftonline.com/PLACEHOLDER_TENANT/v2.0\n        authorize_scopes: \"openid email profile\"\n\n  # ---------- Secrets / Ops ----------\n  DbCredentialsSecret:\n    Type: AWS::SecretsManager::Secret\n    Properties:\n      Name: !Sub \"${AppName}-${Environment}-db\"\n      GenerateSecretString: {SecretStringTemplate: '{\"username\":\"cc_sier_admin\"}', GenerateStringKey: password, ExcludePunctuation: true}\n\n  KillSwitchParameter:\n    Type: AWS::SSM::Parameter\n    Properties:\n      Name: !Sub \"/${AppName}/${Environment}/kill-switch\"\n      Type: String\n      Value: \"off\"\n      Description: Master kill switch (off / on). Setting to 'on' triggers EventBridge to stop Fargate tasks.\n\n  BackendLogGroup:\n    Type: AWS::Logs::LogGroup\n    Properties:\n      LogGroupName: !Sub \"/aws/ecs/${AppName}-${Environment}-agent-sdk\"\n      RetentionInDays: 90\n\n  CostAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub \"${AppName}-${Environment}-daily-cost-over-10usd\"\n      AlarmDescription: Daily Bedrock cost exceeded $10\n      MetricName: EstimatedCharges\n      Namespace: AWS/Billing\n      Statistic: Maximum\n      Period: 21600\n      EvaluationPeriods: 1\n      Threshold: 10\n      ComparisonOperator: GreaterThanThreshold\n      AlarmActions: [!Ref OpsTopic]\n\n  OpsTopic:\n    Type: AWS::SNS::Topic\n    Properties:\n      TopicName: !Sub \"${AppName}-${Environment}-ops-alerts\"\n\n  CronScheduleGroup:\n    Type: AWS::Scheduler::ScheduleGroup\n    Properties:\n      Name: !Sub \"${AppName}-${Environment}-cron\"\n\n  CatalogUpsertSchedule:\n    Type: AWS::Scheduler::Schedule\n    Properties:\n      Name: !Sub \"${AppName}-${Environment}-catalog-upsert\"\n      GroupName: !Ref CronScheduleGroup\n      ScheduleExpression: \"cron(0 5 * * ? *)\"\n      ScheduleExpressionTimezone: Asia/Tokyo\n      FlexibleTimeWindow: {Mode: \"OFF\"}\n      Target:\n        Arn: !GetAtt EcsCluster.Arn\n        RoleArn: !GetAtt SchedulerInvokeRole.Arn\n        EcsParameters:\n          TaskDefinitionArn: !Ref AgentSdkTaskDef\n          LaunchType: FARGATE\n\n  SchedulerInvokeRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Statement:\n          - Effect: Allow\n            Principal: {Service: scheduler.amazonaws.com}\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: ECSRunTask\n          PolicyDocument:\n            Statement:\n              - Effect: Allow\n                Action: [ecs:RunTask]\n                Resource: !Ref AgentSdkTaskDef\n\nConditions:\n  IsProd: !Equals [!Ref Environment, \"prod\"]\n\nOutputs:\n  CloudFrontDomain:\n    Description: Public-facing domain\n    Value: !GetAtt CloudFrontDistribution.DomainName\n  AppRunnerUrl:\n    Description: Internal App Runner URL (origin)\n    Value: !GetAtt AppRunnerService.ServiceUrl\n  AuroraEndpoint:\n    Description: Aurora cluster writer endpoint\n    Value: !GetAtt AuroraCluster.Endpoint.Address\n  RedisEndpoint:\n    Description: ElastiCache Redis Serverless endpoint\n    Value: !GetAtt ElastiCacheServerless.Endpoint.Address\n  ArtifactBucket:\n    Description: S3 artifact bucket name\n    Value: !Ref ArtifactBucket\n  CognitoUserPoolId:\n    Description: Cognito User Pool ID (federate Entra ID via OIDC provider)\n    Value: !Ref CognitoUserPool\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>
