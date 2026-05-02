@@ -72,3 +72,14 @@ failure_reason: ""
 judge_comment: "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)"
 judged_at: "2026-05-02T08:31:10+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-05-02T21:58:09"
+```

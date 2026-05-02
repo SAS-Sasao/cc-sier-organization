@@ -72,3 +72,14 @@ failure_reason: ""
 judge_comment: "/company-drawio l2_scores から自動マッピング: completeness=avg(s1_structure,s5_index_update)=1.00, accuracy=avg(s2_edge_penetration,s3_xml_html_consistency)=0.975, clarity=avg(s4_design_points_specificity,s6_html_violations)=1.00"
 judged_at: "2026-05-02T22:05:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-05-02T21:58:09"
+```
