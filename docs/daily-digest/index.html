@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全56件 ｜ 最終更新: 2026-05-15 23:48</p>
+<p class="subtitle">domain-tech-collection ｜ 全57件 ｜ 最終更新: 2026-05-16 23:32</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">5177</div>
+    <div class="summary-value blue">5234</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-05-16</div>
+    <div class="summary-value">2026-05-17</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">56</div>
+    <div class="summary-value green">57</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-05-16" onclick="switchTab('2026-05-16')">2026-05-16</button>
+<button class="tab-btn active" data-date="2026-05-17" onclick="switchTab('2026-05-17')">2026-05-17</button>
+<button class="tab-btn" data-date="2026-05-16" onclick="switchTab('2026-05-16')">2026-05-16</button>
 <button class="tab-btn" data-date="2026-05-15" onclick="switchTab('2026-05-15')">2026-05-15</button>
 <button class="tab-btn" data-date="2026-05-14" onclick="switchTab('2026-05-14')">2026-05-14</button>
 <button class="tab-btn" data-date="2026-05-13" onclick="switchTab('2026-05-13')">2026-05-13</button>
@@ -192,7 +193,148 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-05-16" class="digest-panel" style="display:block">
+<div id="digest-2026-05-17" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 57件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>Claude Code活用が開発文化の主流に</strong> — Anthropic社内でコードの90%をClaude Codeが生成、hooks47本実装やAgent Teams再現など実践事例がZenn/Qiitaで大量出現</li><li><strong>AIエージェント信頼性の決定要因はハーネス</strong> — 「Agent = Model + Harness」公式に基づき、モデル性能よりも実行環境・制御機構が品質を左右するとの論考が注目</li><li><strong>トライアルHD売上1兆円突破</strong> — 7-3月連結売上高が初の1兆円を超え通期予想を上方修正、小売DX先進企業の勢いが加速</li><li><strong>AnthropicがAI同士で完結する買い物体験を構想</strong> — AIエージェント間でEC購買を自律完結させる次世代コマースビジョンを発表</li><li><strong>MUFGとGoogleがリテール領域で戦略的提携</strong> — 金融×テック融合によるリテール決済・データ活用の新たな枠組みが始動</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>Claude Code活用が開発文化の主流に</strong> — Anthropic社内でコードの90%をClaude Codeが生成、hooks47本実装やAgent Teams再現など実践事例がZenn/Qiitaで大量出現</li>
+<li><strong>AIエージェント信頼性の決定要因はハーネス</strong> — 「Agent = Model + Harness」公式に基づき、モデル性能よりも実行環境・制御機構が品質を左右するとの論考が注目</li>
+<li><strong>トライアルHD売上1兆円突破</strong> — 7-3月連結売上高が初の1兆円を超え通期予想を上方修正、小売DX先進企業の勢いが加速</li>
+<li><strong>AnthropicがAI同士で完結する買い物体験を構想</strong> — AIエージェント間でEC購買を自律完結させる次世代コマースビジョンを発表</li>
+<li><strong>MUFGとGoogleがリテール領域で戦略的提携</strong> — 金融×テック融合によるリテール決済・データ活用の新たな枠組みが始動</li>
+<li><strong>松屋フーズHD営業利益72.3%増で過去最高益</strong> — 価格改定と既存店好調が寄与し外食産業の回復が鮮明に</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://qiita.com/daisuke-nagata/items/8bb1e25981f9383cab97" target="_blank" rel="noopener">Anthropicコードの90%はClaude Codeが書いている——社員80%が毎日使う「antfooding」を全部解剖した</a></td><td>Qiita</td><td>Anthropic社内でのClaude Code活用実態を分析し、社員の80%が日常利用しコードの9割をAIが生成している開発体制を解説。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/thinkyou0714/articles/claude-code-hooks-47" target="_blank" rel="noopener">Claude Code hooks を47本実装した話：AIへの自動指示を設計するという仕事</a></td><td>Zenn</td><td>Claude Code hooksを47本実装した経験から、AIへの自動指示設計のベストプラクティスと実装パターンを網羅的に解説。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/kubo_gene/articles/27ebeeac3d0d17" target="_blank" rel="noopener">Claude Code × Agent Toolkit for AWS - 自然言語でインフラを構築して感動した話</a></td><td>Zenn</td><td>Claude CodeとAWS Agent Toolkitを連携し、自然言語の指示だけでAWSインフラを構築するワークフローを実践。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/zztomcat/articles/ca3993775ec42b" target="_blank" rel="noopener">「Agent = Model + Harness」公式が示すAIエージェント信頼性の本当の決定要因</a></td><td>Zenn</td><td>AIエージェントの信頼性はモデル性能だけでなくハーネス（実行環境・制御機構）が決定要因であることを体系的に論じる。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/sugityan/items/fef3cfcf2dd1143291ce" target="_blank" rel="noopener">opencode で Claude Code の Agent Teams っぽい仕組みを再現しました</a></td><td>Qiita</td><td>opencodeとtmuxを組み合わせ、Claude CodeのAgent Teams相当の並列エージェント実行環境を再現する方法を紹介。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/naruaki/articles/af-design-06-routing" target="_blank" rel="noopener">【第6回】Microsoft Agent Frameworkで学ぶAIエージェント設計原則：HandoffBuilder でルーティング設計</a></td><td>Zenn</td><td>Microsoft Agent FrameworkのHandoffBuilderを使ったマルチエージェント間のルーティング設計原則を解説。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/dx_pm_product/articles/continue-agents-md-internal-llm" target="_blank" rel="noopener">社内独自LLMでもClaude Codeみたいなエージェント開発をしたい — Continue + AGENTS.md という解</a></td><td>Zenn</td><td>社内LLM環境でもContinueエディタ拡張とAGENTS.mdを組み合わせることでClaude Code同等のエージェント開発体験を実現する方法。</td></tr>
+<tr><td>8</td><td><a href="https://qiita.com/Tadashi_Kudo/items/b4dae51eee76198cc509" target="_blank" rel="noopener">Claude Code ハーネスを「月次スキャン＋spec.md」で自己改善させる——type:"prompt" Hook の誤検知を GPT-5.4 が発見した話</a></td><td>Qiita</td><td>Claude Code hooksのprompt型フックで誤検知が多発する問題をGPT-5.4で発見し、月次スキャンで自己改善する仕組みを構築。</td></tr>
+<tr><td>9</td><td><a href="https://zenn.dev/naoyuki1212/articles/20260506-agent-cli-server" target="_blank" rel="noopener">AIエージェントから使うCLIの認証まわりをGoで作ってみた</a></td><td>Zenn</td><td>AIエージェントが外部CLIを安全に実行するための認証サーバーをGoで実装した設計と実装詳細。</td></tr>
+<tr><td>10</td><td><a href="https://qiita.com/sescore/items/3e4a86e275574f9902e8" target="_blank" rel="noopener">【2026年最新】MCPサーバー5選の導入・実装ガイド｜セットアップからTypeScript/Python連携まで徹底解説</a></td><td>Qiita</td><td>2026年時点で主要なMCPサーバー5選の導入手順とTypeScript/Pythonからの連携実装を解説。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/tokoi/articles/260516_claude_personality_tensions" target="_blank" rel="noopener">Claudeの『性格のようなもの』を形作る、いくつかの葛藤について</a></td><td>Zenn</td><td>Claude AIの応答に見られる「性格的特徴」がどのような内部葛藤から生まれているかを考察。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/yamato_snow/articles/45edb2b07b2cee" target="_blank" rel="noopener">Claudeは夢を見る｜「メモリー」と「dreaming」の正体を時系列で整理する</a></td><td>Zenn</td><td>Claudeのメモリ機能とdreaming機構について時系列で変遷を整理し、内部動作の推測を提示。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/kotakotahiro/articles/45af55a51f14a7" target="_blank" rel="noopener">国産LLMが必要な本当の理由 ─ 「帰国子女AI」と「日本生まれAI」で読み解くソブリンAI</a></td><td>Zenn</td><td>ソブリンAI（国産LLM）の必要性について、文化的・安全保障的観点から議論。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/aerign/articles/841e66a0d49c76" target="_blank" rel="noopener">AI課金システムの設計パターン：ハイブリッドモデル・クレジット抽象化・ガードレール実装の全体像</a></td><td>Zenn</td><td>AIサービスの課金をハイブリッドモデルとクレジット抽象化で設計し、ガードレールで暴走を防ぐアーキテクチャパターンを体系化。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/aidecodelabjp/articles/weekly-ai-2026-05-17" target="_blank" rel="noopener">今週の海外AIニュース：エンジニアが見落とせない実務影響3点（2026/05/12-17週）</a></td><td>Zenn</td><td>2026年5月第3週の海外AIニュースからエンジニア実務に影響する3つのトピックを厳選して解説。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/mhamadajp/items/131c3030e9d26a8e1a40" target="_blank" rel="noopener">データが語る職場のAI——普及・生産性・雇用は今どこまで来たか</a></td><td>Qiita</td><td>ギャラップ等の調査データに基づき、職場でのAI普及率・生産性向上効果・雇用影響の2026年最新状況を分析。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/eksonfagate-containerinsights-kubestatemetrics/" target="_blank" rel="noopener">EKS on Fargate で Pod 異常を検出してみた（kube-state-metrics 編）</a></td><td>DevelopersIO</td><td>EKS on Fargate環境でkube-state-metricsとADOTを組み合わせてPod異常をCloudWatchで検知・アラーム設定する実装手法。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/shousel/articles/c921d13fc27f65" target="_blank" rel="noopener">【AWS IAM（第13回）】：ロールの「安全な渡し方」 iam:PassRoleをマスターする</a></td><td>Zenn</td><td>AWS IAMのPassRole権限の仕組みと安全なロール委譲設計パターンを解説。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/soh506/items/1d40578fcea5df21bbfa" target="_blank" rel="noopener">「再現できる気がしない」を卒業する：TerraformでAWSポートフォリオを0から構築した</a></td><td>Qiita</td><td>AWS環境をTerraformで完全にコード化し、再現可能なポートフォリオインフラを構築した体験記。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/lukapla/items/d6a1b444cc66983f7224" target="_blank" rel="noopener">ConoHa VPS の Kubernetes に cert-manager を導入して HTTPS 化した話</a></td><td>Qiita</td><td>ConoHa VPS上のKubernetesクラスタにcert-managerを導入しLet's EncryptでHTTPS化する手順。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/sugimount/articles/claude-desktop-proxy-setting" target="_blank" rel="noopener">Proxy 環境で Claude Desktop（Cowork）を使う方法</a></td><td>Zenn</td><td>プロキシ環境下でClaude Desktopを利用するための設定方法とトラブルシューティング。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/bq-dts-snowflake-incremental-transfer/" target="_blank" rel="noopener">BigQuery Data Transfer Service で、Snowflake のテーブルデータを増分転送してみた。</a></td><td>DevelopersIO</td><td>BigQuery Data Transfer Serviceを使いSnowflakeからBigQueryへの増分データ転送を実装し、データ型マッピングを検証。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/umanari145/items/9770ed5cdb967007ca5b" target="_blank" rel="noopener">Python の新定番パッケージマネージャ「uv」入門</a></td><td>Qiita</td><td>Python開発の新標準となりつつあるパッケージマネージャ「uv」の導入方法と基本的な使い方を解説。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/kent_kamome/articles/6711c9efe37d1b" target="_blank" rel="noopener">Pure RustのPDF編集ライブラリ「harumi」を開発した。</a></td><td>Zenn</td><td>Pure Rustで依存ゼロのPDF編集ライブラリ「harumi」を開発した動機と実装のアプローチを紹介。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/kenjiigarashi/articles/582a56c7c9d240" target="_blank" rel="noopener">なぜ私はMCPサーバーをRustではなく、400行の純粋なC++20で書いたのか</a></td><td>Zenn</td><td>MCPサーバーをC++20で400行に収めた理由を、巨大コード解析のパフォーマンスの観点から解説。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/zaspa/articles/fd6fb521df88f6" target="_blank" rel="noopener">AIコーディング時代に、後で困らないPython開発環境を考える</a></td><td>Zenn</td><td>AIコーディングツールとの共存を前提としたPython開発環境のベストプラクティスを提案。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/naoyuki1212/articles/20260516-gh-desktop-review" target="_blank" rel="noopener">GitHub CLIをアプリに組み込んで、自分用PRレビューアプリを作った話</a></td><td>Zenn</td><td>GitHub CLIをアプリケーションに組み込み、カスタムPRレビューワークフローを構築した事例。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/okikusan-public/items/0817715d02f02aa2b048" target="_blank" rel="noopener">Obsidian のメモが、勝手に記事になる ── 第二の脳の発信パイプラインを AI で作った話</a></td><td>Qiita</td><td>ObsidianのメモをAIパイプラインで自動的に記事化する「第二の脳」の発信システムを構築。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/okazu_dm/articles/b0c1fd9cfd47b2" target="_blank" rel="noopener">Dockerイメージ経由のサプライチェーン攻撃の概要</a></td><td>Zenn</td><td>Dockerイメージを経路としたサプライチェーン攻撃の手法分類と防御策を概説。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/Kerdy/items/8b3c7ff76c926051adae" target="_blank" rel="noopener">5/17、今日のセキュリティニュース</a></td><td>Qiita</td><td>2026年5月17日時点の最新セキュリティニュースとAIエージェント関連の脅威動向をまとめ。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/carol0226/items/4ad04ffe2141f43ad6a1" target="_blank" rel="noopener">Microsoft Entra の登録キャンペーンを理解する ～パスキー導入に向けた挙動と展開のポイント～</a></td><td>Qiita</td><td>Microsoft Entraのパスキー登録キャンペーン機能の挙動と、企業でのパスキー展開時のポイントを解説。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/strategy/s51542.html" target="_blank" rel="noopener">バローHD／年内に「バロー」が東京初進出、関西ではプロセスセンターを新設</a></td><td>流通ニュース</td><td>バローHDが年内に東京都内へ初出店を計画、関西地区ではプロセスセンター新設で生鮮供給体制を強化する方針を発表。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/store/s051511.html" target="_blank" rel="noopener">くら寿司／プレミアム回転寿司「無添蔵」新宿に7月上旬オープン</a></td><td>流通ニュース</td><td>くら寿司がプレミアム業態「無添蔵」を新宿に7月オープン予定、高価格帯の回転寿司市場に参入する。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/store/s051541.html" target="_blank" rel="noopener">ニトリHD／今期は国内外で143店舗純増を計画、似鳥会長「中国は今がチャンス」</a></td><td>流通ニュース</td><td>ニトリHDが今期143店舗の純増計画を発表、似鳥会長は中国市場の消費低迷を出店好機と捉え積極展開する意向を示した。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/store/s051413.html" target="_blank" rel="noopener">伊勢丹新宿店／26年度50億円リニューアルに投資、スイーツ売場5月20日から改装オープン</a></td><td>流通ニュース</td><td>伊勢丹新宿店が26年度に50億円を投じた大型リニューアルを実施、スイーツ売場を皮切りに改装を進める。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/store/newstorereport/544781/" target="_blank" rel="noopener">話題の「大井町トラックス」に出店 ライフの首都圏最新店は各部門で"即食強化"</a></td><td>DCS</td><td>ライフが大井町の大型商業施設「トラックス」に出店し、全部門で即食ニーズに対応した売場構成を展開。</td></tr>
+<tr><td>6</td><td><a href="https://diamond-rm.net/management/businessplan/544759/" target="_blank" rel="noopener">コト消費は幻想なのか？ 「体験型ショッピングセンター」の脆弱性</a></td><td>DCS</td><td>体験型SCへの投資が増加する中、コト消費の持続性やリピート率に課題があることを分析した論考。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/strategy/s051543.html" target="_blank" rel="noopener">バローHD／SM事業で「生鮮」が集客の武器に、関西では生鮮構成比62%の店舗も</a></td><td>流通ニュース</td><td>バローHDのスーパーマーケット事業が生鮮を差別化の柱に据え、関西店舗では構成比62%に達する生鮮特化戦略を推進。</td></tr>
+<tr><td>2</td><td><a href="https://www.logi-today.com/951409" target="_blank" rel="noopener">日本郵政、総合物流化へ3年で4900億円投資</a></td><td>ロジスティクス・トゥデイ</td><td>日本郵政が新中期経営計画で3年間4900億円を物流事業に投資し総合物流企業への転換を加速。</td></tr>
+<tr><td>3</td><td><a href="https://www.logi-today.com/951458" target="_blank" rel="noopener">カクヤス新体制、1時間枠配送を外部荷主へ拡張</a></td><td>ロジスティクス・トゥデイ</td><td>カクヤスが代表取締役交代と合わせ、1時間枠配送サービスを外部荷主向けにも提供拡大する方針を発表。</td></tr>
+<tr><td>4</td><td><a href="https://www.itmedia.co.jp/business/articles/2605/16/news085.html" target="_blank" rel="noopener">AI導入が進みビジネスに影響、7割の企業が「人材育成」と課題</a></td><td>ITmedia</td><td>AI導入企業の54.7%が課題を抱え、人材育成やコスト面の障壁が拡大していることがdoda調査で判明。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/commodity/s051513.html" target="_blank" rel="noopener">イオン東北／食品・日用品50品目を値下げ、5月20日～28日</a></td><td>流通ニュース</td><td>イオン東北が食品・日用品50品目を対象に期間限定の値下げキャンペーンを5月20日から実施。</td></tr>
+<tr><td>2</td><td><a href="https://ecnomikata.com/ecnews/43580/" target="_blank" rel="noopener">母の日「ソーシャルギフト（eギフト）」の定番化が進む</a></td><td>ECのミカタ</td><td>母の日商戦でソーシャルギフト（eギフト）利用が定番化し、非対面ギフト需要の構造的拡大が確認された。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/n/2026/05/15/16132" target="_blank" rel="noopener">Anthropicがめざす「AI同士で完結させる」買い物体験とは</a></td><td>ネッ担</td><td>Anthropicが構想するAIエージェント同士がEC上で購買を自律的に完結させる次世代ショッピング体験を解説。</td></tr>
+<tr><td>2</td><td><a href="https://netshop.impress.co.jp/n/2026/05/15/16128" target="_blank" rel="noopener">楽天の2026年1-3月期の流通総額は約1.5兆円で4.8%増</a></td><td>ネッ担</td><td>楽天グループの2026年1-3月期EC流通総額が約1.5兆円に到達し前年同期比4.8%増と堅調に推移。</td></tr>
+<tr><td>3</td><td><a href="https://netshop.impress.co.jp/n/2026/05/15/16130" target="_blank" rel="noopener">「楽天市場」に導入したAI活用のRPP広告自動最適化の効果などで広告事業は好調</a></td><td>ネッ担</td><td>楽天市場がAIによるRPP広告の自動最適化機能を導入し、広告事業の収益向上に寄与している。</td></tr>
+<tr><td>4</td><td><a href="https://ecnomikata.com/ecnews/43575/" target="_blank" rel="noopener">MUFG、Google リテール領域における「戦略的提携」を発表</a></td><td>ECのミカタ</td><td>三菱UFJフィナンシャルグループとGoogleがリテール領域での戦略的提携を発表、金融×テック融合を推進。</td></tr>
+<tr><td>5</td><td><a href="https://netshop.impress.co.jp/n/2026/05/14/16125" target="_blank" rel="noopener">ZOZOが販売予定商品の紹介機能を実装、出店ブランドに提供</a></td><td>ネッ担</td><td>ZOZOが出店ブランド向けに発売前商品の紹介・予告機能を新たに実装し購買意欲の事前醸成を支援。</td></tr>
+<tr><td>6</td><td><a href="https://www.itmedia.co.jp/business/articles/2605/16/news092.html" target="_blank" rel="noopener">AI活用してるのに、なぜ売上は伸びないのか 7社の事例から見える「行動と認識」との差</a></td><td>ITmedia</td><td>AI導入済み企業7社の事例から、AI活用が売上向上に直結しない原因として行動変容と認識のギャップを分析。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/accounts/s051414.html" target="_blank" rel="noopener">トライアルHD 決算／7～3月連結売上高が初の1兆円越え、通期予想を上方修正</a></td><td>流通ニュース</td><td>トライアルHDの7-3月連結売上高が初の1兆円を突破、好調な業績を受け通期予想を上方修正。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/accounts/s051449.html" target="_blank" rel="noopener">ニトリHD 決算／3月期は減収増益、商品開発進まず既存店客数が7.2%減に</a></td><td>流通ニュース</td><td>ニトリHDの3月期決算は減収増益で着地、商品開発の遅れから既存店客数が7.2%減少した。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/accounts/s051519.html" target="_blank" rel="noopener">丸井グループ 決算／3月期増収増益、グループ総取扱高は過去最高の5兆3921億円</a></td><td>流通ニュース</td><td>丸井グループの3月期決算が増収増益、フィンテック事業を含むグループ総取扱高が過去最高を更新。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/accounts/s051520.html" target="_blank" rel="noopener">サンドラッグ 決算／3月期増収増益、調剤・EC事業が好調</a></td><td>流通ニュース</td><td>サンドラッグの3月期決算は増収増益、調剤事業とEC事業の伸長が業績を牽引。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/accounts/s051580.html" target="_blank" rel="noopener">松屋フーズHD 決算／3月期営業利益72.3%増で過去最高益達成</a></td><td>流通ニュース</td><td>松屋フーズHDの3月期営業利益が前年比72.3%増で過去最高を記録、価格改定と既存店好調が寄与。</td></tr>
+<tr><td>6</td><td><a href="https://www.ryutsuu.biz/accounts/s051518.html" target="_blank" rel="noopener">モスフードサービス 決算／3月期増収増益、既存店売上高9%増</a></td><td>流通ニュース</td><td>モスフードサービスの3月期決算は増収増益、既存店売上高が9%増と好調に推移。</td></tr>
+<tr><td>7</td><td><a href="https://www.ryutsuu.biz/sales/s051571.html" target="_blank" rel="noopener">ライフ／4月総売上高は723億円、既存店売上高2.8%増</a></td><td>流通ニュース</td><td>ライフの4月月次実績で総売上高723億円、既存店売上高は前年比2.8%増で堅調に推移。</td></tr>
+<tr><td>8</td><td><a href="https://www.ryutsuu.biz/sales/s051442.html" target="_blank" rel="noopener">ビックカメラ／4月の全店売上17.8%増、ビックカメラ＋コジマは15.6%増</a></td><td>流通ニュース</td><td>ビックカメラの4月全店売上高が前年比17.8%増と大幅伸長、グループ全体でも15.6%増を達成。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<p>該当する記事はありませんでした。</p>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. AIエージェントのハーネス設計がリテールDX品質を左右する</h3>
+<p>技術側では「Agent = Model + Harness」の公式が示す通り、AIエージェントの信頼性はモデル性能ではなくハーネス（制御機構）に依存するという認識が広まっている。Claude Code hooksの47本実装やAgent Teams再現といった実践事例が相次ぎ、エージェント運用のノウハウが急速に体系化されつつある。小売側ではAnthropicが「AI同士で完結する買い物体験」を構想し、エージェント型コマースが現実味を帯びてきた。SIerとしては、小売クライアントのEC基盤にエージェント対応レイヤーを追加する提案が差別化要因となる可能性がある。ハーネス品質が購買体験を直接左右するため、エージェント制御基盤の設計力が競争力の源泉になる。</p>
+<h3>2. 決算好調企業のDX投資余力とAI活用の現実ギャップ</h3>
+<p>トライアルHDが売上1兆円を突破し、松屋フーズHDが営業利益72.3%増を達成するなど、小売・外食の好業績企業が目立つ。一方でITmediaの調査記事によれば「AI活用しているのに売上が伸びない」企業が7社中大半を占め、AI導入と業績向上の因果関係は自明ではない。楽天市場のRPP広告AI最適化のように、明確なKPI（広告ROAS）に紐付いたAI活用は効果が出やすいが、漠然とした「DX推進」は成果が見えにくい。SIerとして好業績クライアントにAIを提案する際は、投資対効果を定量化できるユースケース（需要予測、広告最適化、棚割AI）に絞り込むことが重要である。</p>
+<h3>3. MUFG×Google提携が示す金融・テック・小売の三角融合</h3>
+<p>MUFGとGoogleがリテール領域で戦略的提携を発表した。金融データ（決済・与信）とGoogleのAI・クラウド基盤を組み合わせることで、消費者の購買行動分析や店舗向けファイナンスサービスが高度化する見通しである。バローHDの東京初出店やくら寿司のプレミアム業態参入など、出店投資が活発な企業にとって、金融・テック融合型のサービスは資金調達から需要予測まで一貫したソリューションとなりうる。SIerとしてはFinTech×リテールの接点領域でシステム統合案件の獲得を狙える。</p>
+<h3>4. 物流プラットフォーム化と配送のサービス化</h3>
+<p>日本郵政が3年4900億円を総合物流化に投資し、カクヤスが1時間枠配送を外部荷主に拡張するなど、物流のプラットフォーム化が加速している。EC側では楽天の流通総額が1.5兆円に達しネットスーパー・即配の需要が拡大する中、配送能力がボトルネックとなる。バローHDが関西にプロセスセンターを新設するのも生鮮物流の内製化によるSC最適化の一環である。SIerとしてはWMS/TMSの刷新案件やラストマイル配送のAI最適化がビジネス機会となる。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>14件</td><td>AI駆動開発・エージェント系が多数、5/17公開分</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>12件</td><td>Claude Code・LLM・セキュリティ、5/17公開分</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>3件</td><td>5/17朝時点のホットエントリから技術記事を取得</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>2件</td><td>EKS・BigQuery関連、5/17公開分</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>0件</td><td>5/17（土）は新規アップデートなし</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>12件</td><td>決算・出店情報中心、5/15-16公開分</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>2件</td><td>新店レポート・経営分析、5/15-16公開分</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>4件</td><td>AI×EC・楽天関連、5/14-15公開分</td></tr>
+<tr><td>9</td><td>ECのミカタ</td><td>成功</td><td>2件</td><td>MUFG提携・eギフト、5/15公開分</td></tr>
+<tr><td>10</td><td>ITmedia ビジネス</td><td>成功</td><td>2件</td><td>AI導入課題・小売DX、5/16公開分</td></tr>
+<tr><td>11</td><td>ロジスティクス・トゥデイ</td><td>成功</td><td>4件</td><td>物流投資・新体制、5/15公開分</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術31件 + 小売26件 = 57件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-05-16" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: agent-teams-actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、10件成功・1件失敗）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 128件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>Claude Code実践知見が爆発的に増加</strong> — 1000セッション分析によるリードタイム10%短縮、PM補佐設計パターン、大規模コードベース運用法など、AIコーディングエージェントの本格運用事例がZenn・DevelopersIOで大量出現</li><li><strong>AIエージェントが脆弱性を自律発見する時代へ</strong> — Claude MythosがApple M5メモリ保護を5日で突破、nginx18年来の脆弱性をAIが自律的に発見、セキュリティ研究のパラダイムが変化</li><li><strong>Amazon ElastiCache大型アップデート</strong> — Valkey 9.0対応に加え、全文検索・ベクトル検索・ハイブリッド検索・リアルタイム集計を一挙追加し、キャッシュと検索の統合が加速</li><li><strong>小売各社が過去最高決算を連発</strong> — 丸井G総取扱高5.4兆円過去最高、松屋フーズ営業利益72.3%増、サンドラッグ増収増益、バローHD31期連続増収とDX投資余力が拡大</li><li><strong>AIエージェントコマースが世界的に加速</strong> — AnthropicのAI同士完結型購買体験構想、楽天RPP広告AI最適化、ウォルマートのコネクテッドストア展開とEC×AI融合が進行</li></ol></div>
@@ -10265,11 +10407,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-05-15 23:48 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-05-16 23:32 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
