@@ -1,0 +1,25 @@
+cc-sier / company-diagram skill — Third-Party Notices
+=======================================================
+
+The files in this directory (references/drawio/) are derived from the
+awslabs/agent-plugins repository, specifically the deploy-on-aws plugin's
+aws-architecture-diagram skill.
+
+  Upstream repository : https://github.com/awslabs/agent-plugins
+  Upstream path       : plugins/deploy-on-aws/
+  Upstream commit     : 7a17df718d26f07414b876e77a7480fa25089b08
+  Retrieval date      : 2026-06-13
+  License             : Apache License 2.0
+  Copyright           : Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+A copy of the Apache License 2.0 is provided in LICENSE-APACHE-2.0.txt
+in this directory.
+
+Modifications made for cc-sier integration:
+  - File paths adjusted for cc-sier company-diagram skill directory layout
+  - Python script headers updated with SPDX and vendoring annotations
+  - Markdown files prefixed with HTML comment attribution headers
+  - No functional changes to XML generation logic, shape dictionaries,
+    or validation algorithms
+
+Modifications Copyright cc-sier-organization contributors, 2026.
