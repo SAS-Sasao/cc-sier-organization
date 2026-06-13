@@ -6,7 +6,7 @@
     },
     "awslabs.aws-diagram-mcp-server": {
       "command": "uvx",
-      "args": ["awslabs.aws-diagram-mcp-server"],
+      "args": ["awslabs.aws-diagram-mcp-server==1.0.23"],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       }
