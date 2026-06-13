@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDI受発注 オンプレ→AWS移行 - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./edi-onprem-to-aws-migration.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./edi-onprem-to-aws-migration.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>EDI受発注 オンプレ→AWS移行 - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-06-13</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>437 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">edi-onprem-to-aws-migration.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">437 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Generated by /company-diagram-v2 (LLM 直接生成 CFn / cfn-lint 検証)</p>
+<script>
+const raw = "AWSTemplateFormatVersion: \"2010-09-09\"\nDescription: >\n  EDI \u53d7\u767a\u6ce8\u30b7\u30b9\u30c6\u30e0 \u30aa\u30f3\u30d7\u30ec\u30df\u30b9 \u2192 AWS \u79fb\u884c\u69cb\u6210\u3002\n  Transfer Family (AS2/SFTP) \u3067\u53d6\u5f15\u5148\u304b\u3089 EDI \u3092\u53d7\u4fe1\u3057\u3001S3 \u306b landing\u3002\n  B2B Data Interchange \u3067 X12/EDIFACT \u3092 JSON \u3078\u5909\u63db\u3057\u3001EventBridge \u7d4c\u7531\u3067\n  Step Functions / Lambda / SQS \u306b\u3088\u308b\u53d7\u767a\u6ce8\u51e6\u7406\u30ef\u30fc\u30af\u30d5\u30ed\u30fc\u3092\u99c6\u52d5\u3001\n  Aurora (Multi-AZ) \u3068 DynamoDB \u306b\u66f8\u304d\u8fbc\u3080\u3002Direct Connect / Site-to-Site VPN +\n  Transit Gateway \u306b\u3088\u308a\u30aa\u30f3\u30d7\u30ec\u306e\u30ec\u30ac\u30b7\u30fc\u53d7\u767a\u6ce8\u30b7\u30b9\u30c6\u30e0\u3068\u79fb\u884c\u671f\u306b\u4e26\u884c\u7a3c\u50cd\u3059\u308b\u3002\n  \u5b9f\u5024\u306f # TODO \u30b3\u30e1\u30f3\u30c8\u3067\u660e\u793a\uff08\u672c\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u306f\u69cb\u6210\u56f3\u3068\u6574\u5408\u3057\u305f\u9aa8\u5b50\uff09\u3002\n\nParameters:\n  EnvName:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, prod]\n    Description: \u74b0\u5883\u540d\uff08dev / prod\uff09\u3002Aurora \u306e\u30a4\u30f3\u30b9\u30bf\u30f3\u30b9\u6570\u30fb\u5bb9\u91cf\u306e\u51fa\u3057\u5206\u3051\u306b\u4f7f\u7528\u3002\n  VpcCidr:\n    Type: String\n    Default: 10.0.0.0/16 # TODO: \u5b9f CIDR \u306b\u5408\u308f\u305b\u308b\n  OnPremCidr:\n    Type: String\n    Default: 192.168.0.0/16 # TODO: \u30aa\u30f3\u30d7\u30ec DC \u306e CIDR\n  CustomerGatewayIp:\n    Type: String\n    Default: 203.0.113.10 # TODO: \u30aa\u30f3\u30d7\u30ec\u5074 VPN \u7d42\u7aef\u306e\u30b0\u30ed\u30fc\u30d0\u30eb IP\n\nMappings:\n  EnvMap:\n    dev:\n      AuroraInstanceClass: db.serverless\n      AuroraMinAcu: 0.5\n      AuroraMaxAcu: 2\n    prod:\n      AuroraInstanceClass: db.serverless\n      AuroraMinAcu: 2\n      AuroraMaxAcu: 8\n\nResources:\n  # ===== \u30cd\u30c3\u30c8\u30ef\u30fc\u30af\uff08VPC / Multi-AZ\uff09 =====\n  Vpc:\n    Type: AWS::EC2::VPC\n    Properties:\n      CidrBlock: !Ref VpcCidr\n      EnableDnsSupport: true\n      EnableDnsHostnames: true\n      Tags:\n        - Key: Name\n          Value: !Sub \"edi-${EnvName}-vpc\"\n\n  PrivateSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.1.0/24 # TODO\n      AvailabilityZone: !Select [0, !GetAZs \"\"]\n\n  PrivateSubnetB:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.2.0/24 # TODO\n      AvailabilityZone: !Select [1, !GetAZs \"\"]\n\n  # ===== \u30cf\u30a4\u30d6\u30ea\u30c3\u30c9\u63a5\u7d9a\uff08Transit Gateway + Site-to-Site VPN\uff09 =====\n  # Direct Connect \u672c\u4f53\uff08DX Gateway / VIF\uff09\u306f\u30a2\u30ab\u30a6\u30f3\u30c8\u6a2a\u65ad\u30fb\u7269\u7406\u56de\u7dda\u624b\u914d\u306e\u305f\u3081\n  # \u5225\u30b9\u30bf\u30c3\u30af\u7ba1\u7406\u3092\u60f3\u5b9a\u3002\u3053\u3053\u3067\u306f TGW \u3068 VPN \u306b\u3088\u308b\u63a5\u7d9a\u5b9a\u7fa9\u306e\u307f\u8a18\u8ff0\u3002\n  TransitGateway:\n    Type: AWS::EC2::TransitGateway\n    Properties:\n      Description: !Sub \"edi-${EnvName}-tgw (DX/VPN \u96c6\u7d04)\"\n      AmazonSideAsn: 64512 # TODO\n\n  TgwVpcAttachment:\n    Type: AWS::EC2::TransitGatewayVpcAttachment\n    Properties:\n      TransitGatewayId: !Ref TransitGateway\n      VpcId: !Ref Vpc\n      SubnetIds:\n        - !Ref PrivateSubnetA\n        - !Ref PrivateSubnetB\n\n  CustomerGateway:\n    Type: AWS::EC2::CustomerGateway\n    Properties:\n      Type: ipsec.1\n      BgpAsn: 65000 # TODO: \u30aa\u30f3\u30d7\u30ec\u5074 ASN\n      IpAddress: !Ref CustomerGatewayIp\n\n  SiteToSiteVpn:\n    Type: AWS::EC2::VPNConnection\n    Properties:\n      Type: ipsec.1\n      CustomerGatewayId: !Ref CustomerGateway\n      TransitGatewayId: !Ref TransitGateway\n      StaticRoutesOnly: false\n\n  # ===== \u30bb\u30ad\u30e5\u30ea\u30c6\u30a3\uff08KMS / Secrets Manager / IAM\uff09 =====\n  EdiKmsKey:\n    Type: AWS::KMS::Key\n    Properties:\n      Description: EDI \u30c7\u30fc\u30bf\u4fdd\u7ba1\u6642\u6697\u53f7\u5316\uff08S3 / Aurora / DynamoDB / SQS\uff09\n      EnableKeyRotation: true\n      KeyPolicy:\n        Version: \"2012-10-17\"\n        Statement:\n          - Sid: EnableRoot\n            Effect: Allow\n            Principal:\n              AWS: !Sub \"arn:aws:iam::${AWS::AccountId}:root\"\n            Action: \"kms:*\"\n            Resource: \"*\"\n\n  PartnerCredentialsSecret:\n    Type: AWS::SecretsManager::Secret\n    Properties:\n      Name: !Sub \"edi-${EnvName}-partner-credentials\"\n      Description: \u53d6\u5f15\u5148\u306e AS2/SFTP \u8a8d\u8a3c\u60c5\u5831\n      KmsKeyId: !Ref EdiKmsKey\n\n  # ===== \u30d5\u30a1\u30a4\u30eb\u57fa\u76e4\uff08S3\uff09 =====\n  EdiLandingBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub \"edi-${EnvName}-landing-${AWS::AccountId}\"\n      VersioningConfiguration:\n        Status: Enabled\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n              KMSMasterKeyID: !Ref EdiKmsKey\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      LifecycleConfiguration:\n        Rules:\n          - Id: ArchiveRawEdi\n            Status: Enabled\n            Transitions:\n              - StorageClass: GLACIER\n                TransitionInDays: 90 # TODO: \u30a2\u30fc\u30ab\u30a4\u30d6\u8981\u4ef6\u306b\u5408\u308f\u305b\u308b\n\n  # ===== EDI \u53d7\u4fe1\uff08Transfer Family AS2/SFTP\uff09 =====\n  TransferServer:\n    Type: AWS::Transfer::Server\n    Properties:\n      Protocols:\n        - SFTP\n        - AS2\n      Domain: S3\n      EndpointType: VPC\n      EndpointDetails:\n        VpcId: !Ref Vpc\n        SubnetIds:\n          - !Ref PrivateSubnetA\n          - !Ref PrivateSubnetB\n      IdentityProviderType: SERVICE_MANAGED\n      Tags:\n        - Key: Name\n          Value: !Sub \"edi-${EnvName}-transfer\"\n\n  # ===== EDI \u5909\u63db\uff08B2B Data Interchange\uff09 =====\n  # B2Bi \u306e Profile / Capability / Transformer / Partnership \u306f\n  # AWS::B2BI::* \u30ea\u30bd\u30fc\u30b9\u3067\u5b9a\u7fa9\u3059\u308b\u3002X12/EDIFACT \u2192 JSON \u5909\u63db\u3092\u62c5\u3046\u3002\n  B2biProfile:\n    Type: AWS::B2BI::Profile\n    Properties:\n      Name: !Sub \"edi-${EnvName}-profile\"\n      Phone: \"000-0000-0000\" # TODO\n      BusinessName: \"EDI Migration Org\" # TODO\n      Logging: ENABLED\n\n  B2biTransformer:\n    Type: AWS::B2BI::Transformer\n    Properties:\n      Name: !Sub \"edi-${EnvName}-x12-to-json\"\n      Status: active\n      # TODO: EdiType (X12 / EDIFACT) \u3068 OutputConversion (JSON) \u3092\u6307\u5b9a\n\n  # ===== \u9023\u643a\u30fb\u30aa\u30fc\u30b1\u30b9\u30c8\u30ec\u30fc\u30b7\u30e7\u30f3\uff08EventBridge / SQS / Lambda / Step Functions\uff09 =====\n  OrderEventBus:\n    Type: AWS::Events::EventBus\n    Properties:\n      Name: !Sub \"edi-${EnvName}-order-bus\"\n\n  OrderProcessingDlq:\n    Type: AWS::SQS::Queue\n    Properties:\n      QueueName: !Sub \"edi-${EnvName}-order-dlq\"\n      KmsMasterKeyId: !Ref EdiKmsKey\n\n  OrderProcessingQueue:\n    Type: AWS::SQS::Queue\n    Properties:\n      QueueName: !Sub \"edi-${EnvName}-order-queue\"\n      KmsMasterKeyId: !Ref EdiKmsKey\n      RedrivePolicy:\n        deadLetterTargetArn: !GetAtt OrderProcessingDlq.Arn\n        maxReceiveCount: 5\n\n  OrderProcessingFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"edi-${EnvName}-order-processor\"\n      Runtime: python3.12\n      Architectures: [arm64]\n      Handler: index.handler\n      Timeout: 60\n      MemorySize: 512\n      Role: !GetAtt OrderProcessingRole.Arn\n      Code:\n        ZipFile: |\n          def handler(event, context):\n              # TODO: B2Bi \u5909\u63db\u6e08\u307f\u53d7\u767a\u6ce8 JSON \u3092 Aurora / DynamoDB \u306b\u53cd\u6620\n              return {\"status\": \"ok\"}\n\n  OrderApiFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"edi-${EnvName}-order-api\"\n      Runtime: python3.12\n      Architectures: [arm64]\n      Handler: index.handler\n      Timeout: 30\n      MemorySize: 512\n      Role: !GetAtt OrderProcessingRole.Arn\n      Code:\n        ZipFile: |\n          def handler(event, context):\n              # TODO: \u79fb\u884c\u5148 \u53d7\u767a\u6ce8 API \u30d0\u30c3\u30af\u30a8\u30f3\u30c9\uff08Aurora \u7167\u4f1a\uff09\n              return {\"statusCode\": 200, \"body\": \"{}\"}\n\n  OrderWorkflow:\n    Type: AWS::StepFunctions::StateMachine\n    Properties:\n      StateMachineName: !Sub \"edi-${EnvName}-order-workflow\"\n      RoleArn: !GetAtt StepFunctionsRole.Arn\n      DefinitionString: !Sub |\n        {\n          \"Comment\": \"\u53d7\u767a\u6ce8\u51e6\u7406\u30ef\u30fc\u30af\u30d5\u30ed\u30fc\",\n          \"StartAt\": \"Validate\",\n          \"States\": {\n            \"Validate\": { \"Type\": \"Task\", \"Resource\": \"${OrderProcessingFunction.Arn}\", \"Next\": \"Persist\" },\n            \"Persist\":  { \"Type\": \"Task\", \"Resource\": \"${OrderProcessingFunction.Arn}\", \"End\": true }\n          }\n        }\n\n  # EventBridge \u30eb\u30fc\u30eb: B2Bi \u5909\u63db\u5b8c\u4e86\u30a4\u30d9\u30f3\u30c8 \u2192 Step Functions / SQS\n  B2biCompletedToWorkflowRule:\n    Type: AWS::Events::Rule\n    Properties:\n      EventBusName: !Ref OrderEventBus\n      EventPattern:\n        source: [\"aws.b2bi\"] # TODO: \u5b9f\u30a4\u30d9\u30f3\u30c8\u30bd\u30fc\u30b9\u306b\u5408\u308f\u305b\u308b\n        detail-type: [\"EDI Transformation Completed\"]\n      Targets:\n        - Id: ToWorkflow\n          Arn: !Ref OrderWorkflow\n          RoleArn: !GetAtt EventBridgeInvokeRole.Arn\n        - Id: ToQueue\n          Arn: !GetAtt OrderProcessingQueue.Arn\n\n  OrderQueueEventSourceMapping:\n    Type: AWS::Lambda::EventSourceMapping\n    Properties:\n      EventSourceArn: !GetAtt OrderProcessingQueue.Arn\n      FunctionName: !Ref OrderProcessingFunction\n      BatchSize: 10\n\n  # ===== \u30c7\u30fc\u30bf\uff08Aurora Multi-AZ / DynamoDB\uff09 =====\n  AuroraCluster:\n    Type: AWS::RDS::DBCluster\n    Properties:\n      Engine: aurora-postgresql\n      EngineMode: provisioned\n      DatabaseName: orders\n      MasterUsername: !Sub \"{{resolve:secretsmanager:${PartnerCredentialsSecret}:SecretString:dbuser}}\" # TODO\n      StorageEncrypted: true\n      KmsKeyId: !Ref EdiKmsKey\n      ServerlessV2ScalingConfiguration:\n        MinCapacity: !FindInMap [EnvMap, !Ref EnvName, AuroraMinAcu]\n        MaxCapacity: !FindInMap [EnvMap, !Ref EnvName, AuroraMaxAcu]\n\n  AuroraInstanceA:\n    Type: AWS::RDS::DBInstance\n    Properties:\n      DBClusterIdentifier: !Ref AuroraCluster\n      DBInstanceClass: db.serverless\n      Engine: aurora-postgresql\n\n  AuroraInstanceB:\n    Type: AWS::RDS::DBInstance\n    Condition: IsProd\n    Properties:\n      DBClusterIdentifier: !Ref AuroraCluster\n      DBInstanceClass: db.serverless\n      Engine: aurora-postgresql\n\n  ProcessingStateTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub \"edi-${EnvName}-processing-state\"\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - AttributeName: orderId\n          AttributeType: S\n      KeySchema:\n        - AttributeName: orderId\n          KeyType: HASH\n      SSESpecification:\n        SSEEnabled: true\n        KMSMasterKeyId: !Ref EdiKmsKey\n        SSEType: KMS\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n\n  # ===== \u793e\u5185 API\uff08API Gateway\uff09 =====\n  OrderApi:\n    Type: AWS::ApiGatewayV2::Api\n    Properties:\n      Name: !Sub \"edi-${EnvName}-order-api\"\n      ProtocolType: HTTP\n\n  # ===== \u76e3\u8996\u30fb\u901a\u77e5\uff08CloudWatch / SNS\uff09 =====\n  OpsAlertTopic:\n    Type: AWS::SNS::Topic\n    Properties:\n      TopicName: !Sub \"edi-${EnvName}-ops-alerts\"\n      KmsMasterKeyId: !Ref EdiKmsKey\n\n  DlqDepthAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub \"edi-${EnvName}-order-dlq-depth\"\n      Namespace: AWS/SQS\n      MetricName: ApproximateNumberOfMessagesVisible\n      Dimensions:\n        - Name: QueueName\n          Value: !GetAtt OrderProcessingDlq.QueueName\n      Statistic: Maximum\n      Period: 300\n      EvaluationPeriods: 1\n      Threshold: 1\n      ComparisonOperator: GreaterThanOrEqualToThreshold\n      AlarmActions:\n        - !Ref OpsAlertTopic\n\n  # ===== IAM\uff08\u6700\u5c0f\u6a29\u9650\u30ed\u30fc\u30eb\uff09 =====\n  OrderProcessingRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: \"2012-10-17\"\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: lambda.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n      Policies:\n        - PolicyName: order-processing-least-privilege\n          PolicyDocument:\n            Version: \"2012-10-17\"\n            Statement:\n              - Effect: Allow\n                Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes]\n                Resource: !GetAtt OrderProcessingQueue.Arn\n              - Effect: Allow\n                Action: [dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:GetItem]\n                Resource: !GetAtt ProcessingStateTable.Arn\n              - Effect: Allow\n                Action: [kms:Decrypt, kms:GenerateDataKey]\n                Resource: !GetAtt EdiKmsKey.Arn\n              - Effect: Allow\n                Action: [secretsmanager:GetSecretValue]\n                Resource: !Ref PartnerCredentialsSecret\n\n  StepFunctionsRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: \"2012-10-17\"\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: states.amazonaws.com\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: invoke-order-lambda\n          PolicyDocument:\n            Version: \"2012-10-17\"\n            Statement:\n              - Effect: Allow\n                Action: lambda:InvokeFunction\n                Resource: !GetAtt OrderProcessingFunction.Arn\n\n  EventBridgeInvokeRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: \"2012-10-17\"\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: events.amazonaws.com\n            Action: sts:AssumeRole\n      Policies:\n        - PolicyName: start-order-workflow\n          PolicyDocument:\n            Version: \"2012-10-17\"\n            Statement:\n              - Effect: Allow\n                Action: states:StartExecution\n                Resource: !Ref OrderWorkflow\n\nConditions:\n  IsProd: !Equals [!Ref EnvName, prod]\n\nOutputs:\n  TransferServerId:\n    Description: Transfer Family \u30b5\u30fc\u30d0\u30fc ID\uff08\u53d6\u5f15\u5148 AS2/SFTP \u63a5\u7d9a\u5148\uff09\n    Value: !Ref TransferServer\n  LandingBucketName:\n    Description: EDI raw landing / \u30a2\u30fc\u30ab\u30a4\u30d6\u7528 S3 \u30d0\u30b1\u30c3\u30c8\n    Value: !Ref EdiLandingBucket\n  OrderApiEndpoint:\n    Description: \u79fb\u884c\u5148 \u53d7\u767a\u6ce8 API \u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !Sub \"https://${OrderApi}.execute-api.${AWS::Region}.amazonaws.com\"\n  AuroraClusterEndpoint:\n    Description: \u53d7\u767a\u6ce8 DB\uff08Aurora Multi-AZ\uff09\u66f8\u304d\u8fbc\u307f\u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !GetAtt AuroraCluster.Endpoint.Address\n  TransitGatewayId:\n    Description: \u30aa\u30f3\u30d7\u30ec DC \u3068\u306e\u30cf\u30a4\u30d6\u30ea\u30c3\u30c9\u63a5\u7d9a\u3092\u96c6\u7d04\u3059\u308b Transit Gateway\n    Value: !Ref TransitGateway\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>
