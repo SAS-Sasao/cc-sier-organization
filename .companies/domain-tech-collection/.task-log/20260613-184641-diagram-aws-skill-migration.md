@@ -47,5 +47,31 @@ l2_retries: 0
 ### [2026-06-13 18:58] system-architect
 完了: 設計確定（方針B + B-2）。設計書を docs/decisions/2026-06-13-diagram-aws-skill-migration-design.md に作成。未決A〜E決着、変更ファイル一覧、AC、着手順序6ステップ、Issue更新コメントを出力。中核(SKILL.md)改修は人手承認後（Step1）に着手。
 
+### [2026-06-13 19:xx] secretary（ロールバック機構）
+オーナー要件「移行失敗時に即戻せる」に対応し4層セーフティ構築: L1 ブランチ隔離（main無傷）/ L2 復元タグ pre-diagram-aws-skill-migration（push済）/ L3 .mcp.json の aws-diagram ==1.0.23 ピンを Step6 まで維持 / L4 Step1 は加算のみ。
+
+### [2026-06-13 19:xx] secretary → cloud-engineer
+委譲(Step1): deploy-on-aws 資産の移植。
+
+### [2026-06-13 19:xx] cloud-engineer
+完了: deploy-on-aws (Apache-2.0) から 33ファイルを references/drawio/ へ vendoring（references 13 + scripts 9 + samples 7 + 帰属3 + review-drawio.js）。Apache-2.0 帰属付与。既存ファイル不変・plugins↔.claude 同期一致。新パスの review-drawio.js で PoC 検証 pass。commit bdb8f38 / push 済。
+- 設計差分解決: xml-templates-{structure,examples}.md, diagram-templates-{basic,advanced}.md, validate-drawio.sh も追加取得。
+- Step2 前提: defusedxml 導入法の実機確認が必要。
+
+### [2026-06-13 19:xx] secretary（設計変更: 並列スキル方式）
+オーナー要件「移行版も現行版も両方 / で呼べる」を反映し、現行 SKILL を上書きせず **company-diagram-v2 を別スキルとして新設**する方式に変更（ロールバック安全性が最強化）。Step1 で company-diagram 直下に置いた vendored 資産を company-diagram-v2 配下へ git mv 再配置。
+
+### [2026-06-13 19:xx] secretary → ai-developer
+委譲(Step2): company-diagram-v2 の SKILL.md + review-prompt.md 作成。
+
+### [2026-06-13 19:xx] ai-developer
+完了: company-diagram-v2/SKILL.md(1670語・9フェーズ) + references/review-prompt.md(drawio版6軸: s3_xml_html_consistency / s6_drawio_quality, 旧 s6_english_labels 廃止) を作成。現行 company-diagram は無変更（git diff HEAD クリーン）。plugins↔.claude 同期一致。L0二段(validate_drawio.py[uv run --with defusedxml] + review-drawio.js)を SKILL.md に反映。Phase7 は auto-merge せず人手レビュー推奨を明記。
+
+### [2026-06-13 19:xx] 状態
+- /company-diagram（現行 PNG/MCP）と /company-diagram-v2（draw.io）が両方 / から呼出可能
+- ロールバック: tag pre-diagram-aws-skill-migration / v2 削除で即復帰 / .mcp.json ピン維持
+- 既知: PoC の cloudwatch_alarm は無効シェイプ→正は cloudwatch（実図生成時に修正）
+- Phase1+Phase2 を1 PR にまとめ push（auto-merge せず人手レビュー）
+
 ## reward
 （post-merge hook が自動追記）
