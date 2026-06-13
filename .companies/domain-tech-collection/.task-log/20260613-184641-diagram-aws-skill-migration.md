@@ -8,7 +8,7 @@ started: "2026-06-13T18:46:41"
 completed: ""
 request: "Issue #569 をサブエージェントチームで対応したい。AWS の skills（deploy-on-aws の aws-architecture-diagram skill）への移行を実行する"
 issue_number: 569
-pr_number: null
+pr_number: 573
 subagents: [tech-researcher, qa-lead, cloud-engineer, system-architect, secretary]
 l0_gate: null
 l0_retries: 0
