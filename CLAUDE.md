@@ -170,6 +170,7 @@ cc-sier-organization/
 - ⚠️ gitignored データ（`.session-summaries/` `.case-bank/` 等）を参照する Skill は **ローカル実行専用** を SKILL.md に明記（Actions から読めないため完全 observability 不可）
 - ⚠️ GitHub Projects v2 GraphQL API の `items(first: N)` は **N ≤ 100**（100 超で `EXCESSIVE_PAGINATION` エラー）。100 超取得は `pageInfo { hasNextPage endCursor }` の cursor-based pagination 必須
 - ⚠️ workflow shell で `cmd | tee log.txt` を使うと **pipefail なしでは cmd の非 0 exit code が潰され success 偽装**される。`set -euo pipefail` を冒頭に入れるか、実行と log 表示を分離する
+- ⚠️ `.mcp.json` の uvx/npx 系 MCP サーバーは `==バージョン` でピン留め（PyPI yank で再現不能になった実例あり: aws-diagram-mcp-server #569/#570）
 
 詳細: @.claude/rules/review-pattern.md
 
