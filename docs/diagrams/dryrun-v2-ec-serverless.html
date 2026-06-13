@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EC サーバーレスバックエンド (v2 dry-run) - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container iframe { width:100%; height:640px; border:0; border-radius:8px; background:#fff; }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.dl-link { display:inline-block; margin-top:12px; margin-left:8px; padding:10px 20px; background:var(--bg);
+           color:var(--blue); text-decoration:none; border:1px solid var(--border); border-radius:8px; font-size:.88rem; font-weight:600; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:6px; }
+.badge-sync { background:#dbeafe; color:#1e40af; }
+.badge-async { background:#fce7f3; color:#9d174d; }
+ul.learning-points { list-style:none; padding-left:0; }
+ul.learning-points li { border-left:4px solid var(--blue); padding:8px 14px; margin-bottom:10px; background:var(--bg); border-radius:4px; font-size:.88rem; line-height:1.65; }
+ul.learning-points strong { color:var(--blue); }
+.cost-total td, .cost-total th { background:var(--bg); font-weight:600; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>EC サーバーレスバックエンド <span style="font-size:.8rem;color:var(--muted)">(v2 dry-run)</span></h1>
+<div class="meta">
+  <span class="tag tag-project">小売 EC</span>
+  <span class="tag tag-area">サーバーレス / イベント駆動</span>
+  <span>生成日: 2026-06-13</span>
+</div>
+
+<div class="diagram-container">
+  <iframe src="./dryrun-v2-ec-serverless.drawio" title="EC サーバーレスバックエンド構成図"></iframe>
+  <div class="hint">draw.io XML を直接埋め込み表示（v2 方式）。ブラウザによっては <a href="./dryrun-v2-ec-serverless.drawio" download>.drawio をダウンロード</a>して diagrams.net で開いてください。</div>
+  <div>
+    <a href="./dryrun-v2-ec-serverless-iac.html" class="iac-btn">IaCソースコードを見る</a>
+    <a href="./dryrun-v2-ec-serverless.drawio" class="dl-link" download>.drawio をダウンロード</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:#2E7DD7"></span> 同期フロー &#8212; ユーザー閲覧 / Route 53 名前解決 / CloudFront 配信 / API Gateway→Lambda→DynamoDB の同期処理</div>
+    <div class="legend-item"><span class="legend-line" style="background:#DD344C"></span> 認証フロー &#8212; API Gateway が Cognito ユーザープールで JWT を検証</div>
+    <div class="legend-item"><span class="legend-line" style="background:#E7157B"></span> 非同期フロー &#8212; 注文確定を SQS へエンキュー → worker Lambda → DynamoDB 更新 / SNS 発行</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#607D8B"></span> 通知配信フロー（非同期・破線）&#8212; SNS から買い物客へメール / プッシュ通知</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>小売 EC サイトの<strong>サーバーレスバックエンド参照構成</strong>。フロントエンドの SPA は S3 + CloudFront で静的配信し、商品閲覧・カート・注文 API は API Gateway + Lambda + DynamoDB の同期パスで処理する。認証は Cognito ユーザープールで JWT を発行・検証する。</p>
+  <p>注文確定のような<strong>時間のかかる後続処理は SQS で受け止めて非同期化</strong>し、worker Lambda がデキューして在庫引当・注文ステータス更新（DynamoDB）と SNS による確定通知を行う。これによりユーザーへの API 応答は即時返しつつ、ピーク時のスパイクを SQS が吸収する。CloudWatch でメトリクス・ログを集約し、Lambda 実行は最小権限の IAM Role で制御する。本ファイルは company-diagram-v2（draw.io XML 直接生成方式）のドライ実行成果物。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+  <div class="flow">
+    <span class="badge badge-sync">同期</span>
+    <span class="flow-step">買い物客</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Route 53</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">CloudFront</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 静的サイト / 商品画像</span>
+  </div>
+  <div class="flow">
+    <span class="badge badge-sync">同期</span>
+    <span class="flow-step">CloudFront</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (商品/注文API)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">DynamoDB</span>
+  </div>
+  <div class="flow">
+    <span class="badge badge-async">非同期</span>
+    <span class="flow-step">Lambda (API)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SQS (注文キュー)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (worker)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SNS 通知</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">買い物客</span>
+  </div>
+  <p><strong>認証フロー</strong>: クライアントが Cognito で取得した JWT を Authorization ヘッダで送信 → API Gateway の Cognito オーソライザが検証 → 通過したリクエストのみ Lambda へ到達。</p>
+  <p><strong>非同期処理フロー</strong>: 注文確定 API は注文を SQS にエンキューして即時 202 を返す。worker Lambda がイベントソースマッピングでデキューし、DynamoDB の注文ステータスを更新し、SNS トピックへ確定イベントを発行。SNS が購読者（メール / モバイルプッシュ）へファンアウトする。失敗メッセージは DLQ（maxReceiveCount=5）へ退避。</p>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>エッジ / DNS</td><td>Route 53</td><td>ホストゾーン。ドメインを CloudFront へ Alias 解決</td></tr>
+    <tr><td>配信 / CDN</td><td>CloudFront</td><td>静的サイト・商品画像のキャッシュ配信、API リクエストのエッジ受付</td></tr>
+    <tr><td>静的ストレージ</td><td>S3 (静的サイト)</td><td>SPA バンドルのオリジン。OAC でプライベート、CloudFront 経由のみ公開</td></tr>
+    <tr><td>静的ストレージ</td><td>S3 (商品画像)</td><td>商品画像オリジン。/images/* パスで CloudFront 配信</td></tr>
+    <tr><td>認証</td><td>Cognito ユーザープール</td><td>サインアップ/サインイン、JWT 発行。API Gateway オーソライザで検証</td></tr>
+    <tr><td>API</td><td>API Gateway (REST)</td><td>REST エンドポイント。Cognito オーソライザでリクエスト認可</td></tr>
+    <tr><td>Compute (同期)</td><td>Lambda (商品/注文 API)</td><td>商品照会・カート・注文受付。DynamoDB 読み書き + SQS エンキュー</td></tr>
+    <tr><td>Compute (非同期)</td><td>Lambda (worker)</td><td>SQS デキュー。注文ステータス更新 + SNS 発行</td></tr>
+    <tr><td>Database</td><td>DynamoDB</td><td>商品/注文テーブル（PK/SK シングルテーブル設計）、PITR 有効</td></tr>
+    <tr><td>キュー</td><td>SQS (+ DLQ)</td><td>注文確定キュー。スパイク吸収・非同期化。失敗は DLQ へ退避</td></tr>
+    <tr><td>通知</td><td>SNS</td><td>注文確定イベントのファンアウト（メール/プッシュ）</td></tr>
+    <tr><td>監視</td><td>CloudWatch</td><td>Lambda メトリクス・ログ集約、5xx/エラー率アラーム</td></tr>
+    <tr><td>セキュリティ</td><td>IAM Role</td><td>Lambda 実行ロール。DynamoDB/SQS/SNS への最小権限ポリシー</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul>
+    <li><strong>同期パスと非同期パスを明確に分離</strong> &#8212; 商品照会のような即応性が要る処理は API Gateway→Lambda→DynamoDB の同期パスに、注文確定後の在庫引当・通知のような遅延許容処理は SQS→worker Lambda の非同期パスに分ける。ユーザー体感のレイテンシを守りつつ、後段の重い処理をキューで平準化する。</li>
+    <li><strong>SQS + DLQ で注文ロストを防ぐ</strong> &#8212; 注文確定イベントは SQS に永続化してから worker が処理するため、worker 障害時もメッセージは消えない。maxReceiveCount=5 を超えた毒メッセージは DLQ に隔離し、本処理を止めずに後追い調査できる。注文＝失ってはいけないデータの典型パターン。</li>
+    <li><strong>S3 は OAC でプライベート化し CloudFront 経由のみ公開</strong> &#8212; 静的サイト・商品画像バケットはパブリックアクセスを全ブロックし、CloudFront Origin Access Control 経由でのみ到達可能にする。バケット直叩きを塞ぎ、WAF/署名 URL などの制御点を CloudFront に集約する。</li>
+    <li><strong>認可を API Gateway のオーソライザに寄せる</strong> &#8212; JWT 検証を各 Lambda に実装せず Cognito オーソライザに一元化することで、Lambda 関数は業務ロジックに専念できる。認証ロジックの重複と実装ミスを減らす。</li>
+    <li><strong>従量課金サービスで構成しアイドルコストを最小化</strong> &#8212; Lambda・DynamoDB On-Demand・SQS・SNS はいずれもリクエスト課金で、トラフィックが無ければほぼ無料。EC の波のあるトラフィックに対し、固定費の薄いサーバーレス構成が相性良い。</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p class="cost-note">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。<br>
+  為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <thead>
+      <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Lambda (API + worker)</td><td>Dev: ~50万req、Prod: ~1,000万req</td><td>$1 (150円)</td><td>$25 (3,750円)</td></tr>
+      <tr><td>API Gateway (REST)</td><td>リクエスト課金</td><td>$3 (450円)</td><td>$35 (5,250円)</td></tr>
+      <tr><td>DynamoDB (On-Demand)</td><td>商品/注文テーブル + PITR</td><td>$5 (750円)</td><td>$60 (9,000円)</td></tr>
+      <tr><td>S3 (静的 + 画像)</td><td>~30GB + リクエスト</td><td>$2 (300円)</td><td>$5 (750円)</td></tr>
+      <tr><td>CloudFront</td><td>転送量・リクエスト課金</td><td>$2 (300円)</td><td>$40 (6,000円)</td></tr>
+      <tr><td>Route 53</td><td>ホストゾーン + クエリ</td><td>$1 (150円)</td><td>$1 (150円)</td></tr>
+      <tr><td>Cognito</td><td>50,000 MAU 無料枠</td><td>$0 (0円)</td><td>$0 (0円)</td></tr>
+      <tr><td>SQS (+ DLQ)</td><td>100万〜1,000万msg</td><td>$0 (0円)</td><td>$5 (750円)</td></tr>
+      <tr><td>SNS</td><td>100万〜500万pub</td><td>$0 (0円)</td><td>$3 (450円)</td></tr>
+      <tr><td>CloudWatch (Logs/Alarms)</td><td>取り込み + アラーム数</td><td>$2 (300円)</td><td>$12 (1,800円)</td></tr>
+      <tr class="cost-total"><td colspan="2"><strong>合計</strong></td><td><strong>$16 (約2,400円)</strong></td><td><strong>$186 (約27,900円)</strong></td></tr>
+    </tbody>
+  </table>
+  <h3>前提条件</h3>
+  <p>Dev は数十ユーザーの検証規模（月 ~50万リクエスト）、Prod は中規模 EC（月 ~1,000万リクエスト / ~10万注文）を想定。全サービス従量課金で、夜間・閑散期はアイドルコストがほぼ発生しない。CloudFront 転送量は 100GB/月（Prod）で試算。IAM・SQS DLQ は実質無料。</p>
+  <h3>コスト最適化のポイント</h3>
+  <p>DynamoDB はアクセスパターンが安定したら On-Demand → Provisioned + Auto Scaling へ切替で 2〜4 割削減。CloudFront のキャッシュ TTL を伸ばしてオリジン転送とリクエスト数を削減。Lambda は ARM (Graviton) ランタイムで ~20% 単価削減。S3 は Intelligent-Tiering で画像の自動階層化。SQS バッチサイズを大きくして worker Lambda の起動回数を削減。</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>キューは「失ってはいけない処理」を守る緩衝材</strong> &#8212; 同期 API の中で重い処理まで完結させると、後段障害がユーザー応答に直結し、リトライでデータが二重化するリスクもある。SQS を挟むと「受け付け」と「実行」が分離され、worker 障害時もメッセージは残り、DLQ で毒メッセージを隔離できる。注文・決済・在庫など失ってはいけないイベントに普遍的に効くパターン。</li>
+    <li><strong>従量課金サービスの組み合わせはアイドルコストを限りなくゼロに近づける</strong> &#8212; Lambda / DynamoDB On-Demand / SQS / SNS はリクエストが無ければ課金されない。トラフィックに波がある EC・予約・キャンペーン系では、常時起動のサーバー（EC2/RDS）より損益分岐が低くなりやすい。逆に常時高負荷ならプロビジョン型の方が安くなる損益分岐の見極めが設計判断の核心。</li>
+    <li><strong>認可・暗号化・最小権限は「点」ではなく「層」で設計する</strong> &#8212; Cognito オーソライザ（認可の集約点）、S3 OAC（直アクセス遮断）、IAM Role の最小権限（横移動の封じ込め）、KMS 暗号化（保管時保護）を組み合わせて初めて多層防御になる。どれか一つでは破られたとき後がない。セキュリティは最初から各層に織り込む。</li>
+    <li><strong>非同期化は「結果整合性」を受け入れる設計判断</strong> &#8212; SQS を挟むと注文受付と確定通知の間に遅延が生まれる。即時に「確定」を見せたいのか、「受付しました」で十分なのかという UX 要件が、同期/非同期の境界を決める。技術選定の前にユーザー体験の許容遅延を定義することが先。</li>
+    <li><strong>マネージドサービス間の結合はイベント駆動で疎結合に保つ</strong> &#8212; Lambda が SNS/SQS を介して連携することで、購読者（メール・プッシュ・分析）を後から追加してもプロデューサー側を変更せずに済む。ファンアウトで拡張余地を残す設計は、機能追加の速度を落とさないための投資。</li>
+  </ul>
+</div>
+
+<p class="updated">生成: company-diagram-v2 (draw.io XML 直接生成方式 / MCP不使用) ドライ実行 / 元構成: 小売ドメイン EC サーバーレスバックエンド参照アーキテクチャ</p>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EC サーバーレスバックエンド (dry-run v2) - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./dryrun-v2-ec-serverless.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./dryrun-v2-ec-serverless.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>EC サーバーレスバックエンド (dry-run v2) - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-06-13</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>298 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">dryrun-v2-ec-serverless.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">298 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Generated by /company-diagram-v2 (LLM 直接生成 CFn / cfn-lint 検証)</p>
+<script>
+const raw = "AWSTemplateFormatVersion: \"2010-09-09\"\nDescription: >\n  EC \u30b5\u30fc\u30d0\u30fc\u30ec\u30b9\u30d0\u30c3\u30af\u30a8\u30f3\u30c9 (dry-run v2). Route 53 + CloudFront + S3 \u9759\u7684\u30b5\u30a4\u30c8,\n  API Gateway + Lambda + DynamoDB, Cognito \u8a8d\u8a3c, SQS/SNS \u306b\u3088\u308b\u975e\u540c\u671f\u6ce8\u6587\u51e6\u7406,\n  CloudWatch \u76e3\u8996, Lambda \u5b9f\u884c\u7528 IAM Role \u3092\u542b\u3080\u5c0f\u58f2 EC \u53c2\u7167\u69cb\u6210.\n\nParameters:\n  EnvName:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, prod]\n    Description: \u74b0\u5883\u540d (dev / prod)\n  DomainName:\n    Type: String\n    Default: shop.example.com\n    Description: \u516c\u958b\u30c9\u30e1\u30a4\u30f3\u540d (Route 53 \u30db\u30b9\u30c8\u30be\u30fc\u30f3\u7528) # TODO: \u5b9f\u30c9\u30e1\u30a4\u30f3\u306b\u5909\u66f4\n\nResources:\n  # ===== Edge / \u914d\u4fe1 =====\n  StaticSiteBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub \"ec-${EnvName}-static-site\"\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n\n  ProductImageBucket:\n    Type: AWS::S3::Bucket\n    Properties:\n      BucketName: !Sub \"ec-${EnvName}-product-images\"\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: aws:kms\n\n  CloudFrontOAC:\n    Type: AWS::CloudFront::OriginAccessControl\n    Properties:\n      OriginAccessControlConfig:\n        Name: !Sub \"ec-${EnvName}-oac\"\n        OriginAccessControlOriginType: s3\n        SigningBehavior: always\n        SigningProtocol: sigv4\n\n  CloudFrontDistribution:\n    Type: AWS::CloudFront::Distribution\n    Properties:\n      DistributionConfig:\n        Enabled: true\n        DefaultRootObject: index.html\n        Origins:\n          - Id: static-site-origin\n            DomainName: !GetAtt StaticSiteBucket.RegionalDomainName\n            OriginAccessControlId: !GetAtt CloudFrontOAC.Id\n            S3OriginConfig:\n              OriginAccessIdentity: \"\"\n          - Id: product-image-origin\n            DomainName: !GetAtt ProductImageBucket.RegionalDomainName\n            OriginAccessControlId: !GetAtt CloudFrontOAC.Id\n            S3OriginConfig:\n              OriginAccessIdentity: \"\"\n        DefaultCacheBehavior:\n          TargetOriginId: static-site-origin\n          ViewerProtocolPolicy: redirect-to-https\n          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # Managed-CachingOptimized\n        CacheBehaviors:\n          - PathPattern: /images/*\n            TargetOriginId: product-image-origin\n            ViewerProtocolPolicy: redirect-to-https\n            CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6\n        ViewerCertificate:\n          CloudFrontDefaultCertificate: true  # TODO: ACM \u8a3c\u660e\u66f8 ARN \u306b\u5dee\u3057\u66ff\u3048\n\n  HostedZone:\n    Type: AWS::Route53::HostedZone\n    Properties:\n      Name: !Ref DomainName\n\n  AliasRecord:\n    Type: AWS::Route53::RecordSet\n    Properties:\n      HostedZoneId: !Ref HostedZone\n      Name: !Ref DomainName\n      Type: A\n      AliasTarget:\n        DNSName: !GetAtt CloudFrontDistribution.DomainName\n        HostedZoneId: Z2FDTNDATAQYW2  # CloudFront \u56fa\u5b9a HostedZoneId\n\n  # ===== \u8a8d\u8a3c =====\n  UserPool:\n    Type: AWS::Cognito::UserPool\n    Properties:\n      UserPoolName: !Sub \"ec-${EnvName}-user-pool\"\n      AutoVerifiedAttributes: [email]\n      Policies:\n        PasswordPolicy:\n          MinimumLength: 12\n          RequireNumbers: true\n          RequireSymbols: true\n          RequireUppercase: true\n\n  UserPoolClient:\n    Type: AWS::Cognito::UserPoolClient\n    Properties:\n      UserPoolId: !Ref UserPool\n      ClientName: !Sub \"ec-${EnvName}-web-client\"\n      GenerateSecret: false\n      AllowedOAuthFlows: [code]\n      AllowedOAuthScopes: [openid, email, profile]\n\n  # ===== Database =====\n  AppTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub \"ec-${EnvName}-app\"\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - AttributeName: PK\n          AttributeType: S\n        - AttributeName: SK\n          AttributeType: S\n      KeySchema:\n        - AttributeName: PK\n          KeyType: HASH\n        - AttributeName: SK\n          KeyType: RANGE\n      SSESpecification:\n        SSEEnabled: true\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: true\n\n  # ===== \u975e\u540c\u671f / \u901a\u77e5 =====\n  OrderQueue:\n    Type: AWS::SQS::Queue\n    Properties:\n      QueueName: !Sub \"ec-${EnvName}-order-queue\"\n      VisibilityTimeout: 60\n      KmsMasterKeyId: alias/aws/sqs\n      RedrivePolicy:\n        deadLetterTargetArn: !GetAtt OrderDLQ.Arn\n        maxReceiveCount: 5\n\n  OrderDLQ:\n    Type: AWS::SQS::Queue\n    Properties:\n      QueueName: !Sub \"ec-${EnvName}-order-dlq\"\n      KmsMasterKeyId: alias/aws/sqs\n\n  OrderConfirmedTopic:\n    Type: AWS::SNS::Topic\n    Properties:\n      TopicName: !Sub \"ec-${EnvName}-order-confirmed\"\n      KmsMasterKeyId: alias/aws/sns\n\n  # ===== IAM (Lambda \u5b9f\u884c\u30ed\u30fc\u30eb: \u6700\u5c0f\u6a29\u9650) =====\n  LambdaExecutionRole:\n    Type: AWS::IAM::Role\n    Properties:\n      RoleName: !Sub \"ec-${EnvName}-lambda-exec\"\n      AssumeRolePolicyDocument:\n        Version: \"2012-10-17\"\n        Statement:\n          - Effect: Allow\n            Principal:\n              Service: lambda.amazonaws.com\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n      Policies:\n        - PolicyName: app-access\n          PolicyDocument:\n            Version: \"2012-10-17\"\n            Statement:\n              - Effect: Allow\n                Action:\n                  - dynamodb:GetItem\n                  - dynamodb:PutItem\n                  - dynamodb:UpdateItem\n                  - dynamodb:Query\n                Resource: !GetAtt AppTable.Arn\n              - Effect: Allow\n                Action:\n                  - sqs:SendMessage\n                  - sqs:ReceiveMessage\n                  - sqs:DeleteMessage\n                  - sqs:GetQueueAttributes\n                Resource:\n                  - !GetAtt OrderQueue.Arn\n                  - !GetAtt OrderDLQ.Arn\n              - Effect: Allow\n                Action: sns:Publish\n                Resource: !Ref OrderConfirmedTopic\n\n  # ===== Compute (\u540c\u671f API Lambda) =====\n  ApiLambda:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"ec-${EnvName}-api\"\n      Runtime: nodejs20.x\n      Handler: index.handler\n      Role: !GetAtt LambdaExecutionRole.Arn\n      Timeout: 15\n      MemorySize: 256\n      Environment:\n        Variables:\n          TABLE_NAME: !Ref AppTable\n          ORDER_QUEUE_URL: !Ref OrderQueue\n      Code:\n        ZipFile: |\n          // TODO: \u5546\u54c1/\u6ce8\u6587 API \u5b9f\u88c5\u306b\u5dee\u3057\u66ff\u3048\n          exports.handler = async () => ({ statusCode: 200, body: \"ok\" });\n\n  # ===== Compute (\u975e\u540c\u671f worker Lambda) =====\n  OrderWorkerLambda:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"ec-${EnvName}-order-worker\"\n      Runtime: nodejs20.x\n      Handler: index.handler\n      Role: !GetAtt LambdaExecutionRole.Arn\n      Timeout: 30\n      MemorySize: 256\n      Environment:\n        Variables:\n          TABLE_NAME: !Ref AppTable\n          TOPIC_ARN: !Ref OrderConfirmedTopic\n      Code:\n        ZipFile: |\n          // TODO: \u6ce8\u6587\u78ba\u5b9a\u306e\u975e\u540c\u671f\u51e6\u7406\u306b\u5dee\u3057\u66ff\u3048\n          exports.handler = async () => ({ statusCode: 200 });\n\n  OrderWorkerEventSource:\n    Type: AWS::Lambda::EventSourceMapping\n    Properties:\n      EventSourceArn: !GetAtt OrderQueue.Arn\n      FunctionName: !Ref OrderWorkerLambda\n      BatchSize: 10\n\n  # ===== API Gateway (Cognito \u30aa\u30fc\u30bd\u30e9\u30a4\u30b6) =====\n  RestApi:\n    Type: AWS::ApiGateway::RestApi\n    Properties:\n      Name: !Sub \"ec-${EnvName}-api\"\n      EndpointConfiguration:\n        Types: [REGIONAL]\n\n  CognitoAuthorizer:\n    Type: AWS::ApiGateway::Authorizer\n    Properties:\n      Name: cognito-authorizer\n      RestApiId: !Ref RestApi\n      Type: COGNITO_USER_POOLS\n      IdentitySource: method.request.header.Authorization\n      ProviderARNs:\n        - !GetAtt UserPool.Arn\n\n  # ===== \u76e3\u8996 =====\n  ApiErrorAlarm:\n    Type: AWS::CloudWatch::Alarm\n    Properties:\n      AlarmName: !Sub \"ec-${EnvName}-api-5xx\"\n      Namespace: AWS/Lambda\n      MetricName: Errors\n      Dimensions:\n        - Name: FunctionName\n          Value: !Ref ApiLambda\n      Statistic: Sum\n      Period: 300\n      EvaluationPeriods: 1\n      Threshold: 5\n      ComparisonOperator: GreaterThanThreshold\n      TreatMissingData: notBreaching\n\nOutputs:\n  CloudFrontDomain:\n    Description: CloudFront \u914d\u4fe1\u30c9\u30e1\u30a4\u30f3\n    Value: !GetAtt CloudFrontDistribution.DomainName\n  ApiEndpoint:\n    Description: API Gateway \u30a8\u30f3\u30c9\u30dd\u30a4\u30f3\u30c8\n    Value: !Sub \"https://${RestApi}.execute-api.${AWS::Region}.amazonaws.com\"\n  UserPoolId:\n    Description: Cognito User Pool ID\n    Value: !Ref UserPool\n  AppTableName:\n    Description: DynamoDB \u30c6\u30fc\u30d6\u30eb\u540d\n    Value: !Ref AppTable\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

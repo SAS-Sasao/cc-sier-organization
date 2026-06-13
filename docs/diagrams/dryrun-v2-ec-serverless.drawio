@@ -1,0 +1,235 @@
+<mxfile host="cc-sier-diagram-v2" agent="company-diagram-v2 LLM direct generation" version="29.6.1">
+  <diagram name="EC-Serverless-Backend" id="dryrun-v2-ec-serverless">
+    <mxGraphModel dx="1600" dy="1200" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- ===== Title block ===== -->
+        <mxCell id="title-group" connectable="0" parent="1" style="group;fontFamily=Helvetica;" value="" vertex="1">
+          <mxGeometry height="83" width="1500" x="50" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="title-text" parent="title-group" style="text;html=1;resizable=1;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=30;fontStyle=1;fontFamily=Helvetica;" value="EC サーバーレスバックエンド" vertex="1">
+          <mxGeometry height="42" width="900" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle-text" parent="title-group" style="text;html=1;resizable=0;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=16;fontFamily=Helvetica;" value="CloudFront 配信・API Gateway/Lambda/DynamoDB・SQS/SNS 非同期注文処理による小売 EC バックエンド" vertex="1">
+          <mxGeometry height="25" width="1100" x="5" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="title-separator" parent="title-group" style="line;strokeWidth=2;html=1;fontSize=14;strokeColor=#FF9900;fontFamily=Helvetica;" value="" vertex="1">
+          <mxGeometry height="10" width="1490" x="5" y="70" as="geometry" />
+        </mxCell>
+        <!-- ===== Users (external actor) ===== -->
+        <mxCell id="users-container" parent="1" style="fillColor=#f5f5f5;strokeColor=light-dark(#666666,#D4D4D4);rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#333333;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1;perimeterSpacing=0;" value="買い物客" vertex="1">
+          <mxGeometry height="98" width="107" x="50" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="users-icon" parent="users-container" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#232F3D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.users;fontFamily=Helvetica;" value="" vertex="1">
+          <mxGeometry height="48" width="48" x="30" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== AWS Cloud boundary (decoration container=1) ===== -->
+        <mxCell id="aws-cloud" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=light-dark(#232F3E,#E4F0FF);fillColor=light-dark(#232F3E0D,#232F3E0D);fillStyle=auto;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;fontFamily=Helvetica;" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;AWS Cloud&lt;/font&gt;" vertex="1">
+          <mxGeometry height="900" width="1330" x="220" y="150" as="geometry" />
+        </mxCell>
+        <!-- ===== Column labels ===== -->
+        <mxCell id="col-edge" parent="aws-cloud" value="&lt;b&gt;エッジ / 配信&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#8C4FFF;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="50" y="50" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="col-api" parent="aws-cloud" value="&lt;b&gt;API / 同期処理&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#8C4FFF;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="340" y="50" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="col-async" parent="aws-cloud" value="&lt;b&gt;非同期 / 通知&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#E7157B;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="860" y="50" width="160" height="20" as="geometry" />
+        </mxCell>
+        <!-- ===== Route 53 ===== -->
+        <mxCell id="svc-group-route53" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="DNS" vertex="1">
+          <mxGeometry x="70" y="90" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-route53" parent="svc-group-route53" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.route_53;fontFamily=Helvetica;shadow=1;" value="Route 53&lt;div&gt;&lt;i&gt;ホストゾーン&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== CloudFront ===== -->
+        <mxCell id="svc-group-cloudfront" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="CDN" vertex="1">
+          <mxGeometry x="70" y="290" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-cloudfront" parent="svc-group-cloudfront" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudfront;fontFamily=Helvetica;shadow=1;" value="CloudFront&lt;div&gt;&lt;i&gt;配信 + 画像&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== S3 static site ===== -->
+        <mxCell id="svc-group-s3-site" parent="aws-cloud" style="fillColor=#E8F5E9;strokeColor=#3F8624;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3F8624;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="静的サイト" vertex="1">
+          <mxGeometry x="70" y="490" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-s3-site" parent="svc-group-s3-site" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#3F8624;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fontFamily=Helvetica;shadow=1;" value="S3 静的ホスティング&lt;div&gt;&lt;i&gt;SPA バンドル&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== S3 product images ===== -->
+        <mxCell id="svc-group-s3-img" parent="aws-cloud" style="fillColor=#E8F5E9;strokeColor=#3F8624;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3F8624;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="画像ストア" vertex="1">
+          <mxGeometry x="70" y="690" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-s3-img" parent="svc-group-s3-img" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#3F8624;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fontFamily=Helvetica;shadow=1;" value="S3 商品画像&lt;div&gt;&lt;i&gt;オリジン&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== Cognito (auth, placed above-left of API, off the main flow line) ===== -->
+        <mxCell id="svc-group-cognito" parent="aws-cloud" style="fillColor=#FFEBEE;strokeColor=#DD344C;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#DD344C;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="認証" vertex="1">
+          <mxGeometry x="340" y="90" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-cognito" parent="svc-group-cognito" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cognito;fontFamily=Helvetica;shadow=1;" value="Cognito&lt;div&gt;&lt;i&gt;ユーザープール&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== API Gateway ===== -->
+        <mxCell id="svc-group-apigw" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="API" vertex="1">
+          <mxGeometry x="340" y="290" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-apigw" parent="svc-group-apigw" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.api_gateway;fontFamily=Helvetica;shadow=1;" value="API Gateway&lt;div&gt;&lt;i&gt;REST API&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== Lambda API (sync) ===== -->
+        <mxCell id="svc-group-lambda-api" parent="aws-cloud" style="fillColor=#FFF2E8;strokeColor=#ED7100;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#ED7100;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="Compute" vertex="1">
+          <mxGeometry x="580" y="290" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-lambda-api" parent="svc-group-lambda-api" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontFamily=Helvetica;shadow=1;" value="Lambda&lt;div&gt;&lt;i&gt;商品/注文 API&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== DynamoDB ===== -->
+        <mxCell id="svc-group-dynamodb" parent="aws-cloud" style="fillColor=#F5E6F7;strokeColor=#C925D1;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#C925D1;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="Database" vertex="1">
+          <mxGeometry x="580" y="490" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-dynamodb" parent="svc-group-dynamodb" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;fontFamily=Helvetica;shadow=1;" value="DynamoDB&lt;div&gt;&lt;i&gt;商品/注文テーブル&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== SQS (async order queue) ===== -->
+        <mxCell id="svc-group-sqs" parent="aws-cloud" style="fillColor=#FCE4EC;strokeColor=#E7157B;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#E7157B;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="キュー" vertex="1">
+          <mxGeometry x="880" y="290" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-sqs" parent="svc-group-sqs" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sqs;fontFamily=Helvetica;shadow=1;" value="SQS&lt;div&gt;&lt;i&gt;注文確定キュー&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== Lambda worker (async) ===== -->
+        <mxCell id="svc-group-lambda-worker" parent="aws-cloud" style="fillColor=#FFF2E8;strokeColor=#ED7100;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#ED7100;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="Compute" vertex="1">
+          <mxGeometry x="880" y="490" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-lambda-worker" parent="svc-group-lambda-worker" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;fontFamily=Helvetica;shadow=1;" value="Lambda&lt;div&gt;&lt;i&gt;非同期処理&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== SNS (notification) ===== -->
+        <mxCell id="svc-group-sns" parent="aws-cloud" style="fillColor=#FCE4EC;strokeColor=#E7157B;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#E7157B;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="通知" vertex="1">
+          <mxGeometry x="880" y="690" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-sns" parent="svc-group-sns" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.sns;fontFamily=Helvetica;shadow=1;" value="SNS&lt;div&gt;&lt;i&gt;注文確定通知&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== Auxiliary Services (CloudWatch + IAM) ===== -->
+        <mxCell id="aux-box" parent="aws-cloud" value="&lt;b&gt;Auxiliary Services&lt;/b&gt;" style="rounded=0;fillColor=none;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacingLeft=8;spacingTop=4;html=1;fontSize=12;fontStyle=0;fontColor=#666666;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="340" y="550" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-group-cloudwatch" parent="aws-cloud" style="fillColor=#FCE4EC;strokeColor=#E7157B;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#E7157B;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="監視" vertex="1">
+          <mxGeometry x="360" y="570" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-cloudwatch" parent="svc-group-cloudwatch" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch_2;fontFamily=Helvetica;shadow=1;" value="CloudWatch&lt;div&gt;&lt;i&gt;監視・ログ&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-group-iam" parent="aws-cloud" style="fillColor=#FFEBEE;strokeColor=#DD344C;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#DD344C;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="権限" vertex="1">
+          <mxGeometry x="500" y="570" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-iam" parent="svc-group-iam" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.identity_and_access_management;fontFamily=Helvetica;shadow=1;" value="IAM Role&lt;div&gt;&lt;i&gt;Lambda 実行&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===================== EDGES (icon-to-icon; waypoints route around intervening icons) ===================== -->
+        <!-- Blue #2E7DD7 : 同期フロー (ユーザー閲覧/API) -->
+        <mxCell id="e-users-cf" edge="1" parent="1" source="users-icon" target="svc-cloudfront" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="104" y="494" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-users-cf-label" value="HTTPS 閲覧" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-users-cf">
+          <mxGeometry relative="1" x="-0.2" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-r53-cf" edge="1" parent="1" source="svc-route53" target="svc-cloudfront" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-r53-cf-label" value="名前解決" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-r53-cf">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-cf-s3site" edge="1" parent="1" source="svc-cloudfront" target="svc-s3-site" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-cf-s3site-label" value="静的配信" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-cf-s3site">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-cf-s3img" edge="1" parent="1" source="svc-cloudfront" target="svc-s3-img" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="494" />
+              <mxPoint x="250" y="894" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-cf-s3img-label" value="画像配信" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-cf-s3img">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-cf-apigw" edge="1" parent="1" source="svc-cloudfront" target="svc-apigw" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-cf-apigw-label" value="API リクエスト" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-cf-apigw">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-apigw-lambda" edge="1" parent="1" source="svc-apigw" target="svc-lambda-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-apigw-lambda-label" value="呼び出し" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-apigw-lambda">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-lambda-ddb" edge="1" parent="1" source="svc-lambda-api" target="svc-dynamodb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-lambda-ddb-label" value="読み書き" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-lambda-ddb">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Red #DD344C : 認証フロー -->
+        <mxCell id="e-apigw-cognito" edge="1" parent="1" source="svc-apigw" target="svc-cognito" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#DD344C;strokeWidth=2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-apigw-cognito-label" value="JWT 検証" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-apigw-cognito">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Pink #E7157B : 非同期フロー (注文確定) -->
+        <mxCell id="e-lambda-sqs" edge="1" parent="1" source="svc-lambda-api" target="svc-sqs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E7157B;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-lambda-sqs-label" value="注文をエンキュー" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-lambda-sqs">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-sqs-worker" edge="1" parent="1" source="svc-sqs" target="svc-lambda-worker" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E7157B;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-sqs-worker-label" value="デキュー処理" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-sqs-worker">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-worker-sns" edge="1" parent="1" source="svc-lambda-worker" target="svc-sns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E7157B;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-worker-sns-label" value="確定通知発行" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-worker-sns">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-worker-ddb" edge="1" parent="1" source="svc-lambda-worker" target="svc-dynamodb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E7157B;strokeWidth=2;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-worker-ddb-label" value="注文ステータス更新" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-worker-ddb">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Slate dashed #607D8B : 通知配信フロー -->
+        <mxCell id="e-sns-users" edge="1" parent="1" source="svc-sns" target="users-icon" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#607D8B;strokeWidth=2;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1160" y="1090" />
+              <mxPoint x="160" y="1090" />
+              <mxPoint x="160" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-sns-users-label" value="メール/プッシュ通知" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-sns-users">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
