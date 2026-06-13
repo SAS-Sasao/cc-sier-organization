@@ -73,5 +73,13 @@ l2_retries: 0
 - 既知: PoC の cloudwatch_alarm は無効シェイプ→正は cloudwatch（実図生成時に修正）
 - Phase1+Phase2 を1 PR にまとめ push（auto-merge せず人手レビュー）
 
+### [2026-06-13 dry-run] secretary → cloud-engineer（生成+L0+L1）→ general-purpose（L2）
+v2 実図ドライ実行: cloud-engineer が EC サーバーレス構成図を生成し Phase2-5 通過（L0① validate_drawio.py exit0/shape全VALID、L0② review-drawio.js exit0/貫通0、L1 全PASS）。生成4ファイル docs/diagrams/dryrun-v2-ec-serverless.{drawio,html,yaml,-iac.html}（未コミット）。
+別サブエージェント general-purpose による L2 独立採点: **composite 1.00 / verdict pass / critical_triggered false**（s5 は dry-run で N/A、s1/s2/s3/s4/s6=1.00）。
+→ v2 スキルは end-to-end 動作確認済み。
+
+### [2026-06-13] 要対応の発見（スキル堅牢化）
+review-drawio.js が group→group 接続・aws-cloud 全面コンテナを貫通と**誤検知**（shipped サンプルも全て exit1）。生成時に「エッジは icon-to-icon 接続」「service group は parent=aws-cloud に reparent（相対座標）」を初回適用すれば回避可。→ v2 SKILL.md Phase2 に必須手順として追記すべき（未対応）。iac.html の "Powered by AWS IaC MCP Server" 表記も v2 用に要修正（軽微）。
+
 ## reward
 （post-merge hook が自動追記）
