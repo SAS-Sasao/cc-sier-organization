@@ -7,8 +7,8 @@ mode: "subagent"
 started: "2026-06-13T20:11:16"
 completed: "2026-06-14T07:25:20"
 request: "EDI受発注システムをオンプレミス環境からAWSへ移行する際の構成図を作成して（/company-diagram-v2 初の本番実行）"
-issue_number: null
-pr_number: null
+issue_number: 576
+pr_number: 575
 subagents: [cloud-engineer, general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 0
