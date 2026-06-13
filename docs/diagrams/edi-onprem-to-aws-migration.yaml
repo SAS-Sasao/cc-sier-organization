@@ -1,0 +1,437 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  EDI 受発注システム オンプレミス → AWS 移行構成。
+  Transfer Family (AS2/SFTP) で取引先から EDI を受信し、S3 に landing。
+  B2B Data Interchange で X12/EDIFACT を JSON へ変換し、EventBridge 経由で
+  Step Functions / Lambda / SQS による受発注処理ワークフローを駆動、
+  Aurora (Multi-AZ) と DynamoDB に書き込む。Direct Connect / Site-to-Site VPN +
+  Transit Gateway によりオンプレのレガシー受発注システムと移行期に並行稼働する。
+  実値は # TODO コメントで明示（本テンプレートは構成図と整合した骨子）。
+
+Parameters:
+  EnvName:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: 環境名（dev / prod）。Aurora のインスタンス数・容量の出し分けに使用。
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16 # TODO: 実 CIDR に合わせる
+  OnPremCidr:
+    Type: String
+    Default: 192.168.0.0/16 # TODO: オンプレ DC の CIDR
+  CustomerGatewayIp:
+    Type: String
+    Default: 203.0.113.10 # TODO: オンプレ側 VPN 終端のグローバル IP
+
+Mappings:
+  EnvMap:
+    dev:
+      AuroraInstanceClass: db.serverless
+      AuroraMinAcu: 0.5
+      AuroraMaxAcu: 2
+    prod:
+      AuroraInstanceClass: db.serverless
+      AuroraMinAcu: 2
+      AuroraMaxAcu: 8
+
+Resources:
+  # ===== ネットワーク（VPC / Multi-AZ） =====
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "edi-${EnvName}-vpc"
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.1.0/24 # TODO
+      AvailabilityZone: !Select [0, !GetAZs ""]
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.2.0/24 # TODO
+      AvailabilityZone: !Select [1, !GetAZs ""]
+
+  # ===== ハイブリッド接続（Transit Gateway + Site-to-Site VPN） =====
+  # Direct Connect 本体（DX Gateway / VIF）はアカウント横断・物理回線手配のため
+  # 別スタック管理を想定。ここでは TGW と VPN による接続定義のみ記述。
+  TransitGateway:
+    Type: AWS::EC2::TransitGateway
+    Properties:
+      Description: !Sub "edi-${EnvName}-tgw (DX/VPN 集約)"
+      AmazonSideAsn: 64512 # TODO
+
+  TgwVpcAttachment:
+    Type: AWS::EC2::TransitGatewayVpcAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGateway
+      VpcId: !Ref Vpc
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+
+  CustomerGateway:
+    Type: AWS::EC2::CustomerGateway
+    Properties:
+      Type: ipsec.1
+      BgpAsn: 65000 # TODO: オンプレ側 ASN
+      IpAddress: !Ref CustomerGatewayIp
+
+  SiteToSiteVpn:
+    Type: AWS::EC2::VPNConnection
+    Properties:
+      Type: ipsec.1
+      CustomerGatewayId: !Ref CustomerGateway
+      TransitGatewayId: !Ref TransitGateway
+      StaticRoutesOnly: false
+
+  # ===== セキュリティ（KMS / Secrets Manager / IAM） =====
+  EdiKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: EDI データ保管時暗号化（S3 / Aurora / DynamoDB / SQS）
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: EnableRoot
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
+
+  PartnerCredentialsSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "edi-${EnvName}-partner-credentials"
+      Description: 取引先の AS2/SFTP 認証情報
+      KmsKeyId: !Ref EdiKmsKey
+
+  # ===== ファイル基盤（S3） =====
+  EdiLandingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "edi-${EnvName}-landing-${AWS::AccountId}"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: !Ref EdiKmsKey
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: ArchiveRawEdi
+            Status: Enabled
+            Transitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 90 # TODO: アーカイブ要件に合わせる
+
+  # ===== EDI 受信（Transfer Family AS2/SFTP） =====
+  TransferServer:
+    Type: AWS::Transfer::Server
+    Properties:
+      Protocols:
+        - SFTP
+        - AS2
+      Domain: S3
+      EndpointType: VPC
+      EndpointDetails:
+        VpcId: !Ref Vpc
+        SubnetIds:
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+      IdentityProviderType: SERVICE_MANAGED
+      Tags:
+        - Key: Name
+          Value: !Sub "edi-${EnvName}-transfer"
+
+  # ===== EDI 変換（B2B Data Interchange） =====
+  # B2Bi の Profile / Capability / Transformer / Partnership は
+  # AWS::B2BI::* リソースで定義する。X12/EDIFACT → JSON 変換を担う。
+  B2biProfile:
+    Type: AWS::B2BI::Profile
+    Properties:
+      Name: !Sub "edi-${EnvName}-profile"
+      Phone: "000-0000-0000" # TODO
+      BusinessName: "EDI Migration Org" # TODO
+      Logging: ENABLED
+
+  B2biTransformer:
+    Type: AWS::B2BI::Transformer
+    Properties:
+      Name: !Sub "edi-${EnvName}-x12-to-json"
+      Status: active
+      # TODO: EdiType (X12 / EDIFACT) と OutputConversion (JSON) を指定
+
+  # ===== 連携・オーケストレーション（EventBridge / SQS / Lambda / Step Functions） =====
+  OrderEventBus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: !Sub "edi-${EnvName}-order-bus"
+
+  OrderProcessingDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "edi-${EnvName}-order-dlq"
+      KmsMasterKeyId: !Ref EdiKmsKey
+
+  OrderProcessingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub "edi-${EnvName}-order-queue"
+      KmsMasterKeyId: !Ref EdiKmsKey
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt OrderProcessingDlq.Arn
+        maxReceiveCount: 5
+
+  OrderProcessingFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "edi-${EnvName}-order-processor"
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: index.handler
+      Timeout: 60
+      MemorySize: 512
+      Role: !GetAtt OrderProcessingRole.Arn
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              # TODO: B2Bi 変換済み受発注 JSON を Aurora / DynamoDB に反映
+              return {"status": "ok"}
+
+  OrderApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "edi-${EnvName}-order-api"
+      Runtime: python3.12
+      Architectures: [arm64]
+      Handler: index.handler
+      Timeout: 30
+      MemorySize: 512
+      Role: !GetAtt OrderProcessingRole.Arn
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              # TODO: 移行先 受発注 API バックエンド（Aurora 照会）
+              return {"statusCode": 200, "body": "{}"}
+
+  OrderWorkflow:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: !Sub "edi-${EnvName}-order-workflow"
+      RoleArn: !GetAtt StepFunctionsRole.Arn
+      DefinitionString: !Sub |
+        {
+          "Comment": "受発注処理ワークフロー",
+          "StartAt": "Validate",
+          "States": {
+            "Validate": { "Type": "Task", "Resource": "${OrderProcessingFunction.Arn}", "Next": "Persist" },
+            "Persist":  { "Type": "Task", "Resource": "${OrderProcessingFunction.Arn}", "End": true }
+          }
+        }
+
+  # EventBridge ルール: B2Bi 変換完了イベント → Step Functions / SQS
+  B2biCompletedToWorkflowRule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName: !Ref OrderEventBus
+      EventPattern:
+        source: ["aws.b2bi"] # TODO: 実イベントソースに合わせる
+        detail-type: ["EDI Transformation Completed"]
+      Targets:
+        - Id: ToWorkflow
+          Arn: !Ref OrderWorkflow
+          RoleArn: !GetAtt EventBridgeInvokeRole.Arn
+        - Id: ToQueue
+          Arn: !GetAtt OrderProcessingQueue.Arn
+
+  OrderQueueEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt OrderProcessingQueue.Arn
+      FunctionName: !Ref OrderProcessingFunction
+      BatchSize: 10
+
+  # ===== データ（Aurora Multi-AZ / DynamoDB） =====
+  AuroraCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-postgresql
+      EngineMode: provisioned
+      DatabaseName: orders
+      MasterUsername: !Sub "{{resolve:secretsmanager:${PartnerCredentialsSecret}:SecretString:dbuser}}" # TODO
+      StorageEncrypted: true
+      KmsKeyId: !Ref EdiKmsKey
+      ServerlessV2ScalingConfiguration:
+        MinCapacity: !FindInMap [EnvMap, !Ref EnvName, AuroraMinAcu]
+        MaxCapacity: !FindInMap [EnvMap, !Ref EnvName, AuroraMaxAcu]
+
+  AuroraInstanceA:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+
+  AuroraInstanceB:
+    Type: AWS::RDS::DBInstance
+    Condition: IsProd
+    Properties:
+      DBClusterIdentifier: !Ref AuroraCluster
+      DBInstanceClass: db.serverless
+      Engine: aurora-postgresql
+
+  ProcessingStateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "edi-${EnvName}-processing-state"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+        KMSMasterKeyId: !Ref EdiKmsKey
+        SSEType: KMS
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  # ===== 社内 API（API Gateway） =====
+  OrderApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "edi-${EnvName}-order-api"
+      ProtocolType: HTTP
+
+  # ===== 監視・通知（CloudWatch / SNS） =====
+  OpsAlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "edi-${EnvName}-ops-alerts"
+      KmsMasterKeyId: !Ref EdiKmsKey
+
+  DlqDepthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "edi-${EnvName}-order-dlq-depth"
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt OrderProcessingDlq.QueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      AlarmActions:
+        - !Ref OpsAlertTopic
+
+  # ===== IAM（最小権限ロール） =====
+  OrderProcessingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: order-processing-least-privilege
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes]
+                Resource: !GetAtt OrderProcessingQueue.Arn
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:GetItem]
+                Resource: !GetAtt ProcessingStateTable.Arn
+              - Effect: Allow
+                Action: [kms:Decrypt, kms:GenerateDataKey]
+                Resource: !GetAtt EdiKmsKey.Arn
+              - Effect: Allow
+                Action: [secretsmanager:GetSecretValue]
+                Resource: !Ref PartnerCredentialsSecret
+
+  StepFunctionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: invoke-order-lambda
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt OrderProcessingFunction.Arn
+
+  EventBridgeInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: start-order-workflow
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref OrderWorkflow
+
+Conditions:
+  IsProd: !Equals [!Ref EnvName, prod]
+
+Outputs:
+  TransferServerId:
+    Description: Transfer Family サーバー ID（取引先 AS2/SFTP 接続先）
+    Value: !Ref TransferServer
+  LandingBucketName:
+    Description: EDI raw landing / アーカイブ用 S3 バケット
+    Value: !Ref EdiLandingBucket
+  OrderApiEndpoint:
+    Description: 移行先 受発注 API エンドポイント
+    Value: !Sub "https://${OrderApi}.execute-api.${AWS::Region}.amazonaws.com"
+  AuroraClusterEndpoint:
+    Description: 受発注 DB（Aurora Multi-AZ）書き込みエンドポイント
+    Value: !GetAtt AuroraCluster.Endpoint.Address
+  TransitGatewayId:
+    Description: オンプレ DC とのハイブリッド接続を集約する Transit Gateway
+    Value: !Ref TransitGateway

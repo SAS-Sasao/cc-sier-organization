@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDI 受発注システム オンプレミス → AWS 移行構成 - AWS構成図</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08);
+        --muted:#6c757d; --shadow:rgba(0,0,0,.06); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08);
+          --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1100px; margin:0 auto; }
+.back-btn { display:inline-block; color:var(--blue); text-decoration:none; font-size:.88rem; margin-bottom:20px; }
+.back-btn:hover { text-decoration:underline; }
+h1 { font-size:1.4rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:24px; display:flex; flex-wrap:wrap; gap:16px; }
+.tag { display:inline-block; padding:2px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.tag-area { background:#e0e7ff; color:#3730a3; }
+.tag-project { background:#fef3c7; color:#92400e; }
+@media (prefers-color-scheme: dark) {
+  .tag-area { background:#312e81; color:#c7d2fe; }
+  .tag-project { background:#78350f; color:#fde68a; }
+}
+.diagram-container { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+                     padding:24px; margin-bottom:32px; text-align:center; box-shadow:0 2px 8px var(--shadow); }
+.diagram-container iframe { width:100%; height:680px; border:0; border-radius:8px; background:#fff; }
+.hint { font-size:.78rem; color:var(--muted); margin-top:8px; }
+.legend-grid { display:flex; flex-wrap:wrap; gap:12px 24px; }
+.legend-item { display:flex; align-items:center; gap:8px; font-size:.85rem; }
+.legend-line { width:28px; height:3px; border-radius:2px; flex-shrink:0; }
+.legend-dashed { height:0; border-top:3px dashed; background:none !important; }
+.iac-btn { display:inline-block; margin-top:12px; padding:10px 20px; background:linear-gradient(135deg,#4361ee,#7c3aed);
+           color:#fff; text-decoration:none; border-radius:8px; font-size:.88rem; font-weight:600;
+           transition:opacity .2s, transform .15s; }
+.iac-btn:hover { opacity:.9; transform:translateY(-1px); }
+.dl-link { display:inline-block; margin-top:12px; margin-left:8px; padding:10px 20px; background:var(--bg);
+           color:var(--blue); text-decoration:none; border:1px solid var(--border); border-radius:8px; font-size:.88rem; font-weight:600; }
+.section { background:var(--bg2); border:1px solid var(--border); border-radius:12px;
+           padding:24px; margin-bottom:24px; box-shadow:0 2px 8px var(--shadow); }
+.section h2 { font-size:1.1rem; margin-bottom:12px; }
+.section h3 { font-size:.95rem; margin:20px 0 12px; }
+.section p { font-size:.9rem; line-height:1.7; margin-bottom:12px; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th { text-align:left; background:var(--bg); padding:10px 12px; border:1px solid var(--border); white-space:nowrap; font-weight:600; }
+td { padding:10px 12px; border:1px solid var(--border); }
+.flow { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:16px 0; font-size:.88rem; }
+.flow-step { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:8px 14px; font-weight:500; }
+.flow-arrow { color:var(--muted); font-size:1.2rem; }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:.72rem; font-weight:600; margin-right:6px; }
+.badge-recv { background:#dbeafe; color:#1e40af; }
+.badge-proc { background:#ffedd5; color:#9a3412; }
+.badge-hybrid { background:#ede9fe; color:#5b21b6; }
+.badge-ops { background:#e2e8f0; color:#334155; }
+ul.learning-points { list-style:none; padding-left:0; }
+ul.learning-points li { border-left:4px solid var(--blue); padding:8px 14px; margin-bottom:10px; background:var(--bg); border-radius:4px; font-size:.88rem; line-height:1.65; }
+ul.learning-points strong { color:var(--blue); }
+.cost-total td, .cost-total th { background:var(--bg); font-weight:600; }
+.updated { margin-top:32px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<a href="./index.html" class="back-btn">&larr; 構成図一覧に戻る</a>
+
+<h1>EDI 受発注システム オンプレミス &rarr; AWS 移行構成</h1>
+<div class="meta">
+  <span class="tag tag-project">EDI 受発注移行</span>
+  <span class="tag tag-area">ハイブリッド / サーバーレス</span>
+  <span>生成日: 2026-06-13</span>
+</div>
+
+<div class="diagram-container">
+  <iframe src="./edi-onprem-to-aws-migration.drawio" title="EDI 受発注システム オンプレミス→AWS 移行構成図"></iframe>
+  <div class="hint">draw.io XML を直接埋め込み表示（v2 方式）。ブラウザによっては <a href="./edi-onprem-to-aws-migration.drawio" download>.drawio をダウンロード</a>して diagrams.net で開いてください。</div>
+  <div>
+    <a href="./edi-onprem-to-aws-migration-iac.html" class="iac-btn">IaCソースコードを見る</a>
+    <a href="./edi-onprem-to-aws-migration.drawio" class="dl-link" download>.drawio をダウンロード</a>
+  </div>
+</div>
+
+<div class="section">
+  <h2>凡例</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="legend-line" style="background:#2E7DD7"></span> EDI 受信フロー &#8212; 取引先が AS2/SFTP で送信 &rarr; Transfer Family が受信 &rarr; S3 へ EDI ファイルを landing</div>
+    <div class="legend-item"><span class="legend-line" style="background:#ED7100"></span> EDI 変換・受発注処理フロー &#8212; S3 &rarr; B2B Data Interchange (X12/EDIFACT→JSON) &rarr; EventBridge &rarr; Step Functions / SQS / Lambda &rarr; Aurora・DynamoDB。社内 API (API Gateway+Lambda) からの受発注照会も含む</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#8C4FFF"></span> オンプレ⇔AWS ハイブリッド連携（破線・移行期の並行稼働）&#8212; レガシー受発注/EDI ↔ Direct Connect・Site-to-Site VPN ↔ Transit Gateway ↔ VPC 内サービス</div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#607D8B"></span> 監視・通知フロー（破線）&#8212; CloudWatch アラームが発火 &rarr; SNS で運用担当へ通知</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>概要</h2>
+  <p>既存の <strong>オンプレミス EDI/VAN・レガシー受発注システム</strong> を AWS のマネージドサービス群へ段階的に移行する構成。取引先（発注元・受注先）からの EDI ファイルは <strong>AWS Transfer Family</strong> が AS2/SFTP で受信し、<strong>S3</strong> に raw landing する。<strong>AWS B2B Data Interchange</strong> が X12/EDIFACT を JSON へ変換し、その完了イベントを起点に <strong>EventBridge → Step Functions / SQS / Lambda</strong> の受発注処理ワークフローが駆動され、<strong>Aurora（Multi-AZ）</strong>に受発注データ、<strong>DynamoDB</strong> に処理ステータスを記録する。移行先の受発注機能は <strong>API Gateway + Lambda</strong> の社内 API として提供する。</p>
+  <p>移行はビッグバンではなく<strong>並行稼働（ストラングラーパターン）</strong>を前提とする。オンプレのレガシー受発注/EDI システムは <strong>Direct Connect</strong>（冗長として <strong>Site-to-Site VPN</strong>）と <strong>Transit Gateway</strong> 経由で VPC 内の新基盤と接続し、移行期間中はデータをやり取りしながら段階的に処理を AWS 側へ切り替える。セキュリティは <strong>IAM 最小権限ロール・KMS 保管時暗号化・Secrets Manager（取引先認証情報）</strong>を最初から各層に織り込み、<strong>CloudWatch + SNS</strong> で監視・通知を行う。本ファイルは company-diagram-v2（draw.io XML 直接生成方式 / MCP 不使用）の成果物。</p>
+</div>
+
+<div class="section">
+  <h2>データフロー</h2>
+  <div class="flow">
+    <span class="badge badge-recv">受信</span>
+    <span class="flow-step">取引先（発注元/受注先）</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Transfer Family (AS2/SFTP)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">S3 (raw landing / アーカイブ)</span>
+  </div>
+  <div class="flow">
+    <span class="badge badge-proc">変換・処理</span>
+    <span class="flow-step">S3</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">B2B Data Interchange</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">EventBridge</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Step Functions / SQS</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora / DynamoDB</span>
+  </div>
+  <div class="flow">
+    <span class="badge badge-proc">社内API</span>
+    <span class="flow-step">社内システム</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">API Gateway</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Lambda (API)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">Aurora</span>
+  </div>
+  <div class="flow">
+    <span class="badge badge-hybrid">ハイブリッド</span>
+    <span class="flow-step">レガシー受発注/EDI（オンプレ）</span><span class="flow-arrow">&harr;</span>
+    <span class="flow-step">Direct Connect / VPN</span><span class="flow-arrow">&harr;</span>
+    <span class="flow-step">Transit Gateway</span><span class="flow-arrow">&harr;</span>
+    <span class="flow-step">VPC 内サービス</span>
+  </div>
+  <div class="flow">
+    <span class="badge badge-ops">監視・通知</span>
+    <span class="flow-step">CloudWatch (メトリクス/アラーム)</span><span class="flow-arrow">&rarr;</span>
+    <span class="flow-step">SNS (運用通知)</span>
+  </div>
+  <p><strong>EDI 変換・受発注処理フロー</strong>: S3 に着地した EDI ファイルを B2B Data Interchange が X12/EDIFACT から JSON へ変換し、変換完了イベントを EventBridge に発行する。EventBridge は同期的なステップ実行が必要な受発注は Step Functions ワークフローへ、スパイクを吸収すべき非同期処理は SQS（+ DLQ, maxReceiveCount=5）へ振り分ける。Lambda が処理結果を Aurora（受発注 DB, Multi-AZ）へ書き込み、処理ステータスを DynamoDB に記録する。</p>
+  <p><strong>オンプレ⇔AWS ハイブリッド連携フロー（移行期）</strong>: レガシー EDI/VAN・受発注システムは Direct Connect（主）と Site-to-Site VPN（冗長）で AWS へ接続し、両回線を Transit Gateway が集約して VPC へルーティングする。移行期間中はレガシー側と新基盤（API Gateway+Lambda）の間で受発注データを連携させ、機能単位で段階的に切り替える。</p>
+</div>
+
+<div class="section">
+  <h2>レイヤー構成</h2>
+  <table>
+    <tr><th>レイヤー</th><th>AWSサービス</th><th>用途</th></tr>
+    <tr><td>外部アクター</td><td>取引先（発注元/受注先）</td><td>複数の取引先が AS2/SFTP で EDI ファイルを送受信</td></tr>
+    <tr><td>オンプレミス</td><td>既存 EDI/VAN（レガシー）</td><td>X12/EDIFACT の既存交換基盤。移行期は並行稼働</td></tr>
+    <tr><td>オンプレミス</td><td>レガシー受発注システム</td><td>既存の受発注処理。Direct Connect/VPN 経由で AWS と連携</td></tr>
+    <tr><td>ハイブリッド接続</td><td>Direct Connect</td><td>オンプレ DC と AWS をつなぐ専用線（主回線）</td></tr>
+    <tr><td>ハイブリッド接続</td><td>Site-to-Site VPN</td><td>Direct Connect 障害時の冗長 IPsec 経路</td></tr>
+    <tr><td>ハイブリッド接続</td><td>Transit Gateway</td><td>DX/VPN を集約し VPC へルーティング</td></tr>
+    <tr><td>EDI 受信</td><td>AWS Transfer Family</td><td>AS2/SFTP エンドポイント。取引先から EDI を受信し S3 へ</td></tr>
+    <tr><td>ファイル基盤</td><td>S3</td><td>EDI raw landing バケット + アーカイブ（Glacier 移行）。KMS 暗号化</td></tr>
+    <tr><td>EDI 変換</td><td>AWS B2B Data Interchange</td><td>X12/EDIFACT &rarr; JSON 変換。Transformer/Partnership で取引先別に処理</td></tr>
+    <tr><td>イベント連携</td><td>EventBridge</td><td>変換完了イベントを Step Functions / SQS へルーティング</td></tr>
+    <tr><td>キュー</td><td>SQS (+ DLQ)</td><td>非同期受発注処理キュー。スパイク吸収・失敗は DLQ へ退避</td></tr>
+    <tr><td>オーケストレーション</td><td>Step Functions</td><td>受発注処理ワークフロー（検証→永続化）のステップ管理</td></tr>
+    <tr><td>Compute</td><td>Lambda（受発注処理）</td><td>SQS/Step Functions から起動。Aurora/DynamoDB へ反映</td></tr>
+    <tr><td>受発注 DB</td><td>Aurora（Multi-AZ）</td><td>受発注データの永続化。Serverless v2、KMS 暗号化、Multi-AZ</td></tr>
+    <tr><td>処理状態</td><td>DynamoDB</td><td>受発注処理ステータス。PITR 有効、KMS 暗号化</td></tr>
+    <tr><td>社内 API</td><td>API Gateway</td><td>移行先 受発注 API のエンドポイント（HTTP API）</td></tr>
+    <tr><td>API Compute</td><td>Lambda（API）</td><td>社内 API バックエンド。Aurora を照会</td></tr>
+    <tr><td>監視</td><td>CloudWatch</td><td>メトリクス・ログ集約、DLQ 滞留などのアラーム</td></tr>
+    <tr><td>通知</td><td>SNS</td><td>運用アラートの通知トピック</td></tr>
+    <tr><td>権限</td><td>IAM</td><td>Lambda/Step Functions/EventBridge の最小権限ロール</td></tr>
+    <tr><td>暗号化</td><td>KMS</td><td>S3/Aurora/DynamoDB/SQS/SNS の保管時暗号化 CMK</td></tr>
+    <tr><td>認証情報</td><td>Secrets Manager</td><td>取引先の AS2/SFTP 認証情報・DB 認証情報</td></tr>
+  </table>
+</div>
+
+<div class="section">
+  <h2>設計のポイント</h2>
+  <ul>
+    <li><strong>ビッグバンではなくストラングラーパターンで段階移行する</strong> &#8212; レガシー受発注/EDI を一度に止めるのではなく、Direct Connect/VPN + Transit Gateway でオンプレと AWS を接続し、受発注の機能単位で新基盤へ少しずつ切り替える。並行稼働期間を設けることで、変換ロジックの差異や取引先ごとの方言を本番データで検証しながら、切り戻し可能な状態を保てる。EDI は取引先との取り決めが絡むため一斉切替のリスクが極めて高い。</li>
+    <li><strong>EDI 変換はマネージドの B2B Data Interchange に寄せる</strong> &#8212; X12/EDIFACT のパースとマッピングは自前実装すると保守負担が大きく、取引先追加のたびに改修が必要になる。B2B Data Interchange の Transformer/Partnership に変換定義を持たせることで、業務ロジック（Lambda）と EDI 方言の吸収（B2Bi）を分離し、取引先の増減に変換定義の追加だけで対応できる。</li>
+    <li><strong>同期ワークフローと非同期キューを EventBridge で振り分ける</strong> &#8212; 順序保証や複数ステップが要る受発注は Step Functions に、繁忙期のスパイクを吸収すべき大量処理は SQS（+ DLQ）に流す。EventBridge をハブにすることで、後から購読者（分析・監査・別システム連携）を追加してもプロデューサー側を変えずに済む疎結合を保てる。</li>
+    <li><strong>受発注データは Aurora、処理ステータスは DynamoDB と役割で分ける</strong> &#8212; トランザクション整合性と既存 SQL 資産の移行性が要る受発注本体は Aurora（Multi-AZ）、高頻度に更新され参照キーが固定の処理ステータスは DynamoDB に置く。データ特性に合わせてストアを使い分けることで、それぞれのスケーリング特性とコスト効率を最大化する。</li>
+    <li><strong>取引先認証情報・暗号化・最小権限を最初から多層で設計する</strong> &#8212; 取引先の AS2/SFTP 認証情報は Secrets Manager に隔離し、S3/Aurora/DynamoDB/SQS は KMS CMK で保管時暗号化、Lambda 等は IAM 最小権限ロールで動かす。EDI は企業間取引データそのものを扱うため、移行を機に「点」の対策ではなく層ごとの防御を組み込む。</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>コスト概算</h2>
+  <p class="cost-note">ap-northeast-1 (東京) リージョン基準の月額概算。実際の費用は利用量により変動します。<br>
+  為替レート: $1 = 150円（参考値）</p>
+  <table>
+    <thead>
+      <tr><th>サービス</th><th>構成</th><th>Dev (月額)</th><th>Prod (月額)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Transfer Family</td><td>AS2/SFTP エンドポイント（時間課金 + 転送量）</td><td>$30 (4,500円)</td><td>$60 (9,000円)</td></tr>
+      <tr><td>B2B Data Interchange</td><td>EDI 変換（処理ドキュメント数課金）</td><td>$10 (1,500円)</td><td>$50 (7,500円)</td></tr>
+      <tr><td>S3 (landing + アーカイブ)</td><td>~50GB + リクエスト + Glacier</td><td>$3 (450円)</td><td>$8 (1,200円)</td></tr>
+      <tr><td>Lambda (処理 + API)</td><td>Dev: ~50万req、Prod: ~1,000万req（ARM）</td><td>$1 (150円)</td><td>$25 (3,750円)</td></tr>
+      <tr><td>Step Functions</td><td>Standard、状態遷移課金</td><td>$2 (300円)</td><td>$20 (3,000円)</td></tr>
+      <tr><td>SQS (+ DLQ)</td><td>100万〜1,000万msg</td><td>$0 (0円)</td><td>$5 (750円)</td></tr>
+      <tr><td>EventBridge</td><td>カスタムイベント発行</td><td>$1 (150円)</td><td>$5 (750円)</td></tr>
+      <tr><td>Aurora Serverless v2</td><td>Dev: 0.5-2 ACU、Prod: 2-8 ACU Multi-AZ</td><td>$60 (9,000円)</td><td>$320 (48,000円)</td></tr>
+      <tr><td>DynamoDB (On-Demand)</td><td>処理ステータス + PITR</td><td>$5 (750円)</td><td>$40 (6,000円)</td></tr>
+      <tr><td>API Gateway (HTTP)</td><td>リクエスト課金</td><td>$2 (300円)</td><td>$15 (2,250円)</td></tr>
+      <tr><td>Direct Connect</td><td>ポート時間（1Gbps Hosted 想定）+ 転送量</td><td>$220 (33,000円)</td><td>$300 (45,000円)</td></tr>
+      <tr><td>Site-to-Site VPN</td><td>VPN 接続時間（冗長経路）</td><td>$36 (5,400円)</td><td>$36 (5,400円)</td></tr>
+      <tr><td>Transit Gateway</td><td>アタッチメント時間 + 転送量</td><td>$40 (6,000円)</td><td>$80 (12,000円)</td></tr>
+      <tr><td>CloudWatch / SNS</td><td>ログ取り込み + アラーム + 通知</td><td>$3 (450円)</td><td>$15 (2,250円)</td></tr>
+      <tr><td>KMS / Secrets Manager</td><td>CMK 1個 + シークレット数個</td><td>$3 (450円)</td><td>$5 (750円)</td></tr>
+      <tr class="cost-total"><td colspan="2"><strong>合計</strong></td><td><strong>$416 (約62,400円)</strong></td><td><strong>$984 (約147,600円)</strong></td></tr>
+    </tbody>
+  </table>
+  <h3>前提条件</h3>
+  <p>Dev は単一 AZ・少数取引先での検証規模（月 ~50万リクエスト）、Prod は中規模 EDI（複数取引先・月 ~1,000万リクエスト / 数万受発注）を想定。Direct Connect は 1Gbps の Hosted Connection（パートナー経由）でポート費が支配的。Aurora は Serverless v2 で Dev は最小、Prod は Multi-AZ 中負荷を想定。Transfer Family・B2B Data Interchange は処理量に応じた従量課金で試算。</p>
+  <h3>コスト最適化のポイント</h3>
+  <p>Direct Connect が固定費の中心になるため、移行完了後にトラフィックが小さければ <strong>VPN 単独構成へ縮退</strong>して DX を解約する選択も検討する（並行稼働期だけ DX を借りる）。Aurora はアクセスパターン安定後に Reserved Instance / Provisioned + Auto Scaling へ切替で 2〜4 割削減。Lambda は ARM (Graviton) で ~20% 単価削減。S3 は Intelligent-Tiering と Glacier ライフサイクルでアーカイブコストを圧縮。B2B Data Interchange はバッチ集約で処理ドキュメント単価を下げる。DynamoDB はステータス更新が安定したら On-Demand → Provisioned へ。</p>
+</div>
+
+<div class="section">
+  <h2>学習ポイント</h2>
+  <ul class="learning-points">
+    <li><strong>レガシー移行はストラングラーパターンで「切り戻せる並行稼働」を確保する</strong> &#8212; 基幹に近いシステムほど一斉切替（ビッグバン）の失敗コストは致命的になる。新旧を接続して機能単位で少しずつ移し、各段階で旧系へ戻せる状態を保つことで、本番データでの検証とリスク分散を両立できる。ハイブリッド接続（DX/VPN+TGW）はこの並行稼働を支える土台であり、移行の本質的な技術要件。</li>
+    <li><strong>業界標準フォーマットの変換はマネージドサービスへ外出しして業務ロジックと分離する</strong> &#8212; EDI の X12/EDIFACT のように方言が多く取引先依存のフォーマット変換を自前実装すると、取引先追加のたびにコード改修が必要になり保守が破綻しやすい。変換定義（B2Bi）と業務処理（Lambda）を分離すれば、変更の影響範囲が局所化され、新規取引先の追加が設定作業に収まる。関心の分離は普遍的に効く。</li>
+    <li><strong>イベントハブ（EventBridge）を中心に据えると後付けの拡張が安くなる</strong> &#8212; プロデューサーとコンシューマーをイベントバスで疎結合にすると、監査・分析・別システム連携といった購読者を後から追加してもプロデューサー側を変更せずに済む。最初に拡張余地を残す設計投資が、後の機能追加速度を決める。</li>
+    <li><strong>データはトランザクション特性で RDB と KVS を使い分ける</strong> &#8212; 整合性・SQL 資産の移行性が要る本体データは RDB（Aurora）、高頻度更新・固定キー参照の状態管理は KVS（DynamoDB）が向く。一つのストアに全部押し込まず、データ特性ごとに最適なストアを選ぶことが、スケーラビリティとコスト効率の両取りにつながる。</li>
+    <li><strong>企業間データを扱う移行は「層」でのセキュリティ設計を移行の初期から組み込む</strong> &#8212; 認証情報の隔離（Secrets Manager）、保管時暗号化（KMS）、最小権限（IAM）、ネットワーク分離（VPC/専用線）を組み合わせて初めて多層防御になる。移行後に後付けすると改修コストが跳ね上がるため、Infrastructure as Code として最初から各層に織り込むのがセオリー。</li>
+  </ul>
+</div>
+
+<p class="updated">生成: company-diagram-v2 (draw.io XML 直接生成方式 / MCP不使用) / EDI 受発注システム オンプレミス→AWS 移行（ハイブリッド・段階移行）</p>
+</body>
+</html>
