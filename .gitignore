@@ -22,11 +22,11 @@ bk/
 # 会話ログ（ローカルのみ・プライバシー保護）
 .companies/*/.conversation-log/
 
-# Case Bank（ローカル学習データ）
-.companies/*/.case-bank/
+# Case Bank（学習データ）— データドリブン意思決定アプリの素材として Git 管理対象化（2026-06-14）
+# .companies/*/.case-bank/
 
-# Quality Gate ログ
-.companies/*/.quality-gate-log/
+# Quality Gate ログ — 同上、Git 管理対象化（2026-06-14）
+# .companies/*/.quality-gate-log/
 
 # ロックファイル
 .claude/scheduled_tasks.lock
