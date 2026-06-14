@@ -1,0 +1,43 @@
+name: aws-cost-estimate
+title: EDI受発注 AWS移行 月額コスト試算（本番環境）
+description: edi-onprem-to-aws-migration 構成図(prod)の AWS 月額ランニングコスト試算
+assumptions:
+  - { key: usd_jpy, value: 155, note: "為替レート（2026-06 想定、要確認）" }
+  - { key: months, value: 12, note: "年額換算の月数" }
+  - { key: region, value: ap-northeast-1, note: "東京リージョン前提" }
+  - { key: env, value: prod, note: "本番。Aurora 2-8ACU/Multi-AZ 構成" }
+  - { key: hours, value: 730, note: "月間稼働時間（24h×365/12）" }
+sheets:
+  - name: monthly
+    columns: [サービス, 課金項目, 単価USD, 数量, 月額USD, 月額JPY]
+    input_cols: [サービス, 課金項目, 単価USD, 数量]
+    formula_cols:
+      - { col: 月額USD, formula: "=単価USD*数量" }
+      - { col: 月額JPY, formula: "=月額USD*assumptions.usd_jpy" }
+    rows:
+      - { サービス: Aurora Serverless v2, 課金項目: ACU時間, 単価USD: 0.20, 数量: 5840 }
+      - { サービス: Aurora,               課金項目: ストレージGB-月, 単価USD: 0.10, 数量: 100 }
+      - { サービス: Transfer Family,      課金項目: エンドポイント時間, 単価USD: 0.30, 数量: 1460 }
+      - { サービス: Transfer Family,      課金項目: データ転送GB, 単価USD: 0.04, 数量: 500 }
+      - { サービス: S3,                   課金項目: ストレージGB-月, 単価USD: 0.025, 数量: 500 }
+      - { サービス: S3,                   課金項目: リクエスト概算, 単価USD: 5, 数量: 1 }
+      - { サービス: Lambda,               課金項目: 実行概算, 単価USD: 30, 数量: 1 }
+      - { サービス: Step Functions,       課金項目: 状態遷移概算, 単価USD: 25, 数量: 1 }
+      - { サービス: SQS,                  課金項目: 標準キュー概算, 単価USD: 8, 数量: 1 }
+      - { サービス: DynamoDB,             課金項目: オンデマンド概算, 単価USD: 30, 数量: 1 }
+      - { サービス: NAT Gateway,          課金項目: 時間料金, 単価USD: 0.062, 数量: 1460 }
+      - { サービス: NAT Gateway,          課金項目: データ処理GB, 単価USD: 0.062, 数量: 500 }
+      - { サービス: Transit Gateway,      課金項目: アタッチメント時間, 単価USD: 0.07, 数量: 730 }
+      - { サービス: Site-to-Site VPN,     課金項目: 接続時間, 単価USD: 0.05, 数量: 730 }
+      - { サービス: Direct Connect,       課金項目: ポート時間(1Gbps専有), 単価USD: 0.30, 数量: 730 }
+      - { サービス: CloudWatch,           課金項目: ログ/メトリクス概算, 単価USD: 20, 数量: 1 }
+      - { サービス: KMS,                  課金項目: キー数, 単価USD: 1, 数量: 4 }
+  - name: summary
+    columns: [項目, 月額USD合計, 月額JPY合計, 年額JPY]
+    input_cols: [項目]
+    formula_cols:
+      - { col: 月額USD合計, formula: "=SUM(monthly.月額USD)" }
+      - { col: 月額JPY合計, formula: "=SUM(monthly.月額JPY)" }
+      - { col: 年額JPY,     formula: "=月額JPY合計*assumptions.months" }
+    rows:
+      - { 項目: 本番環境 合計 }
