@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-06-14T09:39:43"
 completed: "2026-06-14T09:50:00"
 request: "/company-sheet で EDI受発注 AWS移行の月額コスト試算 Excel を作成（research部署、prod環境、壁打ちでYAML確定済み）"
-issue_number: null
-pr_number: null
+issue_number: 583
+pr_number: 582
 subagents: [openpyxl-generator, general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 0
