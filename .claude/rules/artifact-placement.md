@@ -13,6 +13,7 @@
 | 日次ダイジェスト HTML | `docs/daily-digest/` | GitHub Pages 配信 |
 | AWS 構成図 PNG/HTML/YAML | `docs/diagrams/` | GitHub Pages 配信 |
 | draw.io 汎用図 | `docs/drawio/` | GitHub Pages 配信 |
+| Excel/Office 成果物（xlsx） | `docs/office/`（バイナリ）+ `.companies/{org}/docs/{dept}/sheet-{name}.yaml`（YAML設計図） | DL用に commit（Pages配信なし）+ 設計証跡は組織スコープ |
 | ダッシュボード HTML | `docs/secretary/dashboard.html` および `.companies/{org}/docs/secretary/` | Pages 配信 + 組織スコープ |
 | ナレッジポータル HTML | `docs/handover/` | Pages 配信 |
 | トップ `index.html` | `docs/index.html` | Pages ルート |
@@ -43,7 +44,8 @@
 | `docs/drawio/*.html` | `.companies/{org}/.task-log/*.md` |
 | `docs/daily-digest/index.html` | `.companies/{org}/masters/*.md` |
 | `docs/secretary/dashboard.html` | `.companies/{org}/docs/decisions/*.md` |
-| `docs/handover/*.html` | （組織固有の業務ドキュメント全般） |
+| `docs/handover/*.html` | `docs/office/*.xlsx`（DL用、ブラウザ閲覧しない） |
+| | （組織固有の業務ドキュメント全般） |
 
 ## 同一成果物を複数箇所に置くケース
 
