@@ -62,6 +62,7 @@
 | `/company-daily-digest` | 日次ニュース巡回 → MD → 3層レビュー → PR → HTML公開（8フェーズ） |
 | `/company-diagram` | AWS 構成図生成 + L0/L1/L2 レビュー + auto-merge（9フェーズ） |
 | `/company-drawio` | draw.io 汎用図生成 + 3層レビュー + auto-merge（9フェーズ） |
+| `/company-sheet` | 壁打ちで中間表現 YAML 確定 → xlsx 生成 + 3層レビュー + auto-merge（前半=対話/後半=自動の9フェーズ） |
 | `/company-dashboard` | 組織活動ダッシュボード HTML 生成 |
 | `/company-digest-html` | 日次ダイジェスト HTML 再生成（main 直コミット） |
 | `/company-handover` | 全活動のナレッジポータル HTML 生成 |
