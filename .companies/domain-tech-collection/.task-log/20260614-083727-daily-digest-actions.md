@@ -72,3 +72,14 @@ L2 6軸スコアから3軸へのマッピング:
 | completeness | 1.00 | s1_structure(1.00) + s5_dedup(1.00) | 章構成完全準拠、全A1-A6/B1-B6サブセクション存在、重複なし |
 | accuracy | 0.98 | s2_links(1.00) + s3_summary(0.95) | 全80記事にhttpsリンク完備、要約は情報密度高く句読点終端 |
 | clarity | 0.98 | s4_cross_domain(0.95) + s6_violations(1.00) | C章4トピックでSIer示唆が具体的、禁則違反ゼロ |
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-06-14T10:01:25"
+```
