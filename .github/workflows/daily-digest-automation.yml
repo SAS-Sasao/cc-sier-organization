@@ -25,6 +25,11 @@ name: Daily Digest Automation (07:30 JST)
 #       認証は input parameter と job-level env の両方で渡す
 #   - git remote 書き換え:
 #       push 前に https://x-access-token:${GH_TOKEN}@... で再設定
+#   - Task subagent のバックグラウンド化（Claude Code CLI 2.1.198+）:
+#       subagent がバックグラウンド実行になり、メインが完了を待たずに
+#       セッション終了 → MD 未生成のまま "success" 扱いになる
+#       (anthropics/claude-code#23909)。
+#       CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1 でフォアグラウンド実行を強制
 
 on:
   schedule:
@@ -70,6 +75,10 @@ jobs:
       # issue #690 WebFetch/WebSearch 黙殺対策: DISALLOWED_TOOLS を明示的に空化
       DISALLOWED_TOOLS: ""
       CLAUDE_CODE_DISALLOWED_TOOLS: ""
+      # CLI 2.1.198+ で Task subagent がバックグラウンド実行デフォルトになり、
+      # メインエージェントが subagent 完了前にセッション終了する regression の対策
+      # (2026-07-02 以降の連続失敗の根本原因)。フォアグラウンド実行を強制する。
+      CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
 
     steps:
       # -----------------------------------------------------------------
@@ -195,6 +204,8 @@ jobs:
 
             **Task ツール**で **同一メッセージ内** に 2 つの `general-purpose` agent を並列起動する。
             subagent_type は必ず `"general-purpose"`（tech-researcher 等は WebFetch を持たないため不可）。
+            **バックグラウンド実行は禁止**（`run_in_background` を指定しない）。
+            2 agent の結果が両方返ってくるまで待ってから Phase 3 に進むこと。
 
             ## tech agent への prompt テンプレート
 
