@@ -172,13 +172,13 @@ cc-sier-organization/
 - ⚠️ GitHub Projects v2 GraphQL API の `items(first: N)` は **N ≤ 100**（100 超で `EXCESSIVE_PAGINATION` エラー）。100 超取得は `pageInfo { hasNextPage endCursor }` の cursor-based pagination 必須
 - ⚠️ workflow shell で `cmd | tee log.txt` を使うと **pipefail なしでは cmd の非 0 exit code が潰され success 偽装**される。`set -euo pipefail` を冒頭に入れるか、実行と log 表示を分離する
 - ⚠️ `.mcp.json` の uvx/npx 系 MCP サーバーは `==バージョン` でピン留め（PyPI yank で再現不能になった実例あり: aws-diagram-mcp-server #569/#570）
+- ⚠️ claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` を追加（CLI 2.1.198+ で subagent がバックグラウンドデフォルト化、headless モードでは完了を待たず終了し成果物未生成のまま success 偽装される: #618）
 
 詳細: @.claude/rules/review-pattern.md
 
 ---
 
 ## 外部参照
-
 | ファイル | 内容 |
 |---|---|
 | @docs/requirements.md | 要件定義書 v0.3（§2 機能マッピング / §3 Skill / §4 Subagent / §5 CLAUDE.md 階層 / §6 マスタ / §7 Agent Teams / §8 SIer テンプレート） |
