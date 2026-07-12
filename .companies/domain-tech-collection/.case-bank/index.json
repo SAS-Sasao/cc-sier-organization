@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-11T20:29:08",
-  "case_count": 157,
+  "updated_at": "2026-07-12T16:05:31",
+  "case_count": 160,
   "failure_patterns": [],
   "cases": [
     {
@@ -4714,62 +4714,103 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-11T20:25:00+09:00"
+      },
+      "conversation_context": [
+        "Daily Digest Automation (07:30 JST) というgit hub actinpsが7/2から失敗している。原因をちょうさしてして修正して",
+        "```tool_result\nClaude Code Review\tactive\t[PHONE]\nClaude Code\tactive\t[PHONE]\nDaily Cycle Supplement (19:00 JST)\tactive\t[PHONE]\nDaily Digest Automation ",
+        "```tool_result\n[PHONE] failure 2026-07-10T23:25:49Z Daily Digest Automation (07:30 JST)\n[PHONE] failure 2026-07-09T23:42:05Z Daily Digest Automation ("
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260711-202731-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.9,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.95+0.85)/2=0.90, accuracy=avg(s2_links,s3_summary)=(1.00+0.95)/2=0.975≈0.98, clarity=avg(s4_cross_domain,s6_violations)=(1.00+1.00)/2=1.00",
+        "judged_at": "2026-07-11T21:15:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-11T20:27:31+09:00"
+      },
+      "conversation_context": [
+        "```tool_result\nclaude-code-review.yml\nclaude.yml\ndaily-cycle-supplement.yml\ndaily-digest-automation.yml\ndaily-insights-sync.yml\ndaily-kanban-sync.yml\n",
+        "```tool_result\n1\tname: Daily Digest Automation (07:30 JST)\n2\t\n3\t# 毎朝 07:30 JST に /company-daily-digest 全 8 phase を自動実行し、\n4\t# GitHub Pages に当日の日次ダイジェスト",
+        "```tool_result\n=== .github/workflows/daily-digest-automation.yml ===\n11:#   2. Web 巡回（Agent Teams 並列）        — claude-code-action (Task + WebFetch)\n14"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260712-081435-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-07-12",
+          "自動生成",
+          "GitHub",
+          "Actions経由"
+        ],
+        "request_head": "日次ダイジェスト 2026-07-12 自動生成（GitHub Actions経由）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-07-12.md"
+        ],
+        "started": "2026-07-12T08:14:35"
+      }
+    },
+    {
+      "id": "20260712-160129-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "today"
+        ],
+        "request_head": "/company-cycle today",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-12T16:01:29"
       }
     }
   ],
-  "frequent_phrases": [
-    {
-      "phrase": "を入れてから両方インストールして",
-      "count": 2
-    },
-    {
-      "phrase": "を直接起動して",
-      "count": 2
-    },
-    {
-      "phrase": "切って対応方法を調査して",
-      "count": 2
-    },
-    {
-      "phrase": "サブエージェントチームで対応して",
-      "count": 2
-    },
-    {
-      "phrase": "をサブエージェントチームで対応したい",
-      "count": 2
-    },
-    {
-      "phrase": "具体的なサブエージェントチーム構成案を出して",
-      "count": 2
-    },
-    {
-      "phrase": "の対応からしたい",
-      "count": 2
-    },
-    {
-      "phrase": "に移行してうまくいかなかった際にすぐに戻せるようにして",
-      "count": 2
-    },
-    {
-      "phrase": "で呼び出せるようにして",
-      "count": 2
-    },
-    {
-      "phrase": "の実図ドライ実行して",
-      "count": 2
-    }
-  ],
-  "intent_patterns": [
-    {
-      "intent": "codex mcpが呼び出し出来るのかテスト",
-      "full": "codex mcpが呼び出し出来るのかテストしたい。試しにテスト用のgih hub issueを切らせてみて",
-      "date": "2026-06-13"
-    },
-    {
-      "intent": "ごめんclaudeの利用制限でセッション切れてしまった。作業を再開",
-      "full": "ごめんclaudeの利用制限でセッション切れてしまった。作業を再開してほしい",
-      "date": "2026-06-14"
-    }
-  ],
-  "conversation_enriched_at": "2026-06-14T10:01:39"
+  "frequent_phrases": [],
+  "intent_patterns": [],
+  "conversation_enriched_at": "2026-07-12T16:07:48"
 }

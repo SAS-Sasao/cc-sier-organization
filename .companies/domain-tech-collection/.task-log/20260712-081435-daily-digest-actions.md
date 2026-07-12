@@ -79,3 +79,14 @@ Phase 8 完了: task-log記録、成果物確定
 - サブセクション名に仕様外の付加語あり（A5, B1, B2）→ 軽微、構造準拠に影響せず
 - トライアル西友浦安店がB1で2件重複（流通ニュース+DCS）→ 観点差あり許容範囲
 - AWS MCP OAuth, DMS Schema Conversionが公式+検証記事ペアで重複 → 観点差あり許容範囲
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-12T16:05:17"
+```

@@ -1,6 +1,6 @@
 # 秘書 MEMORY（Case Bank 学習結果）
 
-> 最終更新: 2026-03-24 10:50 | Case Bank: 9件 | 平均報酬: 0.96
+> 最終更新: 2026-07-12 16:10 | Case Bank: 160件 | 平均報酬: 0.84
 
 ## ルーティング先読み
 
@@ -47,3 +47,9 @@
 - 「品質ゲート」「チェックリスト」→ quality-gate-setup
 - 「学習して」「進化させて」→ /company-evolve
 - 「レポート」「振り返り」→ /company-report
+
+## 更新履歴メモ（2026-07-12 追記）
+
+- **日次ダイジェストの現行運用**: GitHub Actions 経由の agent-teams 自動実行（`mode:agent-teams-actions`）が定着。`daily-digest-au*` パターン 48 件で平均報酬 0.80。上記「秘書が直接WebFetch並列実行」の記述はローカル手動実行時代のもので、現在は Actions 自動化が主経路
+- **#618 教訓**: claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` が必須（subagent バックグラウンド化による早期終了・success 偽装を防止）。修正後 2026-07-11/07-12 の連続自動実行成功で有効性確認済み
+- **L2 品質傾向**: 直近ダイジェストは composite 0.95 で安定。最弱軸は s5_dedup（重複排除、0.85）— 複数ソースが同一トピックを扱う場合の集約フェーズでの重複検知が今後の改善点
