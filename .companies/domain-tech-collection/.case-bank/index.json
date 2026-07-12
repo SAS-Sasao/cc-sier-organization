@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-06-14T10:04:43",
-  "case_count": 142,
+  "updated_at": "2026-07-11T20:29:08",
+  "case_count": 157,
   "failure_patterns": [],
   "cases": [
     {
@@ -4237,6 +4237,483 @@
       "outcome": {
         "files_written": [],
         "started": "2026-06-14T09:58:52"
+      }
+    },
+    {
+      "id": "20260615-084207-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.93,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-06-15T08:57:29+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-15T08:42:07+09:00"
+      }
+    },
+    {
+      "id": "20260616-090632-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.98,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure=0.95,s5_dedup=1.00)=0.98, accuracy=avg(s2_links=1.00,s3_summary=0.95)=0.98, clarity=avg(s4_cross_domain=0.95,s6_violations=1.00)=0.98",
+        "judged_at": "2026-06-16T09:24:48+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-16T09:06:32+09:00"
+      }
+    },
+    {
+      "id": "20260618-085417-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-06-18",
+          "自動生成",
+          "GitHub",
+          "Actions",
+          "daily-digest-automation",
+          "workflow"
+        ],
+        "request_head": "日次ダイジェスト 2026-06-18 自動生成（GitHub Actions daily-digest-automat",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-18T08:54:17"
+      }
+    },
+    {
+      "id": "20260619-090629-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-06-19",
+          "自動生成",
+          "GitHub",
+          "Actions経由"
+        ],
+        "request_head": "日次ダイジェスト 2026-06-19 自動生成（GitHub Actions経由）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.925,
+        "accuracy": 0.975,
+        "clarity": 0.975,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-06-19.md"
+        ],
+        "started": "2026-06-19T09:06:29"
+      }
+    },
+    {
+      "id": "20260620-083336-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.9,
+        "accuracy": 0.975,
+        "clarity": 0.975,
+        "total": 0.95,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.90+0.90)/2, accuracy=avg(s2_links,s3_summary)=(1.00+0.95)/2, clarity=avg(s4_cross_domain,s6_violations)=(1.00+0.95)/2",
+        "judged_at": "2026-06-20T08:51:56+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-20T08:33:36+09:00"
+      }
+    },
+    {
+      "id": "20260621-084045-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.85,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-06-21T08:54:31+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-21T08:40:45+09:00"
+      }
+    },
+    {
+      "id": "20260622-084907-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-06-22T09:03:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-22T08:49:07+09:00"
+      }
+    },
+    {
+      "id": "20260623-084731-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.975,
+        "clarity": 0.975,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-06-23T09:03:49+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-23T08:47:31+09:00"
+      }
+    },
+    {
+      "id": "20260625-083842-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-06-25",
+          "自動生成",
+          "GitHub",
+          "Actions"
+        ],
+        "request_head": "日次ダイジェスト 2026-06-25 自動生成（GitHub Actions）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-25T08:38:42"
+      }
+    },
+    {
+      "id": "20260626-084840-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.925,
+        "accuracy": 0.975,
+        "clarity": 0.975,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.90+0.95)/2, accuracy=avg(s2_links,s3_summary)=(1.00+0.95)/2, clarity=avg(s4_cross_domain,s6_violations)=(0.95+1.00)/2",
+        "judged_at": "2026-06-26T09:06:29+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-26T08:48:40+09:00"
+      }
+    },
+    {
+      "id": "20260627-083952-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.90+1.00)/2=0.95, accuracy=avg(s2_links,s3_summary)=(1.00+0.95)/2=0.975≈0.98, clarity=avg(s4_cross_domain,s6_violations)=(1.00+1.00)/2=1.00",
+        "judged_at": "2026-06-27T09:01:44+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-27T08:39:52+09:00"
+      }
+    },
+    {
+      "id": "20260628-083236-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.975,
+        "accuracy": 0.95,
+        "clarity": 0.975,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-06-28T08:51:19+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-28T08:32:36+09:00"
+      }
+    },
+    {
+      "id": "20260630-083125-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "/company-daily-digest",
+          "Phases",
+          "2-5",
+          "実行",
+          "GitHub",
+          "Actions",
+          "nightly",
+          "workflow"
+        ],
+        "request_head": "/company-daily-digest Phases 2-5 実行（GitHub Actions nightly w",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "/company-daily-digest l2_scores から自動マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-06-30T08:45:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-06-30T08:31:25"
+      }
+    },
+    {
+      "id": "20260701-084145-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.93,
+        "accuracy": 0.98,
+        "clarity": 0.95,
+        "total": 0.95,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.95+0.90)/2=0.925→0.93, accuracy=avg(s2_links,s3_summary)=(1.00+0.95)/2=0.975→0.98, clarity=avg(s4_cross_domain,s6_violations)=(0.95+0.95)/2=0.95",
+        "judged_at": "2026-07-01T09:00:51+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-01T08:41:45+09:00"
+      }
+    },
+    {
+      "id": "20260711-202500-daily-digest-workflow-fix",
+      "state": {
+        "request_keywords": [
+          "Daily",
+          "Digest",
+          "Automation",
+          "(07:30",
+          "JST)",
+          "というgit",
+          "hub",
+          "actinpsが7/2から失敗している"
+        ],
+        "request_head": "Daily Digest Automation (07:30 JST) というgit hub actinpsが7/2から",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-11T20:25:00+09:00"
       }
     }
   ],

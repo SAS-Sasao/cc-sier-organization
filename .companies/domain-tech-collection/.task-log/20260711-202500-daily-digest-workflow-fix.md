@@ -54,3 +54,14 @@ l2_retries: 0
 
 他 workflow への影響確認: daily-todo-sync / daily-kanban-sync 等は正常稼働中
 （Task を実際に並列 spawn するのは daily-digest のみ）のため修正対象外。
+
+## reward
+```yaml
+score: 0.2
+signals:
+    completed: false
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-11T20:29:08"
+```
