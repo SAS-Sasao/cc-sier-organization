@@ -1,6 +1,6 @@
 # 秘書 MEMORY（Case Bank 学習結果）
 
-> 最終更新: 2026-07-12 16:10 | Case Bank: 160件 | 平均報酬: 0.84
+> 最終更新: 2026-07-17 22:00 | Case Bank: 167件 | 平均報酬: 0.83
 
 ## ルーティング先読み
 
@@ -53,3 +53,8 @@
 - **日次ダイジェストの現行運用**: GitHub Actions 経由の agent-teams 自動実行（`mode:agent-teams-actions`）が定着。`daily-digest-au*` パターン 48 件で平均報酬 0.80。上記「秘書が直接WebFetch並列実行」の記述はローカル手動実行時代のもので、現在は Actions 自動化が主経路
 - **#618 教訓**: claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` が必須（subagent バックグラウンド化による早期終了・success 偽装を防止）。修正後 2026-07-11/07-12 の連続自動実行成功で有効性確認済み
 - **L2 品質傾向**: 直近ダイジェストは composite 0.95 で安定。最弱軸は s5_dedup（重複排除、0.85）— 複数ソースが同一トピックを扱う場合の集約フェーズでの重複検知が今後の改善点
+
+## 更新履歴メモ（2026-07-17 追記）
+
+- **/company-diagram-v2 初実運用成功**（onprem-to-aws-migration、L2 composite 0.98、PR #638 マージ済み）。「AWS構成図」「移行構成」系の依頼は diagram-v2（draw.io XML 直接生成・MCP 不使用）へルーティング可能
+- **diagram-v2 の貫通チェッカー制約（最重要知見）**: `review-drawio.js` はエッジを「アイコン中心→waypoint→中心」で近似し、除外は source/target の **2 階層上（サービスグループ + その親）まで**。VPC/サブネットを実コンテナ（4 層ネスト）にすると全エッジが誤検知される。**VPC/サブネットはラベル + HTML レイヤー構成表で表現し、全サービスグループは aws-cloud 直下のフラット構造にする**（詳細: Issue #639）
