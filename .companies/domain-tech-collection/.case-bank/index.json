@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-17T22:46:32",
-  "case_count": 168,
+  "updated_at": "2026-07-17T22:52:19",
+  "case_count": 169,
   "failure_patterns": [],
   "cases": [
     {
@@ -5097,22 +5097,34 @@
         ],
         "started": "2026-07-17T22:39:47"
       }
-    }
-  ],
-  "frequent_phrases": [
-    {
-      "phrase": "各ユーザーが独立して",
-      "count": 2
     },
     {
-      "phrase": "データドリブン意思決定アプリの素材として",
-      "count": 2
-    },
-    {
-      "phrase": "レポートを生成",
-      "count": 2
+      "id": "20260717-224932-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "today",
+          "本日",
+          "回目",
+          "夕方以降の活動を反映するリフレッシュ実行"
+        ],
+        "request_head": "/company-cycle today（本日 2 回目、夕方以降の活動を反映するリフレッシュ実行）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-17T22:49:32"
+      }
     }
   ],
+  "frequent_phrases": [],
   "intent_patterns": [],
-  "conversation_enriched_at": "2026-07-17T22:00:29"
+  "conversation_enriched_at": "2026-07-17T22:52:19"
 }

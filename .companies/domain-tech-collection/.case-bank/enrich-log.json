@@ -8,21 +8,8 @@
     "2026-07-12-e3cd551c.md",
     "2026-07-17-e3cd551c.md"
   ],
-  "last_run": "2026-07-17T22:00:29",
-  "total_messages_analyzed": 141,
-  "enriched_cases": 5,
-  "top_phrases": [
-    {
-      "phrase": "各ユーザーが独立して",
-      "count": 2
-    },
-    {
-      "phrase": "データドリブン意思決定アプリの素材として",
-      "count": 2
-    },
-    {
-      "phrase": "レポートを生成",
-      "count": 2
-    }
-  ]
+  "last_run": "2026-07-17T22:52:19",
+  "total_messages_analyzed": 0,
+  "enriched_cases": 0,
+  "top_phrases": []
 }
