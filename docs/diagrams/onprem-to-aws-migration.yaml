@@ -1,0 +1,346 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  On-premises to AWS migration landing zone.
+  Target production stack for Oracle DB / APP servers / file storage migrated
+  via MGN, DMS and DataSync: ALB + EC2 + RDS for Oracle (Multi-AZ) + EFS + S3,
+  with DMS replication instance and backup Site-to-Site VPN gateway.
+
+Parameters:
+  EnvType:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: Environment type. prod enables Multi-AZ RDS and larger instances.
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+  OnPremCidr:
+    Type: String
+    Default: 192.168.0.0/16
+    Description: On-premises network CIDR allowed to reach the VPC during migration.
+  DbMasterUserName:
+    Type: String
+    Default: admin
+    NoEcho: true
+  DbMasterUserPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 12
+    Description: RDS for Oracle master password (12+ chars).
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  AcmCertificateArn:
+    Type: String
+    Description: ACM certificate ARN for the ALB HTTPS listener (HTTPS termination).
+
+Conditions:
+  IsProd: !Equals [!Ref EnvType, prod]
+
+Mappings:
+  EnvSize:
+    dev:
+      Ec2Type: t3.medium
+      RdsType: db.t3.medium
+      DmsType: dms.t3.medium
+    prod:
+      Ec2Type: m5.large
+      RdsType: db.m5.large
+      DmsType: dms.c5.large
+
+Resources:
+  # ---------------- Network ----------------
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - { Key: Name, Value: !Sub "migration-vpc-${EnvType}" }
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.0.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+      Tags: [{ Key: Name, Value: !Sub "public-a-${EnvType}" }]
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: false
+      Tags: [{ Key: Name, Value: !Sub "public-c-${EnvType}" }]
+  PrivateAppSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.10.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags: [{ Key: Name, Value: !Sub "private-app-a-${EnvType}" }]
+  PrivateAppSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.11.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags: [{ Key: Name, Value: !Sub "private-app-c-${EnvType}" }]
+  PrivateDbSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.20.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags: [{ Key: Name, Value: !Sub "private-db-a-${EnvType}" }]
+  PrivateDbSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.0.21.0/24
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      Tags: [{ Key: Name, Value: !Sub "private-db-c-${EnvType}" }]
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnetARouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetCRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+
+  # ---------------- Backup VPN (Site-to-Site) ----------------
+  VpnGateway:
+    Type: AWS::EC2::VPNGateway
+    Properties:
+      Type: ipsec.1
+      Tags: [{ Key: Name, Value: !Sub "backup-vgw-${EnvType}" }]
+  VpnGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      VpnGatewayId: !Ref VpnGateway
+
+  # ---------------- Security Groups ----------------
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB inbound HTTPS
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: APP servers from ALB and on-premises (migration window)
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref OnPremCidr
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Oracle listener from APP and DMS
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1521
+          ToPort: 1521
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 1521
+          ToPort: 1521
+          SourceSecurityGroupId: !Ref DmsSecurityGroup
+  DmsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: DMS replication instance egress to targets
+      VpcId: !Ref Vpc
+  EfsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: NFS 2049 from APP servers
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          SourceSecurityGroupId: !Ref AppSecurityGroup
+
+  # ---------------- ALB ----------------
+  ApplicationLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: application
+      Scheme: internet-facing
+      Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetC]
+      SecurityGroups: [!Ref AlbSecurityGroup]
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref Vpc
+      Protocol: HTTP
+      Port: 8080
+      TargetType: instance
+      HealthCheckPath: /healthz
+      Targets:
+        - Id: !Ref AppInstance
+  AlbListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref AcmCertificateArn
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AppTargetGroup
+
+  # ---------------- APP server (MGN cutover target baseline) ----------------
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmiId
+      InstanceType: !FindInMap [EnvSize, !Ref EnvType, Ec2Type]
+      SubnetId: !Ref PrivateAppSubnetA
+      SecurityGroupIds: [!Ref AppSecurityGroup]
+      Tags:
+        - { Key: Name, Value: !Sub "app-server-${EnvType}" }
+        - { Key: MigrationSource, Value: onprem-app-mgn }
+
+  # ---------------- RDS for Oracle ----------------
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private DB subnets
+      SubnetIds: [!Ref PrivateDbSubnetA, !Ref PrivateDbSubnetC]
+  OracleDb:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      Engine: oracle-se2
+      LicenseModel: license-included
+      DBInstanceClass: !FindInMap [EnvSize, !Ref EnvType, RdsType]
+      AllocatedStorage: "200"
+      StorageType: gp3
+      StorageEncrypted: true
+      MultiAZ: !If [IsProd, true, false]
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups: [!Ref DbSecurityGroup]
+      MasterUsername: !Ref DbMasterUserName
+      MasterUserPassword: !Ref DbMasterUserPassword
+      BackupRetentionPeriod: !If [IsProd, 14, 1]
+      DeletionProtection: !If [IsProd, true, false]
+
+  # ---------------- EFS ----------------
+  SharedFileSystem:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: true
+      PerformanceMode: generalPurpose
+      ThroughputMode: elastic
+      FileSystemTags:
+        - { Key: Name, Value: !Sub "shared-files-${EnvType}" }
+  EfsMountTargetA:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref SharedFileSystem
+      SubnetId: !Ref PrivateAppSubnetA
+      SecurityGroups: [!Ref EfsSecurityGroup]
+  EfsMountTargetC:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref SharedFileSystem
+      SubnetId: !Ref PrivateAppSubnetC
+      SecurityGroups: [!Ref EfsSecurityGroup]
+
+  # ---------------- S3 (archive / backup) ----------------
+  ArchiveBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "onprem-migration-archive-${AWS::AccountId}-${EnvType}"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: archive-to-glacier
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: GLACIER
+
+  # ---------------- DMS (Oracle -> RDS for Oracle) ----------------
+  DmsSubnetGroup:
+    Type: AWS::DMS::ReplicationSubnetGroup
+    Properties:
+      ReplicationSubnetGroupDescription: DMS in private app subnets
+      SubnetIds: [!Ref PrivateAppSubnetA, !Ref PrivateAppSubnetC]
+  DmsReplicationInstance:
+    Type: AWS::DMS::ReplicationInstance
+    Properties:
+      ReplicationInstanceClass: !FindInMap [EnvSize, !Ref EnvType, DmsType]
+      AllocatedStorage: 100
+      MultiAZ: false
+      PubliclyAccessible: false
+      ReplicationSubnetGroupIdentifier: !Ref DmsSubnetGroup
+      VpcSecurityGroupIds: [!Ref DmsSecurityGroup]
+
+Outputs:
+  AlbDnsName:
+    Description: ALB DNS name (Route 53 weighted record target for cutover)
+    Value: !GetAtt ApplicationLoadBalancer.DNSName
+  OracleEndpoint:
+    Description: RDS for Oracle endpoint (DMS target / APP connection)
+    Value: !GetAtt OracleDb.Endpoint.Address
+  EfsId:
+    Description: EFS file system id (DataSync target / APP mount)
+    Value: !Ref SharedFileSystem
+  ArchiveBucketName:
+    Description: S3 archive bucket (DataSync target)
+    Value: !Ref ArchiveBucket

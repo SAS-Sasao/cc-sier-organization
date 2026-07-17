@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>オンプレミス → AWS 移行アーキテクチャ - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./onprem-to-aws-migration.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./onprem-to-aws-migration.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>オンプレミス → AWS 移行アーキテクチャ - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-07-17</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>346 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">onprem-to-aws-migration.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">346 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Generated by /company-diagram-v2 (LLM 直接生成 CFn / cfn-lint 検証)</p>
+<script>
+const raw = "AWSTemplateFormatVersion: \"2010-09-09\"\nDescription: >\n  On-premises to AWS migration landing zone.\n  Target production stack for Oracle DB / APP servers / file storage migrated\n  via MGN, DMS and DataSync: ALB + EC2 + RDS for Oracle (Multi-AZ) + EFS + S3,\n  with DMS replication instance and backup Site-to-Site VPN gateway.\n\nParameters:\n  EnvType:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, prod]\n    Description: Environment type. prod enables Multi-AZ RDS and larger instances.\n  VpcCidr:\n    Type: String\n    Default: 10.0.0.0/16\n  OnPremCidr:\n    Type: String\n    Default: 192.168.0.0/16\n    Description: On-premises network CIDR allowed to reach the VPC during migration.\n  DbMasterUserName:\n    Type: String\n    Default: admin\n    NoEcho: true\n  DbMasterUserPassword:\n    Type: String\n    NoEcho: true\n    MinLength: 12\n    Description: RDS for Oracle master password (12+ chars).\n  LatestAmiId:\n    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>\n    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64\n  AcmCertificateArn:\n    Type: String\n    Description: ACM certificate ARN for the ALB HTTPS listener (HTTPS termination).\n\nConditions:\n  IsProd: !Equals [!Ref EnvType, prod]\n\nMappings:\n  EnvSize:\n    dev:\n      Ec2Type: t3.medium\n      RdsType: db.t3.medium\n      DmsType: dms.t3.medium\n    prod:\n      Ec2Type: m5.large\n      RdsType: db.m5.large\n      DmsType: dms.c5.large\n\nResources:\n  # ---------------- Network ----------------\n  Vpc:\n    Type: AWS::EC2::VPC\n    Properties:\n      CidrBlock: !Ref VpcCidr\n      EnableDnsSupport: true\n      EnableDnsHostnames: true\n      Tags:\n        - { Key: Name, Value: !Sub \"migration-vpc-${EnvType}\" }\n\n  InternetGateway:\n    Type: AWS::EC2::InternetGateway\n  VpcGatewayAttachment:\n    Type: AWS::EC2::VPCGatewayAttachment\n    Properties:\n      VpcId: !Ref Vpc\n      InternetGatewayId: !Ref InternetGateway\n\n  PublicSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.0.0/24\n      AvailabilityZone: !Select [0, !GetAZs \"\"]\n      MapPublicIpOnLaunch: false\n      Tags: [{ Key: Name, Value: !Sub \"public-a-${EnvType}\" }]\n  PublicSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.1.0/24\n      AvailabilityZone: !Select [1, !GetAZs \"\"]\n      MapPublicIpOnLaunch: false\n      Tags: [{ Key: Name, Value: !Sub \"public-c-${EnvType}\" }]\n  PrivateAppSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.10.0/24\n      AvailabilityZone: !Select [0, !GetAZs \"\"]\n      Tags: [{ Key: Name, Value: !Sub \"private-app-a-${EnvType}\" }]\n  PrivateAppSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.11.0/24\n      AvailabilityZone: !Select [1, !GetAZs \"\"]\n      Tags: [{ Key: Name, Value: !Sub \"private-app-c-${EnvType}\" }]\n  PrivateDbSubnetA:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.20.0/24\n      AvailabilityZone: !Select [0, !GetAZs \"\"]\n      Tags: [{ Key: Name, Value: !Sub \"private-db-a-${EnvType}\" }]\n  PrivateDbSubnetC:\n    Type: AWS::EC2::Subnet\n    Properties:\n      VpcId: !Ref Vpc\n      CidrBlock: 10.0.21.0/24\n      AvailabilityZone: !Select [1, !GetAZs \"\"]\n      Tags: [{ Key: Name, Value: !Sub \"private-db-c-${EnvType}\" }]\n\n  PublicRouteTable:\n    Type: AWS::EC2::RouteTable\n    Properties:\n      VpcId: !Ref Vpc\n  PublicDefaultRoute:\n    Type: AWS::EC2::Route\n    DependsOn: VpcGatewayAttachment\n    Properties:\n      RouteTableId: !Ref PublicRouteTable\n      DestinationCidrBlock: 0.0.0.0/0\n      GatewayId: !Ref InternetGateway\n  PublicSubnetARouteAssoc:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PublicSubnetA\n      RouteTableId: !Ref PublicRouteTable\n  PublicSubnetCRouteAssoc:\n    Type: AWS::EC2::SubnetRouteTableAssociation\n    Properties:\n      SubnetId: !Ref PublicSubnetC\n      RouteTableId: !Ref PublicRouteTable\n\n  # ---------------- Backup VPN (Site-to-Site) ----------------\n  VpnGateway:\n    Type: AWS::EC2::VPNGateway\n    Properties:\n      Type: ipsec.1\n      Tags: [{ Key: Name, Value: !Sub \"backup-vgw-${EnvType}\" }]\n  VpnGatewayAttachment:\n    Type: AWS::EC2::VPCGatewayAttachment\n    Properties:\n      VpcId: !Ref Vpc\n      VpnGatewayId: !Ref VpnGateway\n\n  # ---------------- Security Groups ----------------\n  AlbSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: ALB inbound HTTPS\n      VpcId: !Ref Vpc\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 443\n          ToPort: 443\n          CidrIp: 0.0.0.0/0\n  AppSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: APP servers from ALB and on-premises (migration window)\n      VpcId: !Ref Vpc\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 8080\n          ToPort: 8080\n          SourceSecurityGroupId: !Ref AlbSecurityGroup\n        - IpProtocol: tcp\n          FromPort: 22\n          ToPort: 22\n          CidrIp: !Ref OnPremCidr\n  DbSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: Oracle listener from APP and DMS\n      VpcId: !Ref Vpc\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 1521\n          ToPort: 1521\n          SourceSecurityGroupId: !Ref AppSecurityGroup\n        - IpProtocol: tcp\n          FromPort: 1521\n          ToPort: 1521\n          SourceSecurityGroupId: !Ref DmsSecurityGroup\n  DmsSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: DMS replication instance egress to targets\n      VpcId: !Ref Vpc\n  EfsSecurityGroup:\n    Type: AWS::EC2::SecurityGroup\n    Properties:\n      GroupDescription: NFS 2049 from APP servers\n      VpcId: !Ref Vpc\n      SecurityGroupIngress:\n        - IpProtocol: tcp\n          FromPort: 2049\n          ToPort: 2049\n          SourceSecurityGroupId: !Ref AppSecurityGroup\n\n  # ---------------- ALB ----------------\n  ApplicationLoadBalancer:\n    Type: AWS::ElasticLoadBalancingV2::LoadBalancer\n    Properties:\n      Type: application\n      Scheme: internet-facing\n      Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetC]\n      SecurityGroups: [!Ref AlbSecurityGroup]\n  AppTargetGroup:\n    Type: AWS::ElasticLoadBalancingV2::TargetGroup\n    Properties:\n      VpcId: !Ref Vpc\n      Protocol: HTTP\n      Port: 8080\n      TargetType: instance\n      HealthCheckPath: /healthz\n      Targets:\n        - Id: !Ref AppInstance\n  AlbListener:\n    Type: AWS::ElasticLoadBalancingV2::Listener\n    Properties:\n      LoadBalancerArn: !Ref ApplicationLoadBalancer\n      Port: 443\n      Protocol: HTTPS\n      Certificates:\n        - CertificateArn: !Ref AcmCertificateArn\n      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06\n      DefaultActions:\n        - Type: forward\n          TargetGroupArn: !Ref AppTargetGroup\n\n  # ---------------- APP server (MGN cutover target baseline) ----------------\n  AppInstance:\n    Type: AWS::EC2::Instance\n    Properties:\n      ImageId: !Ref LatestAmiId\n      InstanceType: !FindInMap [EnvSize, !Ref EnvType, Ec2Type]\n      SubnetId: !Ref PrivateAppSubnetA\n      SecurityGroupIds: [!Ref AppSecurityGroup]\n      Tags:\n        - { Key: Name, Value: !Sub \"app-server-${EnvType}\" }\n        - { Key: MigrationSource, Value: onprem-app-mgn }\n\n  # ---------------- RDS for Oracle ----------------\n  DbSubnetGroup:\n    Type: AWS::RDS::DBSubnetGroup\n    Properties:\n      DBSubnetGroupDescription: Private DB subnets\n      SubnetIds: [!Ref PrivateDbSubnetA, !Ref PrivateDbSubnetC]\n  OracleDb:\n    Type: AWS::RDS::DBInstance\n    DeletionPolicy: Snapshot\n    UpdateReplacePolicy: Snapshot\n    Properties:\n      Engine: oracle-se2\n      LicenseModel: license-included\n      DBInstanceClass: !FindInMap [EnvSize, !Ref EnvType, RdsType]\n      AllocatedStorage: \"200\"\n      StorageType: gp3\n      StorageEncrypted: true\n      MultiAZ: !If [IsProd, true, false]\n      DBSubnetGroupName: !Ref DbSubnetGroup\n      VPCSecurityGroups: [!Ref DbSecurityGroup]\n      MasterUsername: !Ref DbMasterUserName\n      MasterUserPassword: !Ref DbMasterUserPassword\n      BackupRetentionPeriod: !If [IsProd, 14, 1]\n      DeletionProtection: !If [IsProd, true, false]\n\n  # ---------------- EFS ----------------\n  SharedFileSystem:\n    Type: AWS::EFS::FileSystem\n    Properties:\n      Encrypted: true\n      PerformanceMode: generalPurpose\n      ThroughputMode: elastic\n      FileSystemTags:\n        - { Key: Name, Value: !Sub \"shared-files-${EnvType}\" }\n  EfsMountTargetA:\n    Type: AWS::EFS::MountTarget\n    Properties:\n      FileSystemId: !Ref SharedFileSystem\n      SubnetId: !Ref PrivateAppSubnetA\n      SecurityGroups: [!Ref EfsSecurityGroup]\n  EfsMountTargetC:\n    Type: AWS::EFS::MountTarget\n    Properties:\n      FileSystemId: !Ref SharedFileSystem\n      SubnetId: !Ref PrivateAppSubnetC\n      SecurityGroups: [!Ref EfsSecurityGroup]\n\n  # ---------------- S3 (archive / backup) ----------------\n  ArchiveBucket:\n    Type: AWS::S3::Bucket\n    DeletionPolicy: Retain\n    UpdateReplacePolicy: Retain\n    Properties:\n      BucketName: !Sub \"onprem-migration-archive-${AWS::AccountId}-${EnvType}\"\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      LifecycleConfiguration:\n        Rules:\n          - Id: archive-to-glacier\n            Status: Enabled\n            Transitions:\n              - TransitionInDays: 90\n                StorageClass: GLACIER\n\n  # ---------------- DMS (Oracle -> RDS for Oracle) ----------------\n  DmsSubnetGroup:\n    Type: AWS::DMS::ReplicationSubnetGroup\n    Properties:\n      ReplicationSubnetGroupDescription: DMS in private app subnets\n      SubnetIds: [!Ref PrivateAppSubnetA, !Ref PrivateAppSubnetC]\n  DmsReplicationInstance:\n    Type: AWS::DMS::ReplicationInstance\n    Properties:\n      ReplicationInstanceClass: !FindInMap [EnvSize, !Ref EnvType, DmsType]\n      AllocatedStorage: 100\n      MultiAZ: false\n      PubliclyAccessible: false\n      ReplicationSubnetGroupIdentifier: !Ref DmsSubnetGroup\n      VpcSecurityGroupIds: [!Ref DmsSecurityGroup]\n\nOutputs:\n  AlbDnsName:\n    Description: ALB DNS name (Route 53 weighted record target for cutover)\n    Value: !GetAtt ApplicationLoadBalancer.DNSName\n  OracleEndpoint:\n    Description: RDS for Oracle endpoint (DMS target / APP connection)\n    Value: !GetAtt OracleDb.Endpoint.Address\n  EfsId:\n    Description: EFS file system id (DataSync target / APP mount)\n    Value: !Ref SharedFileSystem\n  ArchiveBucketName:\n    Description: S3 archive bucket (DataSync target)\n    Value: !Ref ArchiveBucket\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>

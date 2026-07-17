@@ -68,7 +68,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count"><span id="match-count">1-20 / 23</span> 件の構成図</p>
+<p class="count"><span id="match-count">1-20 / 24</span> 件の構成図</p>
 
 <!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
 <div class="search-bar">
@@ -79,6 +79,17 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <!-- ▲ 検索・フィルタ ここまで -->
 
 <div class="grid">
+  <a href="./onprem-to-aws-migration.html" class="card">
+    <div class="card-body">
+      <div class="card-title">オンプレミス → AWS 移行アーキテクチャ</div>
+      <div class="card-meta">
+        <span class="tag tag-project">基幹システム移行</span>
+        <span class="tag tag-area">Migration / Hybrid Network</span>
+      </div>
+      <div class="card-desc">Oracle DB・業務 APP・ファイルストレージ（NAS）を MGN / DMS / DataSync で段階移行し、ALB + EC2 + RDS for Oracle (Multi-AZ) + EFS の本番構成へ切替。Direct Connect 主回線 + Site-to-Site VPN バックアップのハイブリッド接続</div>
+      <div class="card-date">2026-07-17</div>
+    </div>
+  </a>
   <a href="./edi-onprem-to-aws-migration.html" class="card">
     <div class="card-body">
       <div class="card-title">EDI 受発注システム オンプレミス→AWS 移行構成</div>
