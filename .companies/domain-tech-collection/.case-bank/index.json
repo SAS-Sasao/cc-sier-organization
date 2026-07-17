@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-17T21:55:40",
-  "case_count": 165,
+  "updated_at": "2026-07-17T21:57:31",
+  "case_count": 166,
   "failure_patterns": [],
   "cases": [
     {
@@ -4969,6 +4969,39 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-17T08:22:31+09:00"
+      }
+    },
+    {
+      "id": "20260717-213034-diagram-v2-onprem-to-aws-migration",
+      "state": {
+        "request_keywords": [
+          "オンプレミス環境",
+          "オラクル",
+          "APP",
+          "ストレージなど",
+          "をAWSへ移行するさいのAWS構成を作成してほしい"
+        ],
+        "request_head": "オンプレミス環境（オラクル、APP、ストレージなど）をAWSへ移行するさいのAWS構成を作成してほしい",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.95,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "/company-diagram-v2 l2_scores から自動マッピング: completeness=avg(s1_structure,s5_index_update), accuracy=avg(s2_iac,s3_xml_html_consistency), clarity=avg(s4_legend,s6_drawio_quality)",
+        "judged_at": "2026-07-17T22:00:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-17T21:30:34"
       }
     }
   ],
