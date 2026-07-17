@@ -1,0 +1,317 @@
+<mxfile host="cc-sier-diagram-v2" agent="company-diagram-v2 LLM direct generation" version="29.6.1">
+  <diagram name="OnPrem-to-AWS-Migration" id="onprem-to-aws-migration">
+    <mxGraphModel dx="1600" dy="1300" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- ===== Title block ===== -->
+        <mxCell id="title-group" connectable="0" parent="1" style="group;fontFamily=Helvetica;" value="" vertex="1">
+          <mxGeometry height="83" width="1500" x="50" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="title-text" parent="title-group" style="text;html=1;resizable=1;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=30;fontStyle=1;fontFamily=Helvetica;" value="オンプレミス → AWS 移行アーキテクチャ" vertex="1">
+          <mxGeometry height="42" width="900" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle-text" parent="title-group" style="text;html=1;resizable=0;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=16;fontFamily=Helvetica;" value="Oracle DB・業務 APP・ファイルストレージを MGN / DMS / DataSync で段階移行し、ALB + EC2 + RDS for Oracle + EFS の本番構成へ切替" vertex="1">
+          <mxGeometry height="25" width="1200" x="5" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="title-separator" parent="title-group" style="line;strokeWidth=2;html=1;fontSize=14;strokeColor=#FF9900;fontFamily=Helvetica;" value="" vertex="1">
+          <mxGeometry height="10" width="1490" x="5" y="70" as="geometry" />
+        </mxCell>
+        <!-- ===== Users (external actor) ===== -->
+        <mxCell id="users-container" parent="1" style="fillColor=#f5f5f5;strokeColor=light-dark(#666666,#D4D4D4);rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#333333;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1;perimeterSpacing=0;" value="利用者" vertex="1">
+          <mxGeometry height="98" width="107" x="50" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="users-icon" parent="users-container" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#232F3D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.users;fontFamily=Helvetica;" value="" vertex="1">
+          <mxGeometry height="48" width="48" x="30" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== On-premises data center (decoration container) ===== -->
+        <mxCell id="onprem-dc" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_corporate_data_center;strokeColor=#7D8998;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#7D8998;dashed=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;fontFamily=Helvetica;" value="オンプレミス データセンター" vertex="1">
+          <mxGeometry height="640" width="250" x="40" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="onprem-app" parent="onprem-dc" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7D8998;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.traditional_server;fontFamily=Helvetica;" value="APP サーバー&lt;div&gt;&lt;i&gt;業務アプリケーション&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="100" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="onprem-oracle" parent="onprem-dc" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7D8998;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.oracle_db_instance;fontFamily=Helvetica;" value="Oracle Database&lt;div&gt;&lt;i&gt;業務 DB&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="100" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="onprem-storage" parent="onprem-dc" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7D8998;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.servers;fontFamily=Helvetica;" value="ファイルストレージ&lt;div&gt;&lt;i&gt;NAS / 共有ファイル&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="100" y="480" as="geometry" />
+        </mxCell>
+        <!-- ===== AWS Cloud boundary ===== -->
+        <mxCell id="aws-cloud" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=light-dark(#232F3E,#E4F0FF);fillColor=light-dark(#232F3E0D,#232F3E0D);fillStyle=auto;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;fontFamily=Helvetica;" value="&lt;font style=&quot;color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;AWS Cloud&lt;/font&gt;" vertex="1">
+          <mxGeometry height="1030" width="1170" x="380" y="150" as="geometry" />
+        </mxCell>
+        <!-- ===== Column labels ===== -->
+        <mxCell id="col-conn" parent="aws-cloud" value="&lt;b&gt;ハイブリッド接続&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#8C4FFF;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="40" y="375" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="col-mig" parent="aws-cloud" value="&lt;b&gt;移行サービス&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#01A88D;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="270" y="185" width="160" height="20" as="geometry" />
+        </mxCell>
+        <!-- ===== Route 53 ===== -->
+        <mxCell id="svc-group-route53" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="DNS" vertex="1">
+          <mxGeometry x="620" y="40" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-route53" parent="svc-group-route53" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.route_53;fontFamily=Helvetica;shadow=1;" value="Route 53&lt;div&gt;&lt;i&gt;切替 (加重ルーティング)&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== Direct Connect ===== -->
+        <mxCell id="svc-group-dx" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="専用線" vertex="1">
+          <mxGeometry x="60" y="410" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-dx" parent="svc-group-dx" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.direct_connect;fontFamily=Helvetica;shadow=1;" value="Direct Connect&lt;div&gt;&lt;i&gt;閉域・帯域確保&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== Site-to-Site VPN ===== -->
+        <mxCell id="svc-group-vpn" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="バックアップ回線" vertex="1">
+          <mxGeometry x="60" y="570" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-vpn" parent="svc-group-vpn" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.site_to_site_vpn;fontFamily=Helvetica;shadow=1;" value="Site-to-Site VPN&lt;div&gt;&lt;i&gt;DX 障害時の迂回路&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== MGN ===== -->
+        <mxCell id="svc-group-mgn" parent="aws-cloud" style="fillColor=#E0F2F1;strokeColor=#01A88D;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#01A88D;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="サーバー移行" vertex="1">
+          <mxGeometry x="290" y="220" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-mgn" parent="svc-group-mgn" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.server_migration_service;fontFamily=Helvetica;shadow=1;" value="Application Migration Service (MGN)&lt;div&gt;&lt;i&gt;ブロックレプリケーション&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== DMS ===== -->
+        <mxCell id="svc-group-dms" parent="aws-cloud" style="fillColor=#E0F2F1;strokeColor=#01A88D;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#01A88D;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="DB 移行" vertex="1">
+          <mxGeometry x="290" y="410" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-dms" parent="svc-group-dms" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.database_migration_service;fontFamily=Helvetica;shadow=1;" value="DMS&lt;div&gt;&lt;i&gt;フルロード + CDC&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== DataSync ===== -->
+        <mxCell id="svc-group-datasync" parent="aws-cloud" style="fillColor=#E0F2F1;strokeColor=#01A88D;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#01A88D;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="ファイル移行" vertex="1">
+          <mxGeometry x="290" y="610" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-datasync" parent="svc-group-datasync" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#01A88D;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.datasync;fontFamily=Helvetica;shadow=1;" value="DataSync&lt;div&gt;&lt;i&gt;NFS/SMB 転送&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== S3 ===== -->
+        <mxCell id="svc-group-s3" parent="aws-cloud" style="fillColor=#E8F5E9;strokeColor=#3F8624;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3F8624;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="オブジェクト保管" vertex="1">
+          <mxGeometry x="290" y="800" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-s3" parent="svc-group-s3" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#3F8624;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;fontFamily=Helvetica;shadow=1;" value="S3&lt;div&gt;&lt;i&gt;アーカイブ / バックアップ&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===== VPC ===== -->
+        <!-- Public subnet -->
+        <mxCell id="svc-group-alb" parent="aws-cloud" style="fillColor=#EDE7F6;strokeColor=#8C4FFF;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#8C4FFF;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="ロードバランサー" vertex="1">
+          <mxGeometry x="780" y="305" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-alb" parent="svc-group-alb" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_load_balancing;fontFamily=Helvetica;shadow=1;" value="ALB&lt;div&gt;&lt;i&gt;HTTPS 終端&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- Private subnet (APP) -->
+        <mxCell id="svc-group-ec2" parent="aws-cloud" style="fillColor=#FFF2E8;strokeColor=#ED7100;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#ED7100;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="Compute" vertex="1">
+          <mxGeometry x="650" y="520" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-ec2" parent="svc-group-ec2" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ec2;fontFamily=Helvetica;shadow=1;" value="EC2&lt;div&gt;&lt;i&gt;移行後 APP サーバー&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-group-efs" parent="aws-cloud" style="fillColor=#E8F5E9;strokeColor=#3F8624;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#3F8624;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="共有ファイル" vertex="1">
+          <mxGeometry x="650" y="670" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-efs" parent="svc-group-efs" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#3F8624;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_file_system;fontFamily=Helvetica;shadow=1;" value="EFS&lt;div&gt;&lt;i&gt;NFS 共有&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- Private subnet (DB) -->
+        <mxCell id="svc-group-rds" parent="aws-cloud" style="fillColor=#F5E6F7;strokeColor=#C925D1;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#C925D1;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="Database" vertex="1">
+          <mxGeometry x="910" y="520" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-rds" parent="svc-group-rds" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.rds;fontFamily=Helvetica;shadow=1;" value="RDS for Oracle&lt;div&gt;&lt;i&gt;Multi-AZ&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="col-vpc" parent="aws-cloud" value="&lt;b&gt;VPC 本番環境（ALB: Public / EC2・EFS・RDS: Private Subnet）&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#8C4FFF;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="680" y="265" width="420" height="20" as="geometry" />
+        </mxCell>
+        <!-- ===== Auxiliary Services (CloudWatch + IAM) ===== -->
+        <mxCell id="aux-box" parent="aws-cloud" value="&lt;b&gt;Auxiliary Services&lt;/b&gt;" style="rounded=0;fillColor=none;strokeColor=#666666;dashed=1;verticalAlign=top;align=left;spacingLeft=8;spacingTop=4;html=1;fontSize=12;fontStyle=0;fontColor=#666666;fontFamily=Helvetica;" vertex="1">
+          <mxGeometry x="40" y="850" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-group-cloudwatch" parent="aws-cloud" style="fillColor=#FCE4EC;strokeColor=#E7157B;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#E7157B;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="監視" vertex="1">
+          <mxGeometry x="60" y="870" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-cloudwatch" parent="svc-group-cloudwatch" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch_2;fontFamily=Helvetica;shadow=1;" value="CloudWatch&lt;div&gt;&lt;i&gt;移行監視・本番監視&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-group-iam" parent="aws-cloud" style="fillColor=#FFEBEE;strokeColor=#DD344C;rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=12;fontColor=#DD344C;fontFamily=Helvetica;container=1;collapsible=0;shadow=1;strokeWidth=1.5;" value="権限" vertex="1">
+          <mxGeometry x="200" y="870" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="svc-iam" parent="svc-group-iam" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.identity_and_access_management;fontFamily=Helvetica;shadow=1;" value="IAM Role&lt;div&gt;&lt;i&gt;移行サービス実行権限&lt;/i&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="48" width="48" x="36" y="30" as="geometry" />
+        </mxCell>
+        <!-- ===================== EDGES (icon-to-icon) ===================== -->
+        <!-- Blue #2E7DD7 : 切替後の本番トラフィック -->
+        <mxCell id="e-users-r53" edge="1" parent="1" source="users-icon" target="svc-route53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-users-r53-label" value="HTTPS アクセス" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-users-r53">
+          <mxGeometry relative="1" x="-0.55" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-r53-alb" edge="1" parent="1" source="svc-route53" target="svc-alb" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="509" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-r53-alb-label" value="ルーティング" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-r53-alb">
+          <mxGeometry relative="1" x="-0.3" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-alb-ec2" edge="1" parent="1" source="svc-alb" target="svc-ec2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1220" y="610" />
+              <mxPoint x="1090" y="610" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-alb-ec2-label" value="振り分け" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-alb-ec2">
+          <mxGeometry relative="1" x="-0.3" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-ec2-rds" edge="1" parent="1" source="svc-ec2" target="svc-rds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ec2-rds-label" value="SQL 接続" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-ec2-rds">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-ec2-efs" edge="1" parent="1" source="svc-ec2" target="svc-efs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7DD7;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ec2-efs-label" value="NFS マウント" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-ec2-efs">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Orange #ED7100 : サーバー移行 (MGN) -->
+        <mxCell id="e-app-dx" edge="1" parent="1" source="onprem-app" target="svc-dx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED7100;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="410" y="444" />
+              <mxPoint x="410" y="602" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-app-dx-label" value="レプリケーション" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-app-dx">
+          <mxGeometry relative="1" x="-0.6" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-dx-mgn" edge="1" parent="1" source="svc-dx" target="svc-mgn" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED7100;strokeWidth=2;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="602" />
+              <mxPoint x="640" y="424" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-dx-mgn-label" value="継続同期" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-dx-mgn">
+          <mxGeometry relative="1" x="0.3" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-mgn-ec2" edge="1" parent="1" source="svc-mgn" target="svc-ec2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#ED7100;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="424" />
+              <mxPoint x="870" y="724" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-mgn-ec2-label" value="カットオーバー起動" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-mgn-ec2">
+          <mxGeometry relative="1" x="-0.35" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Magenta #C925D1 : DB 移行 (DMS) -->
+        <mxCell id="e-ora-dx" edge="1" parent="1" source="onprem-oracle" target="svc-dx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C925D1;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="644" />
+              <mxPoint x="400" y="614" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-ora-dx-label" value="REDO ログ読取" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-ora-dx">
+          <mxGeometry relative="1" x="-0.6" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-dx-dms" edge="1" parent="1" source="svc-dx" target="svc-dms" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C925D1;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-dx-dms-label" value="変更データ転送" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-dx-dms">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-dms-rds" edge="1" parent="1" source="svc-dms" target="svc-rds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C925D1;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="614" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-dms-rds-label" value="フルロード + CDC 適用" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-dms-rds">
+          <mxGeometry relative="1" x="-0.5" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Green #3F8624 : ファイル / オブジェクト移行 (DataSync) -->
+        <mxCell id="e-sto-dx" edge="1" parent="1" source="onprem-storage" target="svc-dx" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F8624;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="844" />
+              <mxPoint x="420" y="626" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-sto-dx-label" value="ファイル読取" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-sto-dx">
+          <mxGeometry relative="1" x="-0.6" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-dx-ds" edge="1" parent="1" source="svc-dx" target="svc-datasync" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F8624;strokeWidth=2;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="650" y="626" />
+              <mxPoint x="650" y="814" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-dx-ds-label" value="増分転送" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-dx-ds">
+          <mxGeometry relative="1" x="0.3" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-ds-efs" edge="1" parent="1" source="svc-datasync" target="svc-efs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F8624;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="814" />
+              <mxPoint x="900" y="874" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-ds-efs-label" value="共有ファイル同期" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-ds-efs">
+          <mxGeometry relative="1" x="-0.4" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-ds-s3" edge="1" parent="1" source="svc-datasync" target="svc-s3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F8624;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-ds-s3-label" value="アーカイブ格納" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-ds-s3">
+          <mxGeometry relative="1" x="0" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <!-- Gray dashed #545B64 : バックアップ VPN 経路 -->
+        <mxCell id="e-app-vpn" edge="1" parent="1" source="onprem-app" target="svc-vpn" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#545B64;strokeWidth=2;dashed=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="330" y="456" />
+              <mxPoint x="330" y="774" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-app-vpn-label" value="バックアップ VPN" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-app-vpn">
+          <mxGeometry relative="1" x="0.4" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="e-vpn-ec2" edge="1" parent="1" source="svc-vpn" target="svc-ec2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#545B64;strokeWidth=2;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="930" />
+              <mxPoint x="1010" y="930" />
+              <mxPoint x="1010" y="736" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e-vpn-ec2-label" value="DX 障害時の迂回経路" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;fontFamily=Helvetica;" connectable="0" vertex="1" parent="e-vpn-ec2">
+          <mxGeometry relative="1" x="-0.45" y="0" as="geometry"><mxPoint as="offset" /></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
