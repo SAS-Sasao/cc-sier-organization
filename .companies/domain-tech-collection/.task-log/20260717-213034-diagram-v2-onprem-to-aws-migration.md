@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-07-17T21:30:34"
 completed: "2026-07-17T22:00:00"
 request: "オンプレミス環境（オラクル、APP、ストレージなど）をAWSへ移行するさいのAWS構成を作成してほしい"
-issue_number: null
-pr_number: null
+issue_number: 639
+pr_number: 638
 subagents: [general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 1
