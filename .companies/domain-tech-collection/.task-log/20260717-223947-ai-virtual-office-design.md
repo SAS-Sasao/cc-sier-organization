@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-07-17T22:39:47"
 completed: "2026-07-17T22:50:00"
 request: "pixel-agents のような AI 仮想オフィスを別リポジトリ・Vercel デプロイ前提の本格アプリとして作りたい。必要な技術・リポジトリ構成・Claude 設定をドキュメントにまとめたい（当面はローカル実行）"
-issue_number: null
-pr_number: null
+issue_number: 644
+pr_number: 643
 subagents: [secretary]
 l0_gate: null
 l0_retries: 0
