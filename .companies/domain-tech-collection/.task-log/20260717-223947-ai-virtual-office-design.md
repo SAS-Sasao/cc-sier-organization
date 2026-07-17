@@ -48,3 +48,14 @@ failure_reason: ""
 judge_comment: "secretary セルフ評価: 依頼 3 点（技術/リポジトリ構成/Claude 設定）+ 追加要件（CC-SIer 組織取り込み）を網羅。accuracy は hooks 仕様・Vercel 制約を既知情報ベースで記載しており実装時の検証が前提（M0 で SSE buffering 検証を明記済み）"
 judged_at: "2026-07-17T22:50:00+09:00"
 ```
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-17T22:46:32"
+```
