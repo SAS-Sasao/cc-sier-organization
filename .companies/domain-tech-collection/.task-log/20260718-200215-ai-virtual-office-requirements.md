@@ -48,3 +48,14 @@ failure_reason: ""
 judge_comment: "secretary セルフ評価: 依頼 3 要素（要件定義 / cc-sier 理念ベース / .claude 設定の重視）を網羅。§2 概念マッピングと §5 .claude 設定設計を中核章化。accuracy は hooks 仕様の実装時検証が前提"
 judged_at: "2026-07-18T20:12:00+09:00"
 ```
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-18T20:08:54"
+```

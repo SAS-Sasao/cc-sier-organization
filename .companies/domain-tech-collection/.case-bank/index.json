@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-18T20:06:22",
-  "case_count": 170,
+  "updated_at": "2026-07-18T20:08:54",
+  "case_count": 171,
   "failure_patterns": [],
   "cases": [
     {
@@ -5161,6 +5161,44 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-18T08:13:19+09:00"
+      }
+    },
+    {
+      "id": "20260718-200215-ai-virtual-office-requirements",
+      "state": {
+        "request_keywords": [
+          "ai-virtual-office",
+          "の要件定義を作成したい",
+          "別リポジトリで作成するが",
+          "ベースの会社作成の理念は",
+          "cc-sier",
+          "を使用する想定",
+          "アプリの中では",
+          ".claude"
+        ],
+        "request_head": "ai-virtual-office の要件定義を作成したい。別リポジトリで作成するが、ベースの会社作成の理念は cc-s",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.92,
+        "clarity": 0.95,
+        "total": 0.94,
+        "failure_reason": "",
+        "judge_comment": "secretary セルフ評価: 依頼 3 要素（要件定義 / cc-sier 理念ベース / .claude 設定の重視）を網羅。§2 概念マッピングと §5 .claude 設定設計を中核章化。accuracy は hooks 仕様の実装時検証が前提",
+        "judged_at": "2026-07-18T20:12:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/ai-virtual-office-requirements.md"
+        ],
+        "started": "2026-07-18T20:02:15"
       }
     }
   ],
