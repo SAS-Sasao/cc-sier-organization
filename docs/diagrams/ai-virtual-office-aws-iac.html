@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Virtual Office — AWS サーバーレス構成 - IaC Source Code</title>
+<style>
+:root { --bg:#f8f9fa; --bg2:#fff; --text:#1a1a2e; --blue:#4361ee; --border:rgba(0,0,0,.08); --muted:#6c757d; --shadow:rgba(0,0,0,.06);
+        --code-bg:#1e1e2e; --code-text:#cdd6f4; --line-num:#6c7086; --kw:#cba6f7; --str:#a6e3a1; --comment:#6c7086; --key:#89b4fa; --val:#fab387; --bool:#f38ba8; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0d1117; --bg2:#161b22; --text:#e6edf3; --border:rgba(255,255,255,.08); --muted:#8b949e; --shadow:rgba(0,0,0,.3); }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:system-ui,sans-serif; padding:32px; max-width:1200px; margin:0 auto; }
+.top-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+.back-btn { color:var(--blue); text-decoration:none; font-size:.88rem; }
+.back-btn:hover { text-decoration:underline; }
+.dl-btn { display:inline-block; padding:8px 16px; background:var(--blue); color:#fff; border-radius:8px; text-decoration:none; font-size:.84rem; font-weight:500; transition:opacity .2s; }
+.dl-btn:hover { opacity:.85; }
+.copy-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(255,255,255,.08); color:var(--code-text); border:1px solid rgba(255,255,255,.15); border-radius:6px; font-size:.78rem; font-family:inherit; cursor:pointer; transition:all .2s; }
+.copy-btn:hover { background:rgba(255,255,255,.15); }
+.copy-btn.copied { background:#16a34a; color:#fff; border-color:#16a34a; }
+.copy-btn svg { width:14px; height:14px; fill:currentColor; }
+h1 { font-size:1.3rem; margin-bottom:8px; }
+.meta { color:var(--muted); font-size:.85rem; margin-bottom:20px; display:flex; flex-wrap:wrap; gap:16px; align-items:center; }
+.badge { display:inline-block; padding:3px 10px; border-radius:4px; font-size:.75rem; font-weight:600; }
+.badge-pass { background:#d1fae5; color:#065f46; }
+.badge-fail { background:#fee2e2; color:#991b1b; }
+@media (prefers-color-scheme: dark) {
+  .badge-pass { background:#064e3b; color:#6ee7b7; }
+  .badge-fail { background:#7f1d1d; color:#fca5a5; }
+}
+.code-container { background:var(--code-bg); border-radius:12px; overflow:hidden; box-shadow:0 4px 16px var(--shadow); margin-bottom:24px; }
+.code-header { background:rgba(255,255,255,.05); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.code-header .filename { color:var(--code-text); font-size:.85rem; font-family:'SF Mono',Consolas,monospace; }
+.code-header .lines { color:var(--line-num); font-size:.78rem; }
+.code-scroll { overflow-x:auto; padding:16px 0; }
+.code-table { border-collapse:collapse; width:100%; }
+.code-table td { padding:0; vertical-align:top; font-family:'SF Mono',Consolas,'Courier New',monospace; font-size:.82rem; line-height:1.65; }
+.code-table .ln { width:1%; white-space:nowrap; padding:0 16px 0 20px; color:var(--line-num); text-align:right; user-select:none; border-right:1px solid rgba(255,255,255,.06); }
+.code-table .code { padding:0 20px; color:var(--code-text); white-space:pre; }
+.hl-comment { color:var(--comment); font-style:italic; }
+.hl-key { color:var(--key); }
+.hl-str { color:var(--str); }
+.hl-kw { color:var(--kw); }
+.hl-bool { color:var(--bool); }
+.hl-ref { color:#f9e2af; }
+.info { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 2px 8px var(--shadow); }
+.info h2 { font-size:1rem; margin-bottom:8px; }
+.info p { font-size:.88rem; color:var(--muted); line-height:1.6; }
+.updated { margin-top:24px; font-size:.78rem; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="top-bar">
+  <a href="./ai-virtual-office-aws.html" class="back-btn">&larr; 構成図に戻る</a>
+  <div><a href="./ai-virtual-office-aws.yaml" class="dl-btn" download>YAMLをダウンロード</a></div>
+</div>
+<h1>AI Virtual Office — AWS サーバーレス構成 - CloudFormation Template</h1>
+<div class="meta">
+  <span>生成日: 2026-07-18</span>
+  <span class="badge badge-pass">検証: Pass</span>
+  <span>314 行</span>
+</div>
+<div class="code-container">
+  <div class="code-header">
+    <span class="filename">ai-virtual-office-aws.yaml</span>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="lines">314 lines</span>
+      <button class="copy-btn" onclick="copyYaml(this)">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+  <div class="code-scroll"><table class="code-table"><tbody id="code-body"></tbody></table></div>
+</div>
+<div class="info">
+  <h2>CloudFormation テンプレートについて</h2>
+  <p>このテンプレートは構成図のアーキテクチャを CloudFormation で実装した参照コードです。
+  サンプル値（<code># TODO</code> コメント付き）は実運用時に変更してください。
+  暗号化・最小権限・パブリックアクセスブロックはデフォルトで有効化されています。</p>
+</div>
+<p class="updated">Generated by /company-diagram-v2 (LLM 直接生成 CFn / cfn-lint 検証)</p>
+<script>
+const raw = "AWSTemplateFormatVersion: \"2010-09-09\"\nDescription: >\n  AI Virtual Office - serverless stack on AWS.\n  Ingest pipeline (HTTP API + Lambda + DynamoDB with TTL), realtime fan-out\n  (WebSocket API + connection table + PostToConnection), static UI hosting\n  (S3 + CloudFront OAC) and Cognito user pool for viewer auth. No VPC required.\n\nParameters:\n  EnvType:\n    Type: String\n    Default: dev\n    AllowedValues: [dev, prod]\n  IngestToken:\n    Type: String\n    NoEcho: true\n    MinLength: 24\n    Description: Bearer token the local Relay presents to the ingest API.\n  EventTtlDays:\n    Type: Number\n    Default: 30\n    Description: Retention days for OfficeEvent items (DynamoDB TTL).\n\nConditions:\n  IsProd: !Equals [!Ref EnvType, prod]\n\nResources:\n  # ---------------- Data stores ----------------\n  EventsTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub \"office-events-${EnvType}\"\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - { AttributeName: pk, AttributeType: S }   # org#date\n        - { AttributeName: sk, AttributeType: S }   # ts#seq\n      KeySchema:\n        - { AttributeName: pk, KeyType: HASH }\n        - { AttributeName: sk, KeyType: RANGE }\n      TimeToLiveSpecification:\n        AttributeName: expireAt\n        Enabled: true\n      PointInTimeRecoverySpecification:\n        PointInTimeRecoveryEnabled: !If [IsProd, true, false]\n\n  ConnectionsTable:\n    Type: AWS::DynamoDB::Table\n    Properties:\n      TableName: !Sub \"office-connections-${EnvType}\"\n      BillingMode: PAY_PER_REQUEST\n      AttributeDefinitions:\n        - { AttributeName: connectionId, AttributeType: S }\n      KeySchema:\n        - { AttributeName: connectionId, KeyType: HASH }\n      TimeToLiveSpecification:\n        AttributeName: expireAt\n        Enabled: true\n\n  # ---------------- IAM ----------------\n  LambdaExecutionRole:\n    Type: AWS::IAM::Role\n    Properties:\n      AssumeRolePolicyDocument:\n        Version: \"2012-10-17\"\n        Statement:\n          - Effect: Allow\n            Principal: { Service: lambda.amazonaws.com }\n            Action: sts:AssumeRole\n      ManagedPolicyArns:\n        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole\n      Policies:\n        - PolicyName: office-tables-and-ws\n          PolicyDocument:\n            Version: \"2012-10-17\"\n            Statement:\n              - Effect: Allow\n                Action: [dynamodb:PutItem, dynamodb:DeleteItem, dynamodb:Query, dynamodb:Scan]\n                Resource:\n                  - !GetAtt EventsTable.Arn\n                  - !GetAtt ConnectionsTable.Arn\n              - Effect: Allow\n                Action: execute-api:ManageConnections\n                Resource: !Sub \"arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RealtimeWebSocketApi}/*\"\n\n  # ---------------- Lambdas ----------------\n  EventProcessorFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"office-event-processor-${EnvType}\"\n      Runtime: nodejs20.x\n      Handler: index.handler\n      Role: !GetAtt LambdaExecutionRole.Arn\n      MemorySize: 256\n      Timeout: 10\n      Environment:\n        Variables:\n          EVENTS_TABLE: !Ref EventsTable\n          CONNECTIONS_TABLE: !Ref ConnectionsTable\n          INGEST_TOKEN: !Ref IngestToken\n          TTL_DAYS: !Ref EventTtlDays\n          WS_ENDPOINT: !Sub \"https://${RealtimeWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${EnvType}\"\n      Code:\n        ZipFile: |\n          // Placeholder: validate bearer token, normalize OfficeEvent,\n          // put to EVENTS_TABLE (with expireAt TTL), scan CONNECTIONS_TABLE\n          // and PostToConnection to broadcast. Real code ships from the\n          // ai-virtual-office repository (packages/protocol shared schema).\n          exports.handler = async () => ({ statusCode: 200 });\n\n  ConnectionManagerFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"office-connection-manager-${EnvType}\"\n      Runtime: nodejs20.x\n      Handler: index.handler\n      Role: !GetAtt LambdaExecutionRole.Arn\n      MemorySize: 128\n      Timeout: 5\n      Environment:\n        Variables:\n          CONNECTIONS_TABLE: !Ref ConnectionsTable\n      Code:\n        ZipFile: |\n          // Placeholder: on $connect store connectionId (with TTL),\n          // on $disconnect remove it.\n          exports.handler = async () => ({ statusCode: 200 });\n\n  # ---------------- Ingest HTTP API ----------------\n  IngestHttpApi:\n    Type: AWS::ApiGatewayV2::Api\n    Properties:\n      Name: !Sub \"office-ingest-${EnvType}\"\n      ProtocolType: HTTP\n  IngestIntegration:\n    Type: AWS::ApiGatewayV2::Integration\n    Properties:\n      ApiId: !Ref IngestHttpApi\n      IntegrationType: AWS_PROXY\n      IntegrationUri: !GetAtt EventProcessorFunction.Arn\n      PayloadFormatVersion: \"2.0\"\n  IngestRoute:\n    Type: AWS::ApiGatewayV2::Route\n    Properties:\n      ApiId: !Ref IngestHttpApi\n      RouteKey: \"POST /ingest\"\n      Target: !Sub \"integrations/${IngestIntegration}\"\n  IngestStage:\n    Type: AWS::ApiGatewayV2::Stage\n    Properties:\n      ApiId: !Ref IngestHttpApi\n      StageName: !Ref EnvType\n      AutoDeploy: true\n      DefaultRouteSettings:\n        ThrottlingBurstLimit: 100\n        ThrottlingRateLimit: 50\n  IngestLambdaPermission:\n    Type: AWS::Lambda::Permission\n    Properties:\n      FunctionName: !Ref EventProcessorFunction\n      Action: lambda:InvokeFunction\n      Principal: apigateway.amazonaws.com\n      SourceArn: !Sub \"arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${IngestHttpApi}/*\"\n\n  # ---------------- Realtime WebSocket API ----------------\n  RealtimeWebSocketApi:\n    Type: AWS::ApiGatewayV2::Api\n    Properties:\n      Name: !Sub \"office-realtime-${EnvType}\"\n      ProtocolType: WEBSOCKET\n      RouteSelectionExpression: \"$request.body.action\"\n\n  # WebSocket API \u306f JWT \u30aa\u30fc\u30bd\u30e9\u30a4\u30b6\u975e\u5bfe\u5fdc\u306e\u305f\u3081\u3001Cognito JWT \u3092\u691c\u8a3c\u3059\u308b\n  # Lambda REQUEST \u30aa\u30fc\u30bd\u30e9\u30a4\u30b6\u3067 $connect \u3092\u4fdd\u8b77\u3059\u308b\uff08\u56f3\u306e\u300cJWT \u30aa\u30fc\u30bd\u30e9\u30a4\u30b6\u691c\u8a3c\u300d\u306b\u5bfe\u5fdc\uff09\n  WsAuthorizerFunction:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub \"office-ws-authorizer-${EnvType}\"\n      Runtime: nodejs20.x\n      Handler: index.handler\n      Role: !GetAtt LambdaExecutionRole.Arn\n      MemorySize: 128\n      Timeout: 5\n      Environment:\n        Variables:\n          USER_POOL_ID: !Ref ViewerUserPool\n          APP_CLIENT_ID: !Ref ViewerUserPoolClient\n      Code:\n        ZipFile: |\n          // Placeholder: verify the Cognito JWT passed as ?token= query param\n          // (aws-jwt-verify) and return an IAM policy Allow/Deny.\n          exports.handler = async () => ({ isAuthorized: false });\n  WsAuthorizer:\n    Type: AWS::ApiGatewayV2::Authorizer\n    Properties:\n      ApiId: !Ref RealtimeWebSocketApi\n      Name: !Sub \"office-ws-jwt-authorizer-${EnvType}\"\n      AuthorizerType: REQUEST\n      AuthorizerUri: !Sub \"arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WsAuthorizerFunction.Arn}/invocations\"\n      IdentitySource:\n        - \"route.request.querystring.token\"\n  WsAuthorizerPermission:\n    Type: AWS::Lambda::Permission\n    Properties:\n      FunctionName: !Ref WsAuthorizerFunction\n      Action: lambda:InvokeFunction\n      Principal: apigateway.amazonaws.com\n      SourceArn: !Sub \"arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RealtimeWebSocketApi}/*\"\n\n  WsConnectIntegration:\n    Type: AWS::ApiGatewayV2::Integration\n    Properties:\n      ApiId: !Ref RealtimeWebSocketApi\n      IntegrationType: AWS_PROXY\n      IntegrationUri: !Sub \"arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ConnectionManagerFunction.Arn}/invocations\"\n  WsConnectRoute:\n    Type: AWS::ApiGatewayV2::Route\n    Properties:\n      ApiId: !Ref RealtimeWebSocketApi\n      RouteKey: \"$connect\"\n      AuthorizationType: CUSTOM\n      AuthorizerId: !Ref WsAuthorizer\n      Target: !Sub \"integrations/${WsConnectIntegration}\"\n  WsDisconnectRoute:\n    Type: AWS::ApiGatewayV2::Route\n    Properties:\n      ApiId: !Ref RealtimeWebSocketApi\n      RouteKey: \"$disconnect\"\n      Target: !Sub \"integrations/${WsConnectIntegration}\"\n  WsStage:\n    Type: AWS::ApiGatewayV2::Stage\n    Properties:\n      ApiId: !Ref RealtimeWebSocketApi\n      StageName: !Ref EnvType\n      AutoDeploy: true\n  WsLambdaPermission:\n    Type: AWS::Lambda::Permission\n    Properties:\n      FunctionName: !Ref ConnectionManagerFunction\n      Action: lambda:InvokeFunction\n      Principal: apigateway.amazonaws.com\n      SourceArn: !Sub \"arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RealtimeWebSocketApi}/*\"\n\n  # ---------------- Static hosting ----------------\n  StaticBucket:\n    Type: AWS::S3::Bucket\n    DeletionPolicy: Retain\n    UpdateReplacePolicy: Retain\n    Properties:\n      BucketName: !Sub \"ai-virtual-office-ui-${AWS::AccountId}-${EnvType}\"\n      PublicAccessBlockConfiguration:\n        BlockPublicAcls: true\n        BlockPublicPolicy: true\n        IgnorePublicAcls: true\n        RestrictPublicBuckets: true\n      BucketEncryption:\n        ServerSideEncryptionConfiguration:\n          - ServerSideEncryptionByDefault:\n              SSEAlgorithm: AES256\n\n  OriginAccessControl:\n    Type: AWS::CloudFront::OriginAccessControl\n    Properties:\n      OriginAccessControlConfig:\n        Name: !Sub \"office-oac-${EnvType}\"\n        OriginAccessControlOriginType: s3\n        SigningBehavior: always\n        SigningProtocol: sigv4\n\n  Distribution:\n    Type: AWS::CloudFront::Distribution\n    Properties:\n      DistributionConfig:\n        Enabled: true\n        DefaultRootObject: index.html\n        HttpVersion: http2\n        Origins:\n          - Id: static-ui\n            DomainName: !GetAtt StaticBucket.RegionalDomainName\n            OriginAccessControlId: !Ref OriginAccessControl\n            S3OriginConfig:\n              OriginAccessIdentity: \"\"\n        DefaultCacheBehavior:\n          TargetOriginId: static-ui\n          ViewerProtocolPolicy: redirect-to-https\n          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6   # CachingOptimized (managed)\n        PriceClass: PriceClass_200\n\n  # ---------------- Viewer auth ----------------\n  ViewerUserPool:\n    Type: AWS::Cognito::UserPool\n    Properties:\n      UserPoolName: !Sub \"office-viewers-${EnvType}\"\n      UsernameAttributes: [email]\n      AdminCreateUserConfig:\n        AllowAdminCreateUserOnly: !If [IsProd, false, true]\n  ViewerUserPoolClient:\n    Type: AWS::Cognito::UserPoolClient\n    Properties:\n      UserPoolId: !Ref ViewerUserPool\n      ClientName: office-web\n      GenerateSecret: false\n      ExplicitAuthFlows: [ALLOW_USER_SRP_AUTH, ALLOW_REFRESH_TOKEN_AUTH]\n\nOutputs:\n  CloudFrontDomain:\n    Description: Viewer URL origin (attach Route 53 Alias for custom domain)\n    Value: !GetAtt Distribution.DomainName\n  IngestEndpoint:\n    Description: Relay forward target (POST /ingest with Bearer token)\n    Value: !Sub \"https://${IngestHttpApi}.execute-api.${AWS::Region}.amazonaws.com/${EnvType}/ingest\"\n  WebSocketEndpoint:\n    Description: Browser realtime subscription endpoint\n    Value: !Sub \"wss://${RealtimeWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/${EnvType}\"\n  UserPoolId:\n    Value: !Ref ViewerUserPool\n";
+const lines = raw.split("\n");
+const tbody = document.getElementById("code-body");
+lines.forEach((line, i) => {
+  const tr = document.createElement("tr");
+  const lnTd = document.createElement("td");
+  lnTd.className = "ln"; lnTd.textContent = i + 1;
+  const codeTd = document.createElement("td");
+  codeTd.className = "code"; codeTd.innerHTML = highlight(line);
+  tr.appendChild(lnTd); tr.appendChild(codeTd); tbody.appendChild(tr);
+});
+function copyYaml(btn) {
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.classList.add("copied");
+    btn.querySelector("span").textContent = "Copied!";
+    btn.querySelector("svg").innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    setTimeout(() => {
+      btn.classList.remove("copied");
+      btn.querySelector("span").textContent = "Copy";
+      btn.querySelector("svg").innerHTML = '<path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>';
+    }, 2000);
+  });
+}
+function highlight(line) {
+  let h = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  if (/^\s*#/.test(h)) return '<span class="hl-comment">' + h + '</span>';
+  h = h.replace(/(#.*)$/, '<span class="hl-comment">$1</span>');
+  h = h.replace(/(!(?:Ref|Sub|GetAtt|Select|Join|If|Equals|FindInMap|Split|ImportValue|GetAZs|Condition|Not|And|Or))/g, '<span class="hl-ref">$1</span>');
+  h = h.replace(/^(\s*)(AWSTemplateFormatVersion|Description|Parameters|Mappings|Conditions|Resources|Outputs|Rules|Metadata|Transform)(:)/, '$1<span class="hl-kw">$2</span>$3');
+  h = h.replace(/(AWS::[A-Za-z0-9]+::[A-Za-z0-9]+)/g, '<span class="hl-kw">$1</span>');
+  h = h.replace(/^(\s*)([A-Za-z_][A-Za-z0-9_]*)(:)/gm, '$1<span class="hl-key">$2</span>$3');
+  return h;
+}
+</script>
+</body>
+</html>
