@@ -65,3 +65,14 @@ failure_reason: ""
 judge_comment: "/company-diagram-v2 l2_scores から自動マッピング: completeness=avg(s1_structure,s5_index_update), accuracy=avg(s2_iac,s3_xml_html_consistency), clarity=avg(s4_legend,s6_drawio_quality)"
 judged_at: "2026-07-18T20:50:00+09:00"
 ```
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-18T20:51:16"
+```
