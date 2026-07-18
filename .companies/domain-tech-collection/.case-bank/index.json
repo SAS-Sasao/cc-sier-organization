@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-18T20:54:49",
+  "updated_at": "2026-07-18T20:55:53",
   "case_count": 174,
   "failure_patterns": [],
   "cases": [
@@ -5299,7 +5299,15 @@
         "artifact_count": 0
       },
       "reward": 0.2,
-      "judge": null,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。同日 2 回目のリフレッシュ実行（PR #655 はユーザーマージ待ち）",
+        "judged_at": "2026-07-18T20:56:00+09:00"
+      },
       "outcome": {
         "files_written": [],
         "started": "2026-07-18T20:51:58"
