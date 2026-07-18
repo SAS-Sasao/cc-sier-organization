@@ -78,6 +78,7 @@ org: domain-tech-collection
 
 | タスクID | 内容 | 担当 | NG日時 | 問題ファイル | Issue |
 |---------|------|------|--------|------------|-------|
+| origin | origin | SAS-Sasao | 2026-07-18 21:28 | `origin.md` | — |
 | — | — | — | — | — | — |
 
 ---
