@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-07-18T20:34:34"
 completed: "2026-07-18T20:50:00"
 request: "ai-virtual-office のアプリをAWS側で作成するとした場合の構成図を考えてほしい"
-issue_number: null
-pr_number: null
+issue_number: 654
+pr_number: 653
 subagents: [general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 0
