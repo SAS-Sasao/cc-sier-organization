@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-18T20:51:16",
-  "case_count": 173,
+  "updated_at": "2026-07-18T20:54:49",
+  "case_count": 174,
   "failure_patterns": [],
   "cases": [
     {
@@ -5278,28 +5278,35 @@
         "files_written": [],
         "started": "2026-07-18T20:34:34"
       }
-    }
-  ],
-  "frequent_phrases": [
-    {
-      "phrase": "各ユーザーが独立して",
-      "count": 2
     },
     {
-      "phrase": "データドリブン意思決定アプリの素材として",
-      "count": 2
-    },
-    {
-      "phrase": "レポートを生成",
-      "count": 2
+      "id": "20260718-205158-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "today",
+          "本日",
+          "回目",
+          "AWS",
+          "構成図タスクを反映するリフレッシュ実行"
+        ],
+        "request_head": "/company-cycle today（本日 2 回目、AWS 構成図タスクを反映するリフレッシュ実行）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-18T20:51:58"
+      }
     }
   ],
-  "intent_patterns": [
-    {
-      "intent": "ai-virtual-office の要件定義を作成",
-      "full": "ai-virtual-office の要件定義を作成したい。別リポジトリで作成するが、ベースの会社作成の理念はcc-sierを使用する想定で作成してみて。アプリの中では.claudeの設定が肝になると",
-      "date": "2026-07-18"
-    }
-  ],
-  "conversation_enriched_at": "2026-07-18T20:11:03"
+  "frequent_phrases": [],
+  "intent_patterns": [],
+  "conversation_enriched_at": "2026-07-18T20:54:49"
 }
