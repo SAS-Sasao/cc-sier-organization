@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-07-18T20:02:15"
 completed: "2026-07-18T20:12:00"
 request: "ai-virtual-office の要件定義を作成したい。別リポジトリで作成するが、ベースの会社作成の理念は cc-sier を使用する想定。アプリの中では .claude の設定が肝になるためそこも考慮"
-issue_number: null
-pr_number: null
+issue_number: 649
+pr_number: 648
 subagents: [secretary]
 l0_gate: null
 l0_retries: 0
