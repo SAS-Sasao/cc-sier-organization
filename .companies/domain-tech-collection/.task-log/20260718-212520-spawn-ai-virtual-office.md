@@ -7,8 +7,8 @@ mode: "subagent"
 started: "2026-07-18T21:25:20"
 completed: "2026-07-18T21:35:00"
 request: "ai-virtual-office の切り出し（/company-spawn）。元ファイルは cc-sier にも残しておく"
-issue_number: null
-pr_number: null
+issue_number: 658
+pr_number: 657
 subagents: [devops-coordinator]
 l0_gate: null
 l0_retries: 0
