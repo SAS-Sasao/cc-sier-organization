@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-18T20:08:54",
-  "case_count": 171,
+  "updated_at": "2026-07-18T20:11:03",
+  "case_count": 172,
   "failure_patterns": [],
   "cases": [
     {
@@ -5161,7 +5161,13 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-18T08:13:19+09:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n   573b712..35711b9  main -> main\n=== docs artifacts today (org) ===\n.companies/domain-tech-collection/docs/daily-digest/2026-07-12.md\n",
+        "```tool_result\n1\t---\n2\ttask_id: \"[PHONE]35-daily-digest-actions\"\n3\torg: \"domain-tech-collection\"\n4\toperator: \"github-actions-bot\"\n5\tstatus: completed\n",
+        "```tool_result\ntrigger-expansion candidates: 0\nworkflow candidates (n>=3, avg>=0.7):\n  - \"daily-digest-au\" n=48 avg=0.8\n  - \"日次ダイジェスト 2026-0\" n=6 avg="
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260718-200215-ai-virtual-office-requirements",
@@ -5199,10 +5205,63 @@
           ".companies/domain-tech-collection/docs/research/ai-virtual-office-requirements.md"
         ],
         "started": "2026-07-18T20:02:15"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\nFile created successfully at: /home/toyoki05/cc-sier-organization/.companies/domain-tech-collection/.task-log/[PHONE]47-ai-virtual-offi",
+        "```tool_result\nFile created successfully at: /home/toyoki05/cc-sier-organization/.companies/domain-tech-collection/docs/research/ai-virtual-office-des",
+        "```tool_result\nThe file /home/toyoki05/cc-sier-organization/.companies/domain-tech-collection/docs/research/ai-virtual-office-design.md has been updat"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260718-200901-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "today"
+        ],
+        "request_head": "/company-cycle today",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-18T20:09:01"
+      },
+      "conversation_context": [
+        "<command-message>company-cycle</command-message>\n<command-name>/company-cycle</command-name>",
+        "Base directory for this skill: /home/toyoki05/cc-sier-organization/.claude/skills/company-cycle\n\n# CC-SIer サイクルオーケストレータ Skill（軽量型）\n\n3 つの skill (`compa",
+        "```tool_result\n[PHONE]47-cycle-today.md\n[PHONE]12-cycle-today.md\n[PHONE]16-cycle-today.md\n[PHONE]52-cycle-today.md"
+      ],
+      "conversation_enriched": true
     }
   ],
-  "frequent_phrases": [],
-  "intent_patterns": [],
-  "conversation_enriched_at": "2026-07-17T22:52:19"
+  "frequent_phrases": [
+    {
+      "phrase": "各ユーザーが独立して",
+      "count": 2
+    },
+    {
+      "phrase": "データドリブン意思決定アプリの素材として",
+      "count": 2
+    },
+    {
+      "phrase": "レポートを生成",
+      "count": 2
+    }
+  ],
+  "intent_patterns": [
+    {
+      "intent": "ai-virtual-office の要件定義を作成",
+      "full": "ai-virtual-office の要件定義を作成したい。別リポジトリで作成するが、ベースの会社作成の理念はcc-sierを使用する想定で作成してみて。アプリの中では.claudeの設定が肝になると",
+      "date": "2026-07-18"
+    }
+  ],
+  "conversation_enriched_at": "2026-07-18T20:11:03"
 }

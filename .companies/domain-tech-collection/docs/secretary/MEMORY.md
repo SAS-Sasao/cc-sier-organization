@@ -1,6 +1,6 @@
 # 秘書 MEMORY（Case Bank 学習結果）
 
-> 最終更新: 2026-07-17 22:00 | Case Bank: 167件 | 平均報酬: 0.83
+> 最終更新: 2026-07-18 20:11 | Case Bank: 172件 | 平均報酬: 0.83
 
 ## ルーティング先読み
 
@@ -58,3 +58,7 @@
 
 - **/company-diagram-v2 初実運用成功**（onprem-to-aws-migration、L2 composite 0.98、PR #638 マージ済み）。「AWS構成図」「移行構成」系の依頼は diagram-v2（draw.io XML 直接生成・MCP 不使用）へルーティング可能
 - **diagram-v2 の貫通チェッカー制約（最重要知見）**: `review-drawio.js` はエッジを「アイコン中心→waypoint→中心」で近似し、除外は source/target の **2 階層上（サービスグループ + その親）まで**。VPC/サブネットを実コンテナ（4 層ネスト）にすると全エッジが誤検知される。**VPC/サブネットはラベル + HTML レイヤー構成表で表現し、全サービスグループは aws-cloud 直下のフラット構造にする**（詳細: Issue #639）
+
+## 更新履歴メモ（2026-07-18 追記）
+
+- **ai-virtual-office プロジェクト進行中**: 設計ドキュメント（07-17）+ 要件定義書 v0.1（07-18）の 2 点セットが `docs/research/` に完成。次アクションは `/company-spawn` でのリポジトリ切り出し → M0 PoC。「仮想オフィス」「ai-office」「spawn」の依頼はこの文脈を参照すること
