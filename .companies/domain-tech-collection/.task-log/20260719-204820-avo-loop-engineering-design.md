@@ -2,13 +2,13 @@
 task_id: "20260719-204820-avo-loop-engineering-design"
 org: "domain-tech-collection"
 operator: "SAS-Sasao"
-status: in-progress
+status: completed
 mode: "direct"
 started: "2026-07-19T20:48:20"
-completed: ""
+completed: "2026-07-19T20:58:00"
 request: "ai-virtual-office の SKILL/hooks 設計をループエンジニアリング思想（Addy Osmani / LayerX 記事）に基づき固める。検証 hooks の settings.json 設計・§5.4 改訂・SKILL カタログ明確化・E2E テスト AI 自動化の設計"
-issue_number: null
-pr_number: null
+issue_number: 663
+pr_number: 662
 subagents: []
 l0_gate: null
 l0_retries: 0
