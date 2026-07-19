@@ -50,3 +50,14 @@ failure_reason: ""
 judge_comment: "secretary 評価: 依頼 4 点（検証 hooks settings.json / §5.4 改訂 / SKILL 明確化 / E2E AI 自動化）を全てカバー。NFR-2（exit 2 禁止）と検証 hooks の矛盾を 2 系統分離で解消した点、E2E を状態ファースト（Debug State API）にして AI 修復ループを成立させた点が設計上の要。hooks スクリプトは仕様レベル（擬似コード）であり実装は ai-virtual-office リポジトリ側の後続タスク"
 judged_at: "2026-07-19T20:55:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-19T20:54:16"
+```

@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-18T21:37:58",
-  "case_count": 174,
+  "updated_at": "2026-07-19T21:20:49",
+  "case_count": 179,
   "failure_patterns": [],
   "cases": [
     {
@@ -5311,6 +5311,184 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-18T20:51:58"
+      }
+    },
+    {
+      "id": "20260718-212520-spawn-ai-virtual-office",
+      "state": {
+        "request_keywords": [
+          "ai-virtual-office",
+          "の切り出し",
+          "/company-spawn",
+          "元ファイルは",
+          "cc-sier",
+          "にも残しておく"
+        ],
+        "request_head": "ai-virtual-office の切り出し（/company-spawn）。元ファイルは cc-sier にも残して",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "subagent",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.95,
+        "clarity": 0.95,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "secretary 評価: spawn の全工程完了（リポ作成/設計コピー/Subagent 4種/origin.md/projects.md 登録）。ユーザー追加指示（public 化）も即時反映。devops-coordinator が git identity・default branch の 2 つの環境ハマりを自己解決し agent-memory に記録した点を評価",
+        "judged_at": "2026-07-18T21:35:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-18T21:25:20"
+      }
+    },
+    {
+      "id": "20260719-081453-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.93,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=avg(0.95,0.90), accuracy=avg(s2_links,s3_summary)=avg(1.00,0.95), clarity=avg(s4_cross_domain,s6_violations)=avg(1.00,0.95)",
+        "judged_at": "2026-07-19T08:33:45+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-19T08:14:53+09:00"
+      }
+    },
+    {
+      "id": "20260719-204820-avo-loop-engineering-design",
+      "state": {
+        "request_keywords": [
+          "ai-virtual-office",
+          "SKILL/hooks",
+          "設計をループエンジニアリング思想",
+          "Addy",
+          "Osmani",
+          "LayerX",
+          "記事",
+          "に基づき固める"
+        ],
+        "request_head": "ai-virtual-office の SKILL/hooks 設計をループエンジニアリング思想（Addy Osmani",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 2
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.95,
+        "clarity": 0.9,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "secretary 評価: 依頼 4 点（検証 hooks settings.json / §5.4 改訂 / SKILL 明確化 / E2E AI 自動化）を全てカバー。NFR-2（exit 2 禁止）と検証 hooks の矛盾を 2 系統分離で解消した点、E2E を状態ファースト（Debug State API）にして AI 修復ループを成立させた点が設計上の要。hooks スクリプトは仕様レベル（擬似コード）であり実装は ai-virtual-office リポジトリ側の後続タスク",
+        "judged_at": "2026-07-19T20:55:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/ai-virtual-office-loop-engineering-design.md",
+          ".companies/domain-tech-collection/docs/research/ai-virtual-office-requirements.md"
+        ],
+        "started": "2026-07-19T20:48:20"
+      }
+    },
+    {
+      "id": "20260719-211034-office-develop-cycle",
+      "state": {
+        "request_keywords": [
+          "ループエンジニアリング設計にレビュー合格基準がない指摘への対応",
+          "office-qa",
+          "合格基準",
+          "verdict",
+          "JSON",
+          "を反映し",
+          "SKILL",
+          "で呼び出せること"
+        ],
+        "request_head": "ループエンジニアリング設計にレビュー合格基準がない指摘への対応。office-qa 合格基準（verdict JSON）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.95,
+        "clarity": 0.95,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "secretary 評価: ユーザー指摘（合格基準欠如）を設計の欠陥と認め、cc-sier review-pattern の実績ある判定ルール（致命軸強制 fail / composite 0.85 / リトライ 1 回）をそのまま移植したことで設計の一貫性を確保。開発サイクルの各ゲートとループ先を明示し、M0 の Phase 4 skip を silent skip 禁止付きで定義した点が良い。cc-sier → ai-vir → txt の 3 点同期も完遂",
+        "judged_at": "2026-07-19T21:35:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-19T21:10:34"
+      }
+    },
+    {
+      "id": "20260719-211500-avo-docs-sync",
+      "state": {
+        "request_keywords": [
+          "ループエンジニアリング設計ドキュメントを",
+          "ai-virtual-office",
+          "リポジトリにも反映",
+          "claude",
+          "の設定自体はまだ対応しなくてよい"
+        ],
+        "request_head": "ループエンジニアリング設計ドキュメントを ai-virtual-office リポジトリにも反映。claude の設定自",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 3
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 0.95,
+        "clarity": 0.95,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "secretary 評価: origin.md 更新ルールに準拠した同期。リンク修正は sed 一括適用後に残存相対リンクを grep 検証（プレーンテキストの出自説明 1 件のみ残存 = 前回コピーと同一扱いで正当）。トレーサビリティ（更新履歴 + コピー元コミット記録）を origin.md に恒久化した点が良い。auto-merge 未有効の検出と設定統一も適切",
+        "judged_at": "2026-07-19T21:25:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/design/loop-engineering-design.md",
+          ".companies/domain-tech-collection/docs/design/requirements.md",
+          ".companies/domain-tech-collection/docs/design/origin.md"
+        ],
+        "started": "2026-07-19T21:15:00"
       }
     }
   ],

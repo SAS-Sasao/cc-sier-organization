@@ -53,3 +53,14 @@ failure_reason: ""
 judge_comment: "secretary 評価: ユーザー指摘（合格基準欠如）を設計の欠陥と認め、cc-sier review-pattern の実績ある判定ルール（致命軸強制 fail / composite 0.85 / リトライ 1 回）をそのまま移植したことで設計の一貫性を確保。開発サイクルの各ゲートとループ先を明示し、M0 の Phase 4 skip を silent skip 禁止付きで定義した点が良い。cc-sier → ai-vir → txt の 3 点同期も完遂"
 judged_at: "2026-07-19T21:35:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-19T21:15:29"
+```

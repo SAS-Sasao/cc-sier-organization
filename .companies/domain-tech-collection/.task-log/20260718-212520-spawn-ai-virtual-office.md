@@ -55,3 +55,14 @@ failure_reason: ""
 judge_comment: "secretary 評価: spawn の全工程完了（リポ作成/設計コピー/Subagent 4種/origin.md/projects.md 登録）。ユーザー追加指示（public 化）も即時反映。devops-coordinator が git identity・default branch の 2 つの環境ハマりを自己解決し agent-memory に記録した点を評価"
 judged_at: "2026-07-18T21:35:00+09:00"
 ```
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-18T21:40:05"
+```
