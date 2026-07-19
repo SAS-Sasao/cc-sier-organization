@@ -63,6 +63,19 @@ Skill ごとに軸の中身は変わるが、**共通で必ず 6軸 + composite 
 2. **B章サブセクション省略**: quality-gate は「該当記事がないサブセクションは省略可」と記載するが、L2 reviewer は全サブセクション（B1-B6）の存在を期待する。該当記事なしの場合は `該当する記事はありませんでした` と明記して残す
 | `/company-diagram` | s1 構造準拠 / s2 IaC生成 / s6 英語ラベル | L0: IaC存在+英語ラベル、L1: HTML 7セクション |
 | `/company-drawio` | s2 エッジ貫通 / s6 HTML埋め込み禁則 | L0: `review-drawio.js` 実行 |
+| `/company-diagram-v2` | s2 IaC / s6 drawio品質 | L0①: `validate_drawio.py` + L0②: `review-drawio.js`（貫通検査） |
+
+### `/company-diagram-v2` L0 エッジ貫通誤検知の回避（フラット構造パターン）
+
+`review-drawio.js` のエッジ貫通検査は source/target セルの **2 階層上まで** parent を遡り、同一コンテナ内であれば除外する設計。VPC → Subnet → Service Group → Service のように **4 層以上ネスト** すると、エッジの両端が共通の祖先に到達できず、false-positive の「貫通」が大量発生する（PR #638 で 11 件誤検知、l0_retries=1）。
+
+**解決策**: draw.io XML 生成時に以下のフラット構造を採用する:
+
+1. 全サービスアイコンは `aws-cloud` コンテナの **直下** に配置（VPC/Subnet のネストコンテナを作らない）
+2. VPC・サブネット・AZ の論理的な囲みは **グループ矩形（style に group 指定）** またはラベル付き背景矩形で表現
+3. 詳細 HTML の「レイヤー構成」セクションで VPC/Subnet/AZ の論理配置を表形式で記載
+
+この知見は PR #653（ai-virtual-office-aws）で MEMORY.md 参照により **初回 L0 PASS**（retry=0）を達成し、有効性が確認されている。
 
 ## 9フェーズ統合実行フロー（diagram/drawio 型）
 
