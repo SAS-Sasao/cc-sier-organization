@@ -68,7 +68,7 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <a href="../" class="back-btn">&larr; トップに戻る</a>
 <h1>AWS 構成図一覧</h1>
 <p class="subtitle">AWS Diagram MCP Server で生成したアーキテクチャ構成図</p>
-<p class="count"><span id="match-count">1-20 / 25</span> 件の構成図</p>
+<p class="count"><span id="match-count">1-20 / 26</span> 件の構成図</p>
 
 <!-- ▼ 検索・フィルタ（カード追加時に編集不要） -->
 <div class="search-bar">
@@ -79,6 +79,17 @@ h1 { font-size:1.5rem; margin-bottom:8px; }
 <!-- ▲ 検索・フィルタ ここまで -->
 
 <div class="grid">
+  <a href="./codex-review-gateway.html" class="card">
+    <div class="card-body">
+      <div class="card-title">Codex Review Gateway — セカンドオピニオン・レビュー基盤</div>
+      <div class="card-meta">
+        <span class="tag tag-project">codex-review-gateway</span>
+        <span class="tag tag-area">Web App / AI Review Pipeline</span>
+      </div>
+      <div class="card-desc">GitHub PR を Codex app-server で独立レビューするゲートウェイ。CloudFront + S3 の SPA、ALB + ECS Fargate API、SQS で非同期化したレビューワーカーが spawn-per-review で codex app-server を実行し、採点結果を RDS / 生ログを S3 に保存</div>
+      <div class="card-date">2026-07-25</div>
+    </div>
+  </a>
   <a href="./ai-virtual-office-aws.html" class="card">
     <div class="card-body">
       <div class="card-title">AI Virtual Office — AWS サーバーレス構成</div>
