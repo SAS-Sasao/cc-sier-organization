@@ -1,0 +1,599 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Codex Review Gateway on AWS - GitHub PR second-opinion review gateway
+  powered by codex app-server (spawn-per-review on ECS Fargate).
+  CloudFront + S3 SPA / ALB + ECS Fargate API / SQS / ECS Fargate Worker /
+  RDS PostgreSQL / S3 raw logs / Secrets Manager.
+
+Parameters:
+  EnvType:
+    Type: String
+    Default: dev
+    AllowedValues: [dev, prod]
+    Description: Environment type (dev / prod)
+  VpcCidr:
+    Type: String
+    Default: 10.20.0.0/16
+  DbMasterUsername:
+    Type: String
+    Default: gateway_admin
+    NoEcho: true
+  GitHubAppSecretArn:
+    Type: String
+    Default: ""
+    Description: Optional pre-existing secret ARN for GitHub App private key (empty = create new)
+
+Mappings:
+  EnvConfig:
+    dev:
+      ApiCpu: "512"
+      ApiMemory: "1024"
+      ApiDesiredCount: 1
+      WorkerCpu: "1024"
+      WorkerMemory: "2048"
+      WorkerDesiredCount: 1
+      DbInstanceClass: db.t4g.micro
+      DbMultiAZ: false
+      LogRetentionDays: 30
+    prod:
+      ApiCpu: "1024"
+      ApiMemory: "2048"
+      ApiDesiredCount: 2
+      WorkerCpu: "2048"
+      WorkerMemory: "4096"
+      WorkerDesiredCount: 3
+      DbInstanceClass: db.t4g.small
+      DbMultiAZ: true
+      LogRetentionDays: 90
+
+Conditions:
+  IsProd: !Equals [!Ref EnvType, prod]
+  CreateGitHubSecret: !Equals [!Ref GitHubAppSecretArn, ""]
+
+Resources:
+  # ---------- Network ----------
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub codex-review-gateway-${EnvType}
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Select [0, !Cidr [!Ref VpcCidr, 6, 8]]
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+  PublicSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Select [1, !Cidr [!Ref VpcCidr, 6, 8]]
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      MapPublicIpOnLaunch: true
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Select [2, !Cidr [!Ref VpcCidr, 6, 8]]
+      AvailabilityZone: !Select [0, !GetAZs ""]
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: !Select [3, !Cidr [!Ref VpcCidr, 6, 8]]
+      AvailabilityZone: !Select [1, !GetAZs ""]
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnetARouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+  PublicSubnetBRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
+
+  NatEip:
+    Type: AWS::EC2::EIP
+    DependsOn: VpcGatewayAttachment
+    Properties:
+      Domain: vpc
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatEip.AllocationId
+      SubnetId: !Ref PublicSubnetA
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+  PrivateDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+  PrivateSubnetARouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
+  PrivateSubnetBRouteAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
+
+  # ---------- Security Groups ----------
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ALB ingress (HTTPS from Internet)
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+  ApiServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: API service (from ALB only)
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+  WorkerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Review worker (egress only)
+      VpcId: !Ref Vpc
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: RDS PostgreSQL (from API / Worker)
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ApiServiceSecurityGroup
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref WorkerSecurityGroup
+
+  # ---------- Frontend (SPA) ----------
+  SpaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub codex-review-gateway-spa-${EnvType}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  CloudFrontOac:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub codex-review-gateway-oac-${EnvType}
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  SpaDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        DefaultRootObject: index.html
+        HttpVersion: http2
+        Origins:
+          - Id: spa-origin
+            DomainName: !GetAtt SpaBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt CloudFrontOac.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          TargetOriginId: spa-origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6
+
+  SpaBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SpaBucket
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub ${SpaBucket.Arn}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${SpaDistribution}
+
+  # ---------- Raw log bucket (90-day lifecycle) ----------
+  RawLogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub codex-review-gateway-rawlogs-${EnvType}-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-raw-logs-90d
+            Status: Enabled
+            ExpirationInDays: 90
+
+  # ---------- Queue ----------
+  ReviewDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub codex-review-gateway-jobs-dlq-${EnvType}
+      MessageRetentionPeriod: 1209600
+  ReviewJobQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub codex-review-gateway-jobs-${EnvType}
+      VisibilityTimeout: 900
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ReviewDeadLetterQueue.Arn
+        maxReceiveCount: 2
+
+  # ---------- Secrets ----------
+  CodexApiKeySecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub codex-review-gateway/${EnvType}/codex-api-key
+      Description: OpenAI Codex API key (server-side, api-key auth)
+  WebhookSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub codex-review-gateway/${EnvType}/webhook-secret
+      Description: GitHub webhook HMAC secret (X-Hub-Signature-256)
+      GenerateSecretString:
+        PasswordLength: 48
+        ExcludePunctuation: true
+  GitHubAppSecret:
+    Type: AWS::SecretsManager::Secret
+    Condition: CreateGitHubSecret
+    Properties:
+      Name: !Sub codex-review-gateway/${EnvType}/github-app-key
+      Description: GitHub App private key for diff fetch / PR comment
+  DbSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub codex-review-gateway/${EnvType}/db-credentials
+      GenerateSecretString:
+        SecretStringTemplate: !Sub '{"username": "${DbMasterUsername}"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludePunctuation: true
+
+  # ---------- Database ----------
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private subnets for review history DB
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+  ReviewHistoryDb:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub codex-review-gateway-${EnvType}
+      Engine: postgres
+      EngineVersion: "16.4"
+      DBInstanceClass: !FindInMap [EnvConfig, !Ref EnvType, DbInstanceClass]
+      AllocatedStorage: "20"
+      StorageType: gp3
+      MultiAZ: !FindInMap [EnvConfig, !Ref EnvType, DbMultiAZ]
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DbSecurityGroup
+      MasterUsername: !Sub "{{resolve:secretsmanager:${DbSecret}:SecretString:username}}"
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${DbSecret}:SecretString:password}}"
+      StorageEncrypted: true
+      BackupRetentionPeriod: !If [IsProd, 14, 1]
+
+  # ---------- Load Balancer ----------
+  Alb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub codex-rg-alb-${EnvType}
+      Scheme: internet-facing
+      Type: application
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+  ApiTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub codex-rg-api-${EnvType}
+      VpcId: !Ref Vpc
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckPath: /healthz
+      HealthCheckIntervalSeconds: 30
+  AlbHttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref Alb
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ApiTargetGroup
+
+  # ---------- ECS ----------
+  EcsCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub codex-review-gateway-${EnvType}
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  ApiTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: api-access
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:SendMessage
+                Resource: !GetAtt ReviewJobQueue.Arn
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref WebhookSecret
+                  - !Ref DbSecret
+                  - !If [CreateGitHubSecret, !Ref GitHubAppSecret, !Ref GitHubAppSecretArn]
+
+  WorkerTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: worker-access
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt ReviewJobQueue.Arn
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub ${RawLogBucket.Arn}/*
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref CodexApiKeySecret
+                  - !Ref DbSecret
+
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/codex-review-gateway-api-${EnvType}
+      RetentionInDays: !FindInMap [EnvConfig, !Ref EnvType, LogRetentionDays]
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /ecs/codex-review-gateway-worker-${EnvType}
+      RetentionInDays: !FindInMap [EnvConfig, !Ref EnvType, LogRetentionDays]
+
+  ApiTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub codex-review-gateway-api-${EnvType}
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: !FindInMap [EnvConfig, !Ref EnvType, ApiCpu]
+      Memory: !FindInMap [EnvConfig, !Ref EnvType, ApiMemory]
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt ApiTaskRole.Arn
+      ContainerDefinitions:
+        - Name: api
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/codex-review-gateway-api:latest
+          PortMappings:
+            - ContainerPort: 8080
+          Environment:
+            - Name: JOB_QUEUE_URL
+              Value: !Ref ReviewJobQueue
+            - Name: ENV_TYPE
+              Value: !Ref EnvType
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ApiLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: api
+
+  WorkerTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub codex-review-gateway-worker-${EnvType}
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: !FindInMap [EnvConfig, !Ref EnvType, WorkerCpu]
+      Memory: !FindInMap [EnvConfig, !Ref EnvType, WorkerMemory]
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      TaskRoleArn: !GetAtt WorkerTaskRole.Arn
+      ContainerDefinitions:
+        - Name: worker
+          Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/codex-review-gateway-worker:latest
+          ReadonlyRootFilesystem: true
+          Environment:
+            - Name: JOB_QUEUE_URL
+              Value: !Ref ReviewJobQueue
+            - Name: RAW_LOG_BUCKET
+              Value: !Ref RawLogBucket
+            - Name: CODEX_APPROVAL_POLICY
+              Value: deny-all
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref WorkerLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: worker
+
+  ApiService:
+    Type: AWS::ECS::Service
+    DependsOn: AlbHttpListener
+    Properties:
+      ServiceName: !Sub codex-review-gateway-api-${EnvType}
+      Cluster: !Ref EcsCluster
+      LaunchType: FARGATE
+      DesiredCount: !FindInMap [EnvConfig, !Ref EnvType, ApiDesiredCount]
+      TaskDefinition: !Ref ApiTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+          SecurityGroups:
+            - !Ref ApiServiceSecurityGroup
+      LoadBalancers:
+        - ContainerName: api
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ApiTargetGroup
+
+  WorkerService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub codex-review-gateway-worker-${EnvType}
+      Cluster: !Ref EcsCluster
+      LaunchType: FARGATE
+      DesiredCount: !FindInMap [EnvConfig, !Ref EnvType, WorkerDesiredCount]
+      TaskDefinition: !Ref WorkerTaskDefinition
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets:
+            - !Ref PrivateSubnetA
+            - !Ref PrivateSubnetB
+          SecurityGroups:
+            - !Ref WorkerSecurityGroup
+
+  # ---------- Monitoring ----------
+  QueueDepthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub codex-review-gateway-${EnvType}-queue-depth
+      AlarmDescription: Review job queue backlog (jobs stuck in queue)
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt ReviewJobQueue.QueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+  DlqAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub codex-review-gateway-${EnvType}-dlq
+      AlarmDescription: Failed review jobs delivered to DLQ
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt ReviewDeadLetterQueue.QueueName
+      Statistic: Maximum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+
+Outputs:
+  SpaUrl:
+    Description: CloudFront URL of the review dashboard SPA
+    Value: !Sub https://${SpaDistribution.DomainName}
+  AlbDnsName:
+    Description: ALB DNS name (API / webhook endpoint)
+    Value: !GetAtt Alb.DNSName
+  ReviewJobQueueUrl:
+    Value: !Ref ReviewJobQueue
+  ReviewHistoryDbEndpoint:
+    Value: !GetAtt ReviewHistoryDb.Endpoint.Address
+  RawLogBucketName:
+    Value: !Ref RawLogBucket
