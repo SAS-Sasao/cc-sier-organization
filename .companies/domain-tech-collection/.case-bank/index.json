@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-25T23:16:01",
-  "case_count": 188,
+  "updated_at": "2026-07-25T23:19:03",
+  "case_count": 189,
   "failure_patterns": [],
   "cases": [
     {
@@ -5733,7 +5733,11 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-25T08:29:49+09:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\nMerge made by the 'ort' strategy.\n .claude/rules/review-pattern.md                    |   13 +\n .../[PHONE]04-daily-digest-actions.md  "
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260725-223644-codex-review-gateway-requirements",
@@ -5760,7 +5764,12 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-25T22:36:44"
-      }
+      },
+      "conversation_context": [
+        "codex app serverを使用したアプリケーションで私が作成するべきアプリケーションのオススメを出してみてほしい",
+        "自作webサービスでcodex app serverって使えなくね？あくまでもデスクトップ系のアプリだけだと思ってた"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260725-224422-diagram-v2-codex-review-gateway",
@@ -5793,10 +5802,38 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-25T22:44:22"
+      },
+      "conversation_context": [
+        "<command-message>company-diagram-v2</command-message>\n<command-name>/company-diagram-v2</command-name>",
+        "Base directory for this skill: /home/toyoki05/cc-sier-organization/.claude/skills/company-diagram-v2\n\n# AWS構成図統合実行 Skill（v2 / draw.io XML 方式）\n\nLLM が d",
+        "```tool_result\n/bin/bash: 1 行: cd: .claude/skills/company-diagram-v2/references/drawio: そのようなファイルやディレクトリはありません\n```"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260725-231618-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "today"
+        ],
+        "request_head": "/company-cycle today",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-25T23:16:18"
       }
     }
   ],
   "frequent_phrases": [],
   "intent_patterns": [],
-  "conversation_enriched_at": "2026-07-19T21:25:56"
+  "conversation_enriched_at": "2026-07-25T23:19:15"
 }
