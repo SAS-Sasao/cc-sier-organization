@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-25T22:40:22",
-  "case_count": 180,
+  "updated_at": "2026-07-25T23:04:43",
+  "case_count": 187,
   "failure_patterns": [],
   "cases": [
     {
@@ -5541,6 +5541,225 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-19T21:23:38"
+      }
+    },
+    {
+      "id": "20260720-082404-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.98,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure=0.95,s5_dedup=1.00)=0.98, accuracy=avg(s2_links=1.00,s3_summary=0.95)=0.98, clarity=avg(s4_cross_domain=1.00,s6_violations=1.00)=1.00",
+        "judged_at": "2026-07-20T08:36:42+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-20T08:24:04+09:00"
+      }
+    },
+    {
+      "id": "20260721-082752-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.9,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure=0.90,s5_dedup=0.90)=0.90, accuracy=avg(s2_links=1.00,s3_summary=0.95)=0.975→1.00, clarity=avg(s4_cross_domain=1.00,s6_violations=1.00)=1.00",
+        "judged_at": "2026-07-21T08:46:27+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-21T08:27:52+09:00"
+      }
+    },
+    {
+      "id": "20260722-082557-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.83,
+        "accuracy": 0.95,
+        "clarity": 0.98,
+        "total": 0.92,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.95+0.70)/2=0.83, accuracy=avg(s2_links,s3_summary)=(1.00+0.90)/2=0.95, clarity=avg(s4_cross_domain,s6_violations)=(0.95+1.00)/2=0.98",
+        "judged_at": "2026-07-22T08:42:03+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-22T08:25:57+09:00"
+      }
+    },
+    {
+      "id": "20260723-082731-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.83,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-07-23T08:43:34+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-23T08:27:31+09:00"
+      }
+    },
+    {
+      "id": "20260724-082527-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.83,
+        "accuracy": 0.95,
+        "clarity": 0.98,
+        "total": 0.92,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=avg(0.90,0.75)=0.83, accuracy=avg(s2_links,s3_summary)=avg(1.00,0.90)=0.95, clarity=avg(s4_cross_domain,s6_violations)=avg(0.95,1.00)=0.98",
+        "judged_at": "2026-07-24T08:45:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-24T08:25:27+09:00"
+      }
+    },
+    {
+      "id": "20260725-082949-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.95,
+        "clarity": 1.0,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=0.95, accuracy=avg(s2_links,s3_summary)=0.95, clarity=avg(s4_cross_domain,s6_violations)=1.00",
+        "judged_at": "2026-07-25T08:46:21+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-25T08:29:49+09:00"
+      }
+    },
+    {
+      "id": "20260725-223644-codex-review-gateway-requirements",
+      "state": {
+        "request_keywords": [
+          "codex",
+          "app",
+          "serverを使用したアプリケーションの要件定義を作成",
+          "機能要件",
+          "非機能要件",
+          "データ定義",
+          "フロント定義中心"
+        ],
+        "request_head": "codex app serverを使用したアプリケーションの要件定義を作成（機能要件・非機能要件・データ定義・フロント定",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-25T22:36:44"
       }
     }
   ],

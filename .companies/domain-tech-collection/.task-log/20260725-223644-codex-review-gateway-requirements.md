@@ -39,3 +39,14 @@ l2_retries: 0
 - **accuracy**: 0.90 — App Server の技術前提（stdio JSON-RPC / spawn-per-review / 承認全拒否 / WebSocket experimental）は Web 調査結果と整合。プロトコルの破壊的変更リスクはアダプタ層で担保
 - **clarity**: 0.95 — FR/NFR/SC の ID 採番とテーブル形式で構成。構成図・ER・画面遷移を ASCII 図で明示
 - **composite**: 0.93
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-07-25T23:04:43"
+```
