@@ -77,6 +77,14 @@ Skill ごとに軸の中身は変わるが、**共通で必ず 6軸 + composite 
 
 この知見は PR #653（ai-virtual-office-aws）で MEMORY.md 参照により **初回 L0 PASS**（retry=0）を達成し、有効性が確認されている。
 
+### `/company-diagram-v2` L0 外部アクター接続の誤検知回避
+
+フラット構造を採用しても、**外部アクター**（Developer / GitHub / Slack 等の `aws-cloud` 外要素）からコンテナ内サービスへのエッジは貫通として検知される（PR #686 で 5 件誤検知 + ラベル交差 3 件、l0_retries=1）。
+
+**対策**:
+1. 外部アクターから `aws-cloud` 内サービスへの接続は **icon-to-icon**（アクターアイコン → サービスアイコン直接）で結び、コンテナ自体を source/target にしない
+2. エッジラベルが他のエッジやノードと視覚的に交差する場合は **ラベル位置を移動**（`exitX/exitY` / `entryX/entryY` を調整、またはラベルのオフセット変更）
+
 ## 9フェーズ統合実行フロー（diagram/drawio 型）
 
 ```
