@@ -7,8 +7,8 @@ mode: "direct"
 started: "2026-07-25T22:44:22"
 completed: "2026-07-25T23:10:00"
 request: "/company-diagram-v2 — Codexレビューゲートウェイ（要件定義v0.1）のAWS構成図をdraw.io XML方式で生成"
-issue_number: null
-pr_number: null
+issue_number: 687
+pr_number: 686
 subagents: [general-purpose-reviewer]
 l0_gate: pass
 l0_retries: 1
