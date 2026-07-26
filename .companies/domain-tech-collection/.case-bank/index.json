@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-25T23:20:43",
-  "case_count": 189,
+  "updated_at": "2026-07-26T13:03:04",
+  "case_count": 190,
   "failure_patterns": [],
   "cases": [
     {
@@ -5838,6 +5838,33 @@
       "outcome": {
         "files_written": [],
         "started": "2026-07-25T23:16:18"
+      }
+    },
+    {
+      "id": "20260726-122621-app-requirements",
+      "state": {
+        "request_keywords": [
+          "今日取得した日次ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい",
+          "OK!1.と3の要件定義をしてほしい",
+          "必要ならサブエージェントチームを構築しながら進めて"
+        ],
+        "request_head": "今日取得した日次ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい → O",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "system-architect,secretary,retail-domain-researcher,qa-lead",
+        "mode": "agent-teams",
+        "artifact_count": 3
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/retail-domain/retail-monthly-kpi-catalog.md",
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-requirements.md",
+          ".companies/domain-tech-collection/docs/research/keep-best-review-retry-requirements.md"
+        ],
+        "started": "2026-07-26T12:26:21"
       }
     }
   ],
