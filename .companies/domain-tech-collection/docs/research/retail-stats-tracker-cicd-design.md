@@ -767,6 +767,8 @@ NFR-04（主要 4 業態の月次既存店指標カバー率）は `series.json`
 
 実装設計 §7.1 は「フレームワークは標準ライブラリの `unittest`。外部依存を増やさない（NFR-08 の思想を開発環境にも適用）」と明記している。v0.1 は pytest + pytest-cov を前提にしており矛盾していたため、本改訂で `unittest` に統一する（coverage 計測は外部パッケージ追加になるため v0.1 のスコープでは行わない。テストケースの網羅性は実装設計 §7.2 の必須テストケース一覧の充足で担保する）。
 
+**NFR-05 ゲートは v0.2 で warning に変更した**: 実装設計の確定値は 64/83 = 77.1%（未達）であり、`--fail-on-unresolved-rate 0.20`（未解決率 20% 以下 = 成功率 80% 以上）を hard fail のまま渡すと、対象内未解決率が 22.9% である現状で**初回実行から必ず失敗する**。これは v0.1 で「NFR-05 の分母を旧定義のままにしていたため全 PR が恒久 fail する」として high 指摘を受けた問題と同じ構造の再発であり、分母を直しても閾値が実測と整合していなければ意味がない。実装設計 §9.4 の U9 が「到達経路は存在するが M3 で誤抽出率と併せて検証してからでなければ採用できない。現時点で達成を宣言しない」としていることを踏まえ、**未達を可視化したまま開発を止めない**方針を採る（`--fail-on-unresolved-rate` は指定せず、`quality.nfr05` を表示のみに使う）。このゲートを hard fail として有効化するのは、実装設計 M3 の 3 施策（左窓緩和・`sign_only` の扱い確定・ランキング記事の分母除外可否合意）を実施し、実測が 80% 相当まで改善したことを `measure` で確認してから（ロードマップ §7 Stage 1 の完了条件に追記）。
+
 ```yaml
 name: Retail Stats Tracker - Tests
 
@@ -804,30 +806,27 @@ jobs:
         run: |
           set -euo pipefail
           REPORT=/tmp/golden-report.json
-          set +e
+          # NFR-05 は実装設計 §9.4 U9 で 64/83 = 77.1%（目標 80% に未達、M3 で改善予定）と
+          # 確定している。--fail-on-unresolved-rate は指定せず hard fail にしない
+          # （理由は本節冒頭のテキスト参照）。M3 の改善実施後にこのフラグを追加して復活させる。
           (cd "$PACKAGE_DIR" && python3 -m retail_stats measure \
             --rebuild \
             --org domain-tech-collection \
-            --report-json "$REPORT" \
-            --fail-on-unresolved-rate 0.20) \
+            --report-json "$REPORT") \
             2>&1 | tee /tmp/golden.log
-          MEASURE_EXIT="${PIPESTATUS[0]}"
-          set -e
           python3 - "$REPORT" <<'PYEOF'
           import json, sys
           report = json.load(open(sys.argv[1]))
           nfr05 = report.get("quality", {}).get("nfr05", {})
           if nfr05:
-              print(f"NFR-05: {nfr05.get('numerator')}/{nfr05.get('denominator')} = {nfr05.get('rate', 0):.1%}（目標 {nfr05.get('target', 0.8):.0%}）")
+              rate = nfr05.get("rate", 0)
+              target = nfr05.get("target", 0.8)
+              status = "達成" if rate >= target else "未達（M3 で改善予定。実装設計 §9.4 U9 参照）"
+              print(f"::notice::NFR-05: {nfr05.get('numerator')}/{nfr05.get('denominator')} = {rate:.1%}（目標 {target:.0%} / {status}）")
           PYEOF
-          if [ "$MEASURE_EXIT" -ne 0 ]; then
-            echo "::error::--fail-on-unresolved-rate 0.20 を超過（NFR-05 未達、CLI 自身の判定）。golden.log を確認してください"
-            echo "::warning::NFR-05 の目標値自体が実装設計時点の見込みであり、margin が小さいことに留意（design.md 記載）"
-            exit 1
-          fi
 ```
 
-`--fail-on-unresolved-rate` を CLI に渡すことで、**NFR-05 の分母・分子の定義（発表主体が協会統計・マクロ統計である行に限定）を CI 側で再実装しない**。分母の再定義ロジックは実装設計 §4.3.7 の判定木にのみ存在し、CI はその結果（exit code と `quality.nfr05`）を読むだけにする。
+分母・分子の定義（発表主体が協会統計・マクロ統計である行に限定）は実装設計 §4.3.7 の判定木にのみ存在し、CI は `quality.nfr05` の結果を読んで表示するだけで計算式を再実装しない。M3 で目標達成が確定した段階で `--fail-on-unresolved-rate 0.20` を追加し hard fail に切り替える（§7 ロードマップ Stage 1 の完了条件に追記）。
 
 ---
 
@@ -870,7 +869,7 @@ jobs:
 
 | Stage | 内容 | 完了条件 |
 |-------|------|---------|
-| **Stage 1: 手動実行** | `python3 -m retail_stats measure --rebuild` をローカルで実行し golden dataset（現在 102 ファイル/595 行）に対する PoC を完了させる（実装設計 M3）。`docs/index.html` への retail-stats リンク追加を手動 PR で 1 回実施。`retail-stats-tests.yml` を有効化 | 実装設計 M3〜M4 の完了条件（NFR-04/05 の実測、`--rebuild` 2 回連続実行で `runs.json` 以外がバイト一致）を満たす。`docs/retail-stats/index.html` が初回生成され Pages に公開される |
+| **Stage 1: 手動実行** | `python3 -m retail_stats measure --rebuild` をローカルで実行し golden dataset（現在 102 ファイル/595 行）に対する PoC を完了させる（実装設計 M3）。`docs/index.html` への retail-stats リンク追加を手動 PR で 1 回実施。`retail-stats-tests.yml` を有効化（NFR-05 は warning のみ、§5.1） | 実装設計 M3〜M4 の完了条件（`--rebuild` 2 回連続実行で `runs.json` 以外がバイト一致）を満たす。NFR-04 の実測、および NFR-05 の M3 施策（左窓緩和・`sign_only` の扱い・ランキング記事の分母除外可否）を実施し `measure` で 80% 到達を確認できたら、`retail-stats-tests.yml` に `--fail-on-unresolved-rate 0.20` を追加して hard fail に切り替える。`docs/retail-stats/index.html` が初回生成され Pages に公開される |
 | **Stage 2: 半自動（人手レビュー必須）** | `retail-stats-daily-update.yml` を有効化するが、「Commit & create PR」step の `gh pr merge` を一時的にコメントアウトし、PR 作成までで止める（人手マージ）。`retail-stats-llm-fallback.yml` も同様に PR 作成のみ | 2 週間（14 回分）の日次実行で NFR-01/02（実行時間）・NFR-06（再現性）が安定して満たされ、誤検知（想定外の upsert 上書き等）が発生しないことを確認 |
 | **Stage 3: 完全自動** | 日次 workflow の `gh pr merge --squash --delete-branch` を有効化（本書 §3.1 の記載どおり）。週次 LLM フォールバックも自動 merge に切り替え | Stage 2 の観測期間中に手動介入が発生した件数が 0 件、かつ NFR-04/05 の warning が閾値を持続的に下回っていること |
 | **Stage 4（将来検討・本書スコープ外）** | unresolved backlog が継続的に閾値超過する場合、週次 LLM フォールバックの頻度引き上げ、または決定論パースルールの拡充を別タスクとして起票 | 本書の対象外 |

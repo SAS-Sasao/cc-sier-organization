@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-26T15:20:49",
+  "updated_at": "2026-07-26T15:42:34",
   "case_count": 192,
   "failure_patterns": [],
   "cases": [
@@ -5917,7 +5917,7 @@
       "action": {
         "subagent": "secretary,system-architect,ai-developer,ci-cd-engineer",
         "mode": "agent-teams",
-        "artifact_count": 3
+        "artifact_count": 5
       },
       "reward": null,
       "judge": null,
@@ -5925,7 +5925,9 @@
         "files_written": [
           ".companies/domain-tech-collection/docs/research/retail-stats-tracker-design.md",
           ".companies/domain-tech-collection/docs/research/retail-stats-tracker-loop-engineering-design.md",
-          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-cicd-design.md"
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-cicd-design.md",
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-requirements.md",
+          ".companies/domain-tech-collection/docs/retail-domain/retail-monthly-kpi-catalog.md"
         ],
         "started": "2026-07-26T13:36:52"
       }
