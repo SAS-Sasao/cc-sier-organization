@@ -138,7 +138,7 @@ cc-sier-organization/
 - **コミット本文形式**: `{type}: {概要} [{org-slug}] by {operator}`
 - **ブランチ命名**: `{org-slug}/{type}/{YYYY-MM-DD}-{summary}`
 - **SKILL.md の長さ**: 1,500〜2,000 語以内（プログレッシブ・ディスクロージャ、詳細は `references/` に外出し）
-- **MD リンクタイトル**: 半角 `[...]` は全角 `【...】` に置換（HTML 変換時のリンク消失防止）
+- **MD リンクタイトル**: タイトル内部の半角 `[...]` を全角 `【...】` に置換（HTML 変換時のリンク消失防止。リンク構文 `[title](URL)` の角括弧は対象外）
 - **インデント**: 2 スペース（HTML/YAML/Markdown）、タブ使用禁止
 
 詳細: @.claude/rules/git-workflow.md / @.claude/rules/skill-development.md
