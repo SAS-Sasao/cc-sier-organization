@@ -4,16 +4,16 @@
 
 | 項目 | 内容 |
 |------|------|
-| ドキュメント種別 | 設計書 v0.1.2（ドラフト） |
+| ドキュメント種別 | 設計書 v0.1.4（ドラフト） |
 | 作成日 | 2026-07-26 |
-| 改訂 | v0.1.1（2026-07-26）— 要件定義 v0.1.1 の 2 変更に追随。natural key を 5 要素化（§2.3 ④ D2/D3）、L_extract の分母を対象内行に再定義（§1.2 / §2.3 ⑦ S3・S4）、および付随して分母操作への防御を追加（§2.3 ⑧ T3 / §4.2 SP2b / §3.3 G1）<br>v0.1.2（2026-07-26）— L2 レビュー指摘に対応。⑦ を settings.json に配線（§2.2 / §2.4）、ゲート数を 7 に統一、実行メタデータを `runs.json` に統一し冪等性比較から除外（§2.3 ⑤）、テストランナーを unittest に決着（U2）、`permanently_unresolvable` の永続化先を定義（§3.2） |
+| 改訂 | v0.1.1（2026-07-26）— 要件定義 v0.1.1 の 2 変更に追随。natural key を 5 要素化（§2.3 ④ D2/D3）、L_extract の分母を対象内行に再定義（§1.2 / §2.3 ⑦ S3・S4）、および付随して分母操作への防御を追加（§2.3 ⑧ T3 / §4.2 SP2b / §3.3 G1）<br>v0.1.2（2026-07-26）— L2 レビュー指摘に対応。⑦ を settings.json に配線（§2.2 / §2.4）、ゲート数を 7 に統一、実行メタデータを `runs.json` に統一し冪等性比較から除外（§2.3 ⑤）、テストランナーを unittest に決着（U2）、`permanently_unresolvable` の永続化先を定義（§3.2）<br>v0.1.3（2026-08-01）— L2 再レビュー指摘に対応。**(1)** 契約外の CLI 引数 `--out` を廃し、⑤ を「退避 → 再実行 → 比較 → 復元」方式に書き換え副作用の封じ込め策を明記（§2.3 ⑤）**(2)** `RS_REPRO_FILES` を実装設計 §5.1 と同じ 6 ファイルに統一（§2.1 / §2.2）**(3)** NFR-05 の分母を一意 URL [代表] 基準に統一し行ベースの式を撤回（§1.2 / §2.3 ⑦ S3・S4）**(4)** 主語位置ガード導入前の旧内訳を確定値 154/169/77 件（19.0%）・64/83 = 77.1% に更新（§1.2）**(5)** 要件参照を v0.1.1 に、golden-60 の母数を 595 行（計測日 2026-07-26）に統一（§3.3 / §7.3 / §8）**(6)** Stop のブロック可否と `stop_hook_active` の実在を公式ドキュメントで検証し、仕様リファレンス §1.1 の誤りを注記（§1.3 / §2.6 / §7.2）<br>v0.1.4（2026-08-01）— L2 最終レビュー（composite 0.88 / pass）後の任意修正。**(1)** hook は**並列実行**であることを公式で確認（仕様リファレンス §1.7 の誤り）。逐次前提が崩れるため **⑤ の破壊的検査（R1/R2）を Stop から外し、`--full` モードとして `/retail-stats-verify` と CI に移設**。Stop 配下 5 本を全て読み取り専用に統一し、不変条件を ⑧ T7 で機械的に守る（§2.2 ★ / §2.3 ⑤ / §2.3 ⑧）**(2)** Subagent の `when_to_use:` を削除し `description` に畳み込み（公式 16 フィールドに存在しない。§4.1）**(3)** Stop の `matcher` を削除（matcher 非対応・silently ignored。§2.2）**(4)** `permanently-unresolvable.json` を含む `DATA_DIR` 期待値 8 種 / バイト一致比較 6 種の切り分けを明記（§3.2）**(5)** 仕様リファレンスの確認済み誤り 4 件を §7.2 A9 に集約 |
 | 作成者 | 技術リサーチ室（ai-developer） |
 | 対象システム | retail-stats-tracker（Claude Code 開発基盤） |
 | ステータス | レビュー待ち |
 | 上位ドキュメント | [要件定義書 v0.1.1](./retail-stats-tracker-requirements.md) |
 | 並行ドキュメント | [実装設計](./retail-stats-tracker-design.md)（system-architect 執筆中） / [CI/CD 設計](./retail-stats-tracker-cicd-design.md)（ci-cd-engineer 執筆中） |
 | 前例 | [ai-virtual-office ループエンジニアリング設計書](./ai-virtual-office-loop-engineering-design.md) |
-| 仕様の根拠 | Claude Code Specification Reference (v2.1+)（claude-code-guide 作成、公式ドキュメント照合済み） |
+| 仕様の根拠 | Claude Code Specification Reference (v2.1+)（claude-code-guide 作成）。**ただし §1.1 の Stop ブロック可否と §1.3 のフィールド一覧に誤り・欠落を確認済み**（§1.3 ★ / §2.6）。本書が依拠する仕様は [公式ドキュメント](https://code.claude.com/docs/en/hooks) で個別に裏を取っている |
 | 思想的ベース | [Loop Engineering (Addy Osmani)](https://addyosmani.com/blog/loop-engineering/) / [スキル自動最適化とループエンジニアリング (LayerX)](https://zenn.dev/layerx/articles/9f25ec86a31730) |
 
 **本書のスコープ外**: GitHub Actions ワークフロー（FR-21 / IF-04）および日次自動更新の実行基盤設計は本書では扱わない。ci-cd-engineer が `retail-stats-tracker-cicd-design.md` に並行執筆中であり、そちらに委ねる。ただし**検証 hooks とその実体スクリプトは本書の担当**であり、同一スクリプトを CI ステップからも再利用する前提で設計する（§2.7）。
@@ -67,7 +67,7 @@
 | 記号 | 損失 | 定義 | 判定 | 対応する要件 |
 |---|---|---|---|---|
 | **L_silent** | 沈黙損失 | 対象セクションを検出できたファイル数、および `rows_parsed` | 直近 7 実行の**中央値**に対し -20% 以上の減少、または「対象セクション 0 件」が 3 実行連続 | 制約 1 / FR-01 |
-| **L_extract** | 抽出損失 | **対象内行**の未解決率 = `in_scope_unresolved / in_scope_rows`。`in_scope_rows` = 発表主体が協会統計・マクロ統計である行（要件 v0.1.1 NFR-05）。実装上は `rows_parsed` から `reason_code = out_of_scope` の行を差し引いたもの | 20% 超で fail。`out_of_scope`（個社決算・非統計記事）と、H1 で `permanently_unresolvable` とマークされた行は、いずれも分母・分子の双方から除外する | NFR-04 / NFR-05 |
+| **L_extract** | 抽出損失 | **対象内**の未解決率 = `(nfr05.denominator - nfr05.numerator) / nfr05.denominator`。分母は発表主体が協会統計・マクロ統計である**一意 URL [代表]**（要件 v0.1.1 NFR-05 / 実装設計 §4.3.7、確定値 83）。実装は `series.json` の `quality.nfr05` をそのまま読み、式を再実装しない。**`rows_parsed`（延べ行）とは単位が異なる**（§2.3 ⑦ S3） | 20% 超で fail。`out_of_scope`（個社決算・非統計記事）と、H1 で `permanently_unresolvable` とマークされた行は、いずれも分母・分子の双方から除外する | NFR-04 / NFR-05 |
 | **L_repro** | 再現損失 | 同一入力・同一キャッシュでの再実行が JSON バイト一致するか | 不一致で即 fail（0/1 判定） | NFR-06 / FR-09 |
 | **L_prov** | 出典損失 | `article_id` を持たない observation、または `articles.json` に存在しない `article_id` を参照する observation の件数 | 1 件でも fail（0/1 判定） | FR-17 / §4.3 |
 
@@ -77,7 +77,7 @@ L_repro と L_prov を 0/1 判定にしているのは、これらが「少し�
 
 未解決の**件数**で管理すると、入力が増え続ける本システムでは件数が単調増加し、閾値が形骸化する。率で持つことで、ルール改善（分子を減らす）と入力増加（分母を増やす）の双方が正しく反映される。ただし H1 の永久未解決行を除外しないと、解けない行が分子に固定され、率が下がらなくなって同じく形骸化する。**除外の判断が人間に残っている**のはこのためである。
 
-分母を全パース行にしないのは、決算・統計章の大半が本システムの対象範囲外だからである。設計工程の実測では一意タイトル 406 件のうちカタログ定義済み業態を主語とする行は 86 件（21.2%）にとどまり、残りは個社開示 149 件・非統計記事 167 件だった（要件 v0.1.1 の 7-15）。個社決算記事は日次ダイジェストに常時大量に含まれるため、全パース行を分母にすると**個社記事が増えるだけで L_extract が悪化して fail する**。ループが正常な状態でも恒常的に fail 側へ張り付き、損失関数として機能しなくなる。
+分母を全パース行にしないのは、決算・統計章の大半が本システムの対象範囲外だからである。設計工程の実測（一意 URL 406 件 [代表] / 計測日 2026-07-26 / 実装設計 §4.3.7 の確定値）では、カタログ定義済み業態を主語とする行は **77 件（19.0%）** にとどまり、残りは**個社開示 154 件・非統計記事 169 件**だった。うち NFR-05 の分母に載るのは 83 件（対象内成功 64 + `no_metric_match` 3 + `no_numeric` 10 + `no_segment_match` 6）で、達成率は **64/83 = 77.1%（目標 80% に対し未達）** である。個社決算記事は日次ダイジェストに常時大量に含まれるため、全パース行を分母にすると**個社記事が増えるだけで L_extract が悪化して fail する**。ループが正常な状態でも恒常的に fail 側へ張り付き、損失関数として機能しなくなる。
 
 `out_of_scope` の除外は、H1 の `permanently_unresolvable` と**意味が異なる**ことに注意する。前者は決定論的な判定木（設計書 §4.3.7）による機械的分類であり、後者は人間の判断である。前者を分母から外すことは silent fail ではない — 件数と原文は保持され、SC-06 に「対象外」として取りこぼし（`no_segment_match`）と区別可能な形で独立表示される（FR-10 / NFR-10）。**この区別が崩れると分母が操作可能になる**ため、§2.3 ⑧ の T3 と §4.2 の SP2 で両方向から守る。
 
@@ -107,9 +107,25 @@ L_repro と L_prov を 0/1 判定にしているのは、これらが「少し�
 |---|---|---|---|
 | **PreToolUse** | ブロック可 | **禁止操作の阻止**（読み取り専用契約の防衛） | < 100 ms |
 | **PostToolUse** | **ブロック不可** | **即時フィードバック**（書かれた内容の検査結果を stderr で Claude に返し、自己修正を促す） | < 15 秒 |
-| **Stop** | ブロック可 | **エポック終端ゲート**（応答を終わらせない。ここが唯一の実質的な停止点） | 合計 < 60 秒 |
+| **Stop** | ブロック可（★下記） | **エポック終端ゲート**（応答を終わらせない。ここが唯一の実質的な停止点） | 合計 < 60 秒 |
 
 「編集した瞬間に止める」ことは Claude Code の hook 機構では実現できない。**止まるのは応答の終わりだけ**である。この事実を前提に、PostToolUse には「早く気づかせる」役割だけを与え、**合否の責任はすべて Stop に集約する**。PostToolUse で検出した違反は Stop でも必ず再検査される設計とし、PostToolUse を素通りしても Stop で捕まる二重構造にする。
+
+**★ 仕様リファレンスの自己矛盾と、公式ドキュメントによる決着（2026-08-01 確認）**
+
+仕様リファレンスは Stop のブロック可否について相反する記載をしている。§1.1 のイベント一覧表は Stop を `Blockable = No` とし、§1.4 の "Blockable by Exit 2" 一覧には Stop が**含まれている**。本設計は合否の責任を Stop に集約するため、この 1 点が崩れると設計の根幹が成立しない。したがって公式ドキュメント（[code.claude.com/docs/en/hooks](https://code.claude.com/docs/en/hooks)）を直接参照して裏を取った。
+
+公式ドキュメントの "Exit code 2 behavior per event" 表は次のとおりであり、**Stop はブロック可**である。
+
+| Event | Blocks? | Effect |
+|---|---|---|
+| `Stop` | **Yes** | Prevents Claude from stopping, continues the conversation |
+| `SubagentStop` | Yes | Prevents the subagent from stopping |
+| `PostToolUse` | No | （上記のとおりブロックしない） |
+
+加えて Stop の "decision control" 節が `decision: "block"`（+ 必須の `reason`）で応答終了を阻止できると明記しており、exit 2 と JSON の双方に停止阻止の経路がある。**仕様リファレンス §1.1 の `Blockable = No` が誤り**であり、§1.4 が正しい。以後、仕様リファレンス §1.1 と §1.4 が食い違う項目については §1.4（Exit Codes & Behavior）を正とする。
+
+なお公式ドキュメントには **「8 回連続でブロックすると Claude Code 側が hook を上書きしてターンを終了させる」** という上限がある。§2.6 の再入ガード（上限 2 回）はこの上限より内側にあるため、この上限に触れることはない。
 
 ---
 
@@ -127,8 +143,9 @@ RS_DATA_ROOT=".companies/${RS_ORG}/docs/retail-stats/data"                   # �
 RS_CATALOG=".companies/${RS_ORG}/docs/retail-domain/retail-monthly-kpi-catalog.md"
 RS_DIGEST_DIR=".companies/${RS_ORG}/docs/daily-digest"
 RS_HTML="docs/retail-stats/index.html"                                       # 配信物（IF-05）
-# 冪等性・再現性の比較対象。runs.json は実行時刻を含むため必ず除外する（§2.3 ⑤）
-RS_REPRO_FILES="observations.json articles.json unresolved.json extraction-cache.json"
+# 冪等性・再現性の比較対象。実装設計 §5.1 の IDEMPOTENT_FILES と同一の 6 ファイル。
+# runs.json は実行時刻を含むため必ず除外する（§2.3 ⑤）
+RS_REPRO_FILES="observations.json articles.json extraction-cache.json unresolved.json manifest.json series.json"
 ```
 
 ### 2.2 settings.json への配線
@@ -210,7 +227,6 @@ RS_REPRO_FILES="observations.json articles.json unresolved.json extraction-cache
         ]
       },
       {
-        "matcher": ".*",
         "hooks": [
           {
             "type": "command",
@@ -221,8 +237,8 @@ RS_REPRO_FILES="observations.json articles.json unresolved.json extraction-cache
           {
             "type": "command",
             "command": "bash .claude/hooks/verify/retail-stats/gate-idempotency.sh",
-            "timeout": 180,
-            "statusMessage": "冪等性・再現性ゲート..."
+            "timeout": 30,
+            "statusMessage": "冪等性ゲート（読み取り専用モード）..."
           },
           {
             "type": "command",
@@ -251,11 +267,39 @@ RS_REPRO_FILES="observations.json articles.json unresolved.json extraction-cache
 
 配線上の注意:
 
-- 同一イベントの複数 hook は**逐次実行**される（仕様 §1.7）。Stop の 5 本は合計時間予算 60 秒を目標とし、各スクリプトは `git diff` ガードで大半のセッションで即 `exit 0` する
+- **同一イベントにマッチする hook は「並列」実行される（★下記）。** Stop の 5 本は同時に走る。時間予算は「合計」ではなく**各 hook の個別予算**であり、応答終了までの待ち時間は 5 本の**最大値**（最長は ④ の 120 秒）になる。各スクリプトは `git diff` ガードで大半のセッションで即 `exit 0` する
+- **Stop エントリに `matcher` を書かない。** 公式 matcher 対応表は `UserPromptSubmit` / `PostToolBatch` / `Stop` / `TeammateIdle` / `TaskCreated` / `TaskCompleted` / `WorktreeCreate` / `WorktreeRemove` / `MessageDisplay` を「matcher 非対応。常に毎回発火し、**書いても silently ignored**」としている。既存 A 系統の Stop エントリは `"matcher": ".*"` を持つが、これは無視されるだけで害はないため触らない（B 系統の新規エントリからのみ落とす）
 - **⑦ `gate-coverage-regression.sh` も最初から配線する。** §2.4 の導入段階では ⑦ の実効化を段階 2（`runs.json` が生成されるようになる段階）としているが、**配線だけは段階 0 で入れる**。対象ファイルが存在しなければ即 `exit 0` するため無害であり、「後で配線する」を残すと、本書が最大の危険と位置づける silent accumulation（§1.2）に対する唯一の能動的防波堤が**配線漏れのまま誰にも気づかれない**という、まさに同型の事故を招く。日次バッチからの呼び出し（運用ループ側）だけが段階 5 である
-- `session-boundary.sh`（A 系統）を先頭のエントリに残し、B 系統を別エントリとして後ろに置く。A 系統は絶対にブロックしないため、順序による副作用はない
-- `timeout` は既定 600 秒（仕様 §1.7）だと Stop が事実上ハングするため、全 hook で明示する
-- `permissions.allow` は unittest / パーサ実行の都度承認を消すためのもの。`deny` は既存が無いため触らない（仕様 §5.1 のとおり deny が勝つので、追加時は影響を確認すること）
+- `session-boundary.sh`（A 系統）は別エントリのまま残す。**並列実行なので配列上の前後関係に意味はない**が、A 系統は絶対にブロックせず、B 系統が触る `$RS_DATA_ROOT` にも書かないため、同時に走っても干渉しない（当初は「先頭に置けば順序による副作用はない」と順序を根拠にしていたが、根拠を「A 系統は書き込み先が重ならない」に差し替えた）
+- `timeout` は既定 600 秒だと Stop が事実上ハングするため、全 hook で明示する（公式 Common fields: command / http / mcp\_tool の既定は 600 秒）
+- **同一の `command` 文字列 + `args` を持つ handler は自動的に重複排除される**（公式）。B 系統は 8 本すべてスクリプト名が異なるため重複排除の対象にならないが、将来同じスクリプトを 2 つのイベントに配線しても、イベントが違えば別扱いである
+- `permissions.allow` は unittest / パーサ実行の都度承認を消すためのもの。`deny` は既存が無いため触らない（deny が勝つので、追加時は影響を確認すること）
+
+**★ 並列実行の確認と、設計への影響（2026-08-01 訂正）**
+
+本書は当初、仕様リファレンス §1.7 の "Multiple hooks on same event run sequentially (not parallel)" を引いて**逐次実行を前提**にしていた。公式ドキュメント（[hooks リファレンス](https://code.claude.com/docs/en/hooks) "Hook handler fields" 節）を確認したところ、記載は逆である。
+
+> All matching hooks run in parallel, and identical handlers are deduplicated automatically. Command hooks are deduplicated by command string and `args`, and HTTP hooks are deduplicated by URL.
+
+**仕様リファレンス §1.7 が誤り**である（本書が確認した仕様リファレンスの誤り 4 件のうちの 1 つ。一覧は §7.2 A9）。この 1 件は他の 3 件と違い、**記述の訂正だけでは済まない**。逐次実行を前提にした設計判断が 2 つあったためである。
+
+| 崩れた前提 | 影響 | 対応 |
+|---|---|---|
+| 「Stop の 5 本は**合計**時間予算 60 秒」 | 予算の意味が変わる。並列なので待ち時間は最大値だが、5 本が同時に CPU とディスクを使う | 予算を各 hook の個別値として定義し直した（上記）。⑤ の Stop 側予算を 40 秒 → 3 秒に縮小できたため、実質的な負荷はむしろ下がる |
+| **⑤ が `$RS_DATA_ROOT` を破壊的に書き換える間、④ と ⑦ が同じ `data/` を読む** | ④（整合性）と ⑦（カバレッジ回帰）が**再構築途中の中間状態**を読み、false fail / false pass を起こす。⑤ の退避・復元（S-1〜S-4）は「終わったら元に戻す」保証であって、並列に読む他ゲートから中間状態を隠す保護にはならない | **⑤ を Stop では読み取り専用モードに限定**し、破壊的な R1 / R2 を Stop から外した（下記） |
+
+**結論: Stop 配下の 5 本はすべて読み取り専用にする。** これが並列実行下で安全性を根拠づけられる唯一の単純な条件である。「ロックを取って他ゲートを待たせる」案も検討したが、5 本が同時に起動する以上 ④ / ⑦ はほぼ毎回ロック待ちか skip になり、**ゲートが事実上死ぬ**（skip した回は検査していないのに緑になる）。silent accumulation を最大の危険と位置づける本書が、その対策として skip を常態化させる設計を採ることはできない。
+
+| Stop 配下 | 書き込み先 | 並列で安全か |
+|---|---|---|
+| `session-boundary.sh`（A 系統） | `.session-summaries/` 等（B 系統と重ならない） | ○ |
+| ④ `gate-dataset-integrity.sh` | なし（`data/` を読むのみ） | ○ |
+| ⑤ `gate-idempotency.sh`（**読み取り専用モード**） | なし（`git diff` と `tests/` の走査のみ） | ○ |
+| ⑥ `gate-html-selfcontained.sh` | なし（`$RS_HTML` を読むのみ） | ○ |
+| ⑦ `gate-coverage-regression.sh` | なし（`runs.json` を読むのみ） | ○ |
+| ⑧ `gate-signal-tampering.sh` | なし（hooks / settings.json / workflow を読むのみ） | ○ |
+
+`rs_stop_guard()` が書く再入カウンタは `${RS_STATE_DIR}/stop/{session_id}.{スクリプト名}.count` とスクリプト名で分かれており、並列でも競合しない（§2.2 `_common.sh`）。
 
 #### `_common.sh`（全スクリプト共通）
 
@@ -273,9 +317,10 @@ RS_DIGEST_DIR=".companies/${RS_ORG}/docs/daily-digest"
 RS_HTML="docs/retail-stats/index.html"
 RS_STATE_DIR=".companies/${RS_ORG}/.retail-stats-verify"
 
-# 冪等性・再現性の比較対象（§2.3 ⑤）。runs.json は実行時刻を含むため必ず除外する。
+# 冪等性・再現性の比較対象（§2.3 ⑤）。実装設計 §5.1 の IDEMPOTENT_FILES と同一の 6 ファイル。
+# runs.json は実行時刻を含むため必ず除外する。
 # CI 側もこの定数を source して同じ集合を使うこと（§2.7 の契約）
-RS_REPRO_FILES="observations.json articles.json unresolved.json extraction-cache.json"
+RS_REPRO_FILES="observations.json articles.json extraction-cache.json unresolved.json manifest.json series.json"
 
 # stdin の hook イベント JSON を 1 度だけ読み、以後は $RS_INPUT を使う
 rs_read_stdin() {
@@ -319,6 +364,8 @@ rs_in_scope() {
 # Stop hook の再入ガード。session_id ごとに実行回数を数える（理由は §2.6）
 rs_stop_guard() {
   local sid limit=2 n
+  # 従: すでに stop hook 起因で継続中なら再検査しない（§2.6）
+  [[ "$(rs_json "stop_hook_active")" == "true" ]] && return 1
   sid=$(rs_json "session_id"); [[ -z "$sid" ]] && sid="unknown"
   mkdir -p "${RS_STATE_DIR}/stop"
   local f="${RS_STATE_DIR}/stop/${sid}.$(basename "$0").count"
@@ -514,38 +561,93 @@ D6 は「未解決を減らすために既存データを消す」経路を塞�
 
 ---
 
-#### ⑤ `gate-idempotency.sh` — 冪等性・再現性ゲート【Stop】
+#### ⑤ `gate-idempotency.sh` — 冪等性・再現性ゲート【Stop（読み取り専用）/ `--full`（verify・CI）】
 
 | 項目 | 内容 |
 |---|---|
 | 目的 | L_repro を 0 に保つ。NFR-06（再実行でバイト一致）/ NFR-07（重複掲載耐性）/ リスク 6（LLM の非決定性） |
-| 発火 | Stop |
-| 時間予算 | 40 秒（timeout 180 秒） |
+| 発火 | **Stop（引数なし = 読み取り専用モード。R3 / R4 のみ）** と、**`--full`（`/retail-stats-verify` Phase 3 と CI から明示的に呼ぶ。R1 / R2 を追加）** |
+| 時間予算 | Stop: 3 秒（timeout 30 秒） / `--full`: 40 秒（timeout 180 秒） |
+
+**1 本のスクリプトを 2 モードで持つ。** §2.7 の「終了コードで合否が出る 1 本のスクリプト」という契約を壊さないため、⑤ を 2 ファイルに分割せずモード引数で切り替える。ゲート総数は 7 のまま変わらない。
 
 ```
-1. rs_stop_guard / 差分ガード（④ と同様）
-2. 検査 R1: 決定論性
-   python3 -m retail_stats build --rebuild --no-llm --out "$T1"
-   python3 -m retail_stats build --rebuild --no-llm --out "$T2"
-   $RS_REPRO_FILES（下記）の sha256 が不一致 → rs_block
+■ 共通（両モード）— 読み取りのみ。並列実行下でも安全
+1. rs_stop_guard（Stop モードのみ）/ 差分ガード（④ と同様）
+2. 検査 R3: キャッシュ追記のみ
+   git diff -U0 HEAD -- "$RS_DATA_ROOT/extraction-cache.json" の削除行に
+   cache_key が含まれる → rs_block（リスク 6。破棄は --invalidate-cache 明示時のみ）
+3. 検査 R4: 重複掲載テストの存在
+   tests/ 配下に 's041442'（実測最大 6 日・非連続）を含むテストが存在しない → rs_block
+4. 引数に --full が無ければ ここで exit 0（Stop はここで終わる）
+
+■ --full のみ — $RS_DATA_ROOT を書き換える破壊的検査
+5. 排他ロック（多重起動の防止。並列 hook 対策ではない。下記「なぜ Stop から外すか」）
+   exec 9>"${RS_STATE_DIR}/idem.lock"
+   flock -n 9 || { echo "他の冪等性検査が実行中のためスキップ" >&2; exit 0; }
+6. 退避（副作用の封じ込め。下記「副作用の扱い」を必ず参照）
+   BK="${RS_STATE_DIR}/idem/$$"
+   rs_idem_recover_all                          # 前回の DIRTY 残骸を先に復旧（S-2）
+   mkdir -p "$BK/pre" "$BK/run1"
+   cp -a "$RS_DATA_ROOT"/*.json "$BK/pre/" || exit 0   # 退避できなければ検査しない（S-3）
+   touch "$BK/DIRTY"                            # 復元前に落ちた場合の目印
+   trap rs_idem_restore EXIT INT TERM
+7. 検査 R1: 決定論性（DATA_DIR を上書きして 2 回実行する）
+   python3 -m retail_stats build --rebuild --no-llm
+   ( cd "$RS_DATA_ROOT" && sha256sum $RS_REPRO_FILES ) > "$BK/run1.sha"
+   cp -a "$RS_DATA_ROOT"/*.json "$BK/run1/"
+   python3 -m retail_stats build --rebuild --no-llm
+   ( cd "$RS_DATA_ROOT" && sha256sum $RS_REPRO_FILES ) > "$BK/run2.sha"
+   diff "$BK/run1.sha" "$BK/run2.sha" が非空 → rs_block
    （辞書順・タイムスタンプ混入・集合の非決定な反復が典型）
    ★ runs.json は比較対象から除外する（実行時刻を含むため必ず不一致になる）
-3. 検査 R2: no-drift（committed 出力との一致）
-   python3 -m retail_stats build --rebuild --no-llm --out "$T3"
-   $RS_REPRO_FILES を 1 ファイルずつ diff（ディレクトリ全体の diff -rq は使わない）
+8. 検査 R2: no-drift（作業ツリーの data/ が再生成結果と一致するか）
+   $BK/pre と $BK/run1 の $RS_REPRO_FILES を 1 ファイルずつ diff
+   （ディレクトリ全体の diff -rq は使わない）
    不一致 → rs_block。「コードを変えたのに data/ を更新していない」または
             「意図しない出力変化」のいずれか。同一 PR で data/ を更新するか、
             変化の理由を応答に明記すること
-4. 検査 R3: キャッシュ追記のみ
-   git diff -U0 HEAD -- "$RS_DATA_ROOT/extraction-cache.json" の削除行に
-   cache_key が含まれる → rs_block（リスク 6。破棄は --invalidate-cache 明示時のみ）
-5. 検査 R4: 重複掲載テストの存在
-   tests/ 配下に 's041442'（実測最大 6 日・非連続）を含むテストが存在しない → rs_block
+9. 復元（trap により、rs_block・timeout・例外のいずれでも必ず通る）
+   rs_idem_restore: $RS_DATA_ROOT の *.json を消して $BK/pre から書き戻し、
+                    DIRTY を削除する。ロックは exit で自動解放される
 ```
 
-**バイト一致の比較対象（`RS_REPRO_FILES`）**: `observations.json` / `articles.json` / `unresolved.json` / `extraction-cache.json`。**`runs.json` は除外する。** 実行メタデータは `started_at` / `finished_at` を含むため実行のたびに必ず変わり、これを比較対象に含めると R1 も R2 も恒久的に fail する。**`diff -rq` によるデータディレクトリ全体の比較を使ってはならない**（実装設計 §5.1 も同じ除外を明記している）。除外リストは `_common.sh` に定数として置き、CI 側からも同じ定数を参照させる（§2.7 の契約）。
+**なぜ R1 / R2 を Stop から外すか（2026-08-01・並列実行の判明を受けた設計変更）**
+
+hook が**並列実行**される（§2.2 ★）以上、`$RS_DATA_ROOT` を書き換える検査を Stop に置くことはできない。⑤ が再構築している最中に ④（整合性）と ⑦（カバレッジ回帰）が同じ `data/` と `runs.json` を読み、中間状態に対して合否を出してしまう。退避・復元（S-1〜S-4）は「⑤ が終わったら元に戻る」ことしか保証せず、**並列に読む他ゲートから中間状態を隠す機能はない**。
+
+ロックで直列化する案は採らない。5 本が同時に起動するため ④ / ⑦ はほぼ毎回ロック待ちか skip になり、待たせれば Stop の待ち時間が積み上がり、skip すれば「検査していないのに緑」が常態化する。silent accumulation を最大の危険とする本書が、その対策としてゲートの skip を常態化させることはできない。
+
+代わりに **R1 / R2 の実行契機を「直列であることが保証された場所」に移す**。
+
+| 契機 | R3 / R4 | R1 / R2 | 直列性の根拠 |
+|---|---|---|---|
+| **Stop hook** | ○ | × | 並列。読み取り専用のみ許可 |
+| **`/retail-stats-verify`**（§3.1） | ○ | ○ | Skill のフェーズとして逐次実行される。⑤ の実行中に他ゲートは走らない |
+| **CI（PR ゲート）** | ○ | ○ | job 内の step として逐次実行される。作業ツリーは使い捨て |
+
+`--full` 内の `flock` は**並列 hook 対策ではなく**、`/retail-stats-verify` と CI が同一マシンでたまたま同時に走った場合や、オーナーが手動で二重起動した場合の多重破壊を防ぐための保険である。取得できなければ検査せず `exit 0` する（ここで待たないのは、Stop 経路に破壊的検査がもう無く、待つ理由がないため）。
+
+**失うものと、それが許容できる理由**: 「data/ を更新せずにパーサを変えた」ことが応答終了の瞬間には止まらなくなる。ただし (a) `/retail-stats-verify` は §5.2 の開発ループ Phase 3 で毎周回呼ばれる (b) CI が PR マージ前に必ず実行する (c) Stop 側にも R3（キャッシュ破棄の検知）と R4（NFR-07 テストの存在）は残り、**silent に壊れやすい 2 点は即時に止まる**。合否責任を Stop に集約するという原則（§1.3）からの唯一の例外であり、例外である理由は「並列実行下では Stop で安全に実行できない検査だから」に限定される。この例外を広げないため、⑧ `gate-signal-tampering.sh` の T5 に「B 系統スクリプトが Stop 経路で `$RS_DATA_ROOT` に書き込む変更」を監視対象として追加する（§2.3 ⑧）。
+
+**バイト一致の比較対象（`RS_REPRO_FILES`）**: `observations.json` / `articles.json` / `extraction-cache.json` / `unresolved.json` / `manifest.json` / `series.json` の **6 ファイル**。実装設計 §5.1 の `IDEMPOTENT_FILES`（バイト一致保証ありと明記された 6 ファイル）と同一集合であり、片方だけを変更してはならない。**`runs.json` は除外する。** 実行メタデータは `started_at` / `finished_at` を含むため実行のたびに必ず変わり、これを比較対象に含めると R1 も R2 も恒久的に fail する。**`diff -rq` によるデータディレクトリ全体の比較を使ってはならない**。この定数は `_common.sh` に置き、CI 側からも同じ定数を参照させる（§2.7 の契約）。
+
+**`--out` を使わない（CLI 契約への追随）**: 本節は当初 `build --rebuild --no-llm --out "$T1"` のように出力先を一時ディレクトリへ振り分ける形で書いていたが、**`--out` は実装設計 §2.5 の CLI 引数表に存在しない**（実在するのは `--org` / `--rebuild` / `--since` / `--invalidate-cache` / `--no-llm` / `--dry-run` / `--report-json` / `--fail-on-unresolved-rate` の 8 種のみで、出力先を切り替える手段はない）。CLI 契約は実装設計に一本化されており（§2.1 / §2.7）、本書が契約外の引数を要求することはできない。実装設計へ `--out` の追加を要請する案も検討したが、実装設計（§2.5 引数表・§5.1 の CI 申し送り）と CI/CD 設計（§3.1 / §5.1）の再修正が発生する一方、得られるのは「一時ディレクトリに書ければ退避が要らない」という実装上の簡便さのみであり、**冪等性の検査そのものは退避方式でも同等に成立する**ため見送った。CI/CD 設計が既に採っている「退避 → 再実行 → 比較」に本書を揃える。
+
+**副作用の扱い（重要・`--full` モードのみ）**: この方式は検査中に `$RS_DATA_ROOT` を**実際に上書きする**。`/retail-stats-verify` はオーナーの作業ツリー上で走るため、Git 管理下のデータが検査の副作用で書き換わる（CI では使い捨てのチェックアウトなので問題にならない）。無条件に許容できる副作用ではないため、次の 4 点で封じ込める。
+
+| # | 措置 | 理由 |
+|---|---|---|
+| S-1 | 検査の**前**に `$RS_DATA_ROOT/*.json` を `$RS_STATE_DIR/idem/{pid}/pre/` へ `cp -a` で退避し、`trap rs_idem_restore EXIT INT TERM` を張る。復元は「`$RS_DATA_ROOT` 直下の `*.json` を削除 → `pre/` から書き戻す」で行い、`rm -rf` でディレクトリごと消す形にはしない（パス展開の事故が致命傷になるため） | `rs_block`（exit 2）・timeout・例外のいずれで終わっても作業ツリーが検査前の状態に戻る |
+| S-2 | 退避の直後に `$BK/DIRTY` を作り、復元の最後に消す。**次回の ⑤ は `--full` / Stop のどちらで起動しても、まず `$RS_STATE_DIR/idem/*/DIRTY` の残骸を探し、あれば検査より先に `pre/` から復元する**（`rs_idem_recover_all`） | `trap` は SIGKILL（timeout の強制終了）では発火しない。この 1 点だけが trap で塞げない経路であり、次回起動時の復旧で塞ぐ。Stop モードでも復旧だけは行う（読み取り専用の原則の唯一の例外だが、これは「⑤ 自身が壊した状態を元に戻す」操作であり、他ゲートが読む状態を正しい側へ寄せる） |
+| S-3 | 退避に失敗した場合（`$RS_DATA_ROOT` が無い・`cp` が失敗）は**検査を行わず `exit 0`** する。`\|\| true` での握り潰しではなく、「退避できないなら破壊的検査を始めない」という前提条件の判定である（`rs_block` もしない — 検証できないことを違反として扱わない） | 退避なしで再構築を始めることだけは絶対に避ける |
+| S-4 | `git status` 上に `data/` の差分がある状態でも `pre/` からの復元によって差分の内容は保存される。ただし `mtime` は変わるため、mtime に依存する外部ツールがある場合は影響を受ける | 残余リスクとして明示する（本システム内では `manifest.json` の `mtime_date` が日付粒度であり影響しない） |
+
+R2 の比較対象を「committed 出力」ではなく **`pre/`（検査開始時点の作業ツリー）** としたのは、`/retail-stats-verify` も CI の PR ゲートも commit / マージより前に走るためである。`git show HEAD:` と比較すると、同一 PR 内で data/ を更新する正しい是正手順（未コミットの再生成）が常に不一致と判定され、是正できないまま詰む。`pre/` と比較すれば、開発者が `build` を実行して data/ を更新した時点で一致し、ゲートを抜けられる。
 
 - `--no-llm` で LLM 経路を切るのは、LLM 呼び出しを含めると R1 の 2 回実行が「キャッシュがある限り一致」という条件付きの検査になり、判定が曖昧になるため。LLM 経路の再現性は R3（キャッシュ追記のみ）で担保する
+- **前提**: `--no-llm` は「LLM を新規に呼ばない」であって「`extraction-cache.json` のヒットを使わない」ではない（キャッシュ破棄は `--invalidate-cache` 明示時のみ — 実装設計 §2.5）。この前提が崩れると R2 は LLM 由来の observation 分だけ恒常的に不一致になる。実装時に最初に確認すべき点であり、崩れていた場合は R2 を `--no-llm` なしの実行に切り替える
+- **R3 を再構築の前に評価する**のは、R3 が `git diff HEAD -- extraction-cache.json` で作業ツリーとコミット済みを比較する検査だからである。R1 の再構築を先に走らせると、比較対象が「開発者の変更」ではなく「たった今再構築した結果」になり、検査の意味が失われる。両モードで R3 が先に来る構成は、この順序を自然に保証する
 - R4 は要件 NFR-07 が名指しで「この非連続 6 日ケースをテストケースに含める。連続日のみを想定した実装にしない」と要求しているものを機械化した。**要件が名指しした 1 件のテストの存在を hook で強制する**のは過剰に見えるが、これは要件が過去の実測から特定した唯一の最悪ケースであり、消えたら誰も気づかない
 
 ---
@@ -591,18 +693,27 @@ H1 で **`a[href]` を除外する**ことが設計上の要点である。`grep
 3. 判定:
    S1 今回の rows_parsed < M * 0.8              → fail（沈黙損失）
    S2 「対象セクションを検出できたファイル数 = 0」が 3 実行連続 → fail
-   S3 in_scope_unresolved / in_scope_rows > 0.20 → fail（NFR-05）
-       in_scope_rows = rows_parsed - (reason_code = out_of_scope の件数)
-       ※ permanently_unresolvable マーク済みの行は分母・分子からさらに除外
-       ※ 実装は quality.nfr05 の {denominator, numerator, rate} を参照し、
-          このゲート内で計算式を再実装しない（定義の二重管理を避ける）
-   S4 in_scope_rows が M_in_scope（直近 7 実行の中央値）* 0.8 を下回る → fail
+   S3 (nfr05.denominator - nfr05.numerator) / nfr05.denominator > 0.20 → fail（NFR-05）
+       ★ 分母・分子は series.json の quality.nfr05 を**そのまま読む**。
+         このゲート内で計算式を再実装しない（定義の二重管理を避ける）
+       ★ 単位: nfr05.denominator は**一意 URL [代表] 基準**（実装設計 §4.3.7）。
+         S1 の rows_parsed は**延べ行**（実測 595 行 vs 一意 406 件）であり
+         単位が異なる。両者を直接比較・加減算してはならない
+       ※ permanently_unresolvable（§3.2）の除外は quality.nfr05 の**産出側**で
+         適用する。このゲートでは再計算しない（実装設計への申し送り。下記）
+   S4 nfr05.denominator が M_denominator（直近 7 実行の中央値）* 0.8 を下回る → fail
        out_of_scope への誤分類で分母だけが縮む事故を検出する
-4. fail → rs_block。stderr に「直近 7 実行の rows_parsed / in_scope_rows 推移」を
+       （S3 と同じ一意 URL [代表] 基準。S1 の中央値 M とは別に持つ）
+4. fail → rs_block。stderr に「直近 7 実行の rows_parsed [延べ行] /
+   nfr05.denominator [一意 URL 代表] 推移」を
    数値で列挙する
 ```
 
-**S1 と S3 で分母が異なる**ことは意図的である。S1（L_silent）は入力側の変化を見るため全パース行を対象にし、S3（L_extract）は抽出品質を見るため対象内行に限定する。分母を揃えると、個社決算記事の増減という**本システムと無関係な変動**が抽出品質の指標に混入する（§1.2）。
+**S1 と S3 で分母が異なる**ことは意図的である。S1（L_silent）は入力側の変化を見るため**延べパース行**（`rows_parsed`）を対象にし、S3（L_extract）は抽出品質を見るため**一意 URL [代表] のうち対象内のもの**に限定する。分母を揃えると、個社決算記事の増減という**本システムと無関係な変動**が抽出品質の指標に混入する（§1.2）。
+
+**両者は「対象範囲が違う」だけでなく「単位が違う」**点に注意する。実測（計測日 2026-07-26）では延べ行 595 に対し一意 URL は 406 件であり、NFR-05 の分母 83 はこの 406 件を母集団とする値である（実装設計 §4.3.7 / `quality.duplication`）。同一記事が複数日に再掲される本システムでは延べ行と一意件数が恒常的に乖離するため、`rows_parsed` から `out_of_scope` 件数を引いて分母を作ると NFR-05 の分母とは別物になり、hook と CI と画面で違う達成率が出る。**§1.2 の L_extract も一意 URL [代表] 基準で読むこと。** 分母の定義は §4.2 の SP3 が保護対象としており（変更すれば `s3 = 0`）、単位の取り違えはその保護をすり抜ける形の実質的な定義変更になる。
+
+**実装設計への申し送り**: S3 が `quality.nfr05` を「そのまま読む」以上、`permanently_unresolvable`（§3.2 で本書が定義する人間の判断ファイル `data/permanently-unresolvable.json`）の除外は、`quality.nfr05` を産出する側（`report.py`）で適用されている必要がある。適用箇所が本書側とバラけると、hook が読む値と画面が出す値が食い違う。段階 3（H1 の導入時）に実装設計へ反映すること。それまでは同ファイルが存在しないため、除外の有無は結果に影響しない。
 
 S4 は v0.1.1 の分母再定義に伴って必要になった検査である。分母が可変になった以上、**分子を減らさずに分母だけを縮めれば S3 は改善する**。真の取りこぼし（`no_segment_match`）を `out_of_scope` に付け替えると、未解決率は下がり、しかも件数と原文は保持されているため FR-10 の検査も通ってしまう。分母そのものの急減を独立に監視することでこの経路を塞ぐ。設計書 §4.3.7 の判定木が `no_segment_match` と `out_of_scope` を分ける根拠であり、その判定順序には回帰テストが用意されている（設計書 `test_authority_marker_evaluated_before_company_rule`）。
 
@@ -636,6 +747,8 @@ S2 は最も危険なシナリオ（§5.3 のシナリオ 1: 章見出しの改�
    T4 テストの skip / xfail 追加、assert の純減
    T5 2>/dev/null / || true / except: pass の追加（NFR-10）
    T6 本 hooks ディレクトリ自身の削除・無効化
+   T7 B 系統スクリプトが Stop 経路で $RS_DATA_ROOT に書き込む変更
+      （並列実行下で他ゲートに中間状態を見せる。§2.2 ★ / §2.3 ⑤）
 4. 検出 → rs_block:
    「検証信号を弱める変更を検出しました。意図的な場合は、
      (a) 変更前後の値 (b) 緩和が正当である理由 (c) 代替の検証手段
@@ -655,6 +768,8 @@ T1 と T3 が本プロジェクト固有かつ最も起きやすい。未解決�
 
 T5 は NFR-10 の機械化だが、`_common.sh` の `rs_changed_files` が `|| true` を使っている（§2.2）。したがって T5 は**追加された差分行**のみを対象とし、既存行は見ない。新規に握り潰しを増やすことだけを禁じる。
 
+T7 は §2.2 ★（hook の並列実行）を受けて新設した。Stop 配下の全ゲートが読み取り専用であることが、並列実行下で ④ / ⑦ が中間状態を読まないことの唯一の根拠になっている。この不変条件は書いておくだけでは守られない — 「Stop でも冪等性を全部見たい」という一見もっともな変更で簡単に破られ、破れても症状は「たまに落ちる／たまに通る」という最も気づきにくい形で出るため、機械で守る。
+
 ### 2.4 hook 一覧と導入時期
 
 | # | hook | イベント | 実質的な効果 | 導入段階（§6） |
@@ -663,7 +778,7 @@ T5 は NFR-10 の機械化だが、`_common.sh` の `rs_changed_files` が `|| t
 | ② | verify-catalog-contract | PostToolUse | フィードバック | 段階 0 |
 | ③ | verify-parser-tests | PostToolUse | フィードバック | 段階 1 |
 | ④ | gate-dataset-integrity | Stop | **阻止** | 段階 2 |
-| ⑤ | gate-idempotency | Stop | **阻止** | 段階 2 |
+| ⑤ | gate-idempotency | **Stop（R3/R4 のみ）** + `--full`（verify / CI） | **阻止** | 段階 2 |
 | ⑥ | gate-html-selfcontained | Stop | **阻止** | 段階 3 |
 | ⑦ | gate-coverage-regression | Stop + 日次 | **阻止** | **配線 = 段階 0 / 実効化 = 段階 2 / 日次からの呼び出し = 段階 5** |
 | ⑧ | gate-signal-tampering | Stop | **阻止** | 段階 1 |
@@ -693,15 +808,22 @@ T5 は NFR-10 の機械化だが、`_common.sh` の `rs_changed_files` が `|| t
 
 補足として、`exit 2` の stderr は自由テキストであって構造化されていないが、本設計ではメッセージ書式を統一する（`[理由コード] 対象: 内容` + `→ 是正の方向`）ことで、構造化の利得の大半を stderr 内で回収する。②の stderr 例がその書式である。
 
-### 2.6 `stop_hook_active` を使わない理由
+### 2.6 Stop の再入ガード（`session_id` カウンタを主、`stop_hook_active` を従）
 
-前例 §2.2 の Stop ゲートは、無限ループ防止に stdin の `.stop_hook_active` を参照している。**本設計はこれを採用しない。**
+前例 §2.2 の Stop ゲートは、無限ループ防止に stdin の `.stop_hook_active` のみを参照している。**本設計は `session_id` ベースの自前カウンタを主とし、`stop_hook_active` を補助条件として併用する。**
 
-仕様リファレンス §1.3 の stdin JSON フィールド一覧に `stop_hook_active` の記載がなく、§8「未確認・未文書化」にも挙がっていない。つまり本リファレンスの範囲では**存在が確認できていない**フィールドである。存在しないフィールドを読むと空文字が返り、ガードが常に無効化されて Stop hook が無限に再入する危険がある。ガード機構が黙って壊れるのは、本プロジェクトが最も避けたい失敗の型（§1.2）そのものである。
+**当初の判断とその訂正（2026-08-01）**: 本節は当初「仕様リファレンス §1.3 の stdin JSON フィールド一覧に `stop_hook_active` の記載がなく、§8『未確認・未文書化』にも挙がっていないため、存在が確認できないフィールドは読まない」として `stop_hook_active` を採用しなかった。§1.3 の Stop ブロック可否を検証する過程で公式ドキュメントを直接確認したところ、**`stop_hook_active` は Stop / SubagentStop の入力フィールドとして実在する**ことが判明した（"Stop hooks receive `stop_hook_active` … `true` when Claude Code is already continuing as a result of a stop hook"）。本節が定めていた切り替え条件（「実在が確認できた時点で差し替える」）が満たされたため、判断を訂正する。仕様リファレンス §1.3 のフィールド一覧は不完全である。
 
-代替として、仕様 §1.3 に**明記されている** `session_id` を使い、`_common.sh` の `rs_stop_guard()` でスクリプト別・セッション別の実行回数を数える（§2.2 実装済み）。2 回を超えたら未解決である旨をログに残して通す。これは前例と同じ挙動を、確認済みのフィールドだけで実現している。
+主・従の役割は次のとおり分ける。
 
-`stop_hook_active` が実在することが確認できた時点で、`rs_stop_guard()` の実装を差し替えればよい（呼び出し側は変更不要）。抽象化の位置をここに置いた理由である。
+| 機構 | 役割 | 根拠 |
+|---|---|---|
+| `session_id` カウンタ（`rs_stop_guard()`） | **主**。スクリプト別・セッション別に実行回数を数え、2 回を超えたら未解決である旨をログに残して通す。ブロックを伴わない実行（ゲート通過や `exit 0` 側）も数えるため、Stop ゲートの総実行回数に上限を与えられる | 仕様 §1.3 に明記の `session_id` |
+| `stop_hook_active` | **従**。`true` なら「すでに stop hook 起因で継続中」と判断し、カウンタが上限未満でも再検査を打ち切って `exit 0` する。カウンタが状態ファイルの消失などで壊れた場合の二重防護 | 公式ドキュメント Stop 入力フィールド |
+
+`rs_stop_guard()` の先頭に `rs_json "stop_hook_active"` が `true` なら `return 1`（呼び出し側は `exit 0`）を追加する。呼び出し側の記述は変更不要である。フィールドが将来消えても `rs_json` は空文字を返すだけで主のカウンタが残るため、ガードが黙って全無効化されることはない（当初の判断が避けようとしたリスクは、主・従の順序をこの向きにすることで解消している）。
+
+さらに公式ドキュメントは **8 回連続でブロックすると Claude Code 側が hook を上書きしてターンを終了させる**と定めている。本設計の上限 2 回はこれより内側であり、上限に到達する前に必ず自前ガードが先に効く。
 
 ### 2.7 hook スクリプトと CI の関係（責務境界）
 
@@ -783,7 +905,7 @@ model: sonnet
 - `context: fork` は付けない。合否と findings を親コンテキストに残す必要があるため
 - `disable-model-invocation` は既定（false）のまま。checker から自動的に呼ばれてよい
 
-`scripts/verify.sh` は各ゲートを逐次実行し、**1 つでも非 0 なら全体を非 0 で終える**。ただし最初の失敗で止めず全ゲートを走らせる（`--only` 指定時を除く）。開発者が 1 往復で全ての問題を把握できるほうが、ループの回転数が上がるためである。出力の最終行は必ず機械可読の 1 行サマリーにする:
+`scripts/verify.sh` は各ゲートを逐次実行し、**1 つでも非 0 なら全体を非 0 で終える**。ただし最初の失敗で止めず全ゲートを走らせる（`--only` 指定時を除く）。開発者が 1 往復で全ての問題を把握できるほうが、ループの回転数が上がるためである。**⑤ は必ず `--full` 付きで呼ぶ。** Stop hook では並列実行のため読み取り専用モードに限定しており（§2.2 ★ / §2.3 ⑤）、破壊的な冪等性検査（R1 / R2）が実際に走る経路はこの Skill と CI の 2 つだけである。ゲート数は 7 のまま変わらない（⑤ は 1 本のスクリプトのモード切り替え）。出力の最終行は必ず機械可読の 1 行サマリーにする:
 
 ```
 RESULT gates=7 pass=5 fail=2 failed=gate-idempotency,gate-signal-tampering
@@ -894,13 +1016,25 @@ Phase 4 が §3.3 の規律に接続する。**トリアージの出口は必ず
 
 L_extract の算出時に、`article_id` がこのファイルに載っている未解決行を分母・分子の双方から除外する。**このファイル自体も §2.3 ⑧ T3 の監視対象**とし、エントリの追加は「分母を縮める変更」として理由の明示を要求する（追加が正当な操作である以上ブロックはするが、`decided_by` / `reason` が埋まっていれば応答での説明は 1 行で足りる）。
 
+**`DATA_DIR` 直下のファイル集合との関係（3 文書の合意事項）**
+
+CI/CD 設計 §3.1 は「`DATA_DIR` 直下のファイル一覧が期待値と完全一致しなければ hard fail」する新規ファイル検出を入れている。本ファイルは同じ `DATA_DIR` 直下に置かれるため、期待値集合に入っていないと**導入段階 6 で本ファイルが生成された日から日次 workflow が毎日落ちる**。前回のレビューで指摘された「有効化すると全 PR が恒久 fail する」ゲートと同型の事故になる。合意事項を明示する。
+
+| ファイル | `DATA_DIR` 直下の期待値集合（8 種） | `RS_REPRO_FILES` = `IDEMPOTENT_FILES`（バイト一致比較、6 種） | 理由 |
+|---|---|---|---|
+| `observations.json` / `articles.json` / `extraction-cache.json` / `unresolved.json` / `manifest.json` / `series.json` | ○ | ○ | パイプラインが決定論的に再生成する |
+| `runs.json` | ○ | **×** | 実行時刻（`started_at` / `finished_at`）を含み、再実行で必ず変わる |
+| **`permanently-unresolvable.json`** | ○ | **×** | **人間の判断を記録するファイルであり、パイプラインが再生成するものではない。** 再構築しても内容は変わらないが、「バイト一致を保証する対象」として扱うと、人間が編集した瞬間に冪等性 fail になる |
+
+すなわち「存在が許容される 8 種」と「バイト一致を比較する 6 種」は別の集合である。⑤ の R1 / R2 は後者だけを見るため、本ファイルの追加によって ⑤ の挙動は変わらない。実装設計 §5.1 のファイル構成表と CI/CD 設計 §3.1 の期待値にも同じ 8 種 / 6 種の切り分けを反映すること（秘書経由で両担当に連絡済み）。
+
 ### 3.3 評価データセット先行の規律（LayerX 規律の本プロジェクト版）
 
-SWE-Skills-Bench では評価なしで書かれたスキル 49 本中 39 本が改善なし（平均 +1.2%）。前例（ai-virtual-office）はこれに対して「ギャップ記録 3 件」で応じた。本プロジェクトには**より強い形が使える**。実データが 588 行、すでに存在するからである。
+SWE-Skills-Bench では評価なしで書かれたスキル 49 本中 39 本が改善なし（平均 +1.2%）。前例（ai-virtual-office）はこれに対して「ギャップ記録 3 件」で応じた。本プロジェクトには**より強い形が使える**。実データが 595 行（計測日 2026-07-26）、すでに存在するからである。
 
 #### 規律 G1: golden-60 の凍結（実装着手前に完了させる）
 
-決算・統計章の 588 行から代表 60 行を抽出し、期待される observation を**人手で確定**して `tests/fixtures/golden-60.jsonl` に凍結する。パーサのコードを 1 行も書く前に完了させる。
+決算・統計章の 595 行（計測日 2026-07-26）から代表 60 行を抽出し、期待される observation を**人手で確定**して `tests/fixtures/golden-60.jsonl` に凍結する。パーサのコードを 1 行も書く前に完了させる。
 
 選定基準（偏りが評価を無効化するため、機械的に決める）:
 
@@ -909,7 +1043,7 @@ SWE-Skills-Bench では評価なしで書かれたスキル 49 本中 39 本が�
 | 主要 4 業態（SC / 百貨店 / チェーンストア / コンビニ）の月次既存店指標 | 18 | NFR-04 が 90% を要求している対象そのもの |
 | 複数指標を含む記事（FR-11） | 8 | `日本百貨店協会／6月の外国人売上29.8％増、客数0.5％減・客単価30.4％増` = 3 レコード |
 | 期間表記の全 5 種（月次 / 決算期 / 四半期 / 半期 / 年度） | 8 | 制約 5 |
-| 表記ゆれ（全角％ / 半角% / 全角数字 / `カ月`・`ヶ月`） | 6 | FR-05。実測で ％ 226 件 / % 631 件の混在 |
+| 表記ゆれ（全角％ / 半角% / 全角数字 / `カ月`・`ヶ月`） | 6 | FR-05。実測で ％ 236 件 / % 643 件の混在（595 行 / 計測日 2026-07-26。要件 FR-05 が引用する ％ 226 件 / % 631 件は 588 行 / 計測日 2026-07-25 の値であり、母数が違うだけで矛盾ではない） |
 | 定性表現のみ（`増収増益` / `横ばい`）と連続記録（`51カ月ぶりに前年割れ`） | 6 | 制約 11。`sign_only` / `streak_broken_months` |
 | **発表主体が並立する行**（`百貨店／3月の販売額2.2％増の5547億円、既存店は3.4％増（経産省調べ）` と、同一業態・同一期間の協会統計） | 4 | 制約 14。**期待値は「2 レコードが共存し、どちらも上書きされない」** |
 | **数値が取れないことが正解の行**（`ホームセンター月次実績＝2026年6月度`） | 4 | 制約 3。**期待値は `unresolved`（`reason_code = no_numeric`）** |
@@ -925,7 +1059,7 @@ SWE-Skills-Bench では評価なしで書かれたスキル 49 本中 39 本が�
 
 1. 対応する未解決行の**実例**（`unresolved.json` からの引用、最低 2 件）
 2. 追加前後の golden-60 通過数の**差分**
-3. 588 行全件に対する未解決率（L_extract）の**変化**
+3. 595 行全件に対する未解決率（L_extract）の**変化**
 
 3 が改善していないルールは入れない。「たぶん将来こういう表記も来るだろう」という予測でルールを増やすと、ルール集合が肥大化して保守不能になり、しかも効果は測れない。**ルールの正当性は常に実データの差分で示す。**
 
@@ -987,7 +1121,7 @@ IF-03 の LLM 抽出は maker でも checker でもない第 3 の役割であ�
 - **`memory` フィールドを設定しない。** 仕様 §2.1 のとおり省略でセッションメモリのみになる。ここが本プロジェクト固有の判断で、**永続メモリは NFR-06（再現性）と正面から競合する**。抽出器が過去の抽出を記憶していると、同一入力に対する出力が「これまでに何を抽出したか」に依存し、キャッシュで封じ込めたはずの非決定性が memory 経由で復活する。抽出器は毎回まっさらであるべきである
 - `model: sonnet` — NFR-11（1 日数行、キャッシュヒット率 95%）の想定下でコストを抑える。抽出品質はスキーマ検証と confidence 閾値で担保する
 
-#### 新規 2 本のフロントマター（仕様 §2.1 の実在フィールドのみ）
+#### 新規 2 本のフロントマター（公式 sub-agents リファレンス "Supported frontmatter fields" の 16 種のみ）
 
 ```yaml
 ---
@@ -997,9 +1131,9 @@ description: >
   実装 diff を敵対的にレビューして verdict JSON を返す。
   カタログ IF-02 契約、冪等性・再現性、出典トレーサビリティ、スコープ遵守を
   致命軸として採点する。修正は行わず、必ず maker に差し戻す。
-  「retail-stats のレビュー」「トラッカーの検証」と言われたとき、
-  または /retail-stats-build の Phase 4 から委譲されたときに使用する。
-when_to_use: "キーワード: retail-stats レビュー, verdict, 冪等性検証, 出典検証"
+  「retail-stats のレビュー」「トラッカーの検証」「verdict」「冪等性検証」
+  「出典検証」と言われたとき、または /retail-stats-build の Phase 4 から
+  委譲されたときに使用する。
 tools: Read, Glob, Grep, Bash
 model: opus
 memory: project
@@ -1015,13 +1149,19 @@ description: >
   未解決になった記事タイトルを受け取り、observation スキーマの JSON 配列だけを返す。
   推測で値を埋めない。タイトルに現れない情報は null とし、
   根拠となる部分文字列を raw_expression に必ず含める。
-  /retail-stats-build から未解決行が渡されたときにのみ使用する。
-when_to_use: "キーワード: LLM 抽出, フォールバック, unresolved 行の構造化"
+  「LLM 抽出」「フォールバック」「unresolved 行の構造化」と言われたとき、
+  または /retail-stats-build から未解決行が渡されたときにのみ使用する。
 tools: Read
 model: sonnet
 background: false
 ---
 ```
+
+**`when_to_use:` を書かない（2026-08-01 訂正）**: 本節は当初、両 agent に `when_to_use:` を置いてトリガー語を分離していた。公式 sub-agents リファレンスの "Supported frontmatter fields" 表を確認したところ、Subagent が受け付けるのは **`name` / `description` / `tools` / `disallowedTools` / `model` / `permissionMode` / `maxTurns` / `skills` / `mcpServers` / `hooks` / `memory` / `background` / `effort` / `isolation` / `color` / `initialPrompt` の 16 種のみ**で、`when_to_use` は**含まれない**（必須は `name` と `description` の 2 種）。仕様リファレンス §2.1 の表が誤って掲載していたものであり、本書が確認した仕様リファレンスの誤り 4 件のうちの 1 つである（一覧は §7.2 A9）。
+
+`when_to_use` は **Skill のフロントマターには実在する**（§3.2 の 3 skill での使用は正しい）。Skill 側の書式を Subagent に持ち込んだ取り違えであり、トリガー語は `description` の末尾に畳み込む形へ移した。既存 19 種の Subagent（`.claude/agents/*.md`）も `when_to_use` を使っておらず、本修正で書式が揃う。
+
+上記 2 本で使う `name` / `description` / `tools` / `model` / `memory` / `background` は **全数を 16 種の表と突き合わせ済み**である。`disallowedTools` / `permissionMode` / `maxTurns` / `skills` / `mcpServers` / `hooks` / `effort` / `isolation` / `color` / `initialPrompt` は本設計では使わない（`tools` の allowlist で足り、`isolation: worktree` は §2.3 ⑤ の退避方式と役割が重複するため採らない）。
 
 #### `background` フィールドの採否
 
@@ -1119,14 +1259,14 @@ Phase 0 設計       maker が変更設計メモを起案（対象・受入基�
 Phase 1 評価先行   golden-60 に対応ケースを追加し、**先に赤くする**（§3.3 G1）。
                    ここで赤くならない変更は、検証できない変更である
 Phase 2 実装       PostToolUse の ②③ が即時勾配として並走
-Phase 3 機械検証   /retail-stats-verify（②〜⑧ の全 7 ゲート）
+Phase 3 機械検証   /retail-stats-verify（②〜⑧ の全 7 ゲート。⑤ は --full）
                    └ fail → Phase 2 へ（自動 1 回、2 回目 fail で Phase 0 へ戻す）
 Phase 4 独立レビュー retail-stats-qa が §4.2 の verdict JSON を出力
                    └ fail → fix_suggestions を添えて Phase 2 へ（自動 1 回、2 回目で H3）
 Phase 5 反映       branch → PR（verdict JSON と L_extract の変化を本文に記載）→ auto-merge
 ```
 
-Phase 1 が前例（ai-virtual-office の TDD）と異なる点は、**赤くする対象が「テスト」ではなく「評価データセット」**であることである。パーサの正しさは個別の関数の振る舞いではなく、588 行の実データに対する抽出結果の質で決まる。golden-60 が赤くならない変更は、L_extract を動かさない変更であり、入れる根拠がない（§3.3 G2）。
+Phase 1 が前例（ai-virtual-office の TDD）と異なる点は、**赤くする対象が「テスト」ではなく「評価データセット」**であることである。パーサの正しさは個別の関数の振る舞いではなく、595 行の実データに対する抽出結果の質で決まる。golden-60 が赤くならない変更は、L_extract を動かさない変更であり、入れる根拠がない（§3.3 G2）。
 
 ### 5.3 ループ C: 抽出改善ループ（未解決を減らす）
 
@@ -1164,7 +1304,7 @@ S6 への対処が設計上の要点である。常時ダッシュボードは�
 | 段階 | 導入するもの | 完了条件 |
 |---|---|---|
 | **段階 0**<br>実装着手前 | ① guard-readonly-inputs / ② verify-catalog-contract（+ `validate_catalog.py`）/ `_common.sh` / settings.json 配線 / **golden-60 の凍結**（§3.3 G1） | (a) 現行カタログが C1〜C10 を全て pass する（**実装前にカタログ側の不整合を出し切る**）(b) golden-60 の期待値が人手で確定し、末尾 3 区分 14 件（`no_numeric` / `out_of_scope` / 発表主体並立）を含む (c) ダイジェストへの書き込みが実際に拒否されることを確認 |
-| **段階 1**<br>PoC（要件 §8-3） | ③ verify-parser-tests / ⑧ gate-signal-tampering / `/retail-stats-verify` 骨格 / `/retail-stats-rules` 骨子 / **`tests/` パッケージの整備（unittest。外部依存なし）** | (a) 588 行を全件処理し、`out_of_scope` を分離した上で reason_code 別の未解決分布が出る (b) golden-60 の通過数が測定できる (c) NFR-04（主要 4 業態 90%）/ NFR-05（**対象内行**の未解決 20% 以下）の**達成可否を判定できる**。達成そのものは条件にしない — 判定できることが PoC の目的 |
+| **段階 1**<br>PoC（要件 §8-3） | ③ verify-parser-tests / ⑧ gate-signal-tampering / `/retail-stats-verify` 骨格 / `/retail-stats-rules` 骨子 / **`tests/` パッケージの整備（unittest。外部依存なし）** | (a) 595 行を全件処理し、`out_of_scope` を分離した上で reason_code 別の未解決分布が出る (b) golden-60 の通過数が測定できる (c) NFR-04（主要 4 業態 90%）/ NFR-05（**対象内行**の未解決 20% 以下）の**達成可否を判定できる**。達成そのものは条件にしない — 判定できることが PoC の目的 |
 | **段階 2**<br>MVP コア | ④ gate-dataset-integrity / ⑤ gate-idempotency / `retail-stats-qa`（§4.2 verdict JSON 込み）/ `/retail-stats-build`（Phase 0-3） | (a) 非連続 6 日重複ケース（`s041442`）のテストが green (b) 再実行で `observations.json` がバイト一致 (c) 出典を持たない observation が 0 件 (d) `retail-stats-qa` が実際に verdict JSON を返す |
 | **段階 3**<br>配信 | ⑥ gate-html-selfcontained / HTML 生成器 / SC-01〜SC-03・SC-05 | (a) `file://` で開いて全機能が動作 (b) 2 MB 以内 (c) 出典リンク（`a[href]`）が外部 URL として残ったまま H1 を pass する — **検査が要件を殺していないことの確認** |
 | **段階 4**<br>LLM フォールバック | `retail-stats-extractor` / 抽出キャッシュ / FR-07 スキーマ検証 + 1 回リトライ | (a) 同一 URL の再実行がキャッシュヒットし LLM を呼ばない (b) スキーマ検証 NG が unresolved へ退避される (c) §7 U3（実行主体）が決着している |
@@ -1202,13 +1342,18 @@ S6 への対処が設計上の要点である。常時ダッシュボードは�
 | # | 前提 | 根拠 |
 |---|---|---|
 | A1 | **PostToolUse は exit 2 でもツールをブロックしない。** ②③ は「阻止」ではなく「フィードバック」であり、合否の責任は Stop に集約される | 仕様 §1.4 "Never Blockable" |
-| A2 | **`stop_hook_active` を当てにしない。** Stop の再入ガードは `session_id`（仕様 §1.3 に明記）ベースの自前カウンタで実装する | 仕様 §1.3 に記載がなく、§8 にも挙がっていない |
-| A3 | 同一イベントの複数 hook は逐次実行される。Stop の 5 本は合計時間予算 60 秒 | 仕様 §1.7 |
+| A1-b | **Stop は exit 2 でブロック可（"Prevents Claude from stopping"）。** 合否を Stop に集約する本設計の前提。仕様リファレンス §1.1 の `Blockable = No` は誤りであり §1.4 が正しい | 公式ドキュメント "Exit code 2 behavior per event"（2026-08-01 確認。§1.3 ★ 参照） |
+| A2 | **Stop の再入ガードは `session_id` ベースの自前カウンタを主とし、`stop_hook_active` を補助条件として併用する。** 併せて公式の 8 回連続上限より内側（上限 2 回）に収める | 公式ドキュメント Stop 入力フィールド（2026-08-01 確認。§2.6 参照） |
+| A3 | **同一イベントにマッチする hook は並列実行される**（"All matching hooks run in parallel"）。時間予算は各 hook の個別値で、待ち時間は最大値。**Stop 配下は全て読み取り専用**でなければ相互に中間状態を見る。仕様リファレンス §1.7 の「逐次実行」は誤り | 公式ドキュメント "Hook handler fields"（2026-08-01 確認。§2.2 ★ 参照） |
+| A3-b | 同一の `command` 文字列 + `args` を持つ handler は自動的に重複排除される | 同上 |
+| A3-c | `Stop` は matcher 非対応。書いても silently ignored | 公式 matcher 対応表（2026-08-01 確認） |
 | A4 | `hooks` は user / project / local スコープでマージされる。既存 A 系統の配列要素を消さずに追加する | 仕様 §5.1 |
-| A5 | Subagent の `background` 既定値は `true`。待ち合わせが必要な agent には明示する | 仕様 §2.1 / CLAUDE.md #618 |
-| A6 | Subagent の `memory` を省略するとセッションメモリのみになる。`retail-stats-extractor` はこれを利用して再現性を守る | 仕様 §2.1 |
+| A5 | Subagent の `background` は未設定なら Claude が選択し、v2.1.198 以降は既定でバックグラウンド実行になる。待ち合わせが必要な agent には `false` を明示する | 公式 sub-agents "Supported frontmatter fields"（2026-08-01 確認）/ CLAUDE.md #618 |
+| A6 | Subagent の `memory` を省略するとセッションメモリのみになる（`memory` は cross-session 学習を有効化するフィールド）。`retail-stats-extractor` はこれを利用して再現性を守る | 公式 sub-agents "Supported frontmatter fields"（2026-08-01 確認） |
+| A6-b | **Subagent のフロントマターは 16 種で、`when_to_use` は存在しない**（Skill には存在する）。トリガー語は `description` に畳み込む。仕様リファレンス §2.1 の掲載は誤り | 公式 sub-agents "Supported frontmatter fields"（2026-08-01 確認。§4.1 参照） |
 | A7 | Skill の `paths` は「マッチするファイルが編集されたときのみ有効化」。`retail-stats-rules` に使う | 仕様 §3.1 |
-| A8 | hook の `timeout` 既定は 600 秒。全 B 系統 hook で明示的に短縮する | 仕様 §1.7 |
+| A8 | hook の `timeout` 既定は command / http / mcp_tool で 600 秒。全 B 系統 hook で明示的に短縮する | 公式 "Common fields"（2026-08-01 確認） |
+| A9 | **仕様リファレンスには確認済みの誤りが 4 件ある**（§1.1 Stop のブロック可否 / §1.3 `stop_hook_active` 欠落 / §1.7 逐次実行 / §2.1 `when_to_use`）。設計の根幹を支える仕様は公式ドキュメントで個別に裏を取る | 本書 §1.3 ★ / §2.2 ★ / §2.6 / §4.1 |
 
 ### 7.3 スコープ境界
 
@@ -1217,7 +1362,7 @@ S6 への対処が設計上の要点である。常時ダッシュボードは�
 | GitHub Actions workflow、日次自動更新のジョブ構成、PR ゲートの必須チェック化 | ci-cd-engineer（`retail-stats-tracker-cicd-design.md`） | **本書では設計しない。** スクリプトの終了コード契約（§2.7）のみ提供 |
 | パーサのアルゴリズム、データモデルの詳細、HTML 生成器の内部構造 | system-architect（`retail-stats-tracker-design.md`） | 本書は検証すべき性質のみを定義。実装方法には踏み込まない |
 | カタログ MD の内容 | 小売ドメイン室（retail-domain-researcher） | 本書は IF-02 契約の**検査**のみを担当。カタログの内容そのものは管轄外 |
-| 要件そのもの（NFR 目標値の妥当性など） | 要件定義書 v0.1 | 本書は要件を検証可能な形に翻訳するのみ。§4.2 SP3 のとおり、目標値の変更は要件改訂として扱う |
+| 要件そのもの（NFR 目標値の妥当性など） | 要件定義書 v0.1.1 | 本書は要件を検証可能な形に翻訳するのみ。§4.2 SP3 のとおり、目標値の変更は要件改訂として扱う |
 
 ---
 
@@ -1229,7 +1374,7 @@ S6 への対処が設計上の要点である。常時ダッシュボードは�
 | 観測 hooks（A 系統） | 既存 21 本の組織運営基盤 hook。Case Bank・ダッシュボード等。絶対にブロックしない |
 | silent accumulation | パース失敗が例外にならず「不在」として静かに蓄積する、本プロジェクト最大の危険（§1.2） |
 | L_silent / L_extract / L_repro / L_prov | 本プロジェクトの 4 つの損失関数（§1.2）。前 2 者は回帰で、後 2 者は 0/1 で判定する |
-| golden-60 | 588 行から選定し期待値を人手確定した 60 件の評価データセット。**「解けないことが正解」「対象範囲外が正解」「2 レコード共存が正解」の計 14 件を含む**（§3.3 G1） |
+| golden-60 | 595 行（計測日 2026-07-26）から選定し期待値を人手確定した 60 件の評価データセット。**「解けないことが正解」「対象範囲外が正解」「2 レコード共存が正解」の計 14 件を含む**（§3.3 G1） |
 | `out_of_scope` | 個社決算・非統計記事など、本システムの対象範囲外と**決定論的な判定木で明示的に分類**した行の reason_code（要件 v0.1.1）。NFR-05 の分母から除外されるが破棄はせず、SC-06 に取りこぼし（`no_segment_match`）と区別可能な形で独立表示される |
 | `source_authority` | 統計の発表主体コード（`sc-association` / `meti` 等）。記事の掲載媒体（`source_name`）とは別物。natural key の第 5 要素であり、母集団の異なる統計を別レコードとして共存させる根拠（要件 v0.1.1 の 7-14） |
 | permanently_unresolvable | 原理的に解けない未解決行に人間が付けるマーク。L_extract の分母・分子から除外される（H1）。永続化先は `data/permanently-unresolvable.json`（`article_id` をキーとする人間の判断ファイル。§3.2） |

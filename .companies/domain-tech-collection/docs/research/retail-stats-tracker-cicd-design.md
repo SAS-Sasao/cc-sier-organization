@@ -12,7 +12,7 @@
 
 ## 0. v0.2 での変更点（L2 レビュー対応）
 
-v0.1 は実装設計（`retail-stats-tracker-design.md`）が未完成の段階で執筆したため、CLI インターフェースを推測で定義していた。実装設計が 2,302 行で確定したため、本改訂で以下を実装設計に一本化した。
+v0.1 は実装設計（`retail-stats-tracker-design.md`）が未完成の段階で執筆したため、CLI インターフェースを推測で定義していた。実装設計 §2.5 の CLI 引数表が確定したため、本改訂で以下を実装設計に一本化した。
 
 | # | 変更 | 詳細 |
 |---|------|------|
@@ -33,7 +33,7 @@ v0.1 は実装設計（`retail-stats-tracker-design.md`）が未完成の段階�
 
 ### 1.1 本書の位置づけとスコープ
 
-本書は `retail-stats-tracker-requirements.md`（**要件定義 v0.1.1**）と `retail-stats-tracker-design.md`（実装設計、2,302 行、確定済み）を受けて、日次自動更新（FR-21）・差分レポート（FR-22）・LLM フォールバックの実行主体（7-10 未決事項）・品質ゲートの CI 統合・可観測性・導入ロードマップを CI/CD の観点で設計するものである。
+本書は `retail-stats-tracker-requirements.md`（**要件定義 v0.1.1**）と `retail-stats-tracker-design.md`（実装設計、§2.5 の CLI 契約を含め確定済み）を受けて、日次自動更新（FR-21）・差分レポート（FR-22）・LLM フォールバックの実行主体（7-10 未決事項）・品質ゲートの CI 統合・可観測性・導入ロードマップを CI/CD の観点で設計するものである。
 
 **実装設計を実装契約の正とする**。CLI のパス・引数・終了コード・データファイル形式について、本書と実装設計が食い違う場合は実装設計を採用する。
 
@@ -291,19 +291,60 @@ jobs:
         if: steps.source.outputs.skip != 'true'
         run: |
           set -euo pipefail
-          cp -r "$DATA_DIR" /tmp/data-first-run
+          # 比較対象は実装設計 §5.1 の IDEMPOTENT_FILES（バイト一致保証ありの
+          # 6 ファイル）を正とする allowlist 方式で明示する。DATA_DIR 全体を
+          # diff し runs.json のみ除外する方式は、runs.json 以外の非決定
+          # ファイルが将来増えたときに silent に検出漏れを起こすため採用しない。
+          #
+          # 2 回とも --rebuild を付ける（実装設計 §5.1/§5.4 の CI 申し送りに準拠）。
+          # --no-llm のみ（増分モード）で 2 回目を実行すると manifest.json により
+          # 処理済み digest がスキップされ 2 回目が実質 no-op になり、再構築経路の
+          # 非決定性を検出できない。--rebuild と --no-llm は併用可能で、
+          # 「manifest を無視して全 digest を再走査するが、LLM は新規に呼ばず
+          # extraction-cache.json のヒットのみ使う」という意味になる（実装設計 §2.5）。
+          IDEMPOTENT_FILES="observations.json articles.json extraction-cache.json unresolved.json manifest.json series.json"
           (cd "$PACKAGE_DIR" && python3 -m retail_stats build \
+            --rebuild \
             --no-llm \
             --org "$ORG_SLUG" \
-            --report-json /tmp/retail-stats-run-report-2.json)
-          # runs.json は実行時刻を含むためバイト一致保証の対象外
-          # （実装設計 §5.1）。比較から明示的に除外する。
-          if ! diff -rq --exclude='runs.json' /tmp/data-first-run "$DATA_DIR" > /tmp/idempotency-diff.log; then
+            --report-json /tmp/retail-stats-run-report-idem-1.json)
+          cp -r "$DATA_DIR" /tmp/data-first-run
+          (cd "$PACKAGE_DIR" && python3 -m retail_stats build \
+            --rebuild \
+            --no-llm \
+            --org "$ORG_SLUG" \
+            --report-json /tmp/retail-stats-run-report-idem-2.json)
+          # allowlist の弱点（想定外の新規ファイルを検出できない）を補うため、
+          # DATA_DIR 直下のファイル一覧が期待集合と一致するかも検査する。
+          # runs.json（実行時刻を含む）と permanently-unresolvable.json
+          # （ループ設計 §3.2 が定義する人間の判断ファイル）は、いずれも
+          # パイプラインが決定論的に再生成する対象ではないため存在は許容するが
+          # sha256sum の比較対象（IDEMPOTENT_FILES）には含めない。
+          #
+          # 【運用上の注意】この検査は DATA_DIR に書き込む全ての文書の合意を
+          # 前提にしている。新しい成果物ファイルが DATA_DIR 直下に追加される
+          # 場合（実装設計 §5.1 / ループ設計等の改訂）、EXPECTED の集合を
+          # 更新しない限り本 step が hard fail する。変更時は (1) 実装設計 §5.1
+          # の IDEMPOTENT_FILES、(2) ループ設計 §3.2 の永続化先一覧、
+          # (3) 本 step の EXPECTED の 3 箇所を必ず同時に確認・更新すること。
+          EXPECTED=$(printf '%s\n' $IDEMPOTENT_FILES runs.json permanently-unresolvable.json | sort)
+          ACTUAL=$(cd "$DATA_DIR" && ls -1 | sort)
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "::error::DATA_DIR のファイル構成が想定外です（allowlist 未反映の新規ファイルの可能性）"
+            set +e
+            DIFF_OUT=$(diff <(echo "$EXPECTED") <(echo "$ACTUAL"))
+            set -e
+            echo "$DIFF_OUT"
+            exit 1
+          fi
+          ( cd /tmp/data-first-run && sha256sum $IDEMPOTENT_FILES ) > /tmp/idempotency-a.txt
+          ( cd "$DATA_DIR" && sha256sum $IDEMPOTENT_FILES ) > /tmp/idempotency-b.txt
+          if ! diff /tmp/idempotency-a.txt /tmp/idempotency-b.txt > /tmp/idempotency-diff.log; then
             echo "::error::NFR-06 再現性チェック失敗。再実行で出力が変化しました"
             cat /tmp/idempotency-diff.log
             exit 1
           fi
-          echo "::notice::NFR-06 idempotency check passed (runs.json excluded)"
+          echo "::notice::NFR-06 idempotency check passed (allowlist: $IDEMPOTENT_FILES / runs.json・permanently-unresolvable.json は対象外)"
 
       - name: Generate diff report (FR-22)
         id: diff
@@ -419,7 +460,7 @@ jobs:
           $(cat /tmp/diff-report.md)
 
           ## 検証
-          - NFR-06 再現性チェック: pass（runs.json を除く）
+          - NFR-06 再現性チェック: pass（IDEMPOTENT_FILES allowlist、runs.json は対象外）
           - 機械チェック（自己完結性・禁則）: pass
 
           ---
@@ -527,7 +568,7 @@ jobs:
 | 引数 | 対象サブコマンド | 既定値 | CI での用途 |
 |---|---|---|---|
 | `--org SLUG` | build / html / measure | `domain-tech-collection` | 全 workflow で明示指定する |
-| `--rebuild` | build / measure | off | 週次 LLM フォールバック・テスト workflow の golden dataset 検証で使用 |
+| `--rebuild` | build / measure | off | 週次 LLM フォールバック・テスト workflow の golden dataset 検証に加え、日次 workflow の「Verify idempotency」step で 2 回とも指定する（増分モードでは manifest.json により 2 回目が no-op 化し検証にならないため。§3.1） |
 | `--since YYYY-MM-DD` | build / measure | なし | 本書の workflow では未使用（デバッグ用） |
 | `--invalidate-cache` | build | off | **CI からは指定しない**（キャッシュ破棄は明示操作のみ許可、要件リスク 7-6） |
 | `--no-llm` | build / measure | off | **日次 workflow で必須指定**（§2.2 の判断） |
@@ -747,7 +788,7 @@ jobs:
 
 | 要件 | 検証方法 | 実行タイミング |
 |------|---------|--------------|
-| NFR-06（冪等性・バイト一致） | `build --no-llm` を 2 回実行し `diff -rq --exclude='runs.json'` で完全一致を確認。不一致は hard fail | 日次 workflow「Verify idempotency」step（§3.1） |
+| NFR-06（冪等性・バイト一致） | `build --rebuild --no-llm` を 2 回実行し、実装設計 §5.1 の IDEMPOTENT_FILES（6 ファイル）allowlist で `sha256sum` 完全一致を確認。DATA_DIR のファイル構成が allowlist + `runs.json` + `permanently-unresolvable.json` から逸脱していないかも確認する。不一致は hard fail | 日次 workflow「Verify idempotency」step（§3.1） |
 | NFR-04/05（決定論カバー率・抽出成功率） | `--report-json` の `quality.nfr05` を**表示するのみ**。CI 側で分母・分子を再計算しない | 日次・週次 workflow の diff report step |
 | FR-24（カタログ整合チェック） | CLI の終了コード `1` を hard fail として扱う | 日次・週次 workflow 共通 |
 | NFR-08（自己完結性） | 生成 HTML に対する `grep` チェック（外部 script src / fetch(）| 日次 workflow「Machine checks」step |
@@ -759,7 +800,7 @@ jobs:
 
 実装設計 §4.3.7・§9.4 の U9 は、NFR-05 の実測を **64/83 = 77.1%（対象内行のみ、目標 80% に対し未達で確定）** としている。これは初版申告の「75/90 = 83.3%（達成、余裕 3.3 ポイント）」を「指標の解決可否を検査していなかった過大計上であり誤りだった」と実装設計自身が明示的に撤回した後の確定値であり、v0.1 の本節が引用していた「達成率 83.3% は余裕が小さい」という記述はもはや実装設計に存在しない。
 
-U9 は目標値 80% の引き下げを提案しておらず、82.1% まで到達する経路（左窓の節境界緩和等）が実測で存在するとした上で、「M3 で誤抽出率と併せて検証してからでなければ採用できない。現時点で達成を宣言しない」としている。この設計判断（**未達であることを可視化しつつ開発は止めない**）を CI の運用にもそのまま反映し、NFR-05 は達成が M3 で確定するまで**全ての workflow で warning 表示に留める**（golden dataset に対する回帰テストも含む。詳細は §5.1）。一方 FR-24 のカタログ整合エラーは**未定義 ID の暗黙生成という致命的なデータ破損**につながるため、これとは切り離して hard fail のままとする。
+U9 は目標値 80% の引き下げを提案していないが、判断材料は当初より弱い。左窓の節境界緩和は距離制限を撤廃した上限で測っても実測 66/84 = 78.6% に留まり単独では 80% に届かない（「4月都内物価」「6月都内物価」の指標別名未収録・ランキング記事 2 件が構造的に回収不能なため）。80% への到達には (a) 左窓緩和 (b) 定性表現の分子算入の定義確定 (c) ランキング記事の分母除外 の組み合わせが要ることが実装設計 §9.4 U9 で確定しており、「M3 で誤抽出率と併せて検証してからでなければ採用できない。現時点で達成を宣言しない」としている。この設計判断（**未達であることを可視化しつつ開発は止めない**）を CI の運用にもそのまま反映し、NFR-05 は達成が M3 で確定するまで**全ての workflow で warning 表示に留める**（golden dataset に対する回帰テストも含む。詳細は §5.1）。一方 FR-24 のカタログ整合エラーは**未定義 ID の暗黙生成という致命的なデータ破損**につながるため、これとは切り離して hard fail のままとする。
 
 NFR-04（主要 4 業態の月次既存店指標カバー率）は `series.json` の `quality` ブロックに専用キーが確認できていない。この検証は実装設計 M7 で `--report-json` の形式を system-architect と確定する際にあわせて確認し、キーが定まり次第 §3.1 の diff report step に追記する（§8 未決事項）。
 
@@ -767,7 +808,7 @@ NFR-04（主要 4 業態の月次既存店指標カバー率）は `series.json`
 
 実装設計 §7.1 は「フレームワークは標準ライブラリの `unittest`。外部依存を増やさない（NFR-08 の思想を開発環境にも適用）」と明記している。v0.1 は pytest + pytest-cov を前提にしており矛盾していたため、本改訂で `unittest` に統一する（coverage 計測は外部パッケージ追加になるため v0.1 のスコープでは行わない。テストケースの網羅性は実装設計 §7.2 の必須テストケース一覧の充足で担保する）。
 
-**NFR-05 ゲートは v0.2 で warning に変更した**: 実装設計の確定値は 64/83 = 77.1%（未達）であり、`--fail-on-unresolved-rate 0.20`（未解決率 20% 以下 = 成功率 80% 以上）を hard fail のまま渡すと、対象内未解決率が 22.9% である現状で**初回実行から必ず失敗する**。これは v0.1 で「NFR-05 の分母を旧定義のままにしていたため全 PR が恒久 fail する」として high 指摘を受けた問題と同じ構造の再発であり、分母を直しても閾値が実測と整合していなければ意味がない。実装設計 §9.4 の U9 が「到達経路は存在するが M3 で誤抽出率と併せて検証してからでなければ採用できない。現時点で達成を宣言しない」としていることを踏まえ、**未達を可視化したまま開発を止めない**方針を採る（`--fail-on-unresolved-rate` は指定せず、`quality.nfr05` を表示のみに使う）。このゲートを hard fail として有効化するのは、実装設計 M3 の 3 施策（左窓緩和・`sign_only` の扱い確定・ランキング記事の分母除外可否合意）を実施し、実測が 80% 相当まで改善したことを `measure` で確認してから（ロードマップ §7 Stage 1 の完了条件に追記）。
+**NFR-05 ゲートは v0.2 で warning に変更した**: 実装設計の確定値は 64/83 = 77.1%（未達）であり、`--fail-on-unresolved-rate 0.20`（未解決率 20% 以下 = 成功率 80% 以上）を hard fail のまま渡すと、対象内未解決率が 22.9% である現状で**初回実行から必ず失敗する**。これは v0.1 で「NFR-05 の分母を旧定義のままにしていたため全 PR が恒久 fail する」として high 指摘を受けた問題と同じ構造の再発であり、分母を直しても閾値が実測と整合していなければ意味がない。実装設計 §9.4 の U9 が「単独施策では 80% に届かず、複数施策の組み合わせと M3 での誤抽出率検証を経なければ採用できない。現時点で達成を宣言しない」としていることを踏まえ、**未達を可視化したまま開発を止めない**方針を採る（`--fail-on-unresolved-rate` は指定せず、`quality.nfr05` を表示のみに使う）。このゲートを hard fail として有効化するのは、実装設計 M3 の 3 施策（左窓緩和・`sign_only` の扱い確定・ランキング記事の分母除外可否合意）を実施し、実測が 80% 相当まで改善したことを `measure` で確認してから（ロードマップ §7 Stage 1 の完了条件に追記）。
 
 ```yaml
 name: Retail Stats Tracker - Tests
@@ -857,7 +898,7 @@ jobs:
 
 ### 6.4 抽出成功率の推移追跡
 
-`runs.json`（実装設計 §5.1 の ExtractionRun 永続化、直近 180 日保持）は **パイプライン自身（`store.py`）が管理・追記する**ファイルであり、CI 側が別途追記ロジックを持つ必要はない（v0.1 の `extraction-runs.jsonl` という独自形式・独自追記ロジックの定義は撤回する）。CI は `runs.json` を通常の成果物として `git add`（§3.1）し、冪等性検証からのみ明示的に除外する（§3.1 / §5）。
+`runs.json`（実装設計 §5.1 の ExtractionRun 永続化、直近 180 日保持）は **パイプライン自身（`store.py`）が管理・追記する**ファイルであり、CI 側が別途追記ロジックを持つ必要はない（v0.1 の `extraction-runs.jsonl` という独自形式・独自追記ロジックの定義は撤回する）。CI は `runs.json` を通常の成果物として `git add`（§3.1）し、冪等性検証は IDEMPOTENT_FILES allowlist のみを対象とすることで `runs.json` を明示的に対象外とする（§3.1 / §5）。
 
 180 日超のエントリを月次サマリーに集約する処理、および TodoInsights 等の既存ダッシュボード連携（`daily-insights-sync.yml` 相当）への統合は、本書の CI/CD スコープを超えるため将来検討とする。
 

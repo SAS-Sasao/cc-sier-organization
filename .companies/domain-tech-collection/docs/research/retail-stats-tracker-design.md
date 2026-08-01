@@ -23,10 +23,10 @@
 |------|------|
 | 上位文書 | `.companies/domain-tech-collection/docs/research/retail-stats-tracker-requirements.md`（**v0.1.1**） |
 | 参照文書（読み取り専用の外部定義） | `.companies/domain-tech-collection/docs/retail-domain/retail-monthly-kpi-catalog.md` |
-| 本書がカバーする FR | FR-01〜FR-14, FR-16, FR-17, FR-19, FR-20, FR-22, FR-23, FR-24 |
-| 本書がカバーする NFR | NFR-01〜NFR-11, NFR-13〜NFR-15 |
+| 本書がカバーする FR | FR-01〜FR-14, FR-16〜FR-20, FR-22, FR-23, FR-24（FR-18 データ品質パネルは §6.4 SC-06 の P1 / P2 / P3 三分割で実装） |
+| 本書がカバーする NFR | NFR-01〜NFR-15（NFR-12 は §2.5 の終了コード、§5.4 規則 6 のアトミック書き込み、§5.5 の書き出し前検査でデータ側を担保。運用面はスコープ外） |
 | 本書がカバーする SC | SC-01, SC-02, SC-03, SC-04, SC-05, SC-06 |
-| 本書のスコープ外 | FR-15 の重ね合わせ UI 詳細（SC-02 の実装方針は §6 に記載、細部は実装時に確定）、FR-21 / IF-04 の GitHub Actions ワークフロー定義、NFR-12 の配信可用性運用、Claude Code の hooks / subagent / skill を用いた開発体制の設計（ai-developer / ci-cd-engineer 管轄） |
+| 本書のスコープ外 | FR-15 の重ね合わせ UI 詳細（SC-02 の実装方針は §6 に記載、細部は実装時に確定）、FR-21 / IF-04 の GitHub Actions ワークフロー定義、**NFR-12 のうち配信可用性の運用**（監視・復旧手順。データ側の担保は上記のとおり本書が扱う）、Claude Code の hooks / subagent / skill を用いた開発体制の設計（ai-developer / ci-cd-engineer 管轄） |
 
 ### 1.2 設計方針
 
@@ -201,7 +201,8 @@ scripts/retail-stats-tracker/
         │   ├── valid.md
         │   ├── missing_column.md
         │   ├── duplicate_heading.md
-        │   └── undefined_id.md
+        │   ├── undefined_id.md
+        │   └── unknown_authority.md
         └── digests/
             ├── 2026-04-15.md 〜 2026-04-23.md   ← s041442 の 6 日重複
             ├── 2026-07-22.md 〜 2026-07-26.md   ← 主要 4 業態 + 全角/半角混在
@@ -268,7 +269,7 @@ python3 -m retail_stats build
 # 全件再構築（FR-12）
 python3 -m retail_stats build --rebuild
 
-# LLM を呼ばず決定論パースのみで完結させる（日次自動実行向け・要件 7-10 の第一候補）
+# LLM を新規に呼ばない（キャッシュヒットは使う。日次自動実行向け・要件 7-10 の第一候補）
 python3 -m retail_stats build --no-llm
 
 # 抽出キャッシュを破棄して LLM を再実行（要件リスク 7-6：明示指定時のみ）
@@ -287,10 +288,33 @@ python3 -m retail_stats measure --rebuild --report-json /tmp/measure.json
 | `--rebuild` | build / measure | off | manifest を無視して全 MD を処理する（FR-12） |
 | `--since YYYY-MM-DD` | build / measure | なし | 指定日以降の digest のみ処理（デバッグ用） |
 | `--invalidate-cache` | build | off | `extraction-cache.json` を破棄して LLM を再実行する。**指定しない限りキャッシュは絶対に破棄しない** |
-| `--no-llm` | build / measure | off | LLM フォールバックを行わない。閾値未満は全て unresolved に落とす |
+| `--no-llm` | build / measure | off | **LLM を新規に呼ばない**。`extraction-cache.json` のヒットは通常どおり使う。キャッシュに無い閾値未満の行のみ unresolved に落とす（下記に詳述） |
 | `--dry-run` | build | off | 標準出力にサマリーを出すのみでファイルを書かない |
 | `--report-json PATH` | build / measure | なし | 差分レポートを JSON で書き出す（FR-22 の PR 本文生成用） |
 | `--fail-on-unresolved-rate R` | build / measure | なし | 未解決率が R を超えたら exit 1（NFR-05 の CI ガード） |
+
+**`--no-llm` の意味を確定する（ループ設計からの確認依頼への回答）**。`--no-llm` は **(A) LLM を新規に呼ばない**であり、**(B) LLM 由来の抽出を一切使わない（キャッシュヒットも捨てる）ではない**。閾値未満の行の処理順序は次のとおり:
+
+```
+閾値未満の行
+  ├─ extraction-cache.json にヒット → キャッシュの observation を採用（--no-llm でも同じ）
+  └─ キャッシュミス
+        ├─ --no-llm あり → LlmClient を呼ばずに unresolved へ（NullClient と同じ結果）
+        └─ --no-llm なし → ClaudeCliClient を呼び、結果をキャッシュに追記
+```
+
+(A) を採る根拠:
+
+| # | 根拠 |
+|---|---|
+| 1 | **責務の重複を避ける**。キャッシュを使わせない役割は `--invalidate-cache` が既に担っている。`--no-llm` にも同じ効果を持たせると 2 つのフラグが同じ意味を持つ |
+| 2 | **「指定しない限りキャッシュは絶対に破棄しない」原則**（`--invalidate-cache` の説明）と整合する。(B) は `--no-llm` を暗黙の破棄フラグにしてしまう |
+| 3 | **キャッシュを Git 管理する設計（§5.3）が意味を持つのは (A) のときだけ**。v0.1 は「`ClaudeCliClient` によるローカル実行 + キャッシュ commit を既定とし、日次自動実行は `--no-llm`」（§4.6.1）という分業であり、commit したキャッシュを日次実行が使えなければ commit する理由が無くなる |
+| 4 | **冪等性検証（§5.1）が成立する**。`--no-llm` で 2 回実行してバイト一致を見る設計は、キャッシュヒットが安定して同じ observation を返すことに依拠している |
+
+**ループ設計 R2（no-drift 検査）への回答**: R2 が前提としている (A) が正である。committed の出力（LLM 結果を含む）と `--rebuild --no-llm` の出力は、キャッシュが commit されている限り一致するため、R2 は恒常 fail しない。ただし**キャッシュに無い記事を新規に LLM で解決した直後は、キャッシュを同じ PR に含めない限り R2 が落ちる**。`extraction-cache.json` を成果物 PR に必ず同梱すること（§5.3 の「Git 管理: 対象」はこのためでもある）。
+
+§4.6.1 の `NullClient` は「キャッシュミス時に呼ばれるクライアント」の実装であり、キャッシュ層より下に位置する。同節の「日次自動実行は `--no-llm` で決定論パースのみとする」という記述は、**新規の LLM 呼び出しを行わないという意味**であって、キャッシュ済みの LLM 結果を捨てる意味ではない。
 
 **終了コード**: 0 = 正常、1 = データ不整合（カタログ検証失敗・未解決率超過）、2 = 引数エラー、3 = I/O エラー。`2>/dev/null` や `|| true` による握り潰しは行わない（NFR-10）。生成失敗時は既存の成果物を空で上書きしない（NFR-12）。書き込みは全て一時ファイル + `os.replace()` によるアトミック置換とする。
 
@@ -368,7 +392,7 @@ METRIC_COLUMNS: dict[str, tuple[str, ...]] = {
 }
 ```
 
-照合は「ヘッダセルの前後空白除去 + 内部空白除去 + バッククォート除去」後の完全一致で行う（`KPI ID` と `KPIID` の両方を受理するため許容リストに両形を入れている）。定義表に許容リスト外の列（`発表主体` `公表サイクル` `定義・カバー範囲` `主な適用業態` `解釈上の注意`）があっても無視する。必須列が 1 つでも解決できなければ `CatalogError` で停止する（FR-24）。欠損列を既定値で埋めて続行しない。
+照合は「ヘッダセルの前後空白除去 + 内部空白除去 + バッククォート除去」後の完全一致で行う（`KPI ID` と `KPIID` の両方を受理するため許容リストに両形を入れている）。定義表に許容リスト外の列（`公表サイクル` `定義・カバー範囲` `主な適用業態` `解釈上の注意`）があっても無視する。**`発表主体` は無視してはならない**。natural key の第 5 要素 `source_authority` を供給する必須列であり、上記 `SEGMENT_COLUMNS` に `"source_authority": ("発表主体",)` として含まれている（§9.3 の D1 で必須列に昇格）。必須列が 1 つでも解決できなければ `CatalogError` で停止する（FR-24）。欠損列を既定値で埋めて続行しない。
 
 #### 段階 4: セル値の解釈
 
@@ -721,9 +745,9 @@ def to_jpy_oku(m: re.Match) -> float:
 | `2.55兆円` | 25500.0 | **550000.0** | 25500.0 |
 | `11.9兆円` | 119000.0 | **90000.0** | 119000.0 |
 | `1.234兆円` | 12340.0 | **2340000.0** | 12340.0 |
-| `12,345,678万円` | 1234.5678 | 1234.5678 | 1234.5678 |
+| `12,345,678万円` | 1234.5678 | **0.0678**（1 つ目のカンマのみ除去され `12345,678万円` → `678万円` に一致） | 1234.5678 |
 
-旧版 11/16 合格、新版 **16/16 合格**。旧版が落ちた 5 件はいずれも例外を出さず誤った数値を返すため、`unresolved` にも差分レポートにも現れない。**silent に誤値が蓄積する経路**であり、テストで固定する（§7.2 T-3）。
+旧版 8/16 合格、新版 **16/16 合格**。旧版が落ちた 8 件はいずれも例外を出さず誤った数値を返すため、`unresolved` にも差分レポートにも現れない。**silent に誤値が蓄積する経路**であり、テストで固定する（§7.2 T-3）。
 
 **実データでの出現規模**（計測日 2026-07-26、決算・統計章）: 桁区切りカンマは記事タイトル中で 1 件（`ツルハHD、経営統合後の連結決算売上高は1兆4,505億円で営業利益は630億円`）、行全体（要約を含む）では 11 件（`1,002億円` `735億6,700万円` `13兆2,170億円` `8,135億円` 等）。小数付き兆円（`1.5兆円` 型）は行全体で複数存在する。タイトル基準の現時点の件数は小さいが、`兆` 単位の企業決算は継続的に流入するため、放置すると誤差が蓄積し続ける。
 
@@ -946,9 +970,10 @@ def resolve_authority(norm_title: str, norm_summary: str, segment: Segment
 | `家電大型専門店／5月の販売額は27.5％増、生活家電が41％増に` | `electronics-retailer` | `meti` | カタログ既定値（発表主体列 = 経済産業省） |
 | `ホームセンター月次実績＝2026年6月度` | `home-center` | `trade-press` | カタログ既定値（発表主体列 = 業界紙） |
 | `ホームセンター／3月の販売額は3.4％増2868億円、店舗数は0.7％増（経産省調べ）` | `home-center` | `meti` | 記事の `経産省調べ` で上書き。上 2 行と**別系列として共存**（カタログ §1.4） |
-| `6月消費者物価、1.6％上昇＝伸び率3カ月ぶり拡大―総務省` | `cpi` | `mic` | 記事に `総務省` が明示 |
 
 上から 1・2 行目は `(department-store, existing-store-sales-yoy, existing_store, 2026-03)` まで一致するが、`source_authority` が異なるため衝突しない。v0.1 の 4 項キーでは一方が他方を上書きしていた。
+
+**CPI 記事はこの表に載せない**。`6月消費者物価、1.6％上昇＝伸び率3カ月ぶり拡大―総務省` は `総務省` が明示されているため `source_authority = mic` は決まるが、**現行カタログでは segment が解決しない**。`cpi` の別名は `消費者物価指数（CPI）` / `消費者物価指数` / `CPI` の 3 つで、記事表記の `消費者物価`（指数なし）が含まれないためである（実行確認済み。`resolve_segment` は `None` を返し §4.3.7 の判定木で `no_segment_match` に落ちる）。segment が決まらなければ発表主体の解決規則は働かないため、**解決例として扱うと実装者が誤ったテスト期待値を書く**。この記事は §4.3.7 の実測表・§9.3 D3・§9.4 U9 のいずれでも「解決しない側」の代表例として扱っている。カタログに別名 `消費者物価` を追加すれば segment は解決するようになるが、それだけでは NFR-05 の分子は増えない（U9 の到達可能性表を参照）。**別名追加はカタログの担当（小売ドメイン室）であり、本書からは U9 の未決事項として記録するに留める。**
 
 #### 4.3.7 スコープ外の分類（`out_of_scope`）
 
@@ -1169,7 +1194,9 @@ class LlmClient(Protocol):
     def extract(self, prompt: str) -> str: ...
 
 class NullClient:
-    """--no-llm 用。常に空応答を返す（全て unresolved に落ちる）。"""
+    """--no-llm 用。常に空応答を返す。
+    キャッシュ層より下に位置するため、キャッシュヒットした行はここに来ない
+    （§2.5 の --no-llm 定義 (A)）。ミスした行のみ unresolved に落ちる。"""
     def extract(self, prompt: str) -> str:
         return "[]"
 
@@ -1180,7 +1207,7 @@ class ClaudeCliClient:
     def extract(self, prompt: str) -> str: ...
 ```
 
-要件 7-10（LLM 実行主体）が未決のため、v0.1 は `ClaudeCliClient` によるローカル実行 + キャッシュ commit を既定とし、日次自動実行は `--no-llm` で決定論パースのみとする。この分離により、実行主体の決定が `cli.py` のクライアント選択 1 箇所に閉じる。
+要件 7-10（LLM 実行主体）が未決のため、v0.1 は `ClaudeCliClient` によるローカル実行 + キャッシュ commit を既定とし、日次自動実行は `--no-llm`（新規の LLM 呼び出しなし。commit 済みキャッシュのヒットは使う。§2.5 の定義 (A)）とする。この分離により、実行主体の決定が `cli.py` のクライアント選択 1 箇所に閉じる。
 
 #### 4.6.2 プロンプト設計
 
@@ -1315,7 +1342,7 @@ def validate_llm_output(raw: str, catalog: Catalog, pub: datetime.date
 
 `runs.json` を保証対象から外すことを明示するのは、これを含めると「再実行で JSON がバイト一致」が原理的に成立しないためである。
 
-**CI 実装への申し送り（重要）**: 冪等性を検証する CI ステップは、`DATA_DIR` 全体を `diff -rq` してはならない。`runs.json` は実行のたびに `run_id` と `started_at` / `finished_at` が変わるため、**run ログが 1 つでもある限り必ず不一致になり、冪等性チェックが常に fail する**。比較対象は次の 5 ファイルに限定すること。
+**CI 実装への申し送り（重要）**: 冪等性を検証する CI ステップは、`DATA_DIR` 全体を `diff -rq` してはならない。`runs.json` は実行のたびに `run_id` と `started_at` / `finished_at` が変わるため、**run ログが 1 つでもある限り必ず不一致になり、冪等性チェックが常に fail する**。比較対象は次の 6 ファイル（`IDEMPOTENT_FILES`）に限定すること。除外リスト方式（`diff -rq --exclude=...`）ではなく **allowlist 方式**を採る。将来 `runs.json` 以外の非決定なファイルが増えたとき、除外リスト方式では silent に fail し始めるためである。ループ設計の `RS_REPRO_FILES` と CI/CD の比較対象も、この 6 ファイルに一致させること。
 
 ```bash
 IDEMPOTENT_FILES="observations.json articles.json extraction-cache.json unresolved.json manifest.json series.json"
@@ -1456,13 +1483,14 @@ def _wins(new: Observation, old: Observation) -> bool:
 | 5 | **改行は LF 固定**（`newline="\n"` で open） | Windows / WSL 混在環境での差分を防ぐ |
 | 6 | **アトミック書き込み**。`{path}.tmp` に書いてから `os.replace()` | 生成途中で失敗した場合に成果物を空で壊さない（NFR-12） |
 
-冪等性の CI 検証:
+冪等性の CI 検証（対象は §5.1 の `IDEMPOTENT_FILES` 6 ファイル。ここで独自の集合を定義しない）:
 
 ```bash
+IDEMPOTENT_FILES="observations.json articles.json extraction-cache.json unresolved.json manifest.json series.json"
 python3 -m retail_stats build --rebuild
-sha256sum data/observations.json data/articles.json data/series.json > /tmp/a.txt
+( cd "$DATA_DIR" && sha256sum $IDEMPOTENT_FILES ) > /tmp/a.txt
 python3 -m retail_stats build --rebuild
-sha256sum data/observations.json data/articles.json data/series.json > /tmp/b.txt
+( cd "$DATA_DIR" && sha256sum $IDEMPOTENT_FILES ) > /tmp/b.txt
 diff /tmp/a.txt /tmp/b.txt      # 差分があれば fail
 ```
 
@@ -1498,7 +1526,7 @@ HTML に埋め込む JSON は observations の生テーブルではなく、描�
     "digest_files_scanned": 102,
     "digest_files_with_section": 93,
     "observation_count": 128,
-    "unresolved_count": 214,
+    "unresolved_count": 357,
     "catalog_sha256": "…"
   },
   "segments": [
@@ -1548,6 +1576,8 @@ HTML に埋め込む JSON は observations の生テーブルではなく、描�
     "by_reason_code": {"no_segment_match": 6, "no_metric_match": 3, "no_numeric": 10,
                        "ambiguous_period": 11, "low_confidence": 4,
                        "out_of_scope": 323},
+    // by_reason_code の合計 357 = meta.unresolved_count。out_of_scope も
+    // unresolved.json に保持するため（破棄しない・NFR-10）合計に含まれる
     "nfr05": {"denominator": 83, "numerator": 64, "rate": 0.771, "target": 0.80,
               "met": false},
     "out_of_scope_breakdown": {"company_disclosure": 154, "non_statistical": 169},
@@ -1602,9 +1632,14 @@ def escape_json_for_script(payload: str) -> str:
 **外部参照は一切持たない**。`<link rel="stylesheet" href="...">` / `<script src="...">` / `fetch()` / Web Font / 外部画像を使わない。CSP `default-src 'self'` 相当で全機能が動くこと（NFR-08）を、生成後に次のチェックで機械的に検証する。
 
 ```bash
-grep -nE 'src="https?:|href="https?:(?![^"]*")|fetch\(|XMLHttpRequest|import\(' docs/retail-stats/index.html
-# 記事出典の <a href="https://..."> はリンクなので許容。上記は src / fetch のみを対象にする
+# 一致（exit 0）= NFR-08 違反。不一致（exit 1）= 自己完結を満たす
+grep -nE '(src|srcset)="https?:|<link[^>]+href="https?:|fetch\(|XMLHttpRequest|import\(|@import' \
+  docs/retail-stats/index.html && exit 1
 ```
+
+記事出典の `<a href="https://...">` はリンクとして必須（FR-17）なので検査対象から外す。**この除外は「`href` 全般を見ない」のではなく「`<link>` の `href` だけを見る」形でパターン自身に表現する**。当初は `href="https?:(?![^"]*")` と否定先読みで書いていたが、(1) `grep -E`（ERE）は `(?!...)` を解釈できず `invalid syntax` で exit 2 になり検査そのものが走らない、(2) `-P` に替えても正常な `<a href="https://…">` に対して先読みが常に成立し一度も発火しない死んだ枝になる、という二重の欠陥があった。
+
+なお、この grep は**補助的な検査**である。属性値中の空白や大文字小文字、複数行にまたがるタグには行指向の正規表現では対応しきれない。正式な判定はループ設計 ⑥ H1 の `html.parser` による属性ベース解析（`a[href]` は検査対象外）を正とし、本コマンドは生成直後の手元確認および CI/CD 設計 §3.1「Machine checks」の 1 次フィルタとして用いる。
 
 ### 6.3 チャート描画の抽象化
 
@@ -1695,13 +1730,13 @@ function renderLineChart(canvas, spec) { /* ... */ }
 
 #### SC-06 データ品質
 
-パネルを **3 つに分ける**。「未解決（要改善）」と「対象外（意図的除外）」を同じ表に混ぜないことが、この画面の設計上の要点である。混ぜると 316 件の対象外が未解決件数として表示され、システムが壊れているように見える。
+パネルを **3 つに分ける**。「未解決（要改善）」と「対象外（意図的除外）」を同じ表に混ぜないことが、この画面の設計上の要点である。混ぜると 323 件（個社開示 154 + 非統計記事 169）の対象外が未解決件数として表示され、システムが壊れているように見える。
 
 | パネル | 内容 |
 |---|---|
 | P1 抽出品質 | `quality.by_method` の件数と比率。`quality.nfr05` を「対象内行 83 件中 64 件を抽出（77.1% / 目標 80% / **未達**）」の形で表示し、**分母の定義（発表主体が協会統計・マクロ統計である行）と達成可否を画面上に明記**する。目標未達の期間は達成率を強調表示し、`no_metric_match` の件数を隣に併記して回収余地が読み取れるようにする |
 | P2 未解決（要改善） | `no_segment_match` / `no_metric_match` / `no_numeric` / `ambiguous_period` / `low_confidence` / `llm_schema_error` を `reason_code` 別にグルーピングし、`raw_line` の原文を `<pre>` で表示する。ルール改善・カタログ追加のバックログとして使う。特に `no_segment_match` は「カタログに業態行を追加すべき候補」と明記する（例: `4月都内物価…―総務省`） |
-| P3 **対象外（意図的除外）** | `out_of_scope` を `out_of_scope_breakdown` の 2 区分（個社開示 149 件 / 非統計記事 167 件）で表示する。冒頭に `これらは抽出の失敗ではなく、本システムの対象範囲外として意図的に除外した記事です。NFR-05 の分母には含みません。` を固定表示し、代表例を各 10 件まで列挙する |
+| P3 **対象外（意図的除外）** | `out_of_scope` を `out_of_scope_breakdown` の 2 区分（個社開示 154 件 / 非統計記事 169 件）で表示する。冒頭に `これらは抽出の失敗ではなく、本システムの対象範囲外として意図的に除外した記事です。NFR-05 の分母には含みません。` を固定表示し、代表例を各 10 件まで列挙する |
 
 - 欠測マップは 業態（行）× 期間（列）のテーブル。セルの状態は記号と文字の併記（`値あり` / `—（データなし）` / `!（未解決あり）`）で、色のみに依存させない（NFR-13）。発表主体セレクタで切り替える（R2）
 - 重複掲載統計は `quality.duplication` を表示し、`延べ 595 行 → 一意 406 記事 → observation N 件` の縮約が起きていることを確認できるようにする
@@ -1896,7 +1931,7 @@ def test_normalize_table(self):
         with self.subTest(src=src):
             self.assertEqual(textnorm.normalize(src), want)
 
-# 金額換算。旧実装が silent に誤値を返した 5 パターンを必ず含める
+# 金額換算。旧実装が silent に誤値を返した 8 パターンを必ず含める（§4.3.2 の表）
 JPY_CASES = [
     ("233億円", 233.0), ("1兆4505億円", 14505.0),
     ("1兆4,505億円", 14505.0),      # 旧: 505.0（カンマ未除去 → 30 倍の誤差）
@@ -1909,7 +1944,7 @@ JPY_CASES = [
     ("2.55兆円", 25500.0),          # 旧: 550000.0
     ("11.9兆円", 119000.0),         # 旧: 90000.0
     ("1.234兆円", 12340.0),         # 旧: 2340000.0
-    ("12,345,678万円", 1234.5678),
+    ("12,345,678万円", 1234.5678),  # 旧: 0.0678（1 つ目のカンマのみ除去 → 678万円 に一致）
 ]
 
 def test_jpy_conversion(self):
@@ -2190,7 +2225,9 @@ def test_nfr05_denominator_excludes_out_of_scope(self):
                      q["counts"]["in_scope_extractable"]
                      + q["by_reason_code"]["no_numeric"]
                      + q["by_reason_code"]["no_segment_match"])
-    # 現時点では 0.697 で未達。閾値 assert は U9 の解決後に有効化する
+    # 現時点の確定値は 0.771（64/83）で未達（§4.3.7 / §9.4 U9）。
+    # 0.697 / 0.753 は §4.3.7 推移表の中間値であり、閾値の根拠に使わない。
+    # 閾値 assert は U9 の解決後に有効化する
     self.assertEqual(q["nfr05"]["met"], q["nfr05"]["rate"] >= 0.80)
 ```
 
@@ -2241,7 +2278,7 @@ def test_catalog_has_no_parent_links_today(self):
 | T-10g | 生成 HTML に `src="http` / `fetch(` / `import(` が含まれない（NFR-08） |
 | T-10h | `streak_broken_months` がカタログ §4.1 のとおり `existing-store-sales-yoy = -1.6` かつ `51` として格納される |
 | T-10i | `増収増益` が `operating-revenue-yoy` / `operating-profit-yoy` の 2 件、`value = None`、`sign_only = "+"`、`needs_source_check = True` になる |
-| T-10j | 金額換算は `test_jpy_conversion`（T-3）で 16 パターンを固定する。旧実装が silent に誤値を返した 5 パターン（`1兆4,505億円` / `8,577億円` / `約1.5兆円` / `1.45兆円` / `11.9兆円`）を必ず含める |
+| T-10j | 金額換算は `test_jpy_conversion`（T-3）で 16 パターンを固定する。旧実装が silent に誤値を返した 8 パターン（`1兆4,505億円` / `8,577億円` / `約1.5兆円` / `1.45兆円` / `2.55兆円` / `11.9兆円` / `1.234兆円` / `12,345,678万円`）を必ず含める |
 
 ### 7.3 テストデータの置き場所と切り出し
 
@@ -2421,11 +2458,11 @@ M5（LLM）と M6（HTML）は M4 完了後に並行可能。M6 は `--no-llm` �
 
 **確定内容**: NFR-05 の分母を「発表主体が協会統計・マクロ統計である行」に再定義する。個社決算記事と非統計記事は `out_of_scope` として分母から除外し、**破棄せず件数と原文を保持して SC-06 に独立表示**する。個社の全面カタログ化は行わない。要件 v0.1.1 NFR-05 / §4.2 / 7-15、本書 §4.3.7 / §6.4。
 
-**根拠**: 一致率 21.2% の原因は決定論パースの精度不足ではなく、決算・統計章の約 8 割が本システムの対象範囲外の記事である点にある。ルール追加では解消しない性質の問題であり、分母の定義を実態に合わせるのが正しい対処である。個社の全面カタログ化を採らないのは、本システムの目的が業態トレンドの比較であり（要件 7-4 で業態トレンドの既定を `association` のみと決めている）、数十社分の個社定義の保守コストが目的に見合わないため。
+**根拠**: 業態解決率 19.0%（77 / 406 [代表]。§4.3.7）の原因は決定論パースの精度不足ではなく、決算・統計章の約 8 割が本システムの対象範囲外の記事である点にある。ルール追加では解消しない性質の問題であり、分母の定義を実態に合わせるのが正しい対処である。個社の全面カタログ化を採らないのは、本システムの目的が業態トレンドの比較であり（要件 7-4 で業態トレンドの既定を `association` のみと決めている）、数十社分の個社定義の保守コストが目的に見合わないため。
 
 **再定義後の実測**: 分母 83、分子 64 → **77.1%**（カタログ指標別名の追加と §4.3.3 主語位置ガードを反映した確定値）。**目標 80% を下回っており未達**（§9.4 の U9）。分母の再定義自体は妥当だが、これだけでは NFR-05 を満たさない。
 
-**silent fail を作らないための設計**: `out_of_scope` と `no_segment_match` を判定木で厳密に分ける（§4.3.7）。統計の発表主体（協会・省庁）を名乗っているのに業態が取れない行は `no_segment_match` として分母に残し、カタログ追加の候補として SC-06 に出す。実測 4 件（`4月都内物価…―総務省` 等の地域別 CPI、`農水省・食品等取引実態調査`）。この順序を逆にすると、カタログの不足が個社扱いで黙って除外され改善の signal が消える。
+**silent fail を作らないための設計**: `out_of_scope` と `no_segment_match` を判定木で厳密に分ける（§4.3.7）。統計の発表主体（協会・省庁）を名乗っているのに業態が取れない行は `no_segment_match` として分母に残し、カタログ追加の候補として SC-06 に出す。実測 6 件（`4月都内物価、1.5%上昇―総務省` 等の地域別 CPI、`6月消費者物価、1.6％上昇―総務省`、`3月消費支出、2.9％減―総務省`）。この順序を逆にすると、カタログの不足が個社扱いで黙って除外され改善の signal が消える。
 
 **将来拡張**: カタログは `種別=company` 行を受理できる状態を維持する（V3 の enum に既に含む）。頻出上位の個社を追加すれば、その記事は自動的に `out_of_scope` から外れる。パーサのコード変更は不要（NFR-09）。書き方の想定はカタログ §1.5 に記載済み。
 
@@ -2440,57 +2477,6 @@ M5（LLM）と M6（HTML）は M4 完了後に並行可能。M6 は `--no-llm` �
 ### 9.4 未決事項
 
 実装着手前に判断が必要な点、および v0.1 で意図的に対応しないと決めた点。
-
-#### U9. NFR-05（対象内行の抽出成功率 80% 以上）は **未達で確定** — 目標値の扱いを要判断
-
-**確定値**: カタログへの指標別名追加（小売ドメイン室が実施済み）と §4.3.3 の主語位置ガードを反映した最終実測は **64/83 = 77.1%**。目標 80% に 2.9 ポイント届かない。付録 A のスクリプトで再現できる。
-
-**分母に残る 19 件の内訳と回収可能性**:
-
-| 分類 | 件数 | 性質 | 回収可能性 |
-|---|---|---|---|
-| `no_numeric` — タイトルに数値が無い | 4 | `令和8年2月度チェーンストア販売統計`、`コンビニエンスストア統計調査2月度`、`ホームセンター月次実績＝2026年3月度 / 6月度` | **構造的に回収不能**。要件 7-3 のとおり本文取得を行わない以上、タイトルに数値が無い記事からは観測値を作れない |
-| `no_numeric` — 定性表現のみ | 2 | `チェーンストア販売、食品・衣料低迷で総額減`、`大手百貨店／4月売上高4社そろって増、免税売上増が貢献` | **回収可能**。カタログ §4.1 の `sign_only` 経路に載せる。ただし value は null のままなので NFR-05 の分子に数えるかは定義次第（§4.3.7 の「抽出成功」の定義を要確定） |
-| `no_numeric` / `no_metric_match` — ランキング記事 | 5 | `百貨店決算ランキング2026`、`食品スーパー決算ランキング2026 "1兆円クラブ"` 等 | **回収しない**（小売ドメイン室の判断）。ランキング見出しの慣用句であり特定期間の実績値ではない。ただし業態名が主語位置にあるため現状は分母に残る。**分母から外すべきかは要判断**（外せば 64/78 = 82.1% となり達成するが、これは数値操作に見えるため本書からは提案しない） |
-| `no_numeric` — 統計記事でない | 1 | `週刊コンビニエンスストアニュース セブンカフェ…` | 上と同じ。分母に残っている |
-| `no_metric_match` | 1 | `3月の百貨店売上高、全社増収＝免税売り上げは5カ月ぶりプラス` | **回収可能**。定性表現（`全社増収`）と指標の結び付けが必要 |
-| `no_segment_match` — カタログの業態別名不足 | 3 | `6月消費者物価、1.6％上昇`（`消費者物価` が `cpi` の別名に無い）、`4月都内物価` / `6月都内物価`（東京都区部 CPI） | **カタログ別名追加で回収可能**。ただし後述のとおり別名追加だけでは分子に入らない |
-| `no_segment_match` — カタログに業態行が無い | 1 | `3月消費支出、2.9％減―総務省`（総務省 家計調査） | 新規 segment の追加が必要。小売業態統計ではないため追加しない選択もある |
-| `no_segment_match` — 小売統計でない | 2 | `農水省・食品等取引実態調査`、`適正原価は計算式で算出へ、国交省が第1回検討会` | 実質 out_of_scope だが `AUTHORITY_MARKER` に一致するため分母に残る |
-
-**80% への到達可能性（実測）**:
-
-| 施策 | 実測 | 備考 |
-|---|---|---|
-| 確定値 | 64/83 = **77.1%** | — |
-| + `cpi` に別名 `消費者物価` / `都内物価` を追加 | 64/84 = 76.2% | **分子が増えない**。業態は解決するが、値トークンの左窓が節境界（`6月消費者物価` `、` `1.6％上昇`）で切れて指標に届かないため `no_metric_match` に移るだけ |
-| + 左窓の節境界を跨ぐ後方探索を許可（低 confidence で） | 69/84 = **82.1%** | 目標を超えるが、**誤った指標を拾うリスクが上がる**。§4.3.4 の窓設計を緩めることになるため、M3 で誤抽出率とセットで評価する |
-
-到達経路は存在するが、**いずれも M3 の `measure` で誤抽出率と併せて検証してからでなければ採用できない**。現時点で達成を宣言しない。
-
-**目標値 80% 自体の見解**: **引き下げを提案しない。** 上表のとおり 82.1% に到達する経路が実測で存在しており、「80% が過大だった」とは言えないためである。未達の主因は要件側の目標設定ではなく、(a) 左窓の節境界ルールが厳しすぎること、(b) 定性表現を指標に結び付けていないこと、(c) 分母にランキング記事等が混ざっていることの 3 点であり、いずれも実装・カタログ側で対処できる。**構造的に回収不能なのは 4 件（タイトルに数値が無い記事）のみで、分母 83 の 4.8% にとどまる**。目標値を下げるとしたら、M3 で (a)(b)(c) をすべて実施してなお届かないことが分かってからであり、その判断は要件のオーナーが行う。
-
-**M3 での確定事項**: (1) 上表の 3 施策を実装して `measure` で再計測する、(2) 「抽出成功」の定義に `sign_only` のみの観測を含めるかを確定する、(3) ランキング記事を分母から外すかを小売ドメイン室と合意する。**それまで NFR-05 は未達として扱う。**
-
-#### U10. 1 記事に複数主体の値が並ぶ場合、片方だけが業態に誤帰属する — **要対応**
-
-**事実**: §4.3.5 の intra-title 衝突検出は「同一 natural key が 2 つ以上生成された場合」に発火する設計だが、実データでは**衝突が 0 件**だった。代わりに、**2 つ目以降の値トークンが指標に解決できず黙って捨てられ、1 つ目の値だけが業態の観測値になる**パターンが 19 件見つかった。
-
-```
-  ドラッグストア／2月既存店売上ツルハ4.0%増、コスモス薬品7.0%増
-    値① 4.0%増  左窓「2月既存店売上ツルハ」→ 既存店売上 に一致 → 採用
-    値② 7.0%増  左窓「、コスモス薬品」    → 指標別名なし   → 黙って破棄
-    結果: (drugstore, existing-store-sales-yoy, existing_store, 2026-02) = +4.0
-          ＝ ツルハ 1 社の値が業態全体の値として confidence 0.95 で格納される
-```
-
-同型が `スーパーマーケット／…ライフ／ヤオコー`（4 件）、`ファミレス／…すかいらーく／サイゼリヤ`（4 件）、`ドラッグストア／…ツルハ／コスモス薬品`（4 件）、`大手百貨店／…三越伊勢丹／H2O`（1 件）で発生する。**例外も未解決行も出ないため、§4.3.2 の金額バグと同じ silent accumulation** である。
-
-19 件のうち、左窓が区切り文字のみ（同一量の単位違いの言い換え。例: `販売額1兆3001億円、2.9％増に`）で実害が小さいものが 19 件中の一部あり、主体名が入っているものが上記の 13 件程度。
-
-**v0.1 での対処**: 衝突検出の条件を「同一 natural key の重複」から **「解決した指標数 < 値トークン数 かつ 未解決の値トークンの左窓に 2 文字以上の語がある」** に拡張し、該当記事の全 observation を confidence 0.30 に落として LLM フォールバックへ回す（§4.3.5 の既存経路をそのまま使う）。`家電大型専門店／…生活家電が15.8％増` のように主体名でなく商品カテゴリのケースも巻き込むため、**M3 で誤検出率を測ってから閾値を決める**。
-
-**未決の所在**: 検出条件の閾値（左窓の文字数）と、LLM に回さず単に低 confidence で格納する選択肢の是非。M3 で確定する。
 
 #### U2. period_type enum に 9 カ月累計（3Q）を表す値が無い — **v0.1 では意図的に非対応**
 
@@ -2530,6 +2516,76 @@ M5（LLM）と M6（HTML）は M4 完了後に並行可能。M6 は `--no-llm` �
 
 要件で未決のまま。本設計では `LlmClient` プロトコルにより実行主体の決定を `cli.py` の 1 行に閉じ込め、`--no-llm` で日次自動実行が LLM 抜きで完走することを保証した。決定を M5 まで遅らせても他の設計に波及しない状態にしてある。
 
+#### U9. NFR-05（対象内行の抽出成功率 80% 以上）は **未達で確定** — 目標値の扱いを要判断
+
+**確定値**: カタログへの指標別名追加（小売ドメイン室が実施済み）と §4.3.3 の主語位置ガードを反映した最終実測は **64/83 = 77.1%**。目標 80% に 2.9 ポイント届かない。付録 A のスクリプトで再現できる。
+
+**分母に残る 19 件の内訳と回収可能性**:
+
+| 分類 | 件数 | 性質 | 回収可能性 |
+|---|---|---|---|
+| `no_numeric` — タイトルに数値が無い | 4 | `令和8年2月度チェーンストア販売統計`、`コンビニエンスストア統計調査2月度`、`ホームセンター月次実績＝2026年3月度 / 6月度` | **構造的に回収不能**。要件 7-3 のとおり本文取得を行わない以上、タイトルに数値が無い記事からは観測値を作れない |
+| `no_numeric` — 定性表現のみ | 2 | `チェーンストア販売、食品・衣料低迷で総額減`、`大手百貨店／4月売上高4社そろって増、免税売上増が貢献` | **回収可能**。カタログ §4.1 の `sign_only` 経路に載せる。ただし value は null のままなので NFR-05 の分子に数えるかは定義次第（§4.3.7 の「抽出成功」の定義を要確定） |
+| `no_numeric` / `no_metric_match` — ランキング記事 | 5 | `百貨店決算ランキング2026`、`食品スーパー決算ランキング2026 "1兆円クラブ"` 等 | **回収しない**（小売ドメイン室の判断）。ランキング見出しの慣用句であり特定期間の実績値ではない。ただし業態名が主語位置にあるため現状は分母に残る。**分母から外すべきかは要判断**（外せば 64/78 = 82.1% となり達成するが、これは数値操作に見えるため本書からは提案しない） |
+| `no_numeric` — 統計記事でない | 1 | `週刊コンビニエンスストアニュース セブンカフェ…` | 上と同じ。分母に残っている |
+| `no_metric_match` | 1 | `3月の百貨店売上高、全社増収＝免税売り上げは5カ月ぶりプラス` | **回収可能**。定性表現（`全社増収`）と指標の結び付けが必要 |
+| `no_segment_match` — カタログの業態別名不足 | 3 | `6月消費者物価、1.6％上昇`（`消費者物価` が `cpi` の別名に無い）、`4月都内物価` / `6月都内物価`（東京都区部 CPI） | **カタログ別名追加で回収可能**。ただし後述のとおり別名追加だけでは分子に入らない |
+| `no_segment_match` — カタログに業態行が無い | 1 | `3月消費支出、2.9％減―総務省`（総務省 家計調査） | 新規 segment の追加が必要。小売業態統計ではないため追加しない選択もある |
+| `no_segment_match` — 小売統計でない | 2 | `農水省・食品等取引実態調査`、`適正原価は計算式で算出へ、国交省が第1回検討会` | 実質 out_of_scope だが `AUTHORITY_MARKER` に一致するため分母に残る |
+
+**80% への到達可能性（実測）**:
+
+| 施策 | 実測 | 備考 |
+|---|---|---|
+| 確定値 | 64/83 = **77.1%** | — |
+| + `cpi` に別名 `消費者物価` / `都内物価` を追加 | 64/84 = 76.2% | **分子が増えない**。業態は解決するが、値トークンの左窓が節境界（`6月消費者物価` `、` `1.6％上昇`）で切れて指標に届かないため `no_metric_match` に移るだけ |
+| + 左窓の節境界を跨ぐ後方探索を許可（低 confidence で） | 66/84 = **78.6%** | **目標に届かない**。しかも左窓の距離制限を完全に撤廃した上限も同じ 66/84 = 78.6% であり、これがこの施策単独での天井である（付録 A のスクリプトで再現できる）。**誤った指標を拾うリスクだけが上がって目標には届かない**ため、この施策単独では採らない |
+
+**訂正**: 本表は当初この行を `69/84 = 82.1%` と記載していたが、付録 A のスクリプトで再現できず**誤りだった**。左窓を緩めても回収できない 4 件（`4月都内物価` / `6月都内物価` — `都内物価` は業態別名を足しても指標別名が無い、および ランキング記事 2 件）が残るため、上限が 66 件で頭打ちになる。
+
+**したがって、上表のどの施策も単独では 80% に届かない。** 到達には (a) 左窓の緩和に加えて (b) 定性表現の `sign_only` を分子に数えるかの定義確定、(c) ランキング記事を分母から外すかの合意（U9 の内訳表参照）を**組み合わせる必要がある**。いずれも M3 の `measure` で誤抽出率と併せて検証してからでなければ採用できない。現時点で達成を宣言しない。
+
+**目標値 80% 自体の見解**: **引き下げは提案しないが、判断材料は当初より弱い。** 上表の訂正により、単独で 80% を超える施策は実測では存在しないことが分かった（最良でも 78.6%）。それでも引き下げを提案しないのは、(a)(b)(c) を組み合わせた到達可能性がまだ潰れていないこと、および構造的に回収不能な件数が小さいことによる。未達の主因は要件側の目標設定ではなく、(a) 左窓の節境界ルールが厳しすぎること、(b) 定性表現を指標に結び付けていないこと、(c) 分母にランキング記事等が混ざっていることの 3 点であり、いずれも実装・カタログ側で対処できる。**構造的に回収不能なのは 4 件（タイトルに数値が無い記事）のみで、分母 83 の 4.8% にとどまる**。目標値を下げるとしたら、M3 で (a)(b)(c) をすべて実施してなお届かないことが分かってからであり、その判断は要件のオーナーが行う。
+
+**M3 での確定事項**: (1) 上表の 3 施策を実装して `measure` で再計測する、(2) 「抽出成功」の定義に `sign_only` のみの観測を含めるかを確定する、(3) ランキング記事を分母から外すかを小売ドメイン室と合意する。**それまで NFR-05 は未達として扱う。**
+
+#### U10. 1 記事に複数主体の値が並ぶ場合、片方だけが業態に誤帰属する — **要対応**
+
+**事実**: §4.3.5 の intra-title 衝突検出は「同一 natural key が 2 つ以上生成された場合」に発火する設計だが、実データでは**衝突が 0 件**だった。代わりに、**2 つ目以降の値トークンが指標に解決できず黙って捨てられ、1 つ目の値だけが業態の観測値になる**パターンが **30 件**見つかった（付録 A のスクリプトで再現できる）。
+
+```
+  ドラッグストア／2月既存店売上ツルハ4.0%増、コスモス薬品7.0%増
+    値① 4.0%増  左窓「2月既存店売上ツルハ」→ 既存店売上 に一致 → 採用
+    値② 7.0%増  左窓「、コスモス薬品」    → 指標別名なし   → 黙って破棄
+    結果: (drugstore, existing-store-sales-yoy, existing_store, 2026-02) = +4.0
+          ＝ ツルハ 1 社の値が業態全体の値として confidence 0.95 で格納される
+```
+
+**30 件の業態別内訳**（付録 A.3 の出力。括弧内は「未解決トークンが `%` かつ行内に `%` が 2 つ以上」＝同一指標の値が並んでいる疑いが強いもの）:
+
+| 業態 | 件数 | うち同一単位 |
+|---|---|---|
+| `supermarket` | 7 | 4 |
+| `department-store` | 6 | 3 |
+| `drugstore` | 5 | 4 |
+| `family-restaurant` | 4 | 4 |
+| `meti-commerce-dynamics` | 4 | 0 |
+| `electronics-retailer` | 3 | 2 |
+| `ec-platform` | 1 | 0 |
+| **計** | **30** | **17** |
+
+**30 件は 2 種類に分かれる**。
+
+**(1) 複数主体併記 — 13 件（要対応）**。同一単位 17 件の内訳は `ドラッグストア／…ツルハ／コスモス薬品`（4 件）、`スーパーマーケット／…ライフ／ヤオコー`（4 件）、`ファミレス／…すかいらーく／サイゼリヤ`（4 件）、`大手百貨店／…三越伊勢丹／H2O`（1 件）の **13 件**と、後述の誤検出 4 件である。この 13 件が本項の対象で、**例外も未解決行も出ないため §4.3.2 の金額バグと同じ silent accumulation** になる。
+
+**(2) 検出条件の誤検出 — 17 件**。同一単位 17 件のうち残り 4 件は `家電大型専門店／…生活家電が15.8％増`（2 件。主体名でなく**商品カテゴリ**の内訳）と `日本百貨店協会／…インバウンド29.8％増・国内顧客0.2％減`（2 件。**FR-11 の複数指標**であり、カタログ別名が `インバウンド売上` `国内顧客` と完全一致しないために未解決になっているだけ）。残る 13 件（= 30 − 17。同一単位でないもの。要対応の 13 件とは別集合）は、`経済産業省／…小売業販売額0.2％減の12兆1550億円` のように**同一量を率と金額で言い換えた**もので実害がない。
+
+つまり**検出条件は要対応 13 件に対して 30 件を拾う（誤検出 17 件）**。この比率が、下記の「M3 で誤検出率を測ってから閾値を決める」の根拠である。
+
+**v0.1 での対処**: 衝突検出の条件を「同一 natural key の重複」から **「解決した指標数 < 値トークン数 かつ 未解決の値トークンの左窓に 2 文字以上の語がある」** に拡張し、該当記事の全 observation を confidence 0.30 に落として LLM フォールバックへ回す（§4.3.5 の既存経路をそのまま使う）。`家電大型専門店／…生活家電が15.8％増` のように主体名でなく商品カテゴリのケースも巻き込むため、**M3 で誤検出率を測ってから閾値を決める**。
+
+**未決の所在**: 検出条件の閾値（左窓の文字数）と、LLM に回さず単に低 confidence で格納する選択肢の是非。M3 で確定する。
+
 ---
 
 ## 10. 付録 A: 実測値の再現スクリプト
@@ -2550,13 +2606,32 @@ M5（LLM）と M6（HTML）は M4 完了後に並行可能。M6 は `--no-llm` �
 
 ### A.2 スクリプト
 
+**実行場所に依存しない**。リポジトリルートを `.git` / `.claude-plugin` の存在で上位に辿って解決するため、cwd がどこでも（また §10 冒頭の指示どおり `scripts/retail-stats-tracker/tests/measure_evidence.py` に配置しても）動く。この解決方法は実装設計 §2.4 の `config.py` と同じ考え方である。スクリプトをリポジトリ外へ切り出して実行する場合のみ、環境変数 `RS_REPO_ROOT` でルートを明示する。
+
 ```python
 #!/usr/bin/env python3
 """設計書の実測値を再現する。python3 measure_evidence.py で全項目を出力。"""
-import re, unicodedata, collections
+import os, re, unicodedata, collections
 from pathlib import Path
 
-ORG = Path(".companies/domain-tech-collection")
+def _find_repo_root() -> Path:
+    """.git / .claude-plugin を上位に辿ってリポジトリルートを解決する（§2.4 と同方式）。
+    cwd 起点 → スクリプト位置起点の順に探す。cwd 依存で FileNotFoundError にしないため。"""
+    if os.environ.get("RS_REPO_ROOT"):
+        return Path(os.environ["RS_REPO_ROOT"]).resolve()
+    starts = [Path.cwd().resolve()]
+    if "__file__" in globals():
+        starts.append(Path(__file__).resolve().parent)
+    for start in starts:
+        for d in (start, *start.parents):
+            if (d / ".git").exists() or (d / ".claude-plugin").exists():
+                return d
+    raise SystemExit(
+        "リポジトリルートを解決できません。リポジトリ内で実行するか "
+        "RS_REPO_ROOT=/path/to/repo を指定してください。")
+
+REPO_ROOT = _find_repo_root()
+ORG = REPO_ROOT / ".companies/domain-tech-collection"
 DIG = ORG / "docs/daily-digest"
 CAT = ORG / "docs/retail-domain/retail-monthly-kpi-catalog.md"
 
@@ -2621,63 +2696,314 @@ ITEMS = [
     ("割増・割減", r"[0-9]+(?:\.[0-9]+)?割[増減]"), ("半減", r"半減"),
 ]
 
+# === §4.2 normalize（span 分布・スコープ分類はこれを通すことが前提） ==========
+_KA_MONTH_RE = re.compile(r"(?<=[0-9])[カヶヵか](?=月)")
+_SP_IN_NUM_RE = re.compile(r"(?<=[0-9])\s+(?=[0-9])")
+_SP_BEFORE_UNIT_RE = re.compile(r"(?<=[0-9])\s+(?=[月%期年日度億兆万円])")
+_SP_BEFORE_PCT_RE = re.compile(r"\s+(?=%)")
+_THOUSAND_SEP_RE = re.compile(r"(?<=[0-9]),(?=[0-9]{3}(?![0-9]))")
+
+def normalize(s: str) -> str:
+    s = unicodedata.normalize("NFKC", s)
+    s = s.replace("〜", "~").replace("～", "~")
+    s = s.replace("－", "-").replace("―", "-").replace("–", "-")
+    s = _KA_MONTH_RE.sub("カ", s)
+    s = _SP_IN_NUM_RE.sub("", s)
+    s = _SP_BEFORE_UNIT_RE.sub("", s)
+    s = _SP_BEFORE_PCT_RE.sub("", s)
+    return _THOUSAND_SEP_RE.sub("", s)
+
+NORM = [normalize(t) for t in REPS.values()]        # [代表] 406 件
+
+# === カタログローダ（§3.1。§1.1 業態一覧 / §2.1 KPI 一覧の 2 表のみを読む） ====
+def load_catalog():
+    lines = CAT.read_text(encoding="utf-8").splitlines()
+    h2 = [i + 1 for i, l in enumerate(lines) if l.startswith("## ")]
+    segs, mets, sub = {}, {}, None
+    for l in lines:
+        if l.startswith("#"):
+            m = re.match(r"^###\s+([0-9.]+)", l)
+            sub = m.group(1) if m else (None if l.startswith("## ") else sub)
+            continue
+        if not l.startswith("|") or sub not in ("1.1", "2.1"):
+            continue
+        c = [x.strip().strip("`").strip() for x in l.strip().strip("|").split("|")]
+        if len(c) < 3 or c[0] in ("segment_id", "metric_id") or set(c[0]) <= set("-: "):
+            continue                                 # ヘッダ行・区切り行を除く
+        aliases = [c[1]] + [a.strip() for a in c[2].split(",") if a.strip()]  # 名称 + 別名
+        (segs if sub == "1.1" else mets)[c[0]] = aliases
+    return h2, segs, mets
+
+CAT_H2, SEGS, METS = load_catalog()
+
+def alias_index(table, extra=None, drop=None):
+    """別名 → ID の索引を長さ降順で返す（§4.3.3 / §4.3.4 が要求する順序）。"""
+    out = {}
+    for id_, aliases in table.items():
+        for a in aliases:
+            if drop and (id_, a) in drop:
+                continue
+            out.setdefault(a, id_)
+    for id_, a in (extra or []):
+        out.setdefault(a, id_)
+    return sorted(out.items(), key=lambda kv: (-len(kv[0]), kv[0]))
+
+SEG_IDX, MET_IDX = alias_index(SEGS), alias_index(METS)
+
+# === §4.4.2 月範囲の span 分布 ==============================================
+P_RANGE = re.compile(r"(?<![0-9])(?P<m1>1[0-2]|[1-9])\s*[~-]\s*(?P<m2>1[0-2]|[1-9])月(?P<ki>期)?")
+
+def span_dist():
+    d = collections.Counter()
+    for n in NORM:
+        m = P_RANGE.search(n)
+        if m:
+            d[(int(m.group("m2")) - int(m.group("m1"))) % 12 + 1] += 1
+    return d
+
+# === §4.3.3 / §4.3.4 / §4.3.7 スコープ分類 ==================================
+VALUE_PCT_RE = re.compile(r"(?P<num>[0-9]+(?:\.[0-9]+)?)%")
+_JPY_NUM = r"[0-9]+(?:\.[0-9]+)?"
+VALUE_JPY_RE = re.compile(
+    rf"(?<![0-9.])(?:(?P<cho>{_JPY_NUM})兆)?(?:(?P<oku>{_JPY_NUM})億)?"
+    rf"(?:(?P<man>{_JPY_NUM})万)?円")
+WARI_RE = re.compile(r"[0-9]+(?:\.[0-9]+)?割[増減]")
+QUALITATIVE_RE = re.compile(r"増収|減収|増益|減益|横ばい|半減")
+AUTHORITY_HEAD_RE = re.compile(
+    r"協会|連合会|組合|生協連|経済産業省|経産省|総務省|農水省|農林水産省|財務省|厚労省|国交省")
+AUTHORITY_MARKER = re.compile(
+    r"協会|連合会|組合|経済産業省|経産省|総務省|農水省|農林水産省|財務省|厚労省|国交省|統計|白書")
+STAT_VOCAB = re.compile(
+    r"既存店|売上高|売上|販売額|客数|客単価|営業利益|営業収益|供給高|物価|市場規模|店舗数")
+CLAUSE_SEP_RE = re.compile(r"[、。・/:：]")
+METRIC_WINDOW_FAR = 25
+
+def _subject_head(n):
+    if "/" in n:
+        return n.split("/", 1)[0]
+    if "、" in n:
+        return n.split("、", 1)[0]
+    return n
+
+def resolve_segment(n, seg_idx, guard=True):
+    if not guard:                                    # ガード導入前（推移の再現用）
+        return next((s for a, s in seg_idx if a in n), None)
+    head = _subject_head(n)
+    hit = next((s for a, s in seg_idx if a in head), None)
+    if hit:
+        return hit
+    if AUTHORITY_HEAD_RE.search(head):               # 主語が発表主体名の場合の例外
+        return next((s for a, s in seg_idx if a in n), None)
+    return None
+
+def value_spans(n):
+    sp = [(m.start(), m.end()) for m in VALUE_PCT_RE.finditer(n)]
+    sp += [(m.start(), m.end()) for m in VALUE_JPY_RE.finditer(n)
+           if m.group("cho") or m.group("oku") or m.group("man")]
+    sp += [(m.start(), m.end()) for m in WARI_RE.finditer(n)]
+    out = []
+    for s, e in sorted(sp):
+        if not out or s >= out[-1][1]:               # 重なりを畳む
+            out.append((s, e))
+    return out
+
+def _window(n, start, stop, cross_clause):
+    """左窓。既定は直前の節区切りで切る。cross_clause=True で節境界を跨ぐ。"""
+    if cross_clause:
+        return n[start:stop]
+    last = start
+    for m in CLAUSE_SEP_RE.finditer(n, start, stop):
+        last = m.end()
+    return n[last:stop]
+
+def resolve_metric(window, met_idx):
+    for a, mid in met_idx:                           # 長さ降順・右端優先
+        i = window.rfind(a)
+        if i >= 0 and len(window) - (i + len(a)) <= METRIC_WINDOW_FAR:
+            return mid
+    return None
+
+def classify(n, seg_idx, met_idx, guard=True, metric_check=True, cross_clause=False):
+    """§4.3.7 の判定木。戻り値は 6 分類のいずれか。"""
+    seg = resolve_segment(n, seg_idx, guard)
+    vs = value_spans(n)
+    if seg:
+        if not vs:                                   # 定性表現のみは指標に結び付かない（U9）
+            return "no_metric_match" if QUALITATIVE_RE.search(n) else "no_numeric"
+        if not metric_check:
+            return "ok"
+        prev = 0
+        for s, e in vs:
+            if resolve_metric(_window(n, prev, s, cross_clause), met_idx):
+                return "ok"
+            prev = e
+        return "no_metric_match"
+    if AUTHORITY_MARKER.search(n):                   # 順序が要点（§4.3.7）
+        return "no_segment_match"
+    if STAT_VOCAB.search(n) and (vs or QUALITATIVE_RE.search(n)):
+        return "oos_company"
+    return "oos_nonstat"
+
+IN_SCOPE = ("ok", "no_metric_match", "no_numeric", "no_segment_match")
+LABELS = [("ok", "対象内・抽出成功"), ("no_metric_match", "no_metric_match"),
+          ("no_numeric", "no_numeric"), ("no_segment_match", "no_segment_match"),
+          ("oos_company", "out_of_scope 個社"), ("oos_nonstat", "out_of_scope 非統計")]
+
+def measure(seg_idx=None, met_idx=None, **kw):
+    c = collections.Counter(classify(n, seg_idx or SEG_IDX, met_idx or MET_IDX, **kw)
+                            for n in NORM)
+    den = sum(c[k] for k in IN_SCOPE)
+    return c, c["ok"], den, c["ok"] / den * 100
+
+# 推移の再現に使う差分（カタログ指標別名 3 種 / cpi 業態別名 2 種）
+ADDED_METRIC_ALIASES = {("all-store-sales-yoy", "外食売上"),
+                        ("all-store-sales-yoy", "チェーンストア販売"),
+                        ("ec-market-size-yoy", "ECプラットフォーム市場規模")}
+MET_IDX_BEFORE = alias_index(METS, drop=ADDED_METRIC_ALIASES)
+SEG_IDX_CPI = alias_index(SEGS, extra=[("cpi", "消費者物価"), ("cpi", "都内物価")])
+
+# === §9.4 U10 値トークンの黙殺（silent accumulation）の検出 ==================
+_NOISE_RE = re.compile(r"[0-9\s、。・/:：%兆億万円()「」『』…=＝\-~]")
+
+def u10_hits():
+    """U10 の検出条件をそのまま実装する。
+    「業態が解決でき、解決した指標数 < 値トークン数、かつ未解決の値トークンの
+      左窓に 2 文字以上の語がある」行を返す。
+    1 つも指標が解決しない行（＝観測値が 1 件も作られない行）は、黙って捨てられる
+    という現象が起きないため対象外とする。"""
+    hits = []
+    for n in NORM:
+        seg = resolve_segment(n, SEG_IDX)
+        vs = value_spans(n)
+        if not seg or len(vs) < 2:
+            continue
+        prev, solved, unresolved = 0, 0, []
+        for s, e in vs:
+            if resolve_metric(_window(n, prev, s, False), MET_IDX):
+                solved += 1
+            else:
+                unresolved.append((_window(n, prev, s, False), n[s:e]))
+            prev = e
+        if solved == 0 or solved == len(vs):
+            continue
+        if any(len(_NOISE_RE.sub("", w)) >= 2 for w, _ in unresolved):
+            # 未解決トークンが % で、行内に % が 2 つ以上 = 同一指標の値が
+            # 並んでいる疑いが強い（金額と率の言い換えを除外する）
+            same_unit = (any("%" in t for _, t in unresolved)
+                         and len(re.findall(r"[0-9.]+%", n)) >= 2)
+            hits.append((seg, same_unit, n))
+    return hits
+
+STAGES = [
+    ("指標解決を検査",           dict(guard=False, met_idx=MET_IDX_BEFORE)),
+    ("+ カタログ指標別名の追加",   dict(guard=False)),
+    ("+ 主語位置ガード（確定値）", dict()),
+    ("+ cpi 別名追加",          dict(seg_idx=SEG_IDX_CPI)),
+    ("+ 左窓の節境界を跨ぐ後方探索", dict(seg_idx=SEG_IDX_CPI, cross_clause=True)),
+]
+
 if __name__ == "__main__":
     print(f"ファイル {len(FILES)} / 決算・統計章あり {len(WSEC)} / 表あり {len(WTBL)}")
     print(f"データ行[行] {len(ROWS)} / リンク抽出成功 {len(TITLES)} / 一意 URL {len(BYURL)}")
     print(f"{'項目':<24}{'[行]':>7}{'[一意]':>8}{'[代表]':>8}{'出現数':>8}")
     for label, pat in ITEMS:
         print(f"{label:<24}" + "".join(f"{v:>8}" for v in count(pat)))
+
+    d = span_dist()
+    print("\n-- 月範囲 span 分布 [代表]（§4.2 normalize 適用後）--")
+    print("   " + " / ".join(f"span={k}: {d[k]}" for k in sorted(d)))
+    print(f"   合計 {sum(d.values())} / 解決可(3,6,12) "
+          f"{sum(v for k, v in d.items() if k in (3, 6, 12))} / "
+          f"ambiguous {sum(v for k, v in d.items() if k not in (3, 6, 12))}")
+
+    c, num, den, rate = measure()
+    print("\n-- スコープ分類 [代表]（§4.3.7 の判定木・§4.3.3 主語位置ガード適用後）--")
+    for key, label in LABELS:
+        print(f"   {label:<18}{c[key]:>4}  {c[key] / len(NORM) * 100:4.1f}%")
+    print(f"   NFR-05 = {num}/{den} = {rate:.1f}%（目標 80% / {'達成' if rate >= 80 else '未達'}）")
+    resolved = sum(c[k] for k in ("ok", "no_metric_match", "no_numeric"))
+    print(f"   業態解決率 = {resolved}/{len(NORM)} = {resolved / len(NORM) * 100:.1f}%")
+
+    print("\n-- 段階別の推移 --")
+    for label, kw in STAGES:
+        _, n_, d_, r_ = measure(**kw)
+        print(f"   {label:<26}{n_}/{d_} = {r_:.1f}%")
+
+    hits = u10_hits()
+    same = [h for h in hits if h[1]]
+    print("\n-- U10 値トークンの黙殺 [代表]（§9.4 U10 の検出条件）--")
+    print(f"   検出条件に該当            {len(hits)}")
+    print(f"   うち未解決トークンが % かつ行内に % が 2 つ以上   {len(same)}")
+    for seg, c in sorted(collections.Counter(s for s, _, _ in hits).items(),
+                         key=lambda kv: (-kv[1], kv[0])):
+        print(f"     {seg:<24}{c:>3}"
+              f"（うち同一単位 {sum(1 for s, u, _ in hits if s == seg and u)}）")
+
+    print("\n-- カタログ H2 見出しの行番号 --")
+    print("   " + " / ".join(f"L{n}" for n in CAT_H2))
 ```
 
-span 分布と NFR-05 の分類は `normalize()` および カタログローダに依存するため、`retail_stats` パッケージを import して実行する（§4.2 / §4.3.7 の規則をそのまま呼ぶ）。**正規化を通さない再集計とは結果がずれる**点に注意（§4.4.2 の注記を参照）。
+**この 1 本で本書の実測値をすべて再現できる**（`normalize()` とカタログローダを内蔵しているため、`retail_stats` パッケージの実装を待たずに検算できる）。**正規化を通さない再集計とは結果がずれる**点に注意（§4.4.2 の注記を参照）。
+
+**本スクリプトの対象外が 1 項目だけある**。§4.3.7 の推移表の第 1 行「初版の申告（誤り） 75/90 = 83.3%」は、v0.1 初版が**指標の解決可否を検査しない別手順**で算出して申告した値そのものの引用であり、現行の判定木を持つ本スクリプトでは再現しない（同条件＝ガードなし・指標検査なしで走らせると 71/89 = 79.8% になる）。**撤回済みの誤った申告値を歴史的経緯として残しているものなので、再現対象に含めない。** 本書がこの値を根拠に使っている箇所は無い。
 
 ### A.3 実行結果（計測日 2026-07-26）
 
 ```
 ファイル 102 / 決算・統計章あり 93 / 表あり 89
 データ行[行] 595 / リンク抽出成功 595 / 一意 URL 406
-項目                        [行]   [一意]   [代表]    出現数
-全角 ％                      153     127     123     217
-半角 %                      172     129      94     228
-全角数字 [０-９]                0       0       0       0
-カ月                          11      10      10      11
-ヶ月                           0       0       0       0
-ヵ月                           1       1       1       1
-か月                           0       0       0       0
-〜 (U+301C)                  63      39      37      63
-～ (U+FF5E)                   4       3       3       4
-- (ASCII hyphen)              1       1       1       1
-月範囲 N〜M月                  68      41      41      68
-数値中の空白                     6       6       6       9
-桁区切りカンマ                    1       1       1       1
-「ぶり」                       11      10      10      11
-「ぶり」かつ前年割れ                3       2       2       3
-横ばい                         3       1       1       3
-経産省/経済産業省                20      19      19      20
-割増・割減                      1       1       1       1
-半減                          1       1       1       1
+項目                          [行]    [一意]    [代表]     出現数
+全角 ％                         153     127     123     217
+半角 %                         172     129      94     228
+全角数字 [０-９]                     0       0       0       0
+カ月                            11      10      10      11
+ヶ月                             0       0       0       0
+ヵ月                             1       1       1       1
+か月                             0       0       0       0
+〜 (U+301C)                    63      39      37      63
+～ (U+FF5E)                     4       3       3       4
+- (ASCII hyphen)               1       1       1       1
+月範囲 N〜M月                      68      41      41      68
+数値中の空白                         6       6       6       9
+桁区切りカンマ                        1       1       1       1
+「ぶり」                          11      10      10      11
+「ぶり」かつ前年割れ                     3       2       2       3
+横ばい                            3       1       1       3
+経産省/経済産業省                     20      19      19      20
+割増・割減                          1       1       1       1
+半減                             1       1       1       1
 
 -- 月範囲 span 分布 [代表]（§4.2 normalize 適用後）--
    span=3: 23 / span=4: 2 / span=6: 7 / span=9: 9
    合計 41 / 解決可(3,6,12) 30 / ambiguous 11
 
 -- スコープ分類 [代表]（§4.3.7 の判定木・§4.3.3 主語位置ガード適用後）--
-   対象内・抽出成功      64  15.8%
-   no_metric_match       3   0.7%
-   no_numeric           10   2.5%
-   no_segment_match      6   1.5%
-   out_of_scope 個社   154  37.9%
-   out_of_scope 非統計 169  41.6%
+   対象内・抽出成功            64  15.8%
+   no_metric_match      3   0.7%
+   no_numeric          10   2.5%
+   no_segment_match     6   1.5%
+   out_of_scope 個社    154  37.9%
+   out_of_scope 非統計   169  41.6%
    NFR-05 = 64/83 = 77.1%（目標 80% / 未達）
    業態解決率 = 77/406 = 19.0%
 
--- 参考: 段階別の推移 --
-   指標解決を検査せず（初版の誤り）        75/90 = 83.3%
-   指標解決を検査                        62/89 = 69.7%
-   + カタログ指標別名の追加                67/89 = 75.3%
-   + 主語位置ガード（確定値）              64/83 = 77.1%
-   + cpi 別名追加                        64/84 = 76.2%（分子は増えない）
-   + 左窓の節境界を跨ぐ後方探索            69/84 = 82.1%（M3 で誤抽出率と併せて評価）
+-- 段階別の推移 --
+   指標解決を検査                   62/89 = 69.7%
+   + カタログ指標別名の追加             67/89 = 75.3%
+   + 主語位置ガード（確定値）            64/83 = 77.1%
+   + cpi 別名追加                64/84 = 76.2%
+   + 左窓の節境界を跨ぐ後方探索           66/84 = 78.6%
+
+-- U10 値トークンの黙殺 [代表]（§9.4 U10 の検出条件）--
+   検出条件に該当            30
+   うち未解決トークンが % かつ行内に % が 2 つ以上   17
+     supermarket               7（うち同一単位 4）
+     department-store          6（うち同一単位 3）
+     drugstore                 5（うち同一単位 4）
+     family-restaurant         4（うち同一単位 4）
+     meti-commerce-dynamics    4（うち同一単位 0）
+     electronics-retailer      3（うち同一単位 2）
+     ec-platform               1（うち同一単位 0）
 
 -- カタログ H2 見出しの行番号 --
    L12 / L20 / L84 / L138 / L163 / L234
@@ -2694,7 +3020,7 @@ L2 レビューで再現できなかった実測値を、上記スクリプト�
 | §4.2 月範囲表現 | 97 件 | 68 [行] / 41 [一意] / 41 [代表] | 同上。§4.4.2 の「41 件」が正しく、書内で矛盾していた |
 | §4.3.5 「ぶり」 | 21 件・前年割れ 5 件 | 11 / 3 [行]、10 / 2 [一意] | 同上 |
 | §3.1 カタログ見出し行 | KPI 定義 = 行 64 | 行 84 | カタログ改訂で位置が動いたのを追随していなかった |
-| §4.3.2 金額換算 | 6 パターン全て正常 | 旧実装は 16 中 5 パターンで誤値（§4.3.2 の表） | カンマ除去の `\b` バグと小数非対応を検証していなかった |
+| §4.3.2 金額換算 | 6 パターン全て正常 | 旧実装は 16 中 **8 パターン**で誤値（旧版 8/16 合格。§4.3.2 の表） | カンマ除去の `\b` バグと小数非対応を検証していなかった |
 | §4.3.7 NFR-05 | 75/90 = 83.3%（達成） | 64/83 = **77.1%（未達）** | 指標の解決可否を検査せず、数値の有無だけで「抽出可能」と数えていた。訂正後にカタログ指標別名の追加（+5）と §4.3.3 主語位置ガード（誤って成功に数えていた 3 件を除外）を反映した確定値 |
 | §4.3.3 業態の解決 | 別名がタイトル中のどこでも一致してよい | 主語位置での一致を要求（例外: 主語が発表主体名の場合） | 汎用別名（`外食` `百貨店` 等）が個社決算記事の本文に一致し、個社の値を業態の観測値として格納していた（実測 7 件、うち 3 件は抽出成功に計上） |
 | §4.4.2 span 分布 | 合計 41（基準の記載なし） | 合計 41 [代表]、ただし `normalize()` 適用が前提 | 正規化の有無で 40 / 41 が変わる点を明示していなかった |
@@ -2717,4 +3043,4 @@ _本書は設計のドラフトである。§4 の正規表現・期間解決ロ
 
 _**測定値についての注記**: 日次ダイジェストは毎日追加されるため、本書および要件定義書に記載した実測値（ファイル数・行数・一意 URL 数・各種比率）は計測日により変動する。要件定義 v0.1 の 101 ファイル / 588 行 / 一意 405 件は 2026-07-25 時点、本書の 102 ファイル / 595 行 / 一意 406 件は 2026-07-26 時点の計測であり、差は 1 日分のダイジェストによるもので母数の性質に変化はない。数値を引用する際は計測日を併記すること（要件定義 7.1 の注記と同旨）。_
 
-_§9.3 の決定事項 D1〜D4 は要件定義 v0.1.1 に反映済みであり、本書の §3〜§8 は確定後の内容で記述されている。§9.4 に残る未決（U2 / U5 / U6 / U7 / U8）は、いずれも v0.1 の実装を止めない性質のものである。_
+_§9.3 の決定事項 D1〜D4 は要件定義 v0.1.1 に反映済みであり、本書の §3〜§8 は確定後の内容で記述されている。§9.4 に残る未決は 7 件で、性質が 2 つに分かれる。**U2 / U5 / U6 / U7 / U8** は v0.1 の実装を止めない（意図的な非対応、または決定を後続マイルストーンまで遅らせても他の設計に波及しない構造にしてある）。一方 **U9（NFR-05 が 64/83 = 77.1% で未達 — 目標値を下げるか未達のまま進めるかのオーナー判断が要る）と U10（複数主体併記で 2 社目が黙って捨てられる 13 件 — 要対応。検出条件は 30 件を拾う）は M3 での判断・対応を要する**。実装の着手自体は妨げないが、未決のまま M3 を通過させてはならない。_
