@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-01T19:05:20",
-  "case_count": 192,
+  "updated_at": "2026-08-01T19:45:30",
+  "case_count": 198,
   "failure_patterns": [],
   "cases": [
     {
@@ -5930,6 +5930,199 @@
           ".companies/domain-tech-collection/docs/retail-domain/retail-monthly-kpi-catalog.md"
         ],
         "started": "2026-07-26T13:36:52"
+      }
+    },
+    {
+      "id": "20260727-082550-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=0.95, accuracy=avg(s2_links,s3_summary)=0.975→0.98, clarity=avg(s4_cross_domain,s6_violations)=1.00",
+        "judged_at": "2026-07-27T08:42:14+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-27T08:25:50+09:00"
+      }
+    },
+    {
+      "id": "20260728-083114-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.975,
+        "accuracy": 0.975,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-07-28T08:46:07+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-28T08:31:14+09:00"
+      }
+    },
+    {
+      "id": "20260729-082714-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.88,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.94,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=0.875→0.88, accuracy=avg(s2_links,s3_summary)=0.975→0.98, clarity=avg(s4_cross_domain,s6_violations)=0.975→0.98",
+        "judged_at": "2026-07-29T08:43:35+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-29T08:27:14+09:00"
+      }
+    },
+    {
+      "id": "20260730-082751-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-07-30",
+          "自動生成",
+          "GitHub",
+          "Actions",
+          "経由"
+        ],
+        "request_head": "日次ダイジェスト 2026-07-30（木）自動生成（GitHub Actions 経由）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.95,
+        "clarity": 0.95,
+        "total": 0.95,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-30T08:27:51+09:00"
+      }
+    },
+    {
+      "id": "20260731-083016-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.975,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-07-31T08:53:01+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-31T08:30:16+09:00"
+      }
+    },
+    {
+      "id": "20260801-082747-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.98,
+        "accuracy": 0.95,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.95+1.00)/2=0.975→0.98, accuracy=avg(s2_links,s3_summary)=(1.00+0.90)/2=0.95, clarity=avg(s4_cross_domain,s6_violations)=(1.00+1.00)/2=1.00",
+        "judged_at": "2026-08-01T08:48:01+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-01T08:27:47+09:00"
       }
     }
   ],
