@@ -60,13 +60,33 @@ ls .companies/{org-slug}/.session-summaries/${TODAY_COMPACT}*.json 2>/dev/null
 
 ```
 対象: .companies/{org-slug}/.task-log/*.md
-期間フィルタ: frontmatter の started フィールドで絞り込む
+期間フィルタ: frontmatter の started **または** completed が期間内のもの
 収集内容:
   - 完了タスクのリクエスト原文（status: completed）
   - 実行モード（subagent / agent-teams / direct）
   - 成果物パス一覧
   - 進行中タスク（status: in-progress）
 ```
+
+**重要: `started` だけで絞ると複数日にまたがるタスクを取りこぼす。**
+
+長期タスクは開始日と完了日が別日になる。`started` のみでフィルタすると、
+「前日までに開始し当日完了した」最も成果の大きいタスクがレポートから消える。
+
+実例: 2026-08-01 の today レポートで、`started: 2026-07-26` / `completed: 2026-08-01` の
+設計タスク（PR #710、6,189 行）が `started` フィルタでは検出されず、
+当日の成果が日次ダイジェストのみになりかけた。
+
+```bash
+# started が期間内
+grep -l "started: \"{DATE}" .companies/{org-slug}/.task-log/*.md
+# completed が期間内（開始日が別日のものを拾う）
+grep -l "completed: \"{DATE}" .companies/{org-slug}/.task-log/*.md
+# 両者の和集合を対象とする（重複は task_id で排除）
+```
+
+レポート本文では、開始日が期間外のタスクに「{開始日} 開始・{完了日} 完了」と
+補足を添えると、期間内の作業量が読み手に正しく伝わる。
 
 ### 2.3 docs/ 配下の成果物
 

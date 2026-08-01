@@ -341,7 +341,13 @@ if feedback_dir and feedback_dir.exists():
         r'devops-coordinator|standards-lead|technical-writer)'
     )
 
-    for fb_file in sorted(feedback_dir.glob("feedback_*.md")):
+    # NOTE: ファイル名で絞らず全 .md を走査する。
+    # 以前は glob("feedback_*.md") だったが、実在するメモリは
+    # `cc-sier-design-review-lessons.md`（プレフィックスなし）や
+    # `feedback-verify-review-numbers.md`（ハイフン区切り）であり
+    # 1 件もマッチせず failure_patterns が常に 0 件だった。
+    # 絞り込みは下の `type: feedback` 判定のみで行う（命名規約に依存しない）。
+    for fb_file in sorted(feedback_dir.glob("*.md")):
         fb_text = fb_file.read_text(encoding="utf-8", errors="ignore")
         fb_id = fb_file.stem
 
@@ -358,7 +364,9 @@ if feedback_dir and feedback_dir.exists():
         # Verify type: feedback
         fb_type = ""
         for line in fm.split("\n"):
-            m = re.match(r'type:\s*(.+)', line)
+            # `type:` は metadata: 配下にインデントされる形式が現行。
+            # 行頭固定だと `  type: feedback` を取りこぼす。
+            m = re.match(r'\s*type:\s*(.+)', line)
             if m:
                 fb_type = m.group(1).strip()
         if fb_type != "feedback":
@@ -376,7 +384,9 @@ if feedback_dir and feedback_dir.exists():
 
         # Extract "How to apply" section
         how_match = re.search(
-            r'\*\*How to apply:\*\*\s*(.*?)(?=\n##|\n\*\*Why|\n\*\*How to apply|\Z)',
+            # `**How to apply:**`（コロン内側）と `**How to apply**:`（コロン外側）の
+            # 両表記を許容する。実データには後者が存在する。
+            r'\*\*How to apply:?\*\*:?\s*(.*?)(?=\n##|\n\*\*Why|\n\*\*How to apply|\Z)',
             fb_text, re.DOTALL
         )
         how_to_apply = how_match.group(1).strip()[:200] if how_match else ""
