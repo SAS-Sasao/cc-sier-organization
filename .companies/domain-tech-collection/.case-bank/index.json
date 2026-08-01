@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-07-26T13:03:04",
-  "case_count": 190,
+  "updated_at": "2026-08-01T19:05:20",
+  "case_count": 192,
   "failure_patterns": [],
   "cases": [
     {
@@ -5841,6 +5841,38 @@
       }
     },
     {
+      "id": "20260726-082617-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.88,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.94,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=(0.90+0.85)/2=0.875→0.88, accuracy=avg(s2_links,s3_summary)=(1.00+0.95)/2=0.975→0.98, clarity=avg(s4_cross_domain,s6_violations)=(0.95+1.00)/2=0.975→0.98",
+        "judged_at": "2026-07-26T09:15:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-07-26T08:26:17+09:00"
+      }
+    },
+    {
       "id": "20260726-122621-app-requirements",
       "state": {
         "request_keywords": [
@@ -5865,6 +5897,39 @@
           ".companies/domain-tech-collection/docs/research/keep-best-review-retry-requirements.md"
         ],
         "started": "2026-07-26T12:26:21"
+      }
+    },
+    {
+      "id": "20260726-133652-retail-tracker-design",
+      "state": {
+        "request_keywords": [
+          "案1のアプリについて進めたい",
+          "claude",
+          "codeのループエンジニアリング",
+          "サブエージェントチーム",
+          "hooksなど実装するにあたり用意するべきclaude",
+          "codeの設計も作成してほしい",
+          "※サブエージェントチームで対応してほしい"
+        ],
+        "request_head": "案1のアプリについて進めたい。claude codeのループエンジニアリング、サブエージェントチーム、hooksなど実装",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary,system-architect,ai-developer,ci-cd-engineer",
+        "mode": "agent-teams",
+        "artifact_count": 5
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-design.md",
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-loop-engineering-design.md",
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-cicd-design.md",
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-requirements.md",
+          ".companies/domain-tech-collection/docs/retail-domain/retail-monthly-kpi-catalog.md"
+        ],
+        "started": "2026-07-26T13:36:52"
       }
     }
   ],
