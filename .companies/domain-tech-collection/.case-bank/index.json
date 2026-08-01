@@ -1,8 +1,45 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-01T20:03:34",
-  "case_count": 198,
-  "failure_patterns": [],
+  "updated_at": "2026-08-01T20:17:51",
+  "case_count": 200,
+  "failure_patterns": [
+    {
+      "subagent": "general",
+      "failure_reason": "複数 subagent で設計書を並列生成する際、文書間の整合と実測値の再現性が必ず穴になる",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "cc-sier-design-review-lessons",
+      "how_to_apply": "- 依存関係のある設計は**段階を分けて起動**する。仕様調査や前提固めを先行させ、その出力を後続の唯一の根拠として渡す\n- 並列で走らせた場合、統合時に**キー・enum・ファイル名・CLI 引数を機械的に grep で突き合わせる**。目視では拾えない\n- 数値を「実測」と書かせたら**集計条件（対象範囲・一意/行基準）と集計スクリプトを併記させる**。2 タスク連続で実測値が再現せず減点され",
+      "match_keywords": [
+        "cc",
+        "sier",
+        "design",
+        "review",
+        "lessons",
+        "複数",
+        "subagent",
+        "で設計書を並列生成する際"
+      ]
+    },
+    {
+      "subagent": "general",
+      "failure_reason": "笹尾さんは決断と実行を好み、確認質問の繰り返しを嫌う",
+      "count": 1,
+      "avg_score": 0.0,
+      "source": "feedback-memory",
+      "feedback_id": "user-prefers-decisive-action",
+      "how_to_apply": "妥当なデフォルトがあるなら明言して進める。確認は「不可逆・影響大の中核変更の直前」に1回だけ集約する。短い1〜2行で計画を示し、止めるべき所だけ止める。質問するなら多くても1問。関連: [[issue-569-diagram-migration]]",
+      "match_keywords": [
+        "user",
+        "prefers",
+        "decisive",
+        "action",
+        "笹尾さんは決断と実行を好み",
+        "確認質問の繰り返しを嫌う"
+      ]
+    }
+  ],
   "cases": [
     {
       "id": "20260321-103000-store-computer-learning-plan",
@@ -6144,6 +6181,63 @@
         "```tool_result\ndaily-digest\ndecisions\ndiagrams\ndrawio\ninfo-source-master.md\nresearch\nretail-domain\nsecretary\n=== research ===\nCLAUDE.md\nai-virtual-off"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260801-195912-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 2
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #712 マージ + Issue #713、evolve=Case Bank 198 件更新、dashboard=63.6 KB 生成。詳細な L2 レビューは各 sub-skill の task-log を参照",
+        "judged_at": "2026-08-01T20:05:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/dashboard.html",
+          ".companies/domain-tech-collection/docs/secretary/reports/2026-08-01-today.md"
+        ],
+        "started": "2026-08-01T19:59:12"
+      }
+    },
+    {
+      "id": "20260801-201500-fix-case-bank-feedback",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "の実行中に発見した",
+          "evolve",
+          "の機能不全",
+          "反映しておいて！"
+        ],
+        "request_head": "（/company-cycle の実行中に発見した evolve の機能不全）反映しておいて！",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-01T20:15:00"
+      }
     }
   ],
   "frequent_phrases": [
