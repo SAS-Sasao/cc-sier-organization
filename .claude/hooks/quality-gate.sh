@@ -40,11 +40,29 @@ DATETIME=$(date '+%Y-%m-%d %H:%M:%S')
 CHECKLIST_FILES=()
 [[ -f "${GATE_DIR}/_default.md" ]] && CHECKLIST_FILES+=("${GATE_DIR}/_default.md")
 
-if   [[ "$FILE_PATH" == */requirements* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/requirements.md")
-elif [[ "$FILE_PATH" == */design* ]] || [[ "$FILE_PATH" == */architecture* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/design.md")
-elif [[ "$FILE_PATH" == */proposals* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/proposal.md")
-elif [[ "$FILE_PATH" == */reports* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/report.md")
-elif [[ "$FILE_PATH" == */adrs* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/adr.md")
+# 付随文書は by-type チェックリストの対象外とする。
+#
+# by-type の判定は「パスに design / requirements 等を含むか」で行うため、
+# `docs/design/origin.md` のような付随文書も設計書と誤判定される。
+# /company-spawn は設計書を docs/design/ に配置する標準フローなので、
+# 除外しないとスポーンのたびに誤検知 Issue が起票される（実例: Issue #719）。
+#
+# 対象はトレーサビリティ・目次・変更履歴など、成果物そのものではない文書。
+# _default.md（汎用チェックリスト）は引き続き適用する。
+IS_ANCILLARY=false
+case "$(basename "$FILE_PATH")" in
+  origin.md|README.md|readme.md|index.md|INDEX.md|CHANGELOG.md|LICENSE.md|CONTRIBUTING.md|MEMORY.md)
+    IS_ANCILLARY=true
+    ;;
+esac
+
+if [[ "$IS_ANCILLARY" == false ]]; then
+  if   [[ "$FILE_PATH" == */requirements* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/requirements.md")
+  elif [[ "$FILE_PATH" == */design* ]] || [[ "$FILE_PATH" == */architecture* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/design.md")
+  elif [[ "$FILE_PATH" == */proposals* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/proposal.md")
+  elif [[ "$FILE_PATH" == */reports* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/report.md")
+  elif [[ "$FILE_PATH" == */adrs* ]]; then CHECKLIST_FILES+=("${GATE_DIR}/by-type/adr.md")
+  fi
 fi
 
 for customer_gate in "${GATE_DIR}/by-customer/"*.md; do
