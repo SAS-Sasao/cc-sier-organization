@@ -1579,6 +1579,16 @@ if Path("docs/insights/index.html").exists():
       <div class="org-label">活動インサイト・完了グラフ →</div>
     </a>'''
 
+# 小売月次統計トラッカーが存在すれば追加（retail-stats-tracker / 要件 IF-05）
+# **カードの定義はこの生成器に置く。** docs/index.html を直接編集すると
+# /company-dashboard の次回実行で上書きされて消える。
+if Path("docs/retail-stats/index.html").exists():
+    cards += '''
+    <a href="./retail-stats/index.html" class="card" style="border:2px solid #0987a0;">
+      <div class="org-name">小売月次統計</div>
+      <div class="org-label">業態別トレンド・データ品質 →</div>
+    </a>'''
+
 html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
