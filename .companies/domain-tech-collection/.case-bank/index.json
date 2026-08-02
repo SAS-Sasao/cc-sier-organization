@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T10:02:54",
+  "updated_at": "2026-08-02T10:09:55",
   "case_count": 202,
   "failure_patterns": [
     {
@@ -6269,7 +6269,13 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-02T08:25:12+09:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n## wf-daily-digest\n- **名称**: 日次ニュース巡回・ダイジェスト生成\n- **トリガー**: 「ニュース収集」「巡回」「daily digest」「今日のニュース」「情報収集」\n- **実行方式**: agent-teams\n## wf-sour",
+        "```tool_result\n1\t# 日次ダイジェスト 2026-07-25\n2\t\n3\t> **組織**: ドメイン知識や技術スタック収集PJT (`domain-tech-collection`)\n4\t> **生成方式**: Agent Teams Actions（wf-daily-digest）",
+        "```tool_result\ndaily-digest\ndecisions\ndiagrams\ndrawio\ninfo-source-master.md\nresearch\nretail-domain\nsecretary\n=== research ===\nCLAUDE.md\nai-virtual-off"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260802-spawn-retail-stats-tracker",
@@ -6295,48 +6301,26 @@
           ".companies/domain-tech-collection/docs/design/origin.md"
         ],
         "started": "2026-08-02T10:00:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n2026-07-26T13:36:52\ndomain-tech-collection/docs/2026-07-26-retail-tracker-design\n=== hooks 2系統の区別（既存知見） ===\n### 1.2 hooks の 2 系統（最重要の区別",
+        "```tool_result\n=== 要件定義 7-14 / 7-15 ===\n520:| 14 | 制約 | **同一の業態・指標・期間に対し、発表主体の異なる統計が並立する**。実測では `経産省調べ` / `経済産業省` を含む一意タイトルが 19 件あり、`百貨店／3月の販売額2.2％増の5",
+        "```tool_result\n9:| 改訂 | v0.1.1（2026-07-26）— 要件定義 v0.1.1 の 2 変更に追随。natural key を 5 要素化（§2.3 ④ D2/D3）、L_extract の分母を対象内行に再定義（§1.2 / §2.3 ⑦ S3・S4）、および付随し"
+      ],
+      "conversation_enriched": true
     }
   ],
   "frequent_phrases": [
     {
       "phrase": "グラフ系列として",
-      "count": 4
+      "count": 3
     },
     {
       "phrase": "および付随して",
-      "count": 4
+      "count": 3
     },
     {
       "phrase": "仮想組織のピクセルオフィスとして",
-      "count": 2
-    },
-    {
-      "phrase": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップして",
-      "count": 2
-    },
-    {
-      "phrase": "の要件定義をして",
-      "count": 2
-    },
-    {
-      "phrase": "正規化ルールとして",
-      "count": 2
-    },
-    {
-      "phrase": "が外部定義ファイルとして読み込める前提でテーブル形式・機械可読を意識して構成して",
-      "count": 2
-    },
-    {
-      "phrase": "の内訳が構造化データとして",
-      "count": 2
-    },
-    {
-      "phrase": "の選定はチームリード承認待ちの未決事項として",
-      "count": 2
-    },
-    {
-      "phrase": "件を精読して",
       "count": 2
     }
   ],
@@ -6344,38 +6328,28 @@
     {
       "intent": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップ",
       "full": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい",
-      "date": "2026-07-26"
+      "date": "2026-08-02"
     },
     {
       "intent": "OK!1.と3の要件定義を",
       "full": "OK!1.と3の要件定義をしてほしい。必要ならサブエージェントチームを構築しながら進めて",
-      "date": "2026-07-26"
+      "date": "2026-08-02"
     },
     {
       "intent": "ごめん一旦今日は作業終了",
       "full": "ごめん一旦今日は作業終了したい。次のアクションとして記憶してもらって、次回作業時にすぐ取り掛かれるようにして",
-      "date": "2026-07-26"
-    },
-    {
-      "intent": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップ",
-      "full": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい",
-      "date": "2026-08-01"
-    },
-    {
-      "intent": "OK!1.と3の要件定義を",
-      "full": "OK!1.と3の要件定義をしてほしい。必要ならサブエージェントチームを構築しながら進めて",
-      "date": "2026-08-01"
-    },
-    {
-      "intent": "ごめん一旦今日は作業終了",
-      "full": "ごめん一旦今日は作業終了したい。次のアクションとして記憶してもらって、次回作業時にすぐ取り掛かれるようにして",
-      "date": "2026-08-01"
+      "date": "2026-08-02"
     },
     {
       "intent": "ネクストアクションを実施",
       "full": "ネクストアクションを実施したい",
-      "date": "2026-08-01"
+      "date": "2026-08-02"
+    },
+    {
+      "intent": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるように",
+      "full": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるようにしてほしい。",
+      "date": "2026-08-02"
     }
   ],
-  "conversation_enriched_at": "2026-08-01T20:04:19"
+  "conversation_enriched_at": "2026-08-02T10:10:10"
 }
