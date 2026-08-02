@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T17:52:13",
-  "case_count": 207,
+  "updated_at": "2026-08-02T18:13:57",
+  "case_count": 208,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6417,6 +6417,31 @@
           ".companies/domain-tech-collection/docs/secretary/reports/2026-08-02-today.md"
         ],
         "started": "2026-08-02T13:38:44"
+      }
+    },
+    {
+      "id": "20260802-180000-fix-design-728-729",
+      "state": {
+        "request_keywords": [
+          "Issue",
+          "#728",
+          "#729",
+          "の回答を記載してほしい",
+          "OK対応して"
+        ],
+        "request_head": "Issue #728 と #729 の回答を記載してほしい → OK対応して",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-02T18:00:00"
       }
     },
     {
