@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T10:16:00",
-  "case_count": 204,
+  "updated_at": "2026-08-02T13:29:30",
+  "case_count": 205,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6335,6 +6335,31 @@
           ".companies/domain-tech-collection/docs/research/retail-stats-tracker-requirements.md"
         ],
         "started": "2026-08-02T10:20:00"
+      }
+    },
+    {
+      "id": "20260802-104500-fix-loop-design-c4",
+      "state": {
+        "request_keywords": [
+          "Issue",
+          "#724",
+          "の内容確認して必要情報まとめて",
+          "retail",
+          "リポジトリに渡してあげて"
+        ],
+        "request_head": "Issue #724 の内容確認して必要情報まとめて retail リポジトリに渡してあげて",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-02T10:45:00"
       }
     },
     {
