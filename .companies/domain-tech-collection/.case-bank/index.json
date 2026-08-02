@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T18:13:57",
+  "updated_at": "2026-08-02T18:37:22",
   "case_count": 208,
   "failure_patterns": [
     {
@@ -6479,5 +6479,5 @@
   ],
   "frequent_phrases": [],
   "intent_patterns": [],
-  "conversation_enriched_at": "2026-08-02T13:41:34"
+  "conversation_enriched_at": "2026-08-02T18:37:22"
 }
