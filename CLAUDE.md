@@ -164,8 +164,7 @@ cc-sier-organization/
 - ⚠️ 必須セクションの**順序違反**も `critical_triggered = true` 扱い（欠落と同じく均し込み禁止）
 - ⚠️ nightly 系 workflow で Opus に複数シグナル（PR/task-log/commit 20件以上）を分析させる場合 `max-turns` は **60 以上**（30 だと Claude が全件丁寧に Read してツール呼び出し枯渇で timeout）。prompt 側にも「全件丁寧に読まない、優先順位をつけて効率重視」を明示する
 - ⚠️ third-party action の `with:`/`env:` 挙動が公式 docs と食い違う時は `action.yml` の raw ソース（例: `https://raw.githubusercontent.com/anthropics/claude-code-action/v1/action.yml`）を直接参照して真因特定（公式 docs の parameter table が不完全なケースあり）
-- ⚠️ `PROJECTS_PAT` は **Classic PAT 必須**（fine-grained は user-owned Project v2 非対応）。scope は `project` + `read:org` + `read:discussion`
-- ⚠️ `gh project` コマンドは `--owner "@me"` を使う（user 名ベタ書きは Classic PAT で `unknown owner type` エラー）。`gh project item-add` は冪等なので bootstrap hook の `[found]` 分岐でも必ず呼ぶ
+- ⚠️ `PROJECTS_PAT` は **Classic PAT 必須**（fine-grained は user-owned Project v2 非対応、scope: `project` + `read:org` + `read:discussion`）。`gh project` は `--owner "@me"` を使う（user 名ベタ書きで `unknown owner type` エラー）
 - ⚠️ Python→bash で区切りデータを渡す時は `\t` ではなく `\x1f` (ASCII Unit Separator) を使う（bash IFS whitespace で空フィールドが潰れ column shift 発生）
 - ⚠️ workflow の `permissions:` は使う scope を全て明示列挙し、`2>/dev/null` / `|| true` でエラー握り潰し禁止（silent fail で誤集計の実例あり）
 - ⚠️ `.case-bank/` `.quality-gate-log/` `.session-summaries/` `.conversation-log/` は **Git 管理対象**（#587 で移行、`.claude/agent-memory/` のみ gitignore 維持）。`.conversation-log/` は人間発言を含むため顧客案件混入時はマスキング必須
@@ -173,6 +172,7 @@ cc-sier-organization/
 - ⚠️ workflow shell で `cmd | tee log.txt` を使うと **pipefail なしでは cmd の非 0 exit code が潰され success 偽装**される。`set -euo pipefail` を冒頭に入れるか、実行と log 表示を分離する
 - ⚠️ `.mcp.json` の uvx/npx 系 MCP サーバーは `==バージョン` でピン留め（PyPI yank で再現不能になった実例あり: aws-diagram-mcp-server #569/#570）
 - ⚠️ claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` を追加（CLI 2.1.198+ で subagent がバックグラウンドデフォルト化、headless モードでは完了を待たず終了し成果物未生成のまま success 偽装される: #618）
+- ⚠️ hook/スクリプトでファイル種別フィルタする際はファイル名パターン（`feedback_*.md` 等）でなく frontmatter `metadata.type` で判定し、正規表現は `\s*type:` でインデントを許容する（命名揺れ + YAML ネストで Case Bank failure_patterns が長期間 0 件: #714）
 
 詳細: @.claude/rules/review-pattern.md
 
