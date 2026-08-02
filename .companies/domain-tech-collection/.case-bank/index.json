@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T09:37:40",
-  "case_count": 200,
+  "updated_at": "2026-08-02T10:02:54",
+  "case_count": 202,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6237,6 +6237,64 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-01T20:15:00"
+      }
+    },
+    {
+      "id": "20260802-082512-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.975,
+        "accuracy": 0.975,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-08-02T08:42:17+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-02T08:25:12+09:00"
+      }
+    },
+    {
+      "id": "20260802-spawn-retail-stats-tracker",
+      "state": {
+        "request_keywords": [
+          "これまで固めてきた",
+          "要件定義",
+          "設計書を切り出して別リポジトリで対応できるようにしてほしい"
+        ],
+        "request_head": "これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるようにしてほしい。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "",
+        "mode": "subagent",
+        "artifact_count": 2
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/{org}/docs/",
+          ".companies/domain-tech-collection/docs/design/origin.md"
+        ],
+        "started": "2026-08-02T10:00:00"
       }
     }
   ],
