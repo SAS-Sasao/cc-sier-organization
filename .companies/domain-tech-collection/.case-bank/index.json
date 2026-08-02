@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T10:09:55",
-  "case_count": 202,
+  "updated_at": "2026-08-02T10:16:00",
+  "case_count": 204,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6276,6 +6276,66 @@
         "```tool_result\ndaily-digest\ndecisions\ndiagrams\ndrawio\ninfo-source-master.md\nresearch\nretail-domain\nsecretary\n=== research ===\nCLAUDE.md\nai-virtual-off"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260802-100636-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #721 マージ + Issue #722、evolve=Case Bank 202 件・failure_patterns 2 件（昨日の修正が初めて機能）、dashboard=68 KB 生成。詳細な L2 レビューは各 sub-skill の task-log を参照",
+        "judged_at": "2026-08-02T10:12:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/reports/2026-08-02-today.md"
+        ],
+        "started": "2026-08-02T10:06:36"
+      }
+    },
+    {
+      "id": "20260802-102000-fix-quality-gate-ancillary",
+      "state": {
+        "request_keywords": [
+          "/company-cycle",
+          "で発見した品質ゲート誤検知",
+          "修正して",
+          "クローズもして"
+        ],
+        "request_head": "（/company-cycle で発見した品質ゲート誤検知）修正して。クローズもして",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 4
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/design/origin.md",
+          ".companies/domain-tech-collection/docs/design/README.md",
+          ".companies/domain-tech-collection/docs/design/implementation-design.md",
+          ".companies/domain-tech-collection/docs/research/retail-stats-tracker-requirements.md"
+        ],
+        "started": "2026-08-02T10:20:00"
+      }
     },
     {
       "id": "20260802-spawn-retail-stats-tracker",
