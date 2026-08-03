@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-03T20:37:28",
-  "case_count": 212,
+  "updated_at": "2026-08-03T20:55:15",
+  "case_count": 213,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6585,6 +6585,32 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-03T10:45:00"
+      }
+    },
+    {
+      "id": "20260803-113000-ai-practices-catalog",
+      "state": {
+        "request_keywords": [
+          "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73",
+          "このサイトも解析してほしい",
+          "※いくつか依頼したAIがらみの解析はいずれこのリポジトリや私が作成するアプリのclaude",
+          "codeのアーキテクトに採用するか考えるからまとめておいてほしい"
+        ],
+        "request_head": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73 このサイトも解析",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/ai-driven-development-practices-catalog.md"
+        ],
+        "started": "2026-08-03T11:30:00"
       }
     }
   ],
