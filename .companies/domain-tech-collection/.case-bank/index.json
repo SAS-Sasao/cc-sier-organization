@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-03T18:47:10",
-  "case_count": 210,
+  "updated_at": "2026-08-03T20:37:28",
+  "case_count": 212,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6537,6 +6537,54 @@
           ".companies/domain-tech-collection/docs/daily-digest/2026-08-03.md"
         ],
         "started": "2026-08-03T08:25:40+09:00"
+      }
+    },
+    {
+      "id": "20260803-100000-task-management-analysis",
+      "state": {
+        "request_keywords": [
+          "https://qiita.com/Y-Y-dev/items/d526fb7cdbe35a3f9384",
+          "このサイトの内容を熟読して内容を要約してほしい",
+          "解析結果をmdファイルでまとめてほしい"
+        ],
+        "request_head": "https://qiita.com/Y-Y-dev/items/d526fb7cdbe35a3f9384 このサイトの内",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/ai-agent-task-management-analysis.md"
+        ],
+        "started": "2026-08-03T10:00:00"
+      }
+    },
+    {
+      "id": "20260803-104500-web-fetch-rule",
+      "state": {
+        "request_keywords": [
+          "取得方法については",
+          "私が直接解析依頼する際のルールにしてほしい",
+          "SKILLなどでルール化してほしい"
+        ],
+        "request_head": "取得方法については、私が直接解析依頼する際のルールにしてほしい。SKILLなどでルール化してほしい。",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-03T10:45:00"
       }
     }
   ],
