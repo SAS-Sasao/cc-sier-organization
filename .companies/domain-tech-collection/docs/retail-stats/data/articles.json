@@ -1642,7 +1642,8 @@
     },
     {
       "appeared_dates": [
-        "2026-08-01"
+        "2026-08-01",
+        "2026-08-03"
       ],
       "article_id": "423bd79c62152837",
       "first_published_date": "2026-08-01",
@@ -2193,6 +2194,20 @@
     },
     {
       "appeared_dates": [
+        "2026-08-03"
+      ],
+      "article_id": "55cb47898d1ceee1",
+      "first_published_date": "2026-08-03",
+      "source_name": "ロジトゥデイ",
+      "source_name_normalized": "ロジトゥデイ",
+      "title_first_seen": "ハマキョウ1Q増収増益、運送利益2.2倍",
+      "title_variants": [
+        "ハマキョウ1Q増収増益、運送利益2.2倍"
+      ],
+      "url": "https://www.logi-today.com/983420"
+    },
+    {
+      "appeared_dates": [
         "2026-04-28"
       ],
       "article_id": "5629a127b144410c",
@@ -2204,6 +2219,20 @@
         "日本フードサービス協会／3月の外食売上5.7％増、春休みや歓送迎会需要で堅調"
       ],
       "url": "https://www.ryutsuu.biz/sales/s042712.html"
+    },
+    {
+      "appeared_dates": [
+        "2026-08-03"
+      ],
+      "article_id": "569e8e034462cfe6",
+      "first_published_date": "2026-08-03",
+      "source_name": "流通ニュース",
+      "source_name_normalized": "流通ニュース",
+      "title_first_seen": "アルビス 決算／4〜6月営業利益16％増、生産性向上やコスト見直しが奏功",
+      "title_variants": [
+        "アルビス 決算／4〜6月営業利益16％増、生産性向上やコスト見直しが奏功"
+      ],
+      "url": "https://www.ryutsuu.biz/accounts/s073150.html"
     },
     {
       "appeared_dates": [
@@ -3817,6 +3846,20 @@
     },
     {
       "appeared_dates": [
+        "2026-08-03"
+      ],
+      "article_id": "9f9cfe823ca225fd",
+      "first_published_date": "2026-08-03",
+      "source_name": "ロジトゥデイ",
+      "source_name_normalized": "ロジトゥデイ",
+      "title_first_seen": "NSユナイテッド海運1Q、外航好調で営業益倍増",
+      "title_variants": [
+        "NSユナイテッド海運1Q、外航好調で営業益倍増"
+      ],
+      "url": "https://www.logi-today.com/983952"
+    },
+    {
+      "appeared_dates": [
         "2026-05-22",
         "2026-05-25"
       ],
@@ -4032,6 +4075,20 @@
         "「決済代行業の業績」売上高、利益ともに過去6年間最高"
       ],
       "url": "https://ecnomikata.com/ecnews/51205/"
+    },
+    {
+      "appeared_dates": [
+        "2026-08-03"
+      ],
+      "article_id": "a65808eaecea710e",
+      "first_published_date": "2026-08-03",
+      "source_name": "ロジトゥデイ",
+      "source_name_normalized": "ロジトゥデイ",
+      "title_first_seen": "東洋埠頭1Q、国際物流伸長も国内減益",
+      "title_variants": [
+        "東洋埠頭1Q、国際物流伸長も国内減益"
+      ],
+      "url": "https://www.logi-today.com/983964"
     },
     {
       "appeared_dates": [
@@ -4383,6 +4440,20 @@
         "6月都内物価、1.6％上昇＝8カ月ぶり伸び拡大―総務省"
       ],
       "url": "https://diamond-rm.net/flash_news/549762/"
+    },
+    {
+      "appeared_dates": [
+        "2026-08-03"
+      ],
+      "article_id": "b39b0a318952303d",
+      "first_published_date": "2026-08-03",
+      "source_name": "流通ニュース",
+      "source_name_normalized": "流通ニュース",
+      "title_first_seen": "ZOZO 決算／4〜6月増収増益、ZOZOTOWN事業の取扱高は3.6％増1260億円",
+      "title_variants": [
+        "ZOZO 決算／4〜6月増収増益、ZOZOTOWN事業の取扱高は3.6％増1260億円"
+      ],
+      "url": "https://www.ryutsuu.biz/accounts/s073151.html"
     },
     {
       "appeared_dates": [
@@ -6275,6 +6346,20 @@
         "設備投資計画は3年連続減、56.7%にとどまる"
       ],
       "url": "https://www.logi-today.com/954627"
+    },
+    {
+      "appeared_dates": [
+        "2026-08-03"
+      ],
+      "article_id": "fd0eb291132c5e8b",
+      "first_published_date": "2026-08-03",
+      "source_name": "流通ニュース",
+      "source_name_normalized": "流通ニュース",
+      "title_first_seen": "王将フード 決算／3月期営業利益52.8％減、前年のメディア露出の反動減・コスト増加",
+      "title_variants": [
+        "王将フード 決算／3月期営業利益52.8％減、前年のメディア露出の反動減・コスト増加"
+      ],
+      "url": "https://www.ryutsuu.biz/accounts/s073179.html"
     },
     {
       "appeared_dates": [

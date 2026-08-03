@@ -226,10 +226,10 @@
     },
     {
       "digest_date": "2026-05-29",
-      "id": "d74a989a8a79e79b",
+      "id": "cff3d616fc6a9250",
       "last_attempted_at": "2026-05-29",
       "raw_line": "| 2 | [スーパーマーケット／4月既存店売上ライフ2.8％増、ヤオコー3.3％増](https://www.ryutsuu.biz/sales/s052871.html) | 流通ニュース | スーパーマーケット4月の既存店売上高はライフが前年同月比2.8%増、ヤオコーが3.3%増と堅調に推移した。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-04-09",
@@ -737,10 +737,10 @@
     },
     {
       "digest_date": "2026-08-01",
-      "id": "2144fe9a702cb658",
+      "id": "3a1ff303ff1fdb1b",
       "last_attempted_at": "2026-08-01",
       "raw_line": "| 2 | [スーパーマーケット／6月既存店売上ライフ0.4％減、ヤオコー1.8％増](https://www.ryutsuu.biz/sales/s073176.html) | 流通ニュース | 主要スーパーマーケット各社の6月既存店売上が発表され、ヤオコーが1.8%増、ライフが0.4%減。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-04",
@@ -988,6 +988,20 @@
       "reason_code": "out_of_scope"
     },
     {
+      "digest_date": "2026-08-03",
+      "id": "4ce04225be9e4e5d",
+      "last_attempted_at": "2026-08-03",
+      "raw_line": "| 6 | [ハマキョウ1Q増収増益、運送利益2.2倍](https://www.logi-today.com/983420) | ロジトゥデイ | ハマキョウレックスの運送事業の利益が大幅に拡大し通期業績の好調が見込まれる。 |",
+      "reason_code": "out_of_scope"
+    },
+    {
+      "digest_date": "2026-08-03",
+      "id": "77ce0329a02c2f73",
+      "last_attempted_at": "2026-08-03",
+      "raw_line": "| 3 | [アルビス 決算／4〜6月営業利益16％増、生産性向上やコスト見直しが奏功](https://www.ryutsuu.biz/accounts/s073150.html) | 流通ニュース | アルビスが4〜6月期に営業利益16％増を達成し、生産性向上とコスト見直しが貢献した。 |",
+      "reason_code": "out_of_scope"
+    },
+    {
       "digest_date": "2026-08-01",
       "id": "886bc607ca182dfb",
       "last_attempted_at": "2026-08-01",
@@ -1017,10 +1031,10 @@
     },
     {
       "digest_date": "2026-07-25",
-      "id": "77703acfcb059da0",
+      "id": "6f3d378478c59332",
       "last_attempted_at": "2026-07-25",
       "raw_line": "| 6 | [ファミレス／6月既存店すかいらーく1.7％増、サイゼリヤ9.7％増](https://www.ryutsuu.biz/sales/s072474.html) | 流通ニュース | 主要ファミレスの6月既存店売上はすかいらーく1.7%増、サイゼリヤ9.7%増と堅調だった。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-22",
@@ -1205,13 +1219,6 @@
       "reason_code": "out_of_scope"
     },
     {
-      "digest_date": "2026-03-31",
-      "id": "01a7c27602977f31",
-      "last_attempted_at": "2026-03-31",
-      "raw_line": "| 3 | [日本百貨店協会／2月の売上高は1.6%増、国内顧客売上が好調で2カ月連続でプラス](https://www.ryutsuu.biz/sales/s032541.html) | 流通ニュース | 百貨店2月売上は国内顧客の好調を背景に1.6%増で2カ月連続プラス。 |",
-      "reason_code": "no_metric_match"
-    },
-    {
       "digest_date": "2026-04-15",
       "id": "219885fd2cd07821",
       "last_attempted_at": "2026-04-15",
@@ -1220,10 +1227,10 @@
     },
     {
       "digest_date": "2026-04-01",
-      "id": "c84b5284ad136aa5",
+      "id": "4d5675ea38b8be85",
       "last_attempted_at": "2026-04-01",
       "raw_line": "| 4 | [スーパーマーケット／2月既存店売上ライフ2.4％増、ヤオコー3.3％増](https://www.ryutsuu.biz/sales/s033179.html) | 流通ニュース | 2月SM既存店売上でライフ・ヤオコーが好調。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-04-13",
@@ -1325,17 +1332,17 @@
     },
     {
       "digest_date": "2026-05-28",
-      "id": "f538673e169b21d8",
+      "id": "b3d7988a96d09c2d",
       "last_attempted_at": "2026-05-28",
       "raw_line": "| 3 | [ファミレス／4月既存店すかいらーく7.3％増、サイゼリヤ16.3％増](https://www.ryutsuu.biz/sales/s052675.html) | 流通ニュース | ファミレス4月月次でサイゼリヤが16.3%増と突出、すかいらーくも7.3%増と外食産業の回復基調が鮮明に。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-30",
-      "id": "f29da02d3b85e5e6",
+      "id": "87a839c962047b06",
       "last_attempted_at": "2026-05-30",
       "raw_line": "| 8 | [ドラッグストア／4月既存店売上ツルハ5.0％増、コスモス薬品7.0％増](https://www.ryutsuu.biz/sales/s052971.html) | 流通ニュース | ドラッグストア主要チェーンの4月既存店売上はツルハ5.0%増、コスモス薬品7.0%増と好調。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-14",
@@ -1462,13 +1469,6 @@
       "last_attempted_at": "2026-07-19",
       "raw_line": "| 3 | [有事が平時の国際物流、データで壊す貿易DXの壁](https://www.logi-today.com/976639) | ロジ・トゥデイ | 双日テックイノベーションが2060人対象の「貿易業務白書2026」を公開し、貿易DXの課題を分析。 |",
       "reason_code": "out_of_scope"
-    },
-    {
-      "digest_date": "2026-04-28",
-      "id": "48b54668622b6280",
-      "last_attempted_at": "2026-04-28",
-      "raw_line": "| 1 | [日本百貨店協会／3月の売上高3.2％増、国内顧客・インバウンドともにプラスに](https://www.ryutsuu.biz/sales/s042741.html) | 流通ニュース | 日本百貨店協会発表の3月売上高は前年比3.2%増で、国内顧客・インバウンドの双方がプラス。 |",
-      "reason_code": "no_metric_match"
     },
     {
       "digest_date": "2026-05-12",
@@ -1710,10 +1710,10 @@
     },
     {
       "digest_date": "2026-07-01",
-      "id": "7fd3b4716b7df171",
+      "id": "4718f94848072ff4",
       "last_attempted_at": "2026-07-01",
       "raw_line": "| 5 | [スーパーマーケット／5月既存店売上ライフ4.9%増、ヤオコー5.5%増](https://www.ryutsuu.biz/sales/s063074.html) | 流通ニュース | 複数のスーパーチェーンが5月既存店売上高を発表、ヤオコー5.5%増・ライフ4.9%増と全体的にプラス成長。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-14",
@@ -1727,6 +1727,13 @@
       "id": "57e1d768a44b729d",
       "last_attempted_at": "2026-05-30",
       "raw_line": "| 7 | [日本アクセス 決算／27年3月期予想は経常利益363億円、中計目標1年前倒しで達成へ](https://www.ryutsuu.biz/accounts/s052913.html) | 流通ニュース | 日本アクセスが27年3月期の経常利益363億円を予想し、中期経営計画を1年前倒しで達成見込み。 |",
+      "reason_code": "out_of_scope"
+    },
+    {
+      "digest_date": "2026-08-03",
+      "id": "ba8ca9227cf72a2d",
+      "last_attempted_at": "2026-08-03",
+      "raw_line": "| 5 | [NSユナイテッド海運1Q、外航好調で営業益倍増](https://www.logi-today.com/983952) | ロジトゥデイ | 外航輸送の好調によりNSユナイテッド海運の営業利益が前年比で倍増を達成した。 |",
       "reason_code": "out_of_scope"
     },
     {
@@ -1745,10 +1752,10 @@
     },
     {
       "digest_date": "2026-05-29",
-      "id": "c03993770513c968",
+      "id": "e7c37857cdf1b939",
       "last_attempted_at": "2026-05-29",
       "raw_line": "| 1 | [ドラッグストア業績ランキング／スギHDが売上高1兆円台に、各社食品売上を拡大](https://www.ryutsuu.biz/accounts/s052912.html) | 流通ニュース | ドラッグストア業績ランキングでスギHDが売上高1兆円台に到達し、各社とも食品売上の拡大が成長をけん引している。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-04-16",
@@ -1821,6 +1828,13 @@
       "reason_code": "out_of_scope"
     },
     {
+      "digest_date": "2026-08-03",
+      "id": "b36fbe3aadba305a",
+      "last_attempted_at": "2026-08-03",
+      "raw_line": "| 7 | [東洋埠頭1Q、国際物流伸長も国内減益](https://www.logi-today.com/983964) | ロジトゥデイ | 国際物流事業が堅調に伸びた一方で国内総合物流事業のコスト増が利益を圧迫し営業利益が3.0％減少した。 |",
+      "reason_code": "out_of_scope"
+    },
+    {
       "digest_date": "2026-08-01",
       "id": "2cd0d5c3812527ee",
       "last_attempted_at": "2026-08-01",
@@ -1871,10 +1885,10 @@
     },
     {
       "digest_date": "2026-03-31",
-      "id": "1fea11fe6d6fb5b7",
+      "id": "92028a9ff981899e",
       "last_attempted_at": "2026-03-31",
       "raw_line": "| 2 | [ドラッグストア／2月既存店売上ツルハ4.0%増、コスモス薬品7.0%増](https://www.ryutsuu.biz/sales/s033075.html) | 流通ニュース | 2月のドラッグストア既存店売上はツルハ4.0%増、コスモス薬品7.0%増と好調。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-12",
@@ -1885,10 +1899,10 @@
     },
     {
       "digest_date": "2026-07-30",
-      "id": "9ca4fb7287b9f632",
+      "id": "c619102bc76a34d2",
       "last_attempted_at": "2026-07-30",
       "raw_line": "| 1 | [ドラッグストア／6月既存店売上ツルハ1.1%減、コスモス薬品0.6%減](https://www.ryutsuu.biz/sales/s072971.html) | 流通ニュース | 6月ドラッグストア既存店売上はツルハ1.1%減、コスモス薬品0.6%減と主要各社で前年割れ。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-07-29",
@@ -1982,6 +1996,13 @@
       "reason_code": "no_segment_match"
     },
     {
+      "digest_date": "2026-08-03",
+      "id": "eb3d558574c0f64a",
+      "last_attempted_at": "2026-08-03",
+      "raw_line": "| 1 | [ZOZO 決算／4〜6月増収増益、ZOZOTOWN事業の取扱高は3.6％増1260億円](https://www.ryutsuu.biz/accounts/s073151.html) | 流通ニュース | ZOZOが4〜6月期に増収増益を達成し、ZOZOTOWN事業の取扱高は1260億円となった。 |",
+      "reason_code": "out_of_scope"
+    },
+    {
       "digest_date": "2026-06-20",
       "id": "e54341b3593ae5c2",
       "last_attempted_at": "2026-06-20",
@@ -1997,10 +2018,10 @@
     },
     {
       "digest_date": "2026-06-30",
-      "id": "2a4dd7da94ec2f22",
+      "id": "90537ce04a2a565f",
       "last_attempted_at": "2026-06-30",
       "raw_line": "| 7 | [ドラッグストア／5月既存店売上ツルハ4.6％増、コスモス薬品5.5％増](https://www.ryutsuu.biz/sales/s062977.html) | 流通ニュース | ドラッグストア大手チェーンの5月既存店売上がツルハ4.6%増、コスモス薬品5.5%増で堅調。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-04-12",
@@ -2081,10 +2102,10 @@
     },
     {
       "digest_date": "2026-04-29",
-      "id": "c9fd1a4ff725f4bb",
+      "id": "ac465e9dceadfd71",
       "last_attempted_at": "2026-04-29",
       "raw_line": "| 6 | [スーパーマーケット／3月既存店売上ライフ1.3%増、ヤオコー2.1%増](https://www.ryutsuu.biz/sales/s042873.html) | 流通ニュース | 3月のスーパーマーケット既存店売上はライフが1.3%増、ヤオコーが2.1%増と堅調だった。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-10",
@@ -2102,10 +2123,10 @@
     },
     {
       "digest_date": "2026-04-04",
-      "id": "d92223f56be6872b",
+      "id": "d56e07fb0c243a46",
       "last_attempted_at": "2026-04-04",
       "raw_line": "| 5 | [大手百貨店／3月売上高 三越伊勢丹7.6%増、H2O6.5%増](https://www.ryutsuu.biz/sales/s040212.html) | 流通ニュース | 百貨店業界が3月好調、三越伊勢丹が高成長。 |",
-      "reason_code": "no_metric_match"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-12",
@@ -2305,10 +2326,10 @@
     },
     {
       "digest_date": "2026-06-26",
-      "id": "fbfa6b61c617fb23",
+      "id": "37a5fc706a944d70",
       "last_attempted_at": "2026-06-26",
       "raw_line": "| 1 | [ファミレス／5月既存店すかいらーく11.4％増、サイゼリヤ18.5％増](https://www.ryutsuu.biz/sales/s062573.html) | 流通ニュース | 主要ファミレスチェーンの5月既存店売上がすかいらーく11.4%増、サイゼリヤ18.5%増と好調。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-19",
@@ -2424,10 +2445,10 @@
     },
     {
       "digest_date": "2026-04-24",
-      "id": "d4191db9215e7c56",
+      "id": "bef9117364cd3ba6",
       "last_attempted_at": "2026-04-24",
       "raw_line": "| 2 | [ドラッグストア／3月既存店売上ツルハ3.3％増、コスモス薬品6.3％増](https://www.ryutsuu.biz/sales/s042371.html) | 流通ニュース | 3月のドラッグストア既存店売上はツルハ3.3%増、コスモス薬品6.3%増と好調を維持。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-05-09",
@@ -2529,10 +2550,10 @@
     },
     {
       "digest_date": "2026-04-21",
-      "id": "d303ce1de18b4919",
+      "id": "4cc66fba43c12fad",
       "last_attempted_at": "2026-04-21",
       "raw_line": "| 4 | [ファミレス／3月既存店 すかいらーく2.3%増、サイゼリヤ15.5%増](https://www.ryutsuu.biz/sales/s042073.html) | 流通ニュース | 3月のファミレス既存店売上ですかいらーくが2.3%増、サイゼリヤが15.5%増と大幅成長。 |",
-      "reason_code": "out_of_scope"
+      "reason_code": "company_disclosure"
     },
     {
       "digest_date": "2026-07-30",
@@ -2847,6 +2868,13 @@
       "id": "f5be02464f6a1252",
       "last_attempted_at": "2026-05-24",
       "raw_line": "| 3 | [設備投資計画は3年連続減、56.7%にとどまる](https://www.logi-today.com/954627) | ロジスティクス・トゥデイ | 物流企業の設備投資計画が3年連続で減少し、投資実施率が56.7%にとどまる状況。 |",
+      "reason_code": "out_of_scope"
+    },
+    {
+      "digest_date": "2026-08-03",
+      "id": "702ebf51af192538",
+      "last_attempted_at": "2026-08-03",
+      "raw_line": "| 2 | [王将フード 決算／3月期営業利益52.8％減、前年のメディア露出の反動減・コスト増加](https://www.ryutsuu.biz/accounts/s073179.html) | 流通ニュース | 王将フードの3月期営業利益は52.8％減少し、前年のメディア露出の反動と原価上昇が影響した。 |",
       "reason_code": "out_of_scope"
     },
     {
