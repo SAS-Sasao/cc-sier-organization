@@ -173,6 +173,7 @@ cc-sier-organization/
 - ⚠️ `.mcp.json` の uvx/npx 系 MCP サーバーは `==バージョン` でピン留め（PyPI yank で再現不能になった実例あり: aws-diagram-mcp-server #569/#570）
 - ⚠️ claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` を追加（CLI 2.1.198+ で subagent がバックグラウンドデフォルト化、headless モードでは完了を待たず終了し成果物未生成のまま success 偽装される: #618）
 - ⚠️ hook/スクリプトでファイル種別フィルタする際はファイル名パターン（`feedback_*.md` 等）でなく frontmatter `metadata.type` で判定し、正規表現は `\s*type:` でインデントを許容する（命名揺れ + YAML ネストで Case Bank failure_patterns が長期間 0 件: #714）
+- ⚠️ **オーナーから URL を渡されて解析・要約を依頼されたら `curl` で原文を取得する**。`WebFetch` は信頼ドメイン（`docs.aws.amazon.com` 等）**以外**では中間 LLM の要約を返し、一次情報リンク・数値の文脈・原文表記が落ちる。Zenn / Qiita / はてブ / 個人ブログ / ニュースサイトはすべて対象外。curl 不可時のみ WebFetch にフォールバックし、**要約経由である旨を報告に明示**する（実測検証: #726 / 詳細: @.claude/rules/web-content-fetch.md）
 
 詳細: @.claude/rules/review-pattern.md
 
@@ -188,6 +189,7 @@ cc-sier-organization/
 | @.claude/rules/artifact-placement.md | 成果物配置マトリクス（`docs/` vs `.companies/{org}/docs/`） |
 | @.claude/rules/task-log.md | YAML フロントマター形式・Issue 自動作成・ラベル決定 |
 | @.claude/rules/review-pattern.md | L0/L1/L2 3 層レビュー + auto-merge 設計 |
+| @.claude/rules/web-content-fetch.md | 外部 URL の解析・要約依頼では curl で原文取得（WebFetch は信頼ドメイン外で要約経由になる） |
 
 ---
 
