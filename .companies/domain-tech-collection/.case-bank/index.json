@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-03T20:55:15",
+  "updated_at": "2026-08-03T20:58:55",
   "case_count": 213,
   "failure_patterns": [
     {
@@ -6537,7 +6537,13 @@
           ".companies/domain-tech-collection/docs/daily-digest/2026-08-03.md"
         ],
         "started": "2026-08-03T08:25:40+09:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n## wf-daily-digest\n- **名称**: 日次ニュース巡回・ダイジェスト生成\n- **トリガー**: 「ニュース収集」「巡回」「daily digest」「今日のニュース」「情報収集」\n- **実行方式**: agent-teams\n## wf-sour",
+        "```tool_result\n1\t# 日次ダイジェスト 2026-07-25\n2\t\n3\t> **組織**: ドメイン知識や技術スタック収集PJT (`domain-tech-collection`)\n4\t> **生成方式**: Agent Teams Actions（wf-daily-digest）",
+        "```tool_result\ndaily-digest\ndecisions\ndiagrams\ndrawio\ninfo-source-master.md\nresearch\nretail-domain\nsecretary\n=== research ===\nCLAUDE.md\nai-virtual-off"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260803-100000-task-management-analysis",
@@ -6562,7 +6568,12 @@
           ".companies/domain-tech-collection/docs/research/ai-agent-task-management-analysis.md"
         ],
         "started": "2026-08-03T10:00:00"
-      }
+      },
+      "conversation_context": [
+        "https://qiita.com/Y-Y-dev/items/d526fb7cdbe35a3f9384　このサイトの内容を熟読して内容を要約してほしい",
+        "OK！解析結果をmdファイルでまとめてほしい"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260803-104500-web-fetch-rule",
@@ -6585,7 +6596,11 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-03T10:45:00"
-      }
+      },
+      "conversation_context": [
+        "取得方法については、私が直接解析依頼する際のルールにしてほしい。SKILLなどでルール化してほしい。"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260803-113000-ai-practices-catalog",
@@ -6611,10 +6626,86 @@
           ".companies/domain-tech-collection/docs/research/ai-driven-development-practices-catalog.md"
         ],
         "started": "2026-08-03T11:30:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n41:根拠記事: 【AIレビューの基準を後から変えない：Review DefinitionをPR headから解決する設計】(https://zenn.dev/nnku/articles/f6c7a62b78a47e)\n54:根拠記事: 【AI承認待ちキューが月300件",
+        "```tool_result\n54\t根拠記事: 【AI承認待ちキューが月300件を超えてパンクした — 承認基準の自動化と例外設計】(https://zenn.dev/joinclass/articles/ai-[PHONE][PHONE])\n55\t\n56\t現状の PR 発行ペースを実測した：\n57",
+        "https://zenn.dev/zhizhiarv/articles/claude-code-webfetch-haiku-summary の内容を要約してほしい"
+      ],
+      "conversation_enriched": true
     }
   ],
-  "frequent_phrases": [],
-  "intent_patterns": [],
-  "conversation_enriched_at": "2026-08-02T18:37:22"
+  "frequent_phrases": [
+    {
+      "phrase": "グラフ系列として",
+      "count": 4
+    },
+    {
+      "phrase": "および付随して",
+      "count": 4
+    },
+    {
+      "phrase": "レポートを生成",
+      "count": 4
+    },
+    {
+      "phrase": "仮想組織のピクセルオフィスとして",
+      "count": 3
+    },
+    {
+      "phrase": "要件定義・設計書を切り出して別リポジトリで対応できるようにして",
+      "count": 2
+    },
+    {
+      "phrase": "別名が衝突して",
+      "count": 2
+    },
+    {
+      "phrase": "コマンドを作",
+      "count": 2
+    }
+  ],
+  "intent_patterns": [
+    {
+      "intent": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップ",
+      "full": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "OK!1.と3の要件定義を",
+      "full": "OK!1.と3の要件定義をしてほしい。必要ならサブエージェントチームを構築しながら進めて",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "ごめん一旦今日は作業終了",
+      "full": "ごめん一旦今日は作業終了したい。次のアクションとして記憶してもらって、次回作業時にすぐ取り掛かれるようにして",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "ネクストアクションを実施",
+      "full": "ネクストアクションを実施したい",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるように",
+      "full": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるようにしてほしい。",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "OK一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして。この後別作業",
+      "full": "OK一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして。この後別作業したい",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "取得方法については、私が直接解析依頼する際のルールに",
+      "full": "取得方法については、私が直接解析依頼する際のルールにしてほしい。SKILLなどでルール化してほしい。",
+      "date": "2026-08-03"
+    },
+    {
+      "intent": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73　このサイトも解析",
+      "full": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73　このサイトも解析してほしい。※いくつか依頼したAIがらみの解析はいずれこのリポジトリや私が作成す",
+      "date": "2026-08-03"
+    }
+  ],
+  "conversation_enriched_at": "2026-08-03T20:58:55"
 }
