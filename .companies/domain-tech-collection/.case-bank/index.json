@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-02T18:37:22",
-  "case_count": 208,
+  "updated_at": "2026-08-02T18:39:12",
+  "case_count": 209,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6442,6 +6442,35 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-02T18:00:00"
+      }
+    },
+    {
+      "id": "20260802-183254-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #733 マージ + Issue #722 に差分コメント、evolve=Case Bank 208 件、dashboard=68 KB 生成。本日 3 回目の実行。Phase 0 で git fetch 漏れによるローカル同期のずれを検出し、実装の到達点（実データ配信）を取りこぼさずに済んだ。詳細な L2 レビューは各 sub-skill の task-log を参照",
+        "judged_at": "2026-08-02T18:48:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-02T18:32:54"
       }
     },
     {
