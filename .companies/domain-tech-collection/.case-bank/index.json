@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-03T21:00:33",
-  "case_count": 214,
+  "updated_at": "2026-08-08T10:42:04",
+  "case_count": 220,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6663,6 +6663,197 @@
           ".companies/domain-tech-collection/docs/secretary/reports/2026-08-03-today.md"
         ],
         "started": "2026-08-03T20:55:53"
+      }
+    },
+    {
+      "id": "20260804-083231-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト自動生成",
+          "GitHub",
+          "Actions",
+          "scheduled",
+          "workflow"
+        ],
+        "request_head": "日次ダイジェスト自動生成（GitHub Actions scheduled workflow）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.925,
+        "accuracy": 0.975,
+        "clarity": 1.0,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-08-04.md"
+        ],
+        "started": "2026-08-04T08:32:31"
+      }
+    },
+    {
+      "id": "20260805-082945-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-08-05",
+          "自動生成",
+          "GitHub",
+          "Actions",
+          "wf-daily-digest"
+        ],
+        "request_head": "日次ダイジェスト 2026-08-05 自動生成（GitHub Actions wf-daily-digest）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-05T08:29:45"
+      }
+    },
+    {
+      "id": "20260806-082710-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.93,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング",
+        "judged_at": "2026-08-06T09:15:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-06T08:27:10+09:00"
+      }
+    },
+    {
+      "id": "20260807-103518-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.9,
+        "accuracy": 0.9,
+        "clarity": 1.0,
+        "total": 0.93,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=0.90, accuracy=avg(s2_links,s3_summary)=0.90, clarity=avg(s4_cross_domain,s6_violations)=1.00",
+        "judged_at": "2026-08-07T10:56:28+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-07T10:35:18+09:00"
+      }
+    },
+    {
+      "id": "20260808-080118-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-08-08",
+          "の自動生成",
+          "GitHub",
+          "Actions",
+          "経由"
+        ],
+        "request_head": "日次ダイジェスト 2026-08-08 の自動生成（GitHub Actions 経由）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.93,
+        "accuracy": 0.98,
+        "clarity": 0.98,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-08T08:01:18"
+      }
+    },
+    {
+      "id": "20260808-comment-density-analysis",
+      "state": {
+        "request_keywords": [
+          "AI関連で以下の記事を解析してほしい",
+          "解析結果はドキュメントに残してほしいのと",
+          "あなたの精度を向上するのに役立てたい",
+          "https://zenn.dev/uzu_tech/articles/86a2ef05a7d649"
+        ],
+        "request_head": "AI関連で以下の記事を解析してほしい。解析結果はドキュメントに残してほしいのと、あなたの精度を向上するのに役立てたい h",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 2
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/comment-density-analysis.md",
+          ".companies/domain-tech-collection/docs/research/ai-driven-development-practices-catalog.md"
+        ],
+        "started": "2026-08-08T21:00:00"
       }
     }
   ],

@@ -66,3 +66,14 @@ Phase 8 完了: タスクログ記録
 | completeness | 0.93 | s1_structure(0.95) + s5_dedup(0.90) 平均。章構成・サブセクション完備、重複処理も適切。サブセクション名に仕様外の拡張語句あり軽微減点 |
 | accuracy | 0.98 | s2_links(1.00) + s3_summary(0.95) 平均。全記事にhttpsリンク完備、要約品質も高い |
 | clarity | 0.98 | s4_cross_domain(0.95) + s6_violations(1.00) 平均。C章のSIer示唆が具体的、禁則違反なし |
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-08-08T10:42:04"
+```
