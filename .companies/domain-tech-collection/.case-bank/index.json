@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-03T20:58:55",
-  "case_count": 213,
+  "updated_at": "2026-08-03T21:00:33",
+  "case_count": 214,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6633,6 +6633,37 @@
         "https://zenn.dev/zhizhiarv/articles/claude-code-webfetch-haiku-summary の内容を要約してほしい"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260803-205553-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #741 マージ + Issue #742、evolve=Case Bank 213 件・enrich 4 件、dashboard=68 KB。Phase 0 で前日の教訓（git fetch）を適用済み。詳細な L2 レビューは各 sub-skill の task-log を参照",
+        "judged_at": "2026-08-03T21:10:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/reports/2026-08-03-today.md"
+        ],
+        "started": "2026-08-03T20:55:53"
+      }
     }
   ],
   "frequent_phrases": [
