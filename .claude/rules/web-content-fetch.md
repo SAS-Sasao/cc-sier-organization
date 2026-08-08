@@ -14,7 +14,7 @@
 
 さらに、ページの**フッターやナビゲーションを記事内容と誤認**することがある（実測で `Zenn` / `GitHub` / `X (Twitter)` が記事の固有名詞として返された）。
 
-根拠: `.companies/domain-tech-collection/docs/research/webfetch-summarization-verification.md`（2026-08-02 実測検証、主張 5 件を実証）
+根拠: `.companies/domain-tech-collection/docs/insights/analyses/webfetch-summarization.md`（2026-08-02 実測検証、主張 5 件を実証）
 
 ---
 
@@ -119,4 +119,4 @@ curl 主体への切り替えは未実施（影響範囲の見積もりが必要
 ## 関連
 
 - @.claude/rules/artifact-placement.md — 取得した内容を成果物にする場合の配置
-- `.companies/domain-tech-collection/docs/research/webfetch-summarization-verification.md` — 本ルールの根拠となる実測検証
+- `.companies/domain-tech-collection/docs/insights/analyses/webfetch-summarization.md` — 本ルールの根拠となる実測検証

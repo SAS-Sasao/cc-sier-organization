@@ -6,7 +6,7 @@
 | 作成日 | 2026-08-03 |
 | 作成者 | 技術リサーチ室（秘書室主導） |
 | 対象記事 | [Claude Code／Codexに中〜大規模開発を任せるためのタスク管理](https://qiita.com/Y-Y-dev/items/d526fb7cdbe35a3f9384)（@Y-Y-dev / GMOコネクト株式会社 / 2026-08-01） |
-| 取得方法 | **curl による原文取得**（12,458 字）。qiita.com は WebFetch の信頼ドメイン外のため要約経由を避けた（`webfetch-summarization-verification.md` 参照） |
+| 取得方法 | **curl による原文取得**（12,458 字）。qiita.com は WebFetch の信頼ドメイン外のため要約経由を避けた（`analyses/webfetch-summarization.md` 参照） |
 | ステータス | 解析完了 |
 
 ---
@@ -155,7 +155,7 @@ cc-sier の並列は「1 タスク内で複数 Subagent が異なる成果物を
 
 cc-sier の 3 層レビューは成果物の品質を測るが、「**何を検証していないか**」を報告させる仕組みはない。
 
-L2 の採点は 6 軸すべてにスコアが付くため、「この軸は検証できなかった」という状態を表現できない。実際、`webfetch-summarization-verification.md` の検証では「未検証事項」を独立した章として設けたが、これは秘書の判断であってルール化されていない。
+L2 の採点は 6 軸すべてにスコアが付くため、「この軸は検証できなかった」という状態を表現できない。実際、`analyses/webfetch-summarization.md` の検証では「未検証事項」を独立した章として設けたが、これは秘書の判断であってルール化されていない。
 
 → task-log のテンプレートに「未検証事項」欄を設けることを検討する価値がある。
 

@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T10:51:47",
-  "case_count": 221,
+  "updated_at": "2026-08-08T19:35:41",
+  "case_count": 222,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6896,6 +6896,36 @@
         "AI関連で以下の記事を解析してほしい。解析結果はドキュメントに残してほしいのと、あなたの精度を向上するのに役立てたい\nhttps://zenn.dev/uzu_tech/articles/86a2ef05a7d649?redirected=1"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260808-digest-insights-aug",
+      "state": {
+        "request_keywords": [
+          "8月度のAI駆動開発や仕様書駆動開発",
+          "claude",
+          "code",
+          "codex",
+          "bedrockなど使えそうなAI関連のネタを読込",
+          "このリポジトリに生かせるネタがないかを徹底的に解析",
+          "あとこの学習内容をskill化できないか"
+        ],
+        "request_head": "8月度のAI駆動開発や仕様書駆動開発、claude code、codex、bedrockなど使えそうなAI関連のネタを読",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 2
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/research/digest-2026-08-ai-insights.md",
+          ".companies/domain-tech-collection/docs/research/ai-driven-development-practices-catalog.md"
+        ],
+        "started": "2026-08-08T11:30:00"
+      }
     }
   ],
   "frequent_phrases": [

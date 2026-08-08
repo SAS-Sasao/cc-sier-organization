@@ -171,7 +171,7 @@ grep -h "{記事タイトルの一部}" $D/{YYYY-MM}-*.md | head -1 | grep -oE '
 
 ### 8.2 カタログ追記
 
-`.companies/{org}/docs/research/ai-driven-development-practices-catalog.md` に追記します。
+`.companies/{org}/docs/insights/catalog.md` に追記します。
 
 - 新しい知見を節として追加（A〜Z の採番を継続）
 - §7 の優先度まとめ表を更新
@@ -230,5 +230,5 @@ PR 本文には次を含めます。
 - @.claude/rules/web-content-fetch.md — 原文取得のルール
 - @.claude/rules/skill-development.md — SKILL.md の制約と同期
 - @.claude/rules/git-workflow.md — ブランチ・PR
-- `.companies/{org}/docs/research/ai-driven-development-practices-catalog.md` — 追記先のカタログ
+- `.companies/{org}/docs/insights/catalog.md` — 追記先のカタログ
 - `.claude/hooks/measure-comment-density.py` — 実測ツールの例

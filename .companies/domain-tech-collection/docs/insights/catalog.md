@@ -86,7 +86,7 @@ Claude Code の Skill は、スクリプトや拡張機能ではなく **`SKILL.
 ## 2. タスク管理 — 「実装済み」と「完了」を分ける
 
 **出典**: [Claude Code／Codexに中〜大規模開発を任せるためのタスク管理](https://qiita.com/Y-Y-dev/items/d526fb7cdbe35a3f9384)（Y-Y-dev / 2026-08-01、curl で原文取得 12,458 字）
-**詳細レポート**: `ai-agent-task-management-analysis.md`
+**詳細レポート**: `analyses/task-management.md`
 
 ### 主張の 6 原則と採用状況
 
@@ -122,7 +122,7 @@ Claude Code の Skill は、スクリプトや拡張機能ではなく **`SKILL.
 ## 3. WebFetch は信頼ドメイン外で要約を返す
 
 **出典**: [あなたのClaude CodeのWebFetch、実はWebをちゃんと読んでいない](https://zenn.dev/zhizhiarv/articles/claude-code-webfetch-haiku-summary)
-**詳細レポート**: `webfetch-summarization-verification.md`（実測検証で主張 5 件を実証 + 新規発見 1 件）
+**詳細レポート**: `analyses/webfetch-summarization.md`（実測検証で主張 5 件を実証 + 新規発見 1 件）
 
 ### 採用状況
 
@@ -204,7 +204,7 @@ hooks は**並列実行される**ため（公式仕様）、破壊的検査を 
 ## 5.5 コメントの分量は不確実さの指標である
 
 **出典**: [Claude が書く長いコメントは、Claude 自身の役に立っていなかった](https://zenn.dev/uzu_tech/articles/86a2ef05a7d649)（wellPicker / 2026-08-05、curl で原文取得 6,212 字）
-**詳細レポート**: `comment-density-analysis.md`（自組織での実測あり）
+**詳細レポート**: `analyses/comment-density.md`（自組織での実測あり）
 
 ### 主張
 
@@ -258,7 +258,7 @@ CLAUDE.md の注意事項に追加。「不確実さを分量で埋めない。�
 ## 5.6 CLAUDE.md は短く保つ / Skill は弁別性で死ぬ
 
 **出典**: 2026 年 8 月の日次ダイジェスト A1/A2 章（記事 247 件・ユニーク 212 件）から精読 3 件
-**詳細レポート**: `digest-2026-08-ai-insights.md`（クラスタ分析 + 自組織での実測あり）
+**詳細レポート**: `analyses/2026-08-digest-ai.md`（クラスタ分析 + 自組織での実測あり）
 
 ### 主張と自組織の実測
 
