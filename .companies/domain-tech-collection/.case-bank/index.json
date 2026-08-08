@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T10:50:02",
-  "case_count": 220,
+  "updated_at": "2026-08-08T10:51:47",
+  "case_count": 221,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6834,6 +6834,37 @@
         "```tool_result\n=== 未取得14件の内訳 ===\ncf83ae6 chore: ダッシュボード更新 [daily-digest-automation] (2026-08-08)\n83dc725 feat: 日次ダイジェスト 2026-08-08 (土) [domain-tech-co"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260808-104756-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #755 マージ + Issue #756、evolve=Case Bank 220 件、dashboard=68 KB。前回 cycle から 5 日空いたが 8/4〜8/7 は自動生成のみで対話的作業なしを確認済み。詳細な L2 レビューは各 sub-skill の task-log を参照",
+        "judged_at": "2026-08-08T11:05:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/reports/2026-08-08-today.md"
+        ],
+        "started": "2026-08-08T10:47:56"
+      }
     },
     {
       "id": "20260808-comment-density-analysis",
