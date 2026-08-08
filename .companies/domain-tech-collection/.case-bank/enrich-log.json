@@ -13,11 +13,12 @@
     "2026-07-26-a38071da.md",
     "2026-08-01-a38071da.md",
     "2026-08-02-a38071da.md",
-    "2026-08-03-a38071da.md"
+    "2026-08-03-a38071da.md",
+    "2026-08-08-a38071da.md"
   ],
-  "last_run": "2026-08-03T20:58:55",
-  "total_messages_analyzed": 462,
-  "enriched_cases": 4,
+  "last_run": "2026-08-08T10:50:02",
+  "total_messages_analyzed": 491,
+  "enriched_cases": 2,
   "top_phrases": [
     {
       "phrase": "グラフ系列として",

@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T10:42:04",
+  "updated_at": "2026-08-08T10:50:02",
   "case_count": 220,
   "failure_patterns": [
     {
@@ -6827,7 +6827,13 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-08T08:01:18"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n1\t# 日次ダイジェスト 2026-07-25\n2\t\n3\t> **組織**: ドメイン知識や技術スタック収集PJT (`domain-tech-collection`)\n4\t> **生成方式**: Agent Teams Actions（wf-daily-digest）",
+        "```tool_result\n=== 未取得の3件 ===\n4a2af1e chore: ダッシュボード更新 [daily-digest-automation] (2026-08-03)\n35695e9 feat: 日次ダイジェスト 2026-08-03 (月) [domain-tech-colle",
+        "```tool_result\n=== 未取得14件の内訳 ===\ncf83ae6 chore: ダッシュボード更新 [daily-digest-automation] (2026-08-08)\n83dc725 feat: 日次ダイジェスト 2026-08-08 (土) [domain-tech-co"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260808-comment-density-analysis",
@@ -6854,7 +6860,11 @@
           ".companies/domain-tech-collection/docs/research/ai-driven-development-practices-catalog.md"
         ],
         "started": "2026-08-08T21:00:00"
-      }
+      },
+      "conversation_context": [
+        "AI関連で以下の記事を解析してほしい。解析結果はドキュメントに残してほしいのと、あなたの精度を向上するのに役立てたい\nhttps://zenn.dev/uzu_tech/articles/86a2ef05a7d649?redirected=1"
+      ],
+      "conversation_enriched": true
     }
   ],
   "frequent_phrases": [
@@ -6891,43 +6901,48 @@
     {
       "intent": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップ",
       "full": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "OK!1.と3の要件定義を",
       "full": "OK!1.と3の要件定義をしてほしい。必要ならサブエージェントチームを構築しながら進めて",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "ごめん一旦今日は作業終了",
       "full": "ごめん一旦今日は作業終了したい。次のアクションとして記憶してもらって、次回作業時にすぐ取り掛かれるようにして",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "ネクストアクションを実施",
       "full": "ネクストアクションを実施したい",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるように",
       "full": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるようにしてほしい。",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "OK一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして。この後別作業",
       "full": "OK一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして。この後別作業したい",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "取得方法については、私が直接解析依頼する際のルールに",
       "full": "取得方法については、私が直接解析依頼する際のルールにしてほしい。SKILLなどでルール化してほしい。",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
     },
     {
       "intent": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73　このサイトも解析",
       "full": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73　このサイトも解析してほしい。※いくつか依頼したAIがらみの解析はいずれこのリポジトリや私が作成す",
-      "date": "2026-08-03"
+      "date": "2026-08-08"
+    },
+    {
+      "intent": "AI関連で以下の記事を解析",
+      "full": "AI関連で以下の記事を解析してほしい。解析結果はドキュメントに残してほしいのと、あなたの精度を向上するのに役立てたい\nhttps://zenn.dev/uzu_tech/articles/86a2ef",
+      "date": "2026-08-08"
     }
   ],
-  "conversation_enriched_at": "2026-08-03T20:58:55"
+  "conversation_enriched_at": "2026-08-08T10:50:02"
 }
