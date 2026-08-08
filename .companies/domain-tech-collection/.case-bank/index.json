@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T19:35:41",
-  "case_count": 222,
+  "updated_at": "2026-08-08T19:41:51",
+  "case_count": 223,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6925,6 +6925,30 @@
           ".companies/domain-tech-collection/docs/research/ai-driven-development-practices-catalog.md"
         ],
         "started": "2026-08-08T11:30:00"
+      }
+    },
+    {
+      "id": "20260808-insights-directory",
+      "state": {
+        "request_keywords": [
+          "これ日次ダイジェスト解析のカタログ用ディレクトリを作成してほしい",
+          "※俺も確認しやすいように"
+        ],
+        "request_head": "これ日次ダイジェスト解析のカタログ用ディレクトリを作成してほしい。※俺も確認しやすいように",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/insights/catalog.md"
+        ],
+        "started": "2026-08-08T12:40:00"
       }
     }
   ],
