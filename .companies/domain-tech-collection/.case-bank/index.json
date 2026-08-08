@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T19:44:54",
-  "case_count": 223,
+  "updated_at": "2026-08-08T19:46:34",
+  "case_count": 224,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6864,6 +6864,35 @@
           ".companies/domain-tech-collection/docs/secretary/reports/2026-08-08-today.md"
         ],
         "started": "2026-08-08T10:47:56"
+      }
+    },
+    {
+      "id": "20260808-194241-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #759 マージ + Issue #756 に差分コメント、evolve=Case Bank 223 件（enrich 0 件はべき等性による正常動作）、dashboard=68 KB。本日 2 回目の実行として午前版を 1 日分に更新した。詳細な L2 レビューは各 sub-skill の task-log を参照",
+        "judged_at": "2026-08-08T19:58:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-08T19:42:41"
       }
     },
     {
