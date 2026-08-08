@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T19:46:34",
-  "case_count": 224,
+  "updated_at": "2026-08-08T20:00:51",
+  "case_count": 225,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -6893,6 +6893,37 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-08T19:42:41"
+      }
+    },
+    {
+      "id": "20260808-201500-pkb-analysis",
+      "state": {
+        "request_keywords": [
+          "/company-digest-insights",
+          "https://zenn.dev/mkj/articles/claudian-orchestra-build_20260720",
+          "この内容を解析して解説も入れてほしい"
+        ],
+        "request_head": "/company-digest-insights https://zenn.dev/mkj/articles/claud",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 0.95,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "原文を curl で取得（15,020 字）し全文読了。記事の詰まりどころ 4 件を自組織で実測照合し、1 件（Inbox 取り込み過多）が実際に発生していることを 7.0% という具体値で特定。採用 1 / 不採用 1 / 部分採用 1 を理由つきで記録。不採用（V）の理由が「課題がないものに構造を入れない」と明確。clarity を 0.95 としたのは、レポートが解説と実測の二本立てで長めになったため",
+        "judged_at": "2026-08-08T20:42:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-08T20:15:00"
       }
     },
     {
