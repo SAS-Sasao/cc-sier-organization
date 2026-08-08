@@ -174,6 +174,7 @@ cc-sier-organization/
 - ⚠️ claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` を追加（CLI 2.1.198+ で subagent がバックグラウンドデフォルト化、headless モードでは完了を待たず終了し成果物未生成のまま success 偽装される: #618）
 - ⚠️ hook/スクリプトでファイル種別フィルタする際はファイル名パターン（`feedback_*.md` 等）でなく frontmatter `metadata.type` で判定し、正規表現は `\s*type:` でインデントを許容する（命名揺れ + YAML ネストで Case Bank failure_patterns が長期間 0 件: #714）
 - ⚠️ **オーナーから URL を渡されて解析・要約を依頼されたら `curl` で原文を取得する**。`WebFetch` は信頼ドメイン（`docs.aws.amazon.com` 等）**以外**では中間 LLM の要約を返し、一次情報リンク・数値の文脈・原文表記が落ちる。Zenn / Qiita / はてブ / 個人ブログ / ニュースサイトはすべて対象外。curl 不可時のみ WebFetch にフォールバックし、**要約経由である旨を報告に明示**する（実測検証: #726 / 詳細: @.claude/rules/web-content-fetch.md）
+- ⚠️ **不確実さを分量で埋めない。「未確認」と明示的に書く。** 自信のない箇所ほど説明を長くする癖があり、**分量がそのまま不確実さの指標**になっている（丁寧な説明を「よく検証された証」と読むのは逆）。設計書・解析レポートには「未検証事項」章を、task-log には検証していない項目を、完了報告には未実施の確認を**それぞれ独立した項目として明記**する。埋め合わせの説明を足すのではなく、確認していないことを一行で申告する
 
 詳細: @.claude/rules/review-pattern.md
 
