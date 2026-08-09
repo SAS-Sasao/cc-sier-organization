@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-08T20:11:32",
-  "case_count": 226,
+  "updated_at": "2026-08-09T15:40:00",
+  "case_count": 228,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7038,6 +7038,71 @@
           ".companies/domain-tech-collection/docs/insights/catalog.md"
         ],
         "started": "2026-08-08T12:40:00"
+      }
+    },
+    {
+      "id": "20260809-075310-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-08-09",
+          "の自動生成",
+          "GitHub",
+          "Actions",
+          "経由"
+        ],
+        "request_head": "日次ダイジェスト 2026-08-09 の自動生成（GitHub Actions 経由）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.9,
+        "accuracy": 0.975,
+        "clarity": 0.975,
+        "total": 0.95,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-09T07:53:10"
+      }
+    },
+    {
+      "id": "20260809-153000-pr-approval-gate-analysis",
+      "state": {
+        "request_keywords": [
+          "/company-digest-insights",
+          "https://zenn.dev/she_techblog/articles/937836550dfdf3",
+          "この記事の内容を深堀して",
+          "このリポジトリや俺の活動で生かせる点を抽出してほしい"
+        ],
+        "request_head": "/company-digest-insights https://zenn.dev/she_techblog/artic",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 0.95,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "curl で原文取得（6,664 字）し全文読了。記事が 75 件の全数分析から始めているのに合わせ、直近 60 PR の全数分析を実施。統制系 16.7% が 3 層レビューも人間レビューも通っていないという構造的な穴を数字で特定し、nightly の追記:削除 = 49:5 という非対称も定量化した。記事の主題（auto-approve）を『導入対象がない』として不採用にし、逆向きの示唆を採った判断が要点。clarity 0.95 は、解説と実測の二本立てでレポートが長めになったため",
+        "judged_at": "2026-08-09T15:52:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-09T15:30:00"
       }
     }
   ],
