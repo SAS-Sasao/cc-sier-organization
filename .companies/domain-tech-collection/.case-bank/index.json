@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-09T15:40:00",
+  "updated_at": "2026-08-09T15:45:04",
   "case_count": 228,
   "failure_patterns": [
     {
@@ -7071,7 +7071,13 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-09T07:53:10"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n1\t# 日次ダイジェスト 2026-07-25\n2\t\n3\t> **組織**: ドメイン知識や技術スタック収集PJT (`domain-tech-collection`)\n4\t> **生成方式**: Agent Teams Actions（wf-daily-digest）",
+        "```tool_result\n=== 未取得の3件 ===\n4a2af1e chore: ダッシュボード更新 [daily-digest-automation] (2026-08-03)\n35695e9 feat: 日次ダイジェスト 2026-08-03 (月) [domain-tech-colle",
+        "```tool_result\n=== 未取得14件の内訳 ===\ncf83ae6 chore: ダッシュボード更新 [daily-digest-automation] (2026-08-08)\n83dc725 feat: 日次ダイジェスト 2026-08-08 (土) [domain-tech-co"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260809-153000-pr-approval-gate-analysis",
@@ -7103,10 +7109,108 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-09T15:30:00"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\nFile created successfully at: /home/toyoki05/cc-sier-organization/.claude/skills/company-digest-insights/SKILL.md (file state is curren",
+        "```tool_result\nPR: https://github.com/SAS-Sasao/cc-sier-organization/pull/757\n create mode 100644 plugins/cc-sier/skills/company-digest-insights/SKILL",
+        "```tool_result\n=== 参照元ファイルの一覧（更新が必要な箇所）===\n  .claude/hooks/measure-comment-density.py\n  .claude/rules/web-content-fetch.md\n  .claude/skills/company-di"
+      ],
+      "conversation_enriched": true
     }
   ],
-  "frequent_phrases": [],
-  "intent_patterns": [],
-  "conversation_enriched_at": "2026-08-08T20:08:05"
+  "frequent_phrases": [
+    {
+      "phrase": "レポートを生成",
+      "count": 6
+    },
+    {
+      "phrase": "グラフ系列として",
+      "count": 4
+    },
+    {
+      "phrase": "および付随して",
+      "count": 4
+    },
+    {
+      "phrase": "要件定義・設計書を切り出して別リポジトリで対応できるようにして",
+      "count": 4
+    },
+    {
+      "phrase": "この内容を解析して",
+      "count": 4
+    },
+    {
+      "phrase": "仮想組織のピクセルオフィスとして",
+      "count": 3
+    },
+    {
+      "phrase": "の要件定義をして",
+      "count": 3
+    },
+    {
+      "phrase": "の設計も作成して",
+      "count": 3
+    },
+    {
+      "phrase": "サブエージェントチームで対応して",
+      "count": 3
+    },
+    {
+      "phrase": "一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして",
+      "count": 3
+    }
+  ],
+  "intent_patterns": [
+    {
+      "intent": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップ",
+      "full": "今日取得した日時ニュースから私がアプリ化することが出来そうもしくはするべきだと思われる物をピックアップしてほしい",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "OK!1.と3の要件定義を",
+      "full": "OK!1.と3の要件定義をしてほしい。必要ならサブエージェントチームを構築しながら進めて",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "ごめん一旦今日は作業終了",
+      "full": "ごめん一旦今日は作業終了したい。次のアクションとして記憶してもらって、次回作業時にすぐ取り掛かれるようにして",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "ネクストアクションを実施",
+      "full": "ネクストアクションを実施したい",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるように",
+      "full": "OK！これまで固めてきた、要件定義・設計書を切り出して別リポジトリで対応できるようにしてほしい。",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "OK一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして。この後別作業",
+      "full": "OK一旦リテール集計の作業はメモリに入れていつでも呼び出せるようにして。この後別作業したい",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "取得方法については、私が直接解析依頼する際のルールに",
+      "full": "取得方法については、私が直接解析依頼する際のルールにしてほしい。SKILLなどでルール化してほしい。",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73　このサイトも解析",
+      "full": "https://zenn.dev/osakayakyu/articles/e6aa9835c04d73　このサイトも解析してほしい。※いくつか依頼したAIがらみの解析はいずれこのリポジトリや私が作成す",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "AI関連で以下の記事を解析",
+      "full": "AI関連で以下の記事を解析してほしい。解析結果はドキュメントに残してほしいのと、あなたの精度を向上するのに役立てたい\nhttps://zenn.dev/uzu_tech/articles/86a2ef",
+      "date": "2026-08-09"
+    },
+    {
+      "intent": "これ日次ダイジェスト解析のカタログ用ディレクトリを作成",
+      "full": "これ日次ダイジェスト解析のカタログ用ディレクトリを作成してほしい。※俺も確認しやすいように",
+      "date": "2026-08-09"
+    }
+  ],
+  "conversation_enriched_at": "2026-08-09T15:45:04"
 }
