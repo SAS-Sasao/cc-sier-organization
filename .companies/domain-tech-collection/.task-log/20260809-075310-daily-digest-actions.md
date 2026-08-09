@@ -81,3 +81,14 @@ Phase 8 完了: task-log 作成・judge 記録
 ## 未検証事項
 - ITmedia ビジネスオンライン（流通・小売）の取得失敗原因は未調査（サブセクションページが旧コンテンツのみ返却）
 - DynamoDB ベクトル検索関連記事が A1 と A4 に分散している点は L2 reviewer が指摘したが、テーマ分類として妥当と判断し修正せず
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-08-09T15:40:00"
+```
