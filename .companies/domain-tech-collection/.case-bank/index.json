@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-09T15:45:04",
-  "case_count": 228,
+  "updated_at": "2026-08-09T15:46:43",
+  "case_count": 229,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7116,6 +7116,35 @@
         "```tool_result\n=== 参照元ファイルの一覧（更新が必要な箇所）===\n  .claude/hooks/measure-comment-density.py\n  .claude/rules/web-content-fetch.md\n  .claude/skills/company-di"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260809-154200-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: 3 sub-skill (report/evolve/dashboard) 完了状態から導出。report=PR #766 マージ + Issue #767（空本文で作成後に修正）、evolve=Case Bank 228 件・頻出フレーズ 10 件で前回の懸念を否定、dashboard=68 KB / commit 8d1ac98。運用上の不具合 2 件（Issue 空本文 / UTC-JST 取りこぼし）を原因つきで記録した",
+        "judged_at": "2026-08-09T15:52:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-09T15:42:00"
+      }
     }
   ],
   "frequent_phrases": [
