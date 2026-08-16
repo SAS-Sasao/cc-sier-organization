@@ -44,15 +44,24 @@ description: >
 ```
 1. .companies/.active から {org-slug} を取得
 2. git config user.name → {operator}
-3. 対象期間を解釈（デフォルト: 未解析の最新週）
-4. git status --porcelain が空でなければ中断
-5. {date_jst} = TZ=Asia/Tokyo date +%Y-%m-%d
-6. {task-id} = YYYYMMDD-HHMMSS-insights-cycle
-7. .companies/{org}/.task-log/{task-id}.md を YAML フロントマター形式で作成
+3. git fetch --prune && git pull --ff-only   ← 必須。理由は下記
+4. 対象期間を解釈（デフォルト: 未解析の最新週）
+5. git status --porcelain が空でなければ中断
+6. {date_jst} = TZ=Asia/Tokyo date +%Y-%m-%d
+7. {task-id} = YYYYMMDD-HHMMSS-insights-cycle
+8. .companies/{org}/.task-log/{task-id}.md を YAML フロントマター形式で作成
    subagents: [company-digest-insights]
 ```
 
 task-log の `subagents` は必ず英字で記録する（Case Bank 検出のため）。
+
+### ⚠️ 手順 3（git fetch）を飛ばさないこと
+
+**日次ダイジェストは GitHub Actions が毎日 main に直接コミットする。** ローカルが古いまま `ls docs/daily-digest/` を実査すると、存在するダイジェストを「未生成」と誤認する。
+
+実例（2026-08-16）: `/company` 経由で解析を実行した際に fetch を怠り、**7 日分・235 件のダイジェストを「未生成」と報告**した。対象期間の決定根拠そのものが崩れ、公開済みレポートの訂正が必要になった。
+
+**対象期間を決める前に必ず fetch する。** 実査した日付範囲を task-log とレポート §0 に記録すること。
 
 ---
 
