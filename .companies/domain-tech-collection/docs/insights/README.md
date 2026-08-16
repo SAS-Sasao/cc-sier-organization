@@ -24,6 +24,7 @@ docs/insights/                                      ← 根拠側（GitHub Pages
     │                               8/3〜8/9 の Claude Code / Codex / エージェント設計
     ├── ai-pr-approval-gate.md      AIによるPR承認ゲートと「人間が見るべき変更」
     ├── comment-density.md          AIが書くコメントの分量
+    ├── ddd-modeling-as-code.md     ドメインモデル図をコードの世界へ（DDD 解説つき）
     ├── llm-text-watermarking.md    Claude の電子透かし（初心者向け解説つき）
     ├── pkb-three-stage-pipeline.md PKB の 3 段導線と自組織の実測
     ├── task-management.md          中〜大規模開発のタスク管理
@@ -63,7 +64,7 @@ docs/insights/                                      ← 根拠側（GitHub Pages
 
 ## catalog.md の見方
 
-知見を **A〜AY で採番**し、それぞれに次を記録しています。
+知見を **A〜BB で採番**し、それぞれに次を記録しています。
 
 | 記号 | 意味 |
 |---|---|

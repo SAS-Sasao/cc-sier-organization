@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ドメインモデル図をコードの世界に持ち込む — DDD 解説つき | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>ドメインモデル図をコードの世界に持ち込む — DDD 解説つき</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（DDD の初心者向け解説つき）</span><span class="tag">作成日: 2026-08-16</span><span class="tag">ステータス: 解析完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">0. 3 行で</a></li><li><a href="#h1">1. DDD とは何か（前提知識ゼロから）</a></li><li><a href="#h2">2. SUDO モデリングとは</a></li><li><a href="#h3">3. 記事が挙げる 3 つの課題</a></li><li><a href="#h4">4. 解決案 — Storybook の発想を持ち込む</a></li><li><a href="#h5">5. 自組織（cc-sier）での実測</a></li><li><a href="#h6">6. 採用候補</a></li><li><a href="#h7">7. 未検証事項</a></li><li><a href="#h8">関連</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（DDD の初心者向け解説つき）</td></tr>
+<tr><td>作成日</td><td>2026-08-16</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>対象記事</td><td><a href="https://zenn.dev/dress_code/articles/34f18afe1464e8">ドメインモデル図がすぐ古くなるので、Storybookっぽくコードと関連付けて見れるようにしてみた</a>（shinoda / DRESS CODE TECH BLOG、2026-08-10 公開 / 08-12 更新）</td></tr>
+<tr><td>取得方法</td><td><code>curl</code> で原文取得（6,161 字・全文読了）</td></tr>
+<tr><td>ステータス</td><td>解析完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">0. 3 行で</h2>
+<ul>
+<li>記事の主張は <strong>「ドメインモデル図は、コードの外に置くから古くなる。コードの世界の内側に持ってくれば、構造的に古くならない」</strong>。</li>
+<li>実装の型を参照してモデリングを書くので、<strong>型が変わればモデリングのコードがコンパイルエラーになる</strong>。図を直し忘れることが仕組み上できなくなる。</li>
+<li>副産物として <strong>AI にオブジェクト図のパターンを量産させられる</strong>。これが記事の隠れた本題。</li>
+</ul>
+<hr>
+<h2 id="h1">1. DDD とは何か（前提知識ゼロから）</h2>
+<p>記事は DDD を知っている前提で書かれているので、まずそこを埋める。</p>
+<h3>1.1 出発点 — 「何を主語にして設計するか」</h3>
+<p>システムを設計するとき、何から考え始めるでしょうか。</p>
+<p>よくあるのは <strong>データベースのテーブルから</strong>考える方法です。「注文テーブルには id と会員 ID と金額があって……」と組み立てていく。動くものは作れますが、<strong>業務の言葉とコードの言葉がずれていきます</strong>。</p>
+<p>現場の人は「<strong>キャンセルした注文は再開できない</strong>」と言っているのに、コードには <code>status</code> という文字列カラムがあるだけ。ルールがどこにも書かれていないので、開発者ごとに違う場所でチェックが書かれ、抜ける。</p>
+<p><strong>DDD（Domain-Driven Design / ドメイン駆動設計）</strong> は、ここを逆転させます。</p>
+<blockquote><strong>業務（ドメイン）の構造を主語にして、コードをそれに合わせる。</strong></blockquote>
+<p>「ドメイン」とは、そのシステムが扱う<strong>業務領域</strong>のことです。小売なら「発注」「在庫」「棚割」、会計なら「仕訳」「締め」。<strong>その領域の専門家が使っている言葉と概念</strong>が設計の出発点になります。</p>
+<h3>1.2 なぜ SIer にとって重要か</h3>
+<p>SIer の仕事は「顧客の業務をシステムにする」ことです。<strong>業務の言葉と、出来上がったシステムの言葉がずれると、後の変更が全部つらくなります。</strong></p>
+<ul>
+<li>顧客が「掛け率を変えたい」と言う → コードのどこを直せばいいか誰も分からない</li>
+<li>業務ルールが仕様書・コード・運用手順に散らばり、<strong>どれが正なのか分からない</strong></li>
+</ul>
+<p>DDD はこれを「業務の言葉でコードを書く」ことで防ごうとします。</p>
+<h3>1.3 最低限の用語（6 つ）</h3>
+<p>記事を読むのに必要な語だけに絞ります。<strong>小売の「注文」を例</strong>にします。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>用語</th><th>ひとことで</th><th>例</th></tr></thead><tbody>
+<tr><td><strong>ユビキタス言語</strong></td><td>業務側と開発側で<strong>同じ言葉を使う</strong>こと</td><td>現場が「注文者」と呼ぶなら、コードも <code>orderer</code> にする。<code>user</code> にしない</td></tr>
+<tr><td><strong>境界づけられたコンテキスト</strong></td><td>同じ言葉でも<strong>部署が違えば意味が違う</strong>ので、区切りを引く</td><td>「商品」は販売部門では売価つきの商品、物流部門では箱のサイズが主。<strong>同じ名前の別物</strong>として分ける</td></tr>
+<tr><td><strong>エンティティ</strong></td><td><strong>ID で識別され、状態が変わっていく</strong>もの</td><td>注文（<code>o-1001</code>）。中身が変わっても同じ注文</td></tr>
+<tr><td><strong>値オブジェクト</strong></td><td><strong>値そのものが同一性</strong>で、変わらないもの</td><td>金額 1,000 円、日付。「1,000 円」に ID はない</td></tr>
+<tr><td><strong>集約（アグリゲート）</strong></td><td><strong>まとめて守るべき塊</strong>。整合性の単位</td><td>注文と注文明細は一体。「明細だけ勝手に増やす」を禁じる</td></tr>
+<tr><td><strong>ドメインイベント</strong></td><td>業務上「<strong>起きた事実</strong>」。あとから変わらない</td><td>「注文が確定した（OrderPlaced）」</td></tr>
+</tbody></table></div>
+<p><strong>集約が一番わかりにくい</strong>ので補足します。</p>
+<blockquote>注文には明細が複数ぶら下がります。ここで「注文の合計金額は明細の合計と一致していなければならない」というルールがあるとします。 このとき、<strong>明細だけを外から勝手に触れると壊れます</strong>。だから「注文を通してしか明細を触れない」という壁を作る。この壁の内側が <strong>集約</strong> です。  そして<strong>集約をまたぐときは ID で参照するだけにする</strong>。注文から会員を直接いじらない。会員は別の集約だからです。</blockquote>
+<p>記事のサンプルコードにこれがそのまま現れます。</p>
+<pre><code>ds.aggregate(Order, {
+  members: [
+    externalAggregate(Member),   // 会員は別集約 → 参照だけ（点線）
+    entity(OrderItem),           // 注文明細は注文集約の中
+    valueObject(OrderPlaced),    // 確定イベントは不変の事実
+  ],
+})</code></pre>
+<hr>
+<h2 id="h2">2. SUDO モデリングとは</h2>
+<p>記事が使っているモデリング手法です。ログラスの松岡氏が提唱したもので、<strong>DDD のモデリングを実装に落とすための最小限の 4 枚</strong>という位置づけです。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>記号</th><th>図</th><th>何を描くか</th></tr></thead><tbody>
+<tr><td><strong>S</strong></td><td>システム関連図</td><td>開発するシステムと、利用者・外部システムの関係</td></tr>
+<tr><td><strong>U</strong></td><td>ユースケース図</td><td>利用者の要求に対して、システムがどう振る舞うか</td></tr>
+<tr><td><strong>D</strong></td><td><strong>ドメインモデル図</strong></td><td>簡易クラス図。<strong>属性・関連・多重度・集約の範囲・ルール/制約</strong></td></tr>
+<tr><td><strong>O</strong></td><td><strong>オブジェクト図</strong></td><td>ドメインモデルの<strong>具体例</strong>（実際の値を入れたもの）</td></tr>
+</tbody></table></div>
+<p>記事が扱うのは <strong>D と O</strong> です。</p>
+<p><strong>なぜ D と O がセットなのか</strong>が肝心です。</p>
+<ul>
+<li><strong>D（抽象）</strong> だけだと、机上では正しく見えるモデルの穴に気づけない</li>
+<li><strong>O（具体）</strong> に実際の値を入れると、「あれ、キャンセル済みの注文にこの状態あり得るの？」と<strong>矛盾が見える</strong></li>
+</ul>
+<p>つまり <strong>抽象と具体を往復してモデルを磨く</strong>のが SUDO の D・O の使い方です。</p>
+<hr>
+<h2 id="h3">3. 記事が挙げる 3 つの課題</h2>
+<p>著者は 5 年ほど SUDO モデリングを使ってきて、D と O の<strong>「書いたあとの運用」</strong>にモヤモヤしていた、と書いています。</p>
+<h3>課題 1: 図が古くなる</h3>
+<p>実装が進めば属性は増え、集約の切り方も概念の名前も変わります。しかし図は<strong>別の場所に置かれた静的な成果物</strong>なので、</p>
+<blockquote>誰かが意識して直さない限り古くなり続けます。</blockquote>
+<p>そして著者が指摘する怖い点はこちらです。</p>
+<blockquote><strong>一度「この図、最新じゃないかも」と思われた瞬間に、図は参照されなくなります。</strong></blockquote>
+<h3>課題 2: オブジェクト図のパターンが足りない</h3>
+<p>O の価値は「具体例でモデルの矛盾に気づけること」なので、<strong>パターン数が勝負</strong>です。ところが draw.io で 1 パターン描くのは面倒。</p>
+<blockquote>結果、代表的な1〜2パターンだけ描いて満足してしまい、<strong>エッジケース（本当は一番議論したいやつ）が図にならない</strong></blockquote>
+<h3>課題 3: AI 駆動の開発フローに組み込めない</h3>
+<blockquote>draw.io のような GUI で描いた図は <strong>AI からの読み書きと相性が悪く</strong>、フローの外側に置かれたままになりがちでした。</blockquote>
+<hr>
+<h2 id="h4">4. 解決案 — Storybook の発想を持ち込む</h2>
+<p>著者の着想はこうです。</p>
+<blockquote>UI コンポーネントは、Storybook で「コードで書いたコンポーネント」を「複数パターンの Story と一緒に」WebUI で見られる。<strong>ドメインモデルも同じことができるのでは？</strong></blockquote>
+<div class="table-wrap"><table>
+<thead><tr><th>Storybook</th><th>ドメインモデリング</th></tr></thead><tbody>
+<tr><td>コンポーネント本体</td><td><strong>ドメインモデル図</strong>（型定義から導出される抽象）</td></tr>
+<tr><td>Story（値を流し込んだパターン）</td><td><strong>オブジェクト図</strong>（具体例）</td></tr>
+</tbody></table></div>
+<p>作られたのが <a href="https://github.com/shinoda-yosuke/domain.storybook"><code>domain.storybook</code></a> で、TypeScript の型定義から図を生成し、静的ページとして publish できます。</p>
+<h3>効いた理由 — 「構造的に古くならない」</h3>
+<p>ここが本質です。</p>
+<blockquote>モデリングのコードは実装の型を参照しているので、<strong>ドメインモデル側の型が変わればモデリングのコードもコンパイルエラーになります</strong>。「図を直し忘れる」ことが仕組み上できず、図は常に実装と同期した最新の状態に保たれます。</blockquote>
+<p><strong>「気をつけて更新する」ではなく「更新しないと壊れる」に変えた。</strong> 課題 1 はこれで消えます。</p>
+<h3>副産物 — AI にパターンを量産させられる</h3>
+<p>こちらが実務的には大きい効果です。</p>
+<blockquote>型定義と既存のパターンを渡して「解約済み契約に紐づくデバイスのパターンを追加して」と指示すれば、draw.io で図形を並べる作業なしにパターンが増えていきます。</blockquote>
+<p>課題 2（エッジケースが図にならない）は、<strong>パターン追加のコストが劇的に下がったこと</strong>でほぼ解消したとのこと。課題 3 もモデリングがただのコードなので自動的に解決します。</p>
+<hr>
+<h2 id="h5">5. 自組織（cc-sier）での実測</h2>
+<h3>5.1 図の古さ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>対象</th><th>件数</th><th>最終更新</th></tr></thead><tbody>
+<tr><td><code>docs/drawio/</code></td><td><strong>16 図</strong> / HTML 17</td><td><strong>2026-06-13</strong>（約 2 ヶ月前）</td></tr>
+<tr><td><code>docs/diagrams/</code></td><td><strong>28 図</strong> / HTML 57</td><td><strong>2026-07-25</strong>（約 3 週間前）</td></tr>
+</tbody></table></div>
+<p><strong>記事が課題 1 で指摘した状態そのものである。</strong> 本組織の図は <code>/company-drawio</code> や <code>/company-diagram-v2</code> で生成した<strong>静的成果物</strong>で、生成した時点で更新が止まっている。</p>
+<h3>5.2 ただし、記事の解法はそのままは効かない</h3>
+<p><strong>重要な限界がある。</strong> 記事の仕組みは「<strong>モデリングのコードが実装の型を参照している</strong>」から成立する。型が変わればコンパイルエラーになる、という因果があって初めて「構造的に古くならない」。</p>
+<p>本組織の図の大半は <strong>AWS アーキテクチャ図</strong>であり、<strong>その実装コードは本リポジトリに存在しない</strong>（顧客システムの提案・設計であって、動くコードを持たない）。参照すべき型がないので、この仕組みは適用できない。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>図の種類</th><th>件数の目安</th><th>記事の手法が効くか</th></tr></thead><tbody>
+<tr><td>AWS 構成図（<code>docs/diagrams/</code>）</td><td>28</td><td>❌ 参照する型が無い</td></tr>
+<tr><td>業務フロー・C4・ER 図（<code>docs/drawio/</code>）</td><td>16</td><td>🔶 <strong>ER 図とドメインモデル図のみ可能性あり</strong>。ただし実装が別リポジトリ</td></tr>
+<tr><td>派生アプリの設計（<code>retail-stats-tracker</code> 等）</td><td>—</td><td>🔶 <code>/company-spawn</code> で切り出した先にコードがあるなら適用余地あり。<strong>未調査</strong></td></tr>
+</tbody></table></div>
+<h3>5.3 それでも効く部分 — 「AI にパターンを量産させる」</h3>
+<p>記事の<strong>副産物のほうは、型がなくても採れる</strong>。</p>
+<p>本組織は既に「モデリングの成果物をコードの世界（Markdown + Git）に置く」ことは実現している（<code>docs/drawio/*.md</code> に図の説明を置き、PR 運用している）。足りていないのは <strong>具体例（オブジェクト図）のパターンを増やす習慣</strong>である。</p>
+<p><code>docs/drawio/storcon-instore-system.md</code> や <code>btob-sales-c4.md</code> は<strong>抽象の図だけ</strong>で、「この値のときどうなるか」という具体例が無い。記事の課題 2 がそのまま当てはまる。</p>
+<h3>5.4 関連する既存アセット</h3>
+<ul>
+<li>Subagent: <code>system-architect</code> / <code>data-architect</code>（DDD 的な設計を担当しうる）</li>
+<li>Skill: <code>/company-drawio</code>（ER 図・C4・業務フロー生成）</li>
+<li>DDD 用語を含む既存成果物: 8 ファイル（うち設計文書は <code>decisions/2026-06-13-diagram-aws-skill-migration-design.md</code> 等）</li>
+</ul>
+<hr>
+<h2 id="h6">6. 採用候補</h2>
+<h3>(AZ) 図に「具体例（オブジェクト図）」の節を足す — ⬜ 優先度 <strong>中</strong></h3>
+<p><strong>記事の課題 2 への対処。型がなくても今日からできる。</strong></p>
+<p><code>/company-drawio</code> が生成する詳細ページ（<code>docs/drawio/*.md</code>）に、<strong>「具体例」セクション</strong>を必須化する。抽象の図だけでは、モデルの穴が議論の俎上に乗らない。</p>
+<ul>
+<li>代表パターンだけでなく、<strong>エッジケースを最低 1 つ</strong>書かせる（キャンセル済み・上限超過・権限なし など）</li>
+<li>AI が生成するのだから、draw.io で図形を並べるコストは元々ゼロに近い。<strong>やっていないだけ</strong></li>
+</ul>
+<p><strong>コスト</strong>: 小（SKILL.md と <code>review-prompt.md</code> に 1 セクション追加） <strong>判断に必要な情報</strong>: 既存 16 図のうち、具体例を書く価値があるのはどれか（<strong>未選別</strong>）</p>
+<h3>(BA) <code>/company-drawio</code> に DDD 語彙のガイドを持たせる — ⬜ 優先度 <strong>低</strong></h3>
+<p>ER 図や C4 を描くとき、<strong>集約の境界</strong>と<strong>ユビキタス言語（日本語の業務名）</strong>を明示させる。記事のサンプルが <code>addUbiquitousTerm(Order, { ja: '注文' }, ...)</code> で日本語名を持たせているのと同じ発想。</p>
+<p>SIer の成果物は顧客に読ませるものなので、<strong>業務の言葉が図に出ていること</strong>の価値が高い。</p>
+<p><strong>未検証</strong>: 現行の図に業務語彙がどれだけ載っているかを<strong>測っていない</strong>。</p>
+<h3>(BB) <code>domain.storybook</code> の導入 — ❌ <strong>現時点では不採用</strong></h3>
+<p>理由は §5.2。<strong>本リポジトリの図は参照すべき実装の型を持たない</strong>ため、この仕組みの核（型変更でコンパイルエラー）が成立しない。TypeScript 前提であることも、本組織（Bash / Python 中心）と噛み合わない。</p>
+<p><strong>ただし条件付きで再評価する</strong>: <code>/company-spawn</code> で切り出した派生アプリが TypeScript で、かつドメインモデルを持つ場合は適用余地がある。<code>retail-stats-tracker</code> の実装言語は<strong>未確認</strong>。</p>
+<hr>
+<h2 id="h7">7. 未検証事項</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>内容</th></tr></thead><tbody>
+<tr><td>1</td><td><strong><code>domain.storybook</code> を動かしていない</strong>。GitHub リポジトリも公開デモも開いておらず、評価は記事の記述のみに基づく</td></tr>
+<tr><td>2</td><td><code>/company-spawn</code> で切り出した派生アプリ（<code>retail-stats-tracker</code> 等）の<strong>実装言語とドメインモデルの有無を確認していない</strong>。候補 BB の再評価条件が判定できない</td></tr>
+<tr><td>3</td><td>既存 16 図のうち<strong>どれに具体例を足す価値があるかを選別していない</strong>（候補 AZ の作業量が不明）</td></tr>
+<tr><td>4</td><td>現行の図に<strong>業務語彙がどれだけ載っているかを測っていない</strong>（候補 BA）</td></tr>
+<tr><td>5</td><td>SUDO モデリングの<strong>原典</strong>（松岡氏のブログ）は読んでいない。本レポートの記述は対象記事経由</td></tr>
+<tr><td>6</td><td>図が「古い」と判定したのは <strong>git の最終更新日のみ</strong>。実際に内容が実態とずれているかは<strong>確認していない</strong>（更新がない ≠ 内容が誤り）</td></tr>
+<tr><td>7</td><td>候補 <strong>AZ / BA は未実施</strong></td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h8">関連</h2>
+<ul>
+<li><a href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/insights/catalog.md"><code>catalog.md</code></a> — 採用判断カタログ（§5.19 / 候補 AZ・BA・BB）</li>
+<li><code>@.claude/rules/web-content-fetch.md</code> — 本レポートの取得方法の根拠（curl で原文取得）</li>
+</ul>
+  <p class="updated">生成: 2026-08-16 18:45 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>
