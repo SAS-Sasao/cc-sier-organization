@@ -44,7 +44,10 @@ l2_retries: 0
 **重要**:
 - **Subagent 名は必ず英字**で記録（日本語名だと Case Bank 検出不可）
 - **YAML フロントマター形式必須**（MD リスト形式はパーサ検出不可）
-- judge 評価済みなのに reward が null のまま残らないよう post-merge hook で補完される
+- **`reward` の補完は自動化されていない**（2026-08-16 実測）。`.claude/rules/` にも `.git/hooks/` にも `post-merge` hook は存在しない
+- **`skill-evaluator.sh` はべき等**（`## reward` が既にあればスキップ）。**タスクが `in-progress` のうちに評価が走ると低いスコアが固定され、完了後も更新されない**
+  - 実例: `20260816-150510-cycle-today` は evolve 実行時点で `in-progress` だったため `score: 0.2`（`completed: false` / `artifacts_exist: false`）が付き、完了後も自動では直らなかった
+  - **対処**: `## reward` セクションを手で削ってから `evaluate_session` を再実行する（上記の例は 0.2 → **1.0** に是正）
 
 ## セクション構成
 
@@ -66,7 +69,7 @@ l2_retries: 0
 完了: tech team 73件収集
 
 ## reward
-（post-merge hook が自動追記）
+（`skill-evaluator.sh` が追記。**タスク完了後に実行すること** — in-progress のうちに走ると低スコアが固定される）
 ```
 
 ## Issue 自動作成
