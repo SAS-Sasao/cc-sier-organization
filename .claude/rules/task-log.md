@@ -91,6 +91,8 @@ grep -q '^## reward' "$task_file" && continue   # すでに reward があれば�
 
 **注**: evaluator は `started` が対象日のものだけを走査するため、通常実行で過去の task-log が再評価されることはない。
 
+**注 2**: オーケストレータ Skill（`/company-cycle` 等）がフロー内で `evaluate_session` を含む場合、自身の task-log は評価時点でまだ `in-progress` であるため上記の問題に**必ず該当する**。対処: 最終フェーズで task-log を `completed` にした後に `## reward` を削除して再評価する（#788 で 10 件是正、2026-04-11 〜 2026-08-16 の全 cycle タスクが 0.2 固定だった）。
+
 ## Issue 自動作成
 
 タスク完了時に `gh issue create` で Issue を作成:

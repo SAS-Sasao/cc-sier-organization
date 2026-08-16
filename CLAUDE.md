@@ -29,7 +29,7 @@
 
 - **マルチ組織運営**: `.companies/` 配下で複数組織を並列管理（現在 3 組織）
 - **Skill による業務自動化**: 18 種類の `/company-*` コマンド
-- **Subagent による専門領域**: 19 種類のロール別エージェント
+- **Subagent による専門領域**: 20 種のロール別エージェント
 - **3 層レビュー + auto-merge**: Skill 成果物を機械的・構造的・LLM的に 3 層で品質担保
 - **Case Bank 継続学習**: 過去タスクログを報酬スコア付きで蓄積し次セッションで参照
 
@@ -108,9 +108,9 @@ node .claude/skills/company-drawio/references/review-drawio.js docs/drawio/{file
 cc-sier-organization/
 ├── .claude-plugin/           ← plugin.json / marketplace.json
 ├── .claude/
-│   ├── skills/               ← ランタイム Skill（plugins からの同期先、12種）
-│   ├── agents/               ← 19 種の Subagent
-│   ├── hooks/                ← 15 本の Shell スクリプト（Case Bank / Dashboard 等）
+│   ├── skills/               ← ランタイム Skill（plugins からの同期先、18種）
+│   ├── agents/               ← 20 種の Subagent
+│   ├── hooks/                ← 17 本の Shell スクリプト（Case Bank / Dashboard 等）
 │   └── rules/                ← 詳細ルール（本 CLAUDE.md から @参照）
 ├── .companies/               ← 組織データ（マルチ組織対応）
 │   ├── .active               ← .gitignore で除外、ローカル設定
@@ -120,7 +120,7 @@ cc-sier-organization/
 │       ├── .task-log/        ← タスクログ（Git 管理）
 │       └── CLAUDE.md         ← 組織文脈
 ├── plugins/cc-sier/          ← プラグインソース（VCS 真ソース）
-│   ├── skills/               ← 9 種の Skill（company / -admin / -diagram 等）
+│   ├── skills/               ← 15 種の Skill（company / -admin / -diagram 等）
 │   └── agents/               ← Subagent 定義
 ├── docs/                     ← GitHub Pages 配信 + 要件定義
 │   ├── requirements.md       ← 要件定義 v0.3（実装時必読）
@@ -197,12 +197,4 @@ cc-sier-organization/
 | @.claude/rules/review-pattern.md | L0/L1/L2 3 層レビュー + auto-merge 設計 |
 | @.claude/rules/web-content-fetch.md | 外部 URL の解析・要約依頼では curl で原文取得（WebFetch は信頼ドメイン外で要約経由になる） |
 
----
-
-## 重要な前提
-
-- `plugins/cc-sier/` = プラグインソース（VCS 真ソース）
-- `.claude/skills/` と `.claude/agents/` = インストール済みランタイム（`plugins/` から手動 `cp` 同期）
-- プロジェクトルート `CLAUDE.md`（本ファイル）= 開発用
-- `.companies/{org-slug}/CLAUDE.md` = 組織文脈（ランタイム、別物）
-- `/company-spawn` でアプリケーションリポジトリ新規作成可、設計成果物とSubagent を自動コピー、追跡情報は新リポ `docs/design/origin.md` に記録
+**前提**: `plugins/cc-sier/` = VCS 真ソース、`.claude/skills/` `.claude/agents/` = ランタイム（手動 `cp` 同期）。ルート `CLAUDE.md` = 開発用、`.companies/{org}/CLAUDE.md` = 組織文脈（別物）。`/company-spawn` でアプリリポジトリ切り出し可（追跡は `docs/design/origin.md`）。
