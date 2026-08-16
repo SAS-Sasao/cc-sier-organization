@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude の電子透かし — 仕組みと、自組織の成果物への影響 | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>Claude の電子透かし — 仕組みと、自組織の成果物への影響</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（初心者向け解説つき）</span><span class="tag">作成日: 2026-08-16</span><span class="tag">ステータス: 解析完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">0. 3 行で</a></li><li><a href="#h1">1. そもそも「電子透かし」とは（初心者向け）</a></li><li><a href="#h2">2. 仕組み — 「どちらでもいい場面」に印を埋める</a></li><li><a href="#h3">3. 弱点①「品質が落ちる」をどう解いたか</a></li><li><a href="#h4">4. 弱点②「言い換えると消える」は、まだ解けていない</a></li><li><a href="#h5">5. で、Claude はどうなのか</a></li><li><a href="#h6">6. 自組織（cc-sier）への当てはまり</a></li><li><a href="#h7">7. 採用候補</a></li><li><a href="#h8">8. 未検証事項</a></li><li><a href="#h9">関連</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（初心者向け解説つき）</td></tr>
+<tr><td>作成日</td><td>2026-08-16</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>対象記事</td><td><a href="https://zenn.dev/hellorusk/articles/3328866ca9e922">Claude がテキストに電子透かしを入れ始めたので、LLM ウォーターマーキングの仕組みを調べた</a>（Kaito Sugimoto、2026-08-12 公開 / 08-15 追記）</td></tr>
+<tr><td>取得方法</td><td><code>curl</code> で原文取得（13,546 字・全文読了）</td></tr>
+<tr><td>ステータス</td><td>解析完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">0. 3 行で</h2>
+<ul>
+<li><strong>2026 年 8 月から、Claude が出力するテキストには「AI が作った印」が見えない形で埋め込まれている。</strong></li>
+<li>その印は<strong>文章の意味も品質も変えない</strong>。専用の鍵を持つ人だけが「Claude が関わった可能性が高い」と判定できる。</li>
+<li>ただし <strong>「AI が書いた証拠」にはならない</strong>と Anthropic 自身が繰り返し明言している。人間の文章を校正させただけでも印は付く。</li>
+</ul>
+<hr>
+<h2 id="h1">1. そもそも「電子透かし」とは（初心者向け）</h2>
+<h3>1.1 紙のお札の例え</h3>
+<p>一万円札を光に透かすと、印刷では見えない人物像が浮かびます。<strong>普通に使う分にはまったく気づかないが、確かめ方を知っている人には確かめられる。</strong> これが電子透かし（ウォーターマーク）の考え方です。</p>
+<p>デジタルの世界では、画像に対しては昔から使われてきました。写真の画素の色を人間には分からないレベルで微妙にずらせば、見た目は変わらないのに機械には読み取れる情報を埋め込めます。</p>
+<h3>1.2 でも「文章」は難しかった</h3>
+<p>画像には<strong>ずらせる余地</strong>があります。赤色の濃さを 200 から 201 にしても誰も気づきません。</p>
+<p><strong>ところが文章にはそれがありません。</strong> 「猫」を「犬」に変えたら意味が変わってしまう。1 文字ずらすということができないのです。</p>
+<p>記事の著者は 2023 年にこの研究アイデアを聞いたとき、こう思ったと書いています。</p>
+<blockquote>当時の正直な感想は「面白いけど、実用化は無理だろう」というものでした。</blockquote>
+<p>その 3 年後、Google も Anthropic も実運用に載せた。<strong>何が変わったのか</strong>を追ったのがこの記事です。</p>
+<hr>
+<h2 id="h2">2. 仕組み — 「どちらでもいい場面」に印を埋める</h2>
+<h3>2.1 AI は毎回サイコロを振っている</h3>
+<p>まず前提として、<strong>LLM（Claude や Gemini）は次の単語を確率で選んでいます。</strong></p>
+<pre><code>「今日は天気が」の続きとして……
+   良い   40%
+   悪い   25%
+   崩れる 15%
+   ...</code></pre>
+<p>そして文章の中には、<strong>「どちらを選んでも自然」という場面が何度も出てきます。</strong> 「これは」でも「それは」でも通じる、というような箇所です。</p>
+<h3>2.2 その「どちらでもいい」を、鍵で少しだけ偏らせる</h3>
+<p>透かしの原理はここにあります。</p>
+<blockquote><strong>どちらでもよい選択を、秘密鍵から導いたルールでほんの少し偏らせる。</strong></blockquote>
+<p>1 回の選択では何も分かりません。ですが<strong>数百単語ぶん集計すると、人間が書いた文章では統計的にあり得ない「癖」が浮かび上がります</strong>。</p>
+<p>紙のお札が「光に透かす」で確かめられたように、文章は「単語の選ばれ方を集計する」で確かめられる、というわけです。</p>
+<h3>2.3 最初の手法（2023 年）とその弱点</h3>
+<p>出発点は <strong>KGW 法</strong>（Kirchenbauer らの論文の頭文字）です。</p>
+<ol>
+<li>語彙を「グリーンリスト」と「レッドリスト」に二分する（分け方は秘密鍵で決まる）</li>
+<li>生成時にグリーンリストの単語を少しだけ選ばれやすくする</li>
+<li>検出時は「グリーンリストの単語が全体の何割か」を数える。偶然では説明できない割合なら AI 生成と判定</li>
+</ol>
+<p><strong>モデルの中身を見なくても、秘密鍵さえあれば検出できる</strong>のが利点でした。</p>
+<p>ただし弱点が 2 つありました。記事はこの 2 つを軸に話を進めます。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>弱点</th><th>中身</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>品質が落ちる</strong></td><td>本来選ばれにくい単語を無理に選ばせるので、文章が不自然になる</td></tr>
+<tr><td>2</td><td><strong>言い換えると消える</strong></td><td>別の AI に「言い換えて」と頼めば、単語が総入れ替えになり印が消える</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h3">3. 弱点①「品質が落ちる」をどう解いたか</h2>
+<h3>3.1 発想の転換 — 「選び方」ではなく「サイコロ」を差し替える</h3>
+<p>品質を落とさずに透かしを入れる手法群を <strong>distortion-free（歪みなし）</strong> と呼びます。代表が <strong>Gumbel-Max トリック</strong> です。</p>
+<p>考え方はこうです。</p>
+<ul>
+<li>従来: <strong>選ばれる確率そのもの</strong>をいじる → 分布が歪む → 品質が落ちる</li>
+<li>新しい方法: <strong>確率はそのまま。サイコロの出目の作り方だけを差し替える</strong></li>
+</ul>
+<p>AI は元々「乱数」を使って単語を選んでいます。その乱数を、<strong>本物のランダムから「秘密鍵から計算した疑似ランダム」に置き換える</strong>のです。</p>
+<p><strong>どの単語がどの確率で選ばれるかは元とまったく同じ</strong>まま、検出者だけが「この文章の単語は、鍵から作った乱数と相関している」と確かめられる。</p>
+<h3>3.2 公式が使った例え — モノポリーと円周率</h3>
+<p>Anthropic の公式ブログにある比喩が非常に分かりやすいので引用します。</p>
+<blockquote>モノポリーで、サイコロを振る代わりに<strong>円周率の数字の並びを使う</strong>とします。小数点以下100万桁目あたりから始めて、以降は各プレイヤーが次の桁を「出目」として使う。プレイ体験は何も変わりませんし、ゲームの結果にも影響しません。しかし後から全ての手を並べて円周率と照合すれば、「この試合は円周率を使っていたらしい」と判定できます。</blockquote>
+<p>記事の著者はこうまとめています。</p>
+<blockquote><strong>くじの公平さは保ったまま、くじの中身だけを検出者が答え合わせできる状態にしている。</strong></blockquote>
+<h3>3.3 実運用に到達した SynthID-Text（Google）</h3>
+<p>Google DeepMind が Gemini で実運用している手法です。2024 年に Nature 誌に載りました。</p>
+<p><strong>Tournament sampling</strong> という方式で、候補の単語を何本か引いてきて、秘密鍵で決まる判定基準による勝ち抜き戦を行い、勝った単語を出力します。</p>
+<p>Gumbel-Max ではなくこちらを選んだ理由が実務的です。<strong>Gumbel-Max は決定的になってしまう</strong>（同じ文脈からは常に同じ単語が出る）ため、同じ質問を何度しても似た答えばかりになり、チャット製品として使いにくいのです。Tournament sampling は本物のサンプリングを残しているので、毎回違う答えが出せます。</p>
+<p><strong>2,000 万件規模の本番トラフィックで評価</strong>した結果まで論文に含まれています。著者はこう書いています。</p>
+<blockquote>「実用化は無理だろう」という2023年の自分の予想は、この論文でほぼ完全に否定されたことになります。</blockquote>
+<hr>
+<h2 id="h4">4. 弱点②「言い換えると消える」は、まだ解けていない</h2>
+<p>こちらが本命の弱点です。</p>
+<p>透かしの実体は「<strong>表層の単語の選ばれ方の偏り</strong>」です。別の AI に「この文章を言い換えて」と頼むと、意味は保たれたまま単語が総入れ替えになり、<strong>印は薄まって消えます</strong>。</p>
+<p>2023 年の時点で「言い換え専用モデルを 1 回通すだけで既存の検出器がほぼ全滅する」ことが実証されています。</p>
+<h3>研究側の応戦 — 意味の空間に埋める</h3>
+<p>対策として、印を埋める場所を<strong>単語から「意味」へ移す</strong>方向が研究されています。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>手法</th><th>考え方</th></tr></thead><tbody>
+<tr><td><strong>SemStamp</strong>（2024）</td><td>文を「意味のベクトル」に変換し、秘密鍵が指す領域に入る文だけを採用する。言い換えても意味は近い位置に留まるので、印が生き残る</td></tr>
+<tr><td><strong>PASA</strong>（2026）</td><td>品質を落とさないことと言い換えに強いことを、理論的に両立させたと主張</td></tr>
+</tbody></table></div>
+<p>ただしこれらはまだ研究段階で、<strong>商用製品には載っていません</strong>。</p>
+<hr>
+<h2 id="h5">5. で、Claude はどうなのか</h2>
+<h3>5.1 答えは公式から出た</h3>
+<p>記事は当初「Anthropic は技術的詳細を公開していない」と書いていましたが、<strong>公開直後に Anthropic の公式ブログが出て答え合わせがされました</strong>（記事は 08-15 に追記）。</p>
+<blockquote>Claude's text watermark is a version of the SynthID-Text approach published by Google DeepMind in a Nature paper in 2024.</blockquote>
+<p><strong>Claude の透かしは、Google の SynthID-Text の一種</strong>でした。§3.3 で説明した Tournament sampling の系統です。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>開始時期</td><td><strong>2026 年 8 月 2 日以降にリリースされたモデル</strong></td></tr>
+<tr><td>適用範囲</td><td><strong>EU 圏内に限らず世界中</strong></td></tr>
+<tr><td>経緯</td><td>EU AI Act 第 50 条の透明性規範に署名したことに伴う</td></tr>
+<tr><td>埋め込み位置</td><td><strong>モデルレベル</strong>（アプリ・API など経路を問わず全出力に入る）</td></tr>
+<tr><td>速度・価格</td><td><strong>変わらない</strong>（生成トークン数が増えないため）</td></tr>
+<tr><td>品質</td><td>内部テストで内容・創造性・読みやすさへの影響は見られなかったとしている</td></tr>
+<tr><td>検出手段</td><td><strong>検出 API を近く提供予定</strong>（2026-08-16 時点で未公開）</td></tr>
+</tbody></table></div>
+<h3>5.2 ここが最重要 — 「AI が書いた証拠」にはならない</h3>
+<p><strong>Anthropic 自身が繰り返し釘を刺しています。</strong></p>
+<blockquote>鍵で答えられるのは「<strong>Claude が部分的に関与した尤度</strong>」だけで、人間が書いたことの確認にも、別の AI が書いたかの判別にも使えない</blockquote>
+<p>公式ブログには <code>What does a watermark actually prove?</code> という項があり、<strong>「Claude が書いた」と「Claude が大幅に編集した」を区別できない</strong>と明記されています。</p>
+<p>具体的には次のような限界があります。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>状況</th><th>透かしはどうなるか</th></tr></thead><tbody>
+<tr><td>短いテキスト</td><td><strong>信号が足りず検出できない</strong>（選択の機会が少ないため）</td></tr>
+<tr><td>事実を述べる箇所</td><td><strong>薄くなる</strong>。「ニュートンの主著は Principia …」の次は <code>Mathematica</code> しかなく、介入の余地がない</td></tr>
+<tr><td>人間の文章を校正させただけ</td><td><strong>ほとんど乗らない</strong>。大半の語が人間のものだから</td></tr>
+<tr><td>大幅な編集・言い換え・翻訳</td><td><strong>消えうる</strong></td></tr>
+<tr><td>完全な書き換え</td><td><strong>消える</strong></td></tr>
+</tbody></table></div>
+<p>記事の著者はこう懸念を述べています。</p>
+<blockquote>学校や職場が検出結果を証拠として濫用する未来が容易に想像できるだけに、この但し書きがどこまで読まれるかは気掛かりです。</blockquote>
+<h3>5.3 コードと翻訳の扱い</h3>
+<p><strong>コード</strong>: 正確さが要求される箇所には<strong>透かしを適用しないと明言されています</strong>。<code>2 + 2 =</code> の次に来るべきトークンは一つしかないので、そもそも介入しない。コード中のコメントのような任意性のある箇所では機能しうるが、コード自体への影響は無視できる程度、とのこと。</p>
+<p><strong>翻訳</strong>: 逆に、<strong>Claude に翻訳させた文章には透かしが入ります</strong>。翻訳では全ての語を Claude が選んでいるからです。</p>
+<blockquote><strong>混同注意</strong>: 「翻訳で透かしが消える」という話は、<strong>透かし入りテキストを別の手段で翻訳した場合</strong>の攻撃（CWRA）を指します。Claude 自身に翻訳させる場合とは逆です。</blockquote>
+<h3>5.4 個人の追跡には使われていない</h3>
+<p>研究の世界には「誰が生成したか」（ユーザー ID など）を埋め込む<strong>マルチビット型</strong>もありますが、<strong>Claude はその方向ではありません</strong>。</p>
+<p>公式ブログは、<strong>透かしにも鍵にも個人・組織・チャットを特定する情報は含まれない</strong>と明言しています。「Claude が関与したか否か」の <strong>1 ビットに徹する設計</strong>です。</p>
+<p>なお画像などのファイルには、透かしではなく <strong>C2PA</strong>（カメラメーカーや写真編集ソフトが使う業界標準）のメタデータを付けるとのことです。こちらはファイル自体を変更しません。</p>
+<hr>
+<h2 id="h6">6. 自組織（cc-sier）への当てはまり</h2>
+<h3>6.1 実測</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>値</th></tr></thead><tbody>
+<tr><td>リポジトリの公開状態</td><td><strong>PUBLIC</strong></td></tr>
+<tr><td>GitHub Pages 配信 HTML</td><td>90 ファイル / <strong>8.6 MB</strong></td></tr>
+<tr><td>公開 MD（<code>docs/</code>）</td><td>25 ファイル / <strong>214K 字</strong></td></tr>
+<tr><td>組織スコープ MD</td><td>282 ファイル / <strong>4.1M 字</strong></td></tr>
+<tr><td>2026-08-02 以降に変更された成果物</td><td>20 ファイル</td></tr>
+</tbody></table></div>
+<p><strong>この組織は、Claude Code が生成した日本語テキストを公開リポジトリと GitHub Pages に大量に出しています。</strong> 透かしの対象期間に入ってからの成果物には、原理上マークが乗っています。</p>
+<h3>6.2 何が起こりうるか</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>論点</th><th>評価</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>納品物が「AI 生成」と判定されうる</strong></td><td>SIer の文脈では現実的な懸念。検出結果は「Claude が関与した尤度」でしかないが、<strong>受け取る側がそう読むとは限らない</strong></td></tr>
+<tr><td>2</td><td><strong>コードは影響が小さい</strong></td><td>公式が「正確さが要求される箇所には適用しない」と明言。<code>.claude/hooks/</code> の実装や IaC はほぼ無関係</td></tr>
+<tr><td>3</td><td><strong>設計書・レポート・ダイジェストは対象</strong></td><td>任意性の高い文章なので印が乗る。本組織の成果物の大半がこちら</td></tr>
+<tr><td>4</td><td><strong>日本語では薄い可能性がある</strong></td><td>日本語はトークンが細かく刻まれ、次が文脈で決まりがち（「透か」の次は「し」）。<strong>揺らぎが少ない＝埋め込みにくい</strong>。ただし<strong>未実測</strong></td></tr>
+</tbody></table></div>
+<h3>6.3 今すぐ何かを変える必要はない、と判断する理由</h3>
+<ol>
+<li><strong>検出 API が未公開</strong>なので、自組織の成果物で実際に検出されるか試せない</li>
+<li><strong>日本語での実効性が未知</strong>（§6.2 #4）</li>
+<li>そもそも<strong>「AI で作っている」ことを隠していない組織</strong>である（README にも Skill 名にも明記されている）</li>
+</ol>
+<hr>
+<h2 id="h7">7. 採用候補</h2>
+<h3>(AX) 外部公開の確認観点に「AI 関与の判定可能性」を追加する — ⬜ 優先度 <strong>低</strong></h3>
+<p>既存の<strong>候補 A（外部公開を伴う操作の確認ルールを明文化する）</strong>に軸を 1 本足す提案。</p>
+<p>現在の候補 A は「社名・内部 URL・顧客情報・本番環境情報が混ざっていないか」という<strong>情報漏洩の観点</strong>だった。そこに次を加える。</p>
+<blockquote><strong>この成果物が「AI 関与あり」と判定されうることを、出す前に承知しているか。</strong></blockquote>
+<p><strong>やること</strong>（候補 A を実装する際に一緒に書く、1 行の追加）:</p>
+<ul>
+<li>顧客納品物・外部公開物には、AI を使った旨を必要に応じて明示する（隠さない）</li>
+<li>検出結果を「AI が書いた証拠」として扱う/扱われることへの反論材料を用意しておく（§5.2 の公式見解）</li>
+</ul>
+<p><strong>コスト</strong>: 小（候補 A のチェックリストに 1 項目） <strong>判断に必要な情報</strong>: 検出 API が公開されてから、自組織の日本語成果物で実際に検出されるかを測る</p>
+<h3>不採用にしたもの</h3>
+<p><strong>透かしを消す方向の対処</strong> — ❌ <strong>不採用</strong></p>
+<p>言い換えや書き換えで消せることは公式も認めているが、<strong>本組織にそうする動機がない</strong>。AI を使っていることを隠していない以上、消す作業はコストにしかならない。</p>
+<hr>
+<h2 id="h8">8. 未検証事項</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>内容</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>自組織の成果物で透かしが検出されるか試していない</strong>（検出 API 未公開のため試せない）</td></tr>
+<tr><td>2</td><td>日本語での透かし強度は<strong>記事のコメント欄での著者の回答に基づく推測</strong>。実測ではない</td></tr>
+<tr><td>3</td><td>本組織が使っているモデルが「2026-08-02 以降にリリースされた対象」に該当するかを<strong>確認していない</strong></td></tr>
+<tr><td>4</td><td>参考文献 13 本の<strong>原典は読んでいない</strong>（記事の記述に依存）</td></tr>
+<tr><td>5</td><td>公式ブログ（<code>anthropic.com/news/claude-text-watermark</code>）の<strong>原文を直接読んでいない</strong>。本レポートの公式見解は<strong>記事経由の引用</strong></td></tr>
+<tr><td>6</td><td>候補 AX は<strong>未実施</strong>。そもそも前提の候補 A も未着手</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h9">関連</h2>
+<ul>
+<li><a href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/insights/catalog.md"><code>catalog.md</code></a> — 採用判断カタログ（§5.18 / 候補 AX）</li>
+<li><code>@.claude/rules/web-content-fetch.md</code> — 本レポートの取得方法の根拠（curl で原文取得）</li>
+</ul>
+  <p class="updated">生成: 2026-08-16 15:47 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>
