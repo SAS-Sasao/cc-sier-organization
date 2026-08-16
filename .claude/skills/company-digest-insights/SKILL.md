@@ -163,7 +163,11 @@ grep -h "{記事タイトルの一部}" $D/{YYYY-MM}-*.md | head -1 | grep -oE '
 
 ### 8.1 レポート
 
-`.companies/{org}/docs/research/digest-{YYYY-MM}-ai-insights.md` に作成します。
+**`docs/insights/analyses/{slug}.md`（リポジトリルート）** に作成します。ブラウザから読めるようにするためで、`docs/requirements.md` や `docs/guide/*.md` と同じ扱いです。
+
+- `{slug}` は内容が分かる kebab-case（例: `2026-08-w2-claude-code-codex-agent` / `comment-density`）
+- **`@.claude/rules/artifact-placement.md` の原則（業務 MD は組織スコープ）の例外**です。2026-08-16 にオーナー判断で既存 7 本を移動済み
+- **旧パスに作らないこと**: `.companies/{org}/docs/research/digest-{YYYY-MM}-ai-insights.md` および `.companies/{org}/docs/insights/analyses/` は、いずれも過去に使っていた場所です
 
 構成: 方法 → クラスタ分析 → 精読記事と実測 → 採用候補 → 未検証事項
 

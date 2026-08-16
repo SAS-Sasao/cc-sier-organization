@@ -426,7 +426,7 @@ PR レビューがボトルネックという課題に対し、**AI がコード
 ## 5.9 Claude Code と Codex の設定は、放置すると分岐する
 
 **出典**: [【決着】Claude Code と Codex の設定ファイルを同期させる（みんな仲良く）](https://zenn.dev/kanta_tkd/articles/20f7f41cff8428)（Kanta / 株式会社エクスプラザ、2026-07-28、curl で原文取得 3,413 字）
-**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](analyses/2026-08-w2-claude-code-codex-agent.md) §3.1
+**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](../../../../docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md) §3.1
 
 ### 主張
 
@@ -461,7 +461,7 @@ PR レビューがボトルネックという課題に対し、**AI がコード
 - [AI エージェント向けのツールを、MCP ではなく CLI として作った — 設計の 3 原則](https://zenn.dev/codatum/articles/80b99faba75704)（g0e / Codatum、2026-08-04、curl 13,163 字）
 - [Claude Code のようなエージェントをゼロから作る](https://zenn.dev/sun_asterisk/articles/f5514175aa0a0a)（グエン・タイ・ゴック / Sun*、2026-08-06、curl 18,827 字）
 
-**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](analyses/2026-08-w2-claude-code-codex-agent.md) §2.2 / §4.1 / §4.2
+**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](../../../../docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md) §2.2 / §4.1 / §4.2
 
 ### 主張
 
@@ -494,7 +494,7 @@ PR レビューがボトルネックという課題に対し、**AI がコード
 ## 5.11 承認プロンプトでは「スコープ違反」が見逃される
 
 **出典**: [40 万件の AI 承認を分析したら、見逃し率が 3 倍違った](https://qiita.com/jqit_suwa/items/ac7d1201bd14e9a4e1ac)（jqit_suwa / 株式会社JQIT、2026-08-06、curl 4,422 字）／ [コーディングエージェントを安全に使うための実務ガイド v0.2](https://zenn.dev/kanaria007/articles/ee3dfd438af4df)（かなりあ、2026-08-07、curl 9,713 字）
-**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](analyses/2026-08-w2-claude-code-codex-agent.md) §4.4 / §4.5
+**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](../../../../docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md) §4.4 / §4.5
 
 ### 主張
 
@@ -525,7 +525,7 @@ PR レビューがボトルネックという課題に対し、**AI がコード
 ## 5.12 サブエージェントは「まとめて並列」が速く安い／キャッシュと棚卸し
 
 **出典**: [検証！Claude Code のサブエージェント並列はお得なのか](https://qiita.com/tamashiro_nobuyuki/items/ff9004b66b7761c4d34c)（Qiita、curl 3,621 字）／ [プロンプトキャッシュを意識して claude code のトークンを節約しよう](https://zenn.dev/ceres_tech_blog/articles/7163ae482e124e)（Zenn、curl 5,931 字）／ [Claude Code の「無駄」を可視化するツール cclens を作った](https://zenn.dev/lambdalisue/articles/introduce-cclens)（Zenn、curl 8,824 字）
-**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](analyses/2026-08-w2-claude-code-codex-agent.md) §2.1 / §2.3 / §2.4
+**詳細**: [`analyses/2026-08-w2-claude-code-codex-agent.md`](../../../../docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md) §2.1 / §2.3 / §2.4
 
 ### 主張
 

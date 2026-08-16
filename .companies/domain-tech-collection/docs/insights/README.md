@@ -3,17 +3,22 @@
 外部の技術記事から得た知見を、**cc-sier および派生アプリへ採用するか判断する**ためのディレクトリ。
 
 > **どこから読むか**: 採用判断をしたいなら [`catalog.md`](catalog.md) だけ見れば足ります。
-> 個別の根拠が要るときに `analyses/` を開いてください。
+> 個別の根拠が要るときに、リポジトリルートの [`docs/insights/analyses/`](../../../../docs/insights/analyses/) を開いてください。
 
 ---
 
 ## 構成
 
+**判断するもの（カタログ・入口）は組織スコープ、根拠となる解析レポートは Pages 配信側**という 2 箇所構成です。
+
 ```
-insights/
+.companies/domain-tech-collection/docs/insights/    ← 判断側（組織スコープ）
 ├── README.md              ← いまここ（入口）
-├── catalog.md             ← 採用判断カタログ（本体・これを見る）
-└── analyses/              ← 個別の解析レポート（根拠）
+└── catalog.md             ← 採用判断カタログ（本体・これを見る）
+
+docs/insights/                                      ← 根拠側（GitHub Pages 配信）
+├── index.html             ← TodoInsights（既存・本ディレクトリとは別系統）
+└── analyses/              ← 個別の解析レポート
     ├── 2026-08-digest-ai.md        日次ダイジェスト 8月分の徹底解析
     ├── 2026-08-w2-claude-code-codex-agent.md
     │                               8/3〜8/9 の Claude Code / Codex / エージェント設計
@@ -23,6 +28,10 @@ insights/
     ├── task-management.md          中〜大規模開発のタスク管理
     └── webfetch-summarization.md   WebFetch の要約バイパス検証
 ```
+
+**解析レポートは `docs/insights/analyses/` に置いてください**（2026-08-16 にオーナー判断で全 7 本を移動）。ブラウザから読めるようにするためで、`docs/requirements.md` や `docs/guide/*.md` と同じ扱いです。
+
+> `@.claude/rules/artifact-placement.md` は業務ドキュメント（MD）の配置先を `.companies/{org}/docs/` と定めており、`analyses/` 配下はその例外にあたります。**ルールファイル側は未更新です。**
 
 ---
 
@@ -39,13 +48,13 @@ insights/
 
 > 2026-03-21 〜 2026-07-31 の約 107 日分は**読んでいません**。ここに本組織へ効く知見が残っている可能性はありますが、**サンプリングもしていないため量は不明**です。
 
-> **「解析済み」は原文精読の意味ではありません。** 2026-08-03〜08-09 の週では、ユニーク 181 件のうち原文まで読んだのは **12 件（6.6%）**で、残りはタイトルと 1 行要約で判断しています（[`analyses/2026-08-w2-claude-code-codex-agent.md`](analyses/2026-08-w2-claude-code-codex-agent.md) §7）。
+> **「解析済み」は原文精読の意味ではありません。** 2026-08-03〜08-09 の週では、ユニーク 181 件のうち原文まで読んだのは **12 件（6.6%）**で、残りはタイトルと 1 行要約で判断しています（[`analyses/2026-08-w2-claude-code-codex-agent.md`](../../../../docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md) §7）。
 
 > **2026-08-10 以降のダイジェストは未生成です**（最新は 08-09）。日次ダイジェストの実行が止まっている期間があります。
 
 これは PKB 記事が「詰まりどころ」として挙げる **Inbox の取り込み過多**（capture が強力なぶん処理が追いつかず生データが溢れる）そのものです。全件遡及は非現実的（約 3,000 件・古い記事は陳腐化）と判断し、**未解析であることを明示する**方針を採っています。
 
-根拠: [`analyses/pkb-three-stage-pipeline.md`](analyses/pkb-three-stage-pipeline.md)（候補 U）
+根拠: [`analyses/pkb-three-stage-pipeline.md`](../../../../docs/insights/analyses/pkb-three-stage-pipeline.md)（候補 U）
 
 **解析するたびに、この表を更新してください。**
 
@@ -117,10 +126,12 @@ insights/
 
 **過去の PR / Issue / task-log には旧パス（`docs/research/...`）が記録されています。** 履歴として残す方針なので書き換えていません。対応は次のとおり。
 
-| 旧パス | 新パス |
+| 旧パス | 現在のパス |
 |---|---|
-| `research/ai-driven-development-practices-catalog.md` | `insights/catalog.md` |
-| `research/digest-2026-08-ai-insights.md` | `insights/analyses/2026-08-digest-ai.md` |
-| `research/comment-density-analysis.md` | `insights/analyses/comment-density.md` |
-| `research/ai-agent-task-management-analysis.md` | `insights/analyses/task-management.md` |
-| `research/webfetch-summarization-verification.md` | `insights/analyses/webfetch-summarization.md` |
+| `research/ai-driven-development-practices-catalog.md` | `.companies/domain-tech-collection/docs/insights/catalog.md` |
+| `research/digest-2026-08-ai-insights.md` | `docs/insights/analyses/2026-08-digest-ai.md` |
+| `research/comment-density-analysis.md` | `docs/insights/analyses/comment-density.md` |
+| `research/ai-agent-task-management-analysis.md` | `docs/insights/analyses/task-management.md` |
+| `research/webfetch-summarization-verification.md` | `docs/insights/analyses/webfetch-summarization.md` |
+
+**2026-08-16 に `analyses/` 配下 7 本を組織スコープからリポジトリルートの `docs/` へ移しました。** それ以前の task-log / 日次レポート（`docs/secretary/reports/`）には旧パス（`.companies/domain-tech-collection/docs/insights/analyses/...`）が記録されていますが、履歴として残す方針で書き換えていません。

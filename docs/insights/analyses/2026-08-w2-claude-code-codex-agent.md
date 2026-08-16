@@ -605,8 +605,12 @@ cc-sier の Skill は 9 フェーズ構成で、L0 の検証手段が Skill ご�
 
 ## 関連
 
-- [`catalog.md`](../catalog.md) — 採用判断カタログ（本レポートの知見を §5.9〜5.11 として追記）
+解析レポートは **GitHub Pages 配信側（`docs/insights/analyses/`）**、採用判断カタログと入口 README は**組織スコープ側**（`.companies/domain-tech-collection/docs/insights/`）にある。
+
+- [`catalog.md`](../../../.companies/domain-tech-collection/docs/insights/catalog.md) — 採用判断カタログ（本レポートの知見を §5.9〜5.12 として追記。候補 AD〜AN）
 - [`2026-08-digest-ai.md`](2026-08-digest-ai.md) — 8/1〜8/8 の解析（CLAUDE.md 削減 / Skill 弁別性 / 品質保証の分担）
 - [`ai-pr-approval-gate.md`](ai-pr-approval-gate.md) — AI による PR 承認ゲート
 - [`task-management.md`](task-management.md) — Claude Code / Codex のタスク管理
 - `@.claude/rules/web-content-fetch.md` — 本レポートの取得方法の根拠
+
+> **配置についての注記**: `@.claude/rules/artifact-placement.md` は業務ドキュメント（MD）の配置先を `.companies/{org}/docs/` と定めており、`analyses/` 配下はその原則の例外にあたる。オーナー判断（2026-08-16）で全 7 本を Pages 配信側へ移した。`docs/requirements.md` や `docs/guide/*.md` と同じ扱い。**ルールファイル側は未更新**。
