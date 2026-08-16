@@ -90,3 +90,14 @@ Phase 4 L1 構造チェック: 全項目 PASS
 - 2026-08-16 は土曜日かつお盆期間のため、一部ソース（ネッ担: 8/12-16休刊、ITmedia小売セクション: 更新なし）で記事数が通常より少ない
 - Zenn トレンドページの WebFetch は 404 で失敗、curl + RSS フォールバックで対応
 - AWS What's New は SPA のため WebFetch 失敗、curl + RSS で 14 件取得
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-08-16T14:44:08"
+```
