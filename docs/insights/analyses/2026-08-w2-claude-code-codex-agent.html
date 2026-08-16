@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2026-08 第2週 AI関連ダイジェスト解析 — Claude Code / Codex / エージェント設計 | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>2026-08 第2週 AI関連ダイジェスト解析 — Claude Code / Codex / エージェント設計</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（原文精読 + 自組織実測）</span><span class="tag">作成日: 2026-08-16</span><span class="tag">対象期間: 2026-08-03（月）〜 2026-08-09（日）の日次ダイジェスト A1 / A2 章</span><span class="tag">ステータス: 解析完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">0. 方法</a></li><li><a href="#h1">1. 母集団の内訳（181 件）</a></li><li><a href="#h2">2. レンズ① Claude Code 実運用</a></li><li><a href="#h3">3. レンズ② Codex 併用</a></li><li><a href="#h4">4. レンズ③ AI エージェント設計</a></li><li><a href="#h5">5. 自組織での実測</a></li><li><a href="#h6">6. 採用候補</a></li><li><a href="#h7">7. 未検証事項</a></li><li><a href="#h8">8. 出典一覧（精読 12 件）</a></li><li><a href="#h9">関連</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（原文精読 + 自組織実測）</td></tr>
+<tr><td>作成日</td><td>2026-08-16</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>依頼</td><td>「8/9週で AI 関連の配信のうち、私が使用できそうな物（Claude Code, Codex, AI エージェント設計関連）を深堀して解析」</td></tr>
+<tr><td>対象期間</td><td>2026-08-03（月）〜 2026-08-09（日）の日次ダイジェスト A1 / A2 章</td></tr>
+<tr><td>母数</td><td>記事 206 件 / ユニークタイトル 181 件</td></tr>
+<tr><td>精読</td><td>12 件（すべて <code>curl</code> で原文取得）</td></tr>
+<tr><td>ステータス</td><td>解析完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">0. 方法</h2>
+<h3>0.1 対象期間の確定</h3>
+<p>依頼の「8/9週」を <strong>2026-08-03（月）〜 08-09（日）</strong> と解釈した。根拠は次の 2 点。</p>
+<ol>
+<li>2026-08-09 は日曜日であり、月曜起点の週は 08-03 から始まる</li>
+<li><strong>日次ダイジェストは 2026-08-09 が最新で、08-10 以降は未生成</strong>（<code>docs/daily-digest/</code> を実査）</li>
+</ol>
+<p>「8/9 から始まる週（08-09〜08-15）」と解釈した場合でも、データが存在するのは 08-09 の 1 日分だけである。08-03 起点で取ることは、どちらの解釈に対しても取りこぼしがない。</p>
+<h3>0.2 取得方法</h3>
+<p>ダイジェスト MD 原本（<code>.companies/domain-tech-collection/docs/daily-digest/2026-08-0{3..9}.md</code>）を直接読んだ。GitHub Pages の HTML は MD からの変換物であり、変換前を読む方が欠損の可能性がない。</p>
+<p>精読対象の外部記事 12 件はすべて <code>curl</code>（User-Agent 付き）で原文 HTML を取得し、<code>script</code> / <code>style</code> を除去してテキスト化した。<strong>WebFetch は使っていない</strong>（<code>@.claude/rules/web-content-fetch.md</code> に従う。Zenn / Qiita / はてブ / 企業技術ブログはいずれも信頼ドメイン外）。</p>
+<h3>0.3 絞り込み</h3>
+<p>181 件のユニークタイトルを全件目視し、依頼の 3 レンズで分類した。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>レンズ</th><th>定義</th></tr></thead><tbody>
+<tr><td><strong>① Claude Code 実運用</strong></td><td>今日から設定・運用を変えられるもの</td></tr>
+<tr><td><strong>② Codex 併用</strong></td><td>Claude Code と Codex を同時に使う際の問題</td></tr>
+<tr><td><strong>③ AI エージェント設計</strong></td><td>ハーネス・ツール・ゲートの設計思想</td></tr>
+</tbody></table></div>
+<p>既存解析（<code>2026-08-digest-ai.md</code> / <code>ai-pr-approval-gate.md</code> / <code>comment-density.md</code> / <code>task-management.md</code>）で原文精読済みの記事は、重複を避けて精読対象から外した。具体的には次の 5 件。</p>
+<ul>
+<li>CLAUDE.md を厚くしても意味がなかった話</li>
+<li>Claude Code の Skills は「手順書」だった</li>
+<li>58% の Pull Request を AI が承認するようになった</li>
+<li>Claude が書く長いコメントは、Claude 自身の役に立っていなかった</li>
+<li>Claude Code／Codex に中〜大規模開発を任せるためのタスク管理</li>
+</ul>
+<hr>
+<h2 id="h1">1. 母集団の内訳（181 件）</h2>
+<p>依頼の 3 レンズに対する関連度でクラスタ化した。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>クラスタ</th><th>件数</th><th>レンズ</th><th>精読</th></tr></thead><tbody>
+<tr><td>A</td><td>Claude Code の運用テクニック（トークン・並列・plan・権限）</td><td>14</td><td>①</td><td>4</td></tr>
+<tr><td>B</td><td>Claude Code バージョンアップデート（v2.1.220〜226）</td><td>5</td><td>①</td><td>0</td></tr>
+<tr><td>C</td><td>Claude Code の組織展開・リモート実行</td><td>6</td><td>①</td><td>1</td></tr>
+<tr><td>D</td><td>Codex 併用・設定同期・コスト制御</td><td>4</td><td>②</td><td>2</td></tr>
+<tr><td>E</td><td>エージェントハーネスの設計</td><td>5</td><td>③</td><td>1</td></tr>
+<tr><td>F</td><td>エージェント向けツール設計（MCP / CLI / Agent Plugins）</td><td>8</td><td>③</td><td>1</td></tr>
+<tr><td>G</td><td>AI レビュー・自動マージ・承認ゲート</td><td>9</td><td>③</td><td>2</td></tr>
+<tr><td>H</td><td>エージェント運用の安全・権限・リスク</td><td>6</td><td>③</td><td>1</td></tr>
+<tr><td>I</td><td>ナレッジ表現（オントロジー / LLM-Wiki / OKF / RAG）</td><td>11</td><td>—</td><td>0</td></tr>
+<tr><td>—</td><td>モデル・基盤動向（Bedrock / GPT-5.6 / Kimi K3 / ハード等）</td><td>約 113</td><td>対象外</td><td>0</td></tr>
+</tbody></table></div>
+<p><strong>モデル・基盤動向が母集団の約 6 割</strong>を占める。これらは「読めば面白いが、笹尾さんの手元の設定を変える材料にはならない」ため、今回は採点対象から外した。クラスタ I（ナレッジ表現）は関連はあるが、3 レンズのいずれにも直接は乗らないため精読を見送っている。</p>
+<hr>
+<h2 id="h2">2. レンズ① Claude Code 実運用</h2>
+<h3>2.1 サブエージェントは「1 件ずつ」より「まとめて並列」が速く、かつ安い</h3>
+<p><strong>出典</strong>: <a href="https://qiita.com/tamashiro_nobuyuki/items/ff9004b66b7761c4d34c">検証！Claude Code のサブエージェント並列はお得なのか</a>（tamashiro_nobuyuki / 株式会社NEXT TECHNOLOGY、2026-07-31、curl 3,621 字）</p>
+<p>同一の独立 3 タスクを 3 通りの方法で実行し、所要時間・トークン・メイン文脈の増加量を計測した記事。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>群</th><th>所要時間</th><th>全体トークン</th><th>メイン文脈の増加</th></tr></thead><tbody>
+<tr><td>① 直列・サブエージェント無し</td><td>約 9.5 秒</td><td>40,770</td><td>5,876</td></tr>
+<tr><td>② 直列・サブエージェント経由</td><td>約 30.0 秒</td><td>119,194</td><td>6,183</td></tr>
+<tr><td>③ <strong>並列</strong>・サブエージェント経由</td><td>約 14.3 秒</td><td><strong>66,884</strong></td><td><strong>3,473</strong></td></tr>
+</tbody></table></div>
+<p>意外なのは <strong>②→③ でトークンが 44% 減っている</strong>点。著者の分析では、同時に似た内容のサブエージェントを起動したことで<strong>定義部分のキャッシュを共有でき</strong>、③ では新規キャッシュ書き込みがほぼ発生せず、コストが約 1/10 のキャッシュ読み込みが大半を占めたため。</p>
+<p>一方、著者が期待していた「メイン文脈の保護」効果は<strong>確認できなかった</strong>と正直に書いている。理由は、依頼したタスクが <code>tool_uses: 0</code> の一発回答で、そもそもサブエージェント側に隠すべき試行錯誤が無かったから。</p>
+<p><strong>この記事の限界</strong>（著者自身が明記）: 測定は 3 タスク・1 セットのみ。査読も反復もない。「重いタスクでの文脈保護効果は未検証」と結んでいる。</p>
+<h3>2.2 <code>isolation: worktree</code> — 「決定論的な処理を LLM の外へ」だけでは足りない</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/rakko_inc/articles/2da36c0abe4dbe">【並列開発】isolation: worktree やめました 〜決定論と認知を分けて AI と仕事する〜</a>（marimo / ラッコ株式会社、2026-08-06、curl 6,973 字）</p>
+<p>Claude Code の <code>isolation: worktree</code>（サブエージェントを専用 git worktree で動かす設定）を並列開発に使っていたが、やめた記録。</p>
+<p>著者は「起動のたびに壊れ方が変わる」現象を追い、<strong>原因が呼び出し方にあった</strong>ことを突き止めている。</p>
+<blockquote>Claude Code のサブエージェントには起動のしかたが 2 通りあり、<code>isolation: worktree</code> はそのうち片方でしか効きません。 - <strong>名前を付けずに起動する</strong> … 設定通り専用の worktree が用意される - <strong>名前を付けて起動する</strong> … メインの作業ディレクトリをそのまま使う。<code>isolation: worktree</code> の指定は<strong>無視される</strong></blockquote>
+<p>さらに、本体はエージェントを起動時のパスに固定するため、そのパスを自分で <code>git worktree move</code> すると足場が消える。</p>
+<p>注目すべきは、<strong>原因が分かった上で「直さずにやめた」</strong>点。worktree の用意は入力が決まれば出力が決まる決定論的な処理であり、そもそも Claude Code の機能に載せる必要がなかった、という判断である。シェルスクリプト 1 本（<code>setup-worktree.sh</code>）に置き換えた結果、<code>isolation</code> 指定・Hooks・改名工程・「名前付きで起動してはいけない」という運用上の注意が、まとめて消えた。</p>
+<p>教訓として提示されているのが、次の物差し。</p>
+<blockquote>見分ける物差しとして使えるのが、<strong>単体で叩いて確かめられるか</strong>です。</blockquote>
+<p>そして、この不安定さは「AI の気まぐれ」に見えるが実際には配線の問題であり、<strong>プロンプトを直そうとしてしまう</strong>のが厄介だ、と書いている。</p>
+<blockquote>LLM の判断から外しても、呼び出し方しだいで挙動が変わる仕組みに載せていれば同じことです。</blockquote>
+<p>なお本記事は 2026 年 7 月時点の挙動であり、著者もバージョンによって変わりうる点を注記している。</p>
+<h3>2.3 プロンプトキャッシュ — 「再開一発目」のコストは順番で決まる</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/ceres_tech_blog/articles/7163ae482e124e">プロンプトキャッシュを意識して claude code のトークンを節約しよう</a>（tamapon / 株式会社セレス、2026-08-04、curl 5,931 字）</p>
+<p>「前日のやり取りを複数再開したら、まだ一言も打っていないのに 5 時間制限が 2 割持っていかれた」という実体験から書かれた記事。公式ドキュメントの参照が多く、記事内で<strong>どこが公式記載でどこが自分の推論か</strong>を明示している点が信頼できる。</p>
+<p><strong>キャッシュが飛ぶ条件</strong>（記事の列挙）:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>条件</th><th>補足</th></tr></thead><tbody>
+<tr><td>1 時間触らない</td><td>日跨ぎは確定でこれ</td></tr>
+<tr><td><code>/model</code> によるモデル切り替え</td><td>キャッシュはモデル単位。opusplan の plan mode 出入りも該当</td></tr>
+<tr><td><code>/effort</code> による effort 変更</td><td>キャッシュキーはモデルと effort の組</td></tr>
+<tr><td>自動モデルフォールバック</td><td>safety classifier に引っかかった場合</td></tr>
+<tr><td>MCP サーバの接続/切断</td><td>ただし tool search 対応モデルでは遅延ロードのため壊れない</td></tr>
+<tr><td>ツールまるごと deny</td><td><code>Bash</code> は飛ぶ。<code>Bash(rm *)</code> のようなスコープ付きは飛ばない</td></tr>
+<tr><td>Claude Code のアップグレード</td><td>次回起動でシステムプロンプトが変わる</td></tr>
+</tbody></table></div>
+<p><strong>対策の中核は「順番」</strong>である。</p>
+<blockquote><code>/compact</code> は会話履歴を短い要約に置き換える。この要約を作る処理はキャッシュがまだ生きてるうちに走るから安く済む。（中略）逆に「再開してから /compact」だと、キャッシュが切れた履歴を全部読んでから要約することになるので、再処理ぶんは丸々払う。<strong>順番が全て。</strong></blockquote>
+<p>すでに切れてしまった場合は、<code>/model</code> で Sonnet 等に落としてから <code>/compact</code> し、元に戻す。全履歴の再処理 1 回は避けられないが、<strong>どのモデルに払わせるかは選べる</strong>、という理屈。</p>
+<p>著者が「公式ドキュメントに明記がなく、記述からの帰結として書いた」と断っているのは 2 点（要約が選択中のモデルで走ること / 5 時間・週次ウィンドウ側の節約分）。<strong>この 2 点は本レポートでも未検証扱いとする。</strong></p>
+<h3>2.4 cclens — 設定の棚卸しを「計測」に置き換える</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/lambdalisue/articles/introduce-cclens">Claude Code の「無駄」を可視化するツール cclens を作った</a>（Alisue、2026-08-05、curl 8,824 字）</p>
+<p>問題設定が、本組織の状況とそのまま重なる。</p>
+<blockquote>ある目的のためにルールやスキルを書いたとして、それが本当に効いてるのか？（中略）気付いたら使われない設定だけが静かに積もっていく じゃあ棚卸しするか、となっても、今度はその非決定性が逆に効いてきます。「もしかしたら自分の知らないところで効いてるのかも」と思うと、途端に消せなくなる。</blockquote>
+<p>cclens は<strong>計測用に何かを走らせるのではなく、普段使いのログ（<code>~/.claude/projects/**/*.jsonl</code>）をそのまま解析する</strong>。Rust 製・全ローカル完結・データ送信なし。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>コマンド</th><th>見えるもの</th></tr></thead><tbody>
+<tr><td><code>cclens doctor</code></td><td>1 画面の健康診断（global / project 別）</td></tr>
+<tr><td><code>cclens waste</code></td><td>最適化余地のランキング（削除 / スリム化 / トリムの推奨付き）</td></tr>
+<tr><td><code>cclens inventory</code></td><td>全設定サーフェス × 実際の使用状況</td></tr>
+<tr><td><code>cclens overhead</code></td><td><strong>毎セッション必ず払う常時オンのコンテキスト量</strong>（自分の設定由来 / 削れない下駄 に分解）</td></tr>
+<tr><td><code>cclens usage</code></td><td>スキルごとの使用回数ランキング</td></tr>
+<tr><td><code>cclens failures</code></td><td>ツール失敗のカテゴリ別集計</td></tr>
+<tr><td><code>cclens stuck</code></td><td>Claude が短時間に何度も編集し直したファイル</td></tr>
+<tr><td><code>cclens optimize</code></td><td>findings を Claude 自身に渡して修正案を出させる</td></tr>
+</tbody></table></div>
+<p>本組織にとって効くのは <code>overhead</code> と <code>usage</code> と <code>inventory</code> の 3 つ。理由は §5 の実測を参照。</p>
+<h3>2.5 plan モードは要らなくなった（という主張）</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/haru067/articles/0c28638945aa32">【Claude Code】plan モードはもう使っていない</a>（haru067 / NOT A HOTEL、2026-07-29、curl 1,974 字）</p>
+<p>短い記事だが論旨は明快。plan モードの役割は「判断を求める停止点」と「Edit 禁止のガードレール」の 2 つで、どちらも<strong>「案をください」と一言言うだけで解決する</strong>、という主張。</p>
+<p>plan モードより優れている点として挙げているのが Human-in-the-Loop。</p>
+<blockquote>plan モードの典型的な敗北は、人間が知らない調査のコンテキストを使った結論を列挙し、人間の認知負荷を超えた読むに堪えない実装案の羅列を吐き出してしまうことだ。そして人間は読むに耐えないので脳死で許可し、あとで検証すればいいか、となる。</blockquote>
+<p>「案をください」なら一問一答ではなく何往復もできる、というのが利点だという。</p>
+<p><strong>この主張の扱いには注意が要る。</strong> 記事は Anthropic のブログ（context engineering）を根拠に「今のモデルは十分に賢いので雑な命令でよい」としているが、<strong>cc-sier は Skill が固定フェーズを持つ設計</strong>であり、「雑な命令で全部良い感じに」とは前提が異なる。§6 では優先度を低く置いた。</p>
+<hr>
+<h2 id="h3">3. レンズ② Codex 併用</h2>
+<h3>3.1 CLAUDE.md / AGENTS.md / Skills の二重管理をどう畳むか</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/kanta_tkd/articles/20f7f41cff8428">【決着】Claude Code と Codex の設定ファイルを同期させる（みんな仲良く）</a>（Kanta / 株式会社エクスプラザ、2026-07-28、curl 3,413 字）</p>
+<p>課題の記述が、そのまま本組織に当てはまる。</p>
+<blockquote>同じプロジェクトで Codex と Claude Code の両方を使っているとき、AGENTS.md や SKILLS などの変更が片方にしか適用されない 何も意識せずに両方を使っていると、片方でのみ更新が入ってそのまま・・・ という状況が起きますし、なんならそれぞれ独自に分岐していく未来が容易に想像できますよね。</blockquote>
+<p>著者の解法は <strong>「形式が同じものはコピーを作らず symlink」</strong>。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>対象</th><th>手段</th></tr></thead><tbody>
+<tr><td>AGENTS.md / CLAUDE.md</td><td><strong>CLAUDE.md に <code>@AGENTS.md</code> と記載</strong>して AGENTS.md を読ませる</td></tr>
+<tr><td>Skills</td><td><code>.claude/skills/</code> を <code>.agents/skills/</code> へ symlink（git は symlink をリンク先パス文字列として記録するのでそのまま版管理できる）</td></tr>
+<tr><td>MCP（<code>.mcp.json</code> JSON ↔ <code>.codex/config.toml</code> TOML）</td><td>書式が違うため変換ロジック。中立形に正規化して比較し、差があれば相手側の書式へ変換</td></tr>
+</tbody></table></div>
+<blockquote>最終的に、編集されるのは常に Claude 側の 1 か所だけになり、生成・コピーを忘れるという事故が構造的に起きなくなります。</blockquote>
+<p>重要なのは <strong>「すべてを一律で同期しない」</strong> という設計判断。</p>
+<ul>
+<li><strong>Prompting Guide の違い</strong>: Anthropic と OpenAI で推奨される指示の書き方が異なる。Claude 向けに調整した Skill の文面が Codex でも最適とは限らない</li>
+<li><strong>片方に仕組み自体が無い</strong>: Codex には Claude Code の <code>rules</code>（パス条件つきで読み込まれる指示ファイル）に当たる機能が無い。<code>~/.codex/rules/</code> は存在するがコマンド承認ポリシーであり別物</li>
+</ul>
+<p>そのため著者は、rules については<strong>ファイル一覧と読むべきタイミングだけを AGENTS.md に書き出し</strong>、実際に読むかは読み手のツールに委ねている。</p>
+<p>成果物は <code>agents-sync</code> CLI + スキル + fswatch/launchd 常駐スクリプト（MIT）。なお著者は「Claude Code CLI から Codex を操作する手法（<code>claudex</code> 等）もあり、CLI しか使わない人はそちらが良い」と冒頭で断っている。</p>
+<h3>3.2 Codex の利用量と Budget を Gateway 層で止める</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/kashiwabaray/articles/796539362435eb">Amazon Bedrock AgentCore Gateway で Codex の利用量と Budget を制御する</a>（Yutaka Kashiwabara / NTT DATA、2026-08-07、curl 12,971 字）</p>
+<p>AWS Samples の <code>sample-agentcore-gateway-usage-interceptor</code> を EC2 に構築し、Codex CLI から実際に叩いた検証記録。手順とコマンドが全部載っており、再現性が高い。</p>
+<p>構成は、AgentCore Gateway の <strong>Interceptor</strong> をコストガバナンスのポイントとして使うもの。</p>
+<ul>
+<li><strong>REQUEST Interceptor</strong>: JWT からユーザーを特定 → DynamoDB から現在利用額を取得 → Daily / Monthly Budget を確認 → 超過なら <strong>モデル呼び出し前に HTTP 403</strong></li>
+<li><strong>RESPONSE Interceptor</strong>: レスポンスの <code>usage</code> からトークン数を取得 → コスト算出 → CloudWatch EMF 出力 → DynamoDB へ加算</li>
+</ul>
+<p>検証結果（記事の表）:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>検証内容</th><th>結果</th></tr></thead><tbody>
+<tr><td>Codex → AgentCore Gateway → GPT-5.4</td><td>成功</td></tr>
+<tr><td>DynamoDB へのユーザー別 spend 記録</td><td>成功</td></tr>
+<tr><td>Daily Budget 超過</td><td>HTTP 403</td></tr>
+<tr><td><strong>Block 後の spend 増加</strong></td><td><strong>なし</strong></td></tr>
+<tr><td>Monthly Budget 超過</td><td>HTTP 403</td></tr>
+</tbody></table></div>
+<p>著者は<strong>確認できていないことを明示している</strong>点が誠実で、そのまま引用に値する。</p>
+<blockquote>今回確認したのは <strong>すでに現在利用額が cap を超えているユーザーの次のリクエストを止められること</strong> です。 （中略）「Budget を超えたユーザーの次の呼び出しを止める」ことと、「設定した Budget を絶対に超過しない」ことは同じなのか という点は、もう少し検証する余地があります。</blockquote>
+<p>並列実行時に複数の REQUEST Interceptor が同じ現在利用額を参照して同時通過しうる、という懸念も自分で挙げている。</p>
+<p><strong>本組織への適用</strong>: 現状 1 人運用のため、ユーザー単位のコスト帰属は過剰。<strong>チーム展開（要件定義書 §1.3 Phase 2）に入る段階で効いてくる</strong>設計として記録する。</p>
+<hr>
+<h2 id="h4">4. レンズ③ AI エージェント設計</h2>
+<h3>4.1 エージェントハーネスの解剖 — ループ本体は最後まで変わらない</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/sun_asterisk/articles/f5514175aa0a0a">Claude Code のようなエージェントをゼロから作る</a>（グエン・タイ・ゴック / Sun*、2026-08-06、curl 18,827 字）</p>
+<p>GitHub 70k スターの教材 <code>shareAI-lab/learn-claude-code</code>（MIT）全 20 章を読んだ記録。各章が前章のコードに仕組みを 1 つだけ足す構成で、<strong>Claude Code の各機能が「なぜ必要か」を問題起点で説明している</strong>。</p>
+<p>第 1 章のエージェントループがすべての土台で、<code>stop_reason == "tool_use"</code> なら実行して結果を返し、そうでなければ抜ける、というだけ。</p>
+<p>結論が最も価値がある。</p>
+<blockquote>20 章ぶんの仕組みは、どれもこのループのまわりに「モデルに何を見せて、何をさせるか」を足しているだけで、<strong>ループ本体は最後まで変わりません</strong>。 エージェントの賢さはモデルが持っていて、ハーネスの仕事はモデルにコンテキストと道具を渡すことだ</blockquote>
+<p>cc-sier の理解に直接効く章を抜き出す。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>章</th><th>仕組み</th><th>cc-sier での対応物</th></tr></thead><tbody>
+<tr><td>3</td><td>Permission</td><td><code>settings.local.json</code> の allow リスト</td></tr>
+<tr><td>4</td><td>Hooks（PreToolUse / PostToolUse / Stop）</td><td><code>.claude/hooks/</code> 15 本</td></tr>
+<tr><td>6</td><td>Subagent（<strong>親と別の messages[] / システムプロンプト / ツール一覧</strong>。最後のテキストしか親に返らない）</td><td><code>.claude/agents/</code> 20 種</td></tr>
+<tr><td>7</td><td>Skills（起動時はカタログのみ、本文は <code>load_skill</code> で <code>tool_result</code> として渡す <strong>2 段階ロード</strong>）</td><td><code>.claude/skills/</code> 17 種</td></tr>
+<tr><td>8</td><td>Context Compact（<strong>安い順に 4 段階</strong>。budget / micro は取り戻せるが snip は取り戻せない）</td><td>—</td></tr>
+<tr><td>9</td><td>Memory（<code>MEMORY.md</code> を目次にし、<strong>目次だけシステムプロンプトに置くことでキャッシュを壊さない</strong>）</td><td><code>~/.claude/.../memory/MEMORY.md</code></td></tr>
+<tr><td>12</td><td>Task System（<code>.tasks/{id}.json</code> に <code>blockedBy</code> / <code>owner</code>。<code>claim_task</code> は依存が完了していないと断る）</td><td><code>.task-log/</code></td></tr>
+<tr><td>15</td><td>Agent Teams（<strong>実体はファイル追記のメールボックス</strong>。<code>{agent}.jsonl</code> へ 1 行 JSON を追記し、読んだら消す）</td><td><code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code></td></tr>
+<tr><td>18</td><td>Worktree Isolation</td><td>本組織は未使用（§5 参照）</td></tr>
+</tbody></table></div>
+<p>第 5 章の TodoWrite の説明が特に示唆的で、ツールの中身は「リストを受け取って表示するだけ」でファイルもコマンドも触らない。それでも効くのは、<strong>モデルが <code>todo_write</code> を呼んだ瞬間に引数が <code>tool_use</code> ブロックとして <code>messages[]</code> に残る</strong>から。状態はモデルが書いた側にあるので、戻り値は <code>"Updated 3 tasks"</code> で足りる。</p>
+<h3>4.2 エージェント向けツールは MCP より CLI（設計 3 原則）</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/codatum/articles/80b99faba75704">AI エージェント向けのツールを、MCP ではなく CLI として作った — 設計の 3 原則</a>（g0e / Codatum、2026-08-04、curl 13,163 字）</p>
+<p>MCP を試していた過程で CLI に行き着いた経緯と、その設計原則。<strong>MCP を否定する記事ではない</strong>と著者自身が断っている。</p>
+<p>転換点は、MCP 経由でファイル検証を試したときの違和感。</p>
+<blockquote>エージェントは、ローカルのファイルを読み込み、その内容を MCP ツールに渡すためのリクエストボディを組み立て、ツールを呼ぶ、という一連の処理を <strong>すべて自分の「頭の中」＝コンテキスト上でこなそうとします</strong>。</blockquote>
+<p>MCP のツールはファイルを<strong>値渡し</strong>でしか受け取れないため、1MB のノートブックを検証させたいだけでも 1MB がエージェントのコンテキストを通過する。CLI ならファイルそのものを引数にできる。</p>
+<p>さらに、CLI は<strong>人間・CI・エージェントが同じインターフェースに乗れる</strong>。<code>cdm notebook validate</code> を CI で回すために MCP サーバーを立てて……とはならない。</p>
+<p><strong>3 原則</strong>:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>原則</th><th>中身</th></tr></thead><tbody>
+<tr><td><strong>1. コンテキストを浪費させない</strong></td><td>ファイル形式は<strong>モデルの事前学習を活かせるもの</strong>を選ぶ（JSON/YAML は括弧・インデント・キー反復にトークンを食う → Markdown 拡張を採用）。コマンド名も <code>validate</code> / <code>format</code> という既存概念に乗せる。独自構文を発明しない。ドキュメントは全部積まず <code>cdm doc index</code> / <code>doc show</code> で<strong>取りに行かせる</strong></td></tr>
+<tr><td><strong>2. 間違えさせない努力より、気づいて直せる設計に投資する</strong></td><td>プロンプトに禁止事項を積み上げるのをやめる。構造の誤りは <code>validate</code> で（<strong>行番号 + 該当行の抜粋 + 具体的な指摘 + 直し方が載った URL</strong> の 3 点セット）、見た目の誤りは PNG 出力させて<strong>エージェント自身に目視確認</strong>させる。機械的に直せるものはツールが直す（<strong>LLM はランダム文字列の生成が苦手</strong>なので ID は <code>format</code> が自動付与する）</td></tr>
+<tr><td><strong>3. ワークフロー全体をシンプルな一本道に設計する</strong></td><td>多段手順は 1 コマンドに畳み込む（ポーリングのループをエージェントの判断に委ねない）。検証は対象ごとに分けず <code>validate</code> 一発（<strong>どれを叩くべきかという判断＝分岐を持ち込まない</strong>）。流れは人間と共用のドキュメントで伝える</td></tr>
+</tbody></table></div>
+<p>原則 2 の前提として著者が強調しているのが、ドキュメントの位置づけ。</p>
+<blockquote>エージェントに使わせるツールでは、ドキュメントは単なる付属物ではなく、<strong>コマンドと並ぶインターフェースの一部</strong>です。</blockquote>
+<p>原則 3 の「分岐を持ち込まない」は、cc-sier の Skill 設計に直接効く（§6 候補 C）。</p>
+<h3>4.3 「純粋リファクタリング」を証明させて自動マージする</h3>
+<p><strong>出典</strong>: <a href="https://engineering.nature.global/entry/2026/07/prove-pure-refactoring-with-ai-and-auto-merge">「純粋リファクタリング」を AI に証明させて自動マージする</a>（大塚 / Nature CTO、2026-07-31、curl 5,756 字）</p>
+<p>3 層レビュー + auto-merge を持つ cc-sier にとって、<strong>最も参考になる 1 本</strong>。</p>
+<p>出発点は、レビュー対象を<strong>目的で分ける</strong>という発想。リファクタリング PR で見るのは 2 軸しかない。</p>
+<ol>
+<li>設計が良くなっているか（命名・責任分割・依存の方向・結合度）→ <strong>人間の判断が要る</strong></li>
+<li>挙動の等価性 → <strong>機械的</strong></li>
+</ol>
+<p>そこで前者は事前に GitHub issue や夕会で合意しておき、<strong>後者だけを AI に判断させる</strong>。AI に任せる範囲を限定することで信頼性を担保している。</p>
+<p>実装は <code>review-refactoring</code> Skill + GitHub Actions。</p>
+<ol>
+<li>PR に <code>/review_refactoring</code> とコメント</li>
+<li>Actions 内で Skill 本体をそのままプロンプトとして Claude に渡し、ベースブランチとの差分をレビューさせる</li>
+<li><strong>出力を JSON スキーマ（<code>pass</code> と <code>report_file</code>）で縛る</strong></li>
+<li><code>pass: true</code> → approve + squash auto-merge + <code>refactoring-only</code> ラベル</li>
+<li><code>pass: false</code> → auto-merge せず、人間レビューが必要とコメント</li>
+</ol>
+<p>Skill の中身で挙げられているポイント 3 つ。</p>
+<ul>
+<li><strong>マインドセット</strong>: 「あなたは懐疑的な第三者レビュアーである」「『たぶん大丈夫』ではなく『証明できる』レベルで検証せよ」——AI が人間に同意しがちなことへの対策</li>
+<li><strong>実行手順</strong>: 動作変更が紛れ込みやすいパターンを列挙。<strong>テストセットを少しずつ足して育てた</strong></li>
+<li><strong>原則</strong>: テストコードの変化は挙動変化の兆候として扱う。<strong>「他多数」「以下同様」といった省略を禁じ</strong>、変更ファイル・関数・参照箇所をすべて列挙して 1 つずつ等価性をチェックさせる</li>
+</ul>
+<p>さらにプロンプト自体も mizchi 氏の <code>empirical-prompt-tuning</code>（対象プロンプトを毎回まっさらな別エージェントに実行させ、どこが曖昧だったか・何手かかったかで評価して改善する Skill）で複数回チューニングしている。<strong>CI で回すには flaky を避けるため曖昧さの除去が重要だった</strong>という。</p>
+<p><strong>実績（3 ヶ月半）</strong>:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>値</th></tr></thead><tbody>
+<tr><td>自動マージしたリファクタリング PR</td><td>247 件</td></tr>
+<tr><td>チーム全 PR に占める割合</td><td>約 3 割</td></tr>
+<tr><td>2026 年 6 月の API 利用料</td><td>$74.48</td></tr>
+<tr><td>6 月の自動マージ件数</td><td>55 件</td></tr>
+<tr><td><strong>1 件あたり</strong></td><td><strong>約 $1.35</strong></td></tr>
+</tbody></table></div>
+<p>著者は前提条件も明記している。「積み上げてきた E2E テストの資産があるからこそ、安心して自動マージできる」。</p>
+<h3>4.4 コーディングエージェント安全運用ガイド v0.2</h3>
+<p><strong>出典</strong>: <a href="https://zenn.dev/kanaria007/articles/ee3dfd438af4df">コーディングエージェントを安全に使うための実務ガイド v0.2</a>（かなりあ、2026-08-07、curl 9,713 字）</p>
+<p>15 節構成の実務ガイド。中心となる一文が置かれている。</p>
+<blockquote>AI に証拠を構造化させ、機械で検出できるものは自動化し、人間は判断に集中する。</blockquote>
+<p>重要なのは<strong>変更を「複雑さ」と「リスク」の別軸で扱う</strong>設計。「単純でも高リスクな変更はあり、複雑でも影響を限定しやすい変更はある」。</p>
+<p>本組織にとって効く節を 4 つ抜き出す。</p>
+<p><strong>§5「PR を小さく分ければ安全になるわけではない」</strong></p>
+<blockquote>個別 PR がすべて正しいことと、統合された機能全体が正しいことは同じではない。 merge conflict が発生しなかったことは、<strong>意味上の競合が存在しないことを保証しない</strong>。</blockquote>
+<p><strong>§9「プロンプトだけで安全を守ろうとしない」</strong></p>
+<p>CLAUDE.md / rules / skills に「この操作は禁止してください」と書くのは有効だが、それは安全装置の最終層ではない、という指摘。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>層</th><th>例</th></tr></thead><tbody>
+<tr><td>リポジトリ</td><td>CODEOWNERS、branch protection、required checks</td></tr>
+<tr><td>実行環境</td><td>sandbox、権限制限、network 制限</td></tr>
+<tr><td>CI</td><td>lint、typecheck、test、SAST、dependency scan、secret scan</td></tr>
+<tr><td>レビュー</td><td>human review、security review、domain owner review</td></tr>
+<tr><td>リリース</td><td>feature flag、canary、rollback 手順</td></tr>
+</tbody></table></div>
+<blockquote>プロンプト → 望ましい振る舞いを伝える CI / 権限 / repository policy → 望ましくない変更を通さない</blockquote>
+<p><strong>§10「『問題ありませんか』より『証拠を出してください』」</strong></p>
+<blockquote><code>このPRはマージして大丈夫ですか？</code> という問いだけを投げると、最終判定まで AI へ委譲しやすい。</blockquote>
+<p>代わりに、各指摘へ「根拠となるファイルや処理 / 確認できた事実 / <strong>未確認事項</strong>」を添えさせ、AI の役割を<strong>判定者ではなく証拠を収集・構造化する補助者</strong>に寄せる。</p>
+<p><strong>§12「統合後レビュー」</strong> では、確認状態を 4 値で出させる形式が提示されている。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>状態</th><th>意味</th></tr></thead><tbody>
+<tr><td>CONFIRMED</td><td>根拠と対応する証拠を確認できた</td></tr>
+<tr><td>PARTIAL</td><td>一部だけ確認できた</td></tr>
+<tr><td>UNCONFIRMED</td><td>十分な証拠が見つからない</td></tr>
+<tr><td>CONTRADICTED</td><td>計画や不変条件と矛盾している</td></tr>
+</tbody></table></div>
+<blockquote>根拠のない推測で CONFIRMED にしないでください。</blockquote>
+<p>そして §13 のポイント。<strong>AI に「人間が確認した」と書かせない。AI が作った証拠と、人間が行った判断を分ける。</strong></p>
+<h3>4.5 承認プロンプトの見逃し率は、脅威の種類で 3 倍違う</h3>
+<p><strong>出典</strong>: <a href="https://qiita.com/jqit_suwa/items/ac7d1201bd14e9a4e1ac">40 万件の AI 承認を分析したら、見逃し率が 3 倍違った — 危ないものほど、ちゃんと止められている</a>（jqit_suwa / 株式会社JQIT、2026-08-06、curl 4,422 字）</p>
+<p>公開された 409,000 件の承認/拒否判断の集計。平均正答率 66.3%。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>脅威の種類</th><th>見逃し率</th></tr></thead><tbody>
+<tr><td>明白な破壊的操作</td><td>11.7%</td></tr>
+<tr><td>永続的な変更</td><td>23.8%</td></tr>
+<tr><td>持ち出し・コード実行</td><td>33.4%</td></tr>
+<tr><td><strong>スコープ違反</strong></td><td><strong>35.0%</strong></td></tr>
+</tbody></table></div>
+<p><strong>いかにも危なそうなコマンドは止められている</strong>。止められていないのは、コマンド自体は正常なのに触ってはいけない範囲に手を出しているもの。</p>
+<blockquote>承認プロンプトに出てくるのは <strong>コマンドそのもの</strong> です。でも危険かどうかを決めるのは、<strong>そのコマンドが何に対して実行されるか</strong> のほう。 <code>rm -rf ./build</code> → 危なそうに見える が、ビルド成果物なら問題ない <code>cp config.json /tmp/</code> → 普通に見える が、中身が API キーなら持ち出しになる</blockquote>
+<p>Anthropic のテレメトリでは<strong>ユーザーは約 93% の許可プロンプトを承認</strong>しており、「承認を目にする回数が増えるほど、ひとつあたりに払う注意は減っていく」という指摘も引かれている。</p>
+<p>結論は「気をつけて読む」では解決しない、というもの。</p>
+<blockquote><strong>スコープ違反は、人間に見せる前に潰す</strong> しかありません。 - 触ってよいディレクトリを設定で制限する - 本番環境の認証情報を、そもそも実行環境に置かない - 到達できないホストは、ネットワークレベルで遮断する</blockquote>
+<p><strong>著者はデータの限界を自分で 3 点挙げている</strong>（査読された研究ではない / ゲームなので脅威の割合が現実より高い（約 34%）/ 被験者が自己選択）。それでも「種類によって 3 倍違う」傾向と Anthropic の実データが同じ方向を向く点は無視しにくい、と結んでいる。</p>
+<hr>
+<h2 id="h5">5. 自組織での実測</h2>
+<p>記事の主張を、cc-sier リポジトリと手元環境の実測値と突き合わせた（2026-08-16 時点）。</p>
+<h3>5.1 実測結果一覧</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事の論点</th><th>本組織の実測値</th><th>判定</th></tr></thead><tbody>
+<tr><td>1</td><td><code>isolation: worktree</code> の不安定さ（§2.2）</td><td><code>.claude/agents/</code> <code>.claude/skills/</code> <code>plugins/</code> のいずれにも <code>isolation</code> 記述<strong>なし</strong></td><td><strong>該当なし</strong>。ただし Workflow ツールに <code>isolation: "worktree"</code> オプションが存在するため、今後使う場合は §2.2 が予防知識になる</td></tr>
+<tr><td>2</td><td>並列サブエージェントの方が安い（§2.1）</td><td><code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code> 有効、Subagent 20 種。ただし<strong>「独立タスクをまとめて 1 メッセージで投げる」ことは明文化されていない</strong></td><td>🔶 部分該当</td></tr>
+<tr><td>3</td><td>Claude Code と Codex の設定が分岐する（§3.1）</td><td><strong><code>AGENTS.md</code> は 2026-06-13 の 1 コミットのみ。同期間に <code>CLAUDE.md</code> は 19 コミット（最新 2026-08-08）</strong></td><td>❗<strong>分岐が発生している</strong></td></tr>
+<tr><td>4</td><td>同上（内容差分）</td><td>CLAUDE.md の <code>⚠️</code>/<code>❌</code> 注意事項 <strong>28 件</strong> に対し AGENTS.md は <strong>0 件</strong>。<code>curl</code> 原文取得ルール・<code>CLAUDE_CODE_DISABLE_BACKGROUND_TASKS</code>・<code>EXCESSIVE_PAGINATION</code>・「不確実さを分量で埋めない」等が AGENTS.md に<strong>未反映</strong></td><td>❗</td></tr>
+<tr><td>5</td><td>同上（Skills 共有）</td><td><code>~/.agents/</code> <strong>存在しない</strong>。<code>.claude/skills/</code> は Codex と未共有</td><td>❗</td></tr>
+<tr><td>6</td><td>Codex を実際に使っているか</td><td><code>codex-cli 0.144.5</code> インストール済み、<code>~/.codex/config.toml</code> + <code>auth.json</code> あり、<code>goals_1.sqlite</code> が <strong>2026-08-16 07:54 更新</strong></td><td><strong>現用中</strong>。#3〜#5 は実害のある問題</td></tr>
+<tr><td>7</td><td>スコープ違反は承認画面前に潰す（§4.5）</td><td><code>.claude/settings.local.json</code> は <strong><code>allow</code> のみで <code>deny</code> ブロックなし</strong>。ディレクトリ制限の設定もなし</td><td>⬜ 未対応</td></tr>
+<tr><td>8</td><td>設定が静かに積もる（§2.4）</td><td>Skill <strong>17 種</strong>（SKILL.md 合計 183,775 bytes）、Subagent <strong>20 種</strong>（57,505 bytes）、rules <strong>9 本</strong>（44,203 bytes）、CLAUDE.md 14,964 bytes</td><td>棚卸し未実施</td></tr>
+<tr><td>9</td><td>同上（ドリフトの実例）</td><td>CLAUDE.md の「開発コマンド」表は <strong>12 種</strong>と記載するが実体は <strong>17 種</strong>。<code>company-cycle</code> / <code>company-diagram-v2</code> / <code>company-digest-insights</code> / <code>company-today</code> の <strong>4 種が表に無い</strong></td><td>❗</td></tr>
+<tr><td>10</td><td>同上（同期ルール違反）</td><td><code>plugins/cc-sier/skills/</code> に <strong><code>company-evolve</code> / <code>company-quality-setup</code> / <code>company-report</code> が存在しない</strong>（<code>.claude/skills/</code> 側のみ。3 種とも git 管理下ではある）</td><td>❗ <strong>VCS 真ソース原則に反する</strong></td></tr>
+<tr><td>11</td><td>cclens で計測（§2.4）</td><td><strong>未インストール</strong>（<code>command -v cclens</code> → なし）</td><td>⬜</td></tr>
+<tr><td>12</td><td>純粋リファクタリングの自動マージ（§4.3）</td><td>L0/L1/L2 + auto-merge は稼働中。ただし<strong>「リファクタリングのみ」という PR 分類は存在せず</strong>、等価性判定の専用ゲートもない</td><td>⬜</td></tr>
+</tbody></table></div>
+<h3>5.2 特に重い 3 件</h3>
+<p><strong>(a) AGENTS.md の 2 ヶ月放置（#3〜#6）</strong></p>
+<p>Codex を現用しながら、Codex 側が読む <code>AGENTS.md</code> は 6 月 13 日から一度も更新されていない。この間に CLAUDE.md へ入った注意事項——<code>curl</code> での原文取得ルール、<code>claude-code-action</code> の env 配置、Projects v2 の pagination 制限、「不確実さを分量で埋めない」——は<strong>すべて Codex には届いていない</strong>。§3.1 の記事が「独自に分岐していく未来が容易に想像できる」と書いた状態が、すでに 2 ヶ月分進行している。</p>
+<p>なお <code>AGENTS.md</code> は CLAUDE.md から <code>@AGENTS.md</code> 参照もされていないため、Claude Code 側からも読まれていない。<strong>現状は誰も読んでいないファイルとして 6,366 bytes 存在している。</strong></p>
+<p><strong>(b) Skill 台帳のドリフト（#9, #10）</strong></p>
+<p>CLAUDE.md の記述（12 種）と実体（17 種）が乖離し、うち 3 種は VCS 真ソースである <code>plugins/</code> 側に存在しない。<code>@.claude/rules/skill-development.md</code> は「<code>plugins/cc-sier/skills/</code> が VCS 真ソース。<code>.claude/skills/</code> 側に独自編集を入れない」と定めているが、<strong>3 Skill がそのルールの外にある</strong>。</p>
+<p>cclens の言う「気付いたら使われない設定だけが静かに積もっていく」の実例だが、本件は計測ツールがなくても <code>ls</code> と <code>grep</code> で検出できた。<strong>まず必要なのはツールではなく棚卸しの習慣</strong>である。</p>
+<p><strong>(c) permission に deny が無い（#7）</strong></p>
+<p><code>settings.local.json</code> は allow リストのみで、deny もディレクトリ制限もない。§4.5 のデータに照らすと、見逃し率が最も高いのは「コマンド単体では正常に見えるスコープ違反」であり、これは承認プロンプトで人間が止められるものではない。ただし本組織は<strong>単一リポジトリ・単一開発者・本番認証情報を実行環境に置いていない</strong>ため、記事が想定する被害シナリオの一部は成立しない。優先度は §6 で中とした。</p>
+<h3>5.3 付随発見（本解析の対象外）</h3>
+<p><code>.mcp.json</code> の <code>awslabs.aws-iac-mcp-server</code> が <code>@latest</code> 指定で、CLAUDE.md 自身の「uvx/npx 系 MCP サーバーは <code>==バージョン</code> でピン留め」（#569/#570 の教訓）に反している。本解析の範囲外のため<strong>指摘のみで対処していない</strong>。</p>
+<hr>
+<h2 id="h6">6. 採用候補</h2>
+<p>優先度は「本組織で実害が出ているか」と「対処コスト」で決めた。</p>
+<h3>候補 A: AGENTS.md を CLAUDE.md へ畳む — 優先度 <strong>高</strong></h3>
+<p><strong>根拠</strong>: §5.2 (a)。Codex 現用中に 2 ヶ月分の分岐が発生している。</p>
+<p><strong>やること</strong>（§3.1 の手法をそのまま適用）:</p>
+<ol>
+<li>CLAUDE.md に <code>@AGENTS.md</code> 記載を入れるか、逆に <strong>AGENTS.md を削除して CLAUDE.md に一本化</strong>する</li>
+<li>Skills を Codex へ渡すなら <code>.claude/skills/</code> → <code>.agents/skills/</code> の symlink（git は symlink をパス文字列として記録するため版管理できる）</li>
+<li><strong>ただし記事の警告に従い、一律同期はしない</strong>。Anthropic と OpenAI で推奨される指示の書き方が異なるため、rules については「ファイル一覧と読むべきタイミングだけを AGENTS.md に書き出す」方式を採る</li>
+</ol>
+<p><strong>コスト</strong>: 小（1 セッション）。<strong>判断が要る点</strong>: 一本化するか symlink 併存にするかは、笹尾さんが Codex をどの程度使い続けるかで変わる。</p>
+<h3>候補 B: Skill 台帳の棚卸し — 優先度 <strong>高</strong></h3>
+<p><strong>根拠</strong>: §5.2 (b)。CLAUDE.md の記述（12 種）と実体（17 種）の乖離、<code>plugins/</code> 未同期 3 種。</p>
+<p><strong>やること</strong>:</p>
+<ol>
+<li><code>company-evolve</code> / <code>company-quality-setup</code> / <code>company-report</code> を <code>plugins/cc-sier/skills/</code> へ移送（VCS 真ソース原則の回復）</li>
+<li>CLAUDE.md の開発コマンド表に 4 種を追加し、「12 種類」の記述を修正</li>
+<li><code>diff -rq plugins/cc-sier/skills/ .claude/skills/</code> を定期実行できる形にする</li>
+</ol>
+<p><strong>コスト</strong>: 小。<strong>これは記事由来ではなく、記事を読んだことで探しに行って見つかった問題</strong>である。</p>
+<h3>候補 C: <code>/company-*</code> Skill に「分岐を持ち込まない」原則を適用 — 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §4.2 原則 3。「どれを叩くべきかの判断こそが分岐で、抜けや取り違えの温床になる」。</p>
+<p>cc-sier の Skill は 9 フェーズ構成で、L0 の検証手段が Skill ごとに異なる（<code>review-drawio.js</code> / <code>validate_drawio.py</code> / grep）。§4.2 の主張に照らすと、<strong>検証コマンドを 1 本に寄せ、何を編集したかにかかわらず同じものを叩く</strong>形が望ましい。</p>
+<p><strong>未確認</strong>: 現行 9 フェーズで実際に「どの検証を叩くべきか」の取り違えが起きているかは<strong>測定していない</strong>。まず task-log の <code>l0_retries</code> を集計して発生実績を確認すべきで、実績がなければ着手しない。</p>
+<h3>候補 D: 独立タスクは 1 メッセージで並列起動する運用の明文化 — 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §2.1。直列サブエージェント経由（119,194 トークン）に対し並列（66,884）で 44% 減。</p>
+<p><strong>やること</strong>: <code>@.claude/rules/</code> または該当 Skill に「独立した委譲が複数あるときは 1 メッセージにまとめて起動する」を明記。</p>
+<p><strong>留保</strong>: 元データは 3 タスク・1 セットの測定で、査読も反復もない。本組織の Agent Teams は日次ダイジェストのように<strong>重く独立性の高い</strong>タスクで使っており、記事の測定条件（<code>tool_uses: 0</code> の一発回答）とは異なる。<strong>同じ比率で効くとは限らない。</strong></p>
+<h3>候補 E: <code>deny</code> とディレクトリ制限の追加 — 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §4.5。スコープ違反の見逃し率 35.0%、承認率 93%。</p>
+<p><strong>やること</strong>: <code>settings.local.json</code> に <code>deny</code> を追加し、<code>.companies/{他組織}/</code> への書き込みや <code>~/.ssh</code> 等の読み取りを構造的に止める。</p>
+<p><strong>留保</strong>: 単一開発者・本番認証情報なしの環境では、記事が想定する被害の一部は成立しない。ただし<strong>組織横断の誤書き込み</strong>（<code>@.claude/rules/multi-org.md</code> の「組織 A の作業で組織 B に書き込まない」）は現状プロンプトでしか守られておらず、これは §4.4 §9 の「プロンプトだけで安全を守ろうとしない」に該当する。</p>
+<h3>候補 F: cclens の導入 — 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §2.4。Skill 17 種 / rules 9 本 / Subagent 20 種の効果検証が未実施。</p>
+<p><strong>やること</strong>: <code>brew install lambdalisue/cclens/cclens</code> → <code>cclens doctor</code> → <code>cclens overhead</code> で常時オンのコンテキスト量を、<code>cclens usage</code> で Skill 別使用回数を確認。</p>
+<p><strong>留保</strong>: <strong>Windows 非対応</strong>と記事に明記されている。本環境は WSL2（Linux）なので動く見込みだが、<strong>未検証</strong>。また候補 B の問題は cclens なしで見つかったので、<strong>ツール導入を棚卸しの前提条件にしない</strong>。</p>
+<h3>候補 G: 純粋リファクタリング判定ゲート — 優先度 <strong>低</strong></h3>
+<p><strong>根拠</strong>: §4.3。3 ヶ月半で 247 件自動マージ、1 件あたり約 $1.35。</p>
+<p><strong>不採用寄りの理由</strong>: Nature の前提は「積み上げてきた E2E テスト資産」であり、cc-sier は<strong>主にドキュメント・図・HTML を生成するリポジトリでコードの自動テストがほとんどない</strong>。挙動の等価性という概念自体が成立しにくい。</p>
+<p><strong>ただし転用できる部分がある</strong>:</p>
+<ul>
+<li>出力を <strong>JSON スキーマで縛る</strong>（cc-sier の L2 はすでに JSON 出力だが、スキーマによる強制はしていない）</li>
+<li><strong>「他多数」「以下同様」の省略を禁じ、全件列挙させる</strong>（L2 review-prompt に追加可能）</li>
+<li><code>empirical-prompt-tuning</code> で review-prompt 自体を育てる</li>
+</ul>
+<h3>候補 H: L2 レビューを「判定」から「証拠の構造化」へ寄せる — 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §4.4 §10 §12 §13。</p>
+<p>現行の L2 は <code>verdict: pass|fail</code> と <code>composite</code> を返す<strong>判定者</strong>である。§4.4 の主張に従えば、AI には CONFIRMED / PARTIAL / UNCONFIRMED / CONTRADICTED の 4 値で確認状態を出させ、最終判定は人間と機械（L0）に残すのが筋。</p>
+<p><strong>ただしこれは cc-sier の auto-merge 設計の根幹に触れる</strong>。無人で回す前提を崩すことになるため、<strong>変更するかは方針判断であって、記事が正しいから直す類の話ではない</strong>。まず「L2 の findings に未確認事項の欄を追加する」という部分適用から試すのが現実的。</p>
+<h3>候補 I: plan モードをやめて「案をください」 — 優先度 <strong>低</strong></h3>
+<p><strong>根拠</strong>: §2.5。</p>
+<p><strong>留保が大きい</strong>。記事の前提は「賢いモデルに任せる雑な命令」だが、cc-sier は Skill が固定フェーズと必須セクションを持つ設計であり、方向性が逆。<strong>個人の対話作業には効く可能性があるが、Skill 経由の作業には適用しない</strong>のが妥当。</p>
+<h3>候補 J: AgentCore Gateway による Codex の Budget 制御 — 優先度 <strong>低（時期尚早）</strong></h3>
+<p><strong>根拠</strong>: §3.2。1 人運用ではユーザー単位のコスト帰属は過剰。要件定義書 §1.3 の Phase 2（チーム展開）に入る段階で再評価する。</p>
+<hr>
+<h2 id="h7">7. 未検証事項</h2>
+<p>本レポートで<strong>確認していないこと</strong>を明示する。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>未検証の内容</th><th>影響</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>08-10〜08-15 のダイジェストは存在しない</strong>ため、この 6 日分の記事は一切読んでいない</td><td>「8/9 から始まる週」と解釈した場合、本レポートは 1/7 しかカバーしていない</td></tr>
+<tr><td>2</td><td>母集団 181 件のうち、精読したのは 12 件（6.6%）。残り 169 件は<strong>タイトルと 1 行要約しか読んでいない</strong></td><td>見落としの可能性がある。特にクラスタ I（ナレッジ表現 11 件）は 3 レンズに乗らないと判断して切ったが、判断根拠はタイトルのみ</td></tr>
+<tr><td>3</td><td>§2.1 の並列サブエージェント測定を<strong>本組織で再現していない</strong></td><td>44% 削減が cc-sier の Agent Teams でも成立するかは不明</td></tr>
+<tr><td>4</td><td>§2.3 の「要約が選択中のモデルで走る」「5 時間ウィンドウ側の節約」は<strong>記事の著者自身が推論と明記</strong>しており、本レポートでも検証していない</td><td><code>/model</code> を落として <code>/compact</code> する手順の効果は未確認</td></tr>
+<tr><td>5</td><td>cclens を<strong>インストールしていない</strong>（WSL2 での動作も未確認）</td><td>§2.4 の各コマンドの出力は記事の記述のみに基づく</td></tr>
+<tr><td>6</td><td><code>plugins/</code> 未同期 3 Skill について、<strong><code>.claude/skills/</code> 側の内容が正か、移送時に何が起きるかを確認していない</strong></td><td>候補 B の作業量は未見積もり</td></tr>
+<tr><td>7</td><td>候補 C の前提となる <code>l0_retries</code> の集計を<strong>していない</strong></td><td>分岐による取り違えが実際に起きているかは不明</td></tr>
+<tr><td>8</td><td>§4.1 の教材リポジトリ <code>shareAI-lab/learn-claude-code</code> の<strong>原典は読んでいない</strong>（解説記事のみ）</td><td>各章のコードの正確性は解説記事に依存</td></tr>
+<tr><td>9</td><td>AGENTS.md と CLAUDE.md の<strong>全文差分を取っていない</strong>（キーワード 9 個の有無と注意事項件数で判定）</td><td>分岐の全容は未把握</td></tr>
+<tr><td>10</td><td>候補 A〜J は<strong>いずれも未実施</strong>。本レポートは解析のみで、リポジトリへの変更は行っていない</td><td>—</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h8">8. 出典一覧（精読 12 件）</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>出典</th><th>取得</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://qiita.com/tamashiro_nobuyuki/items/ff9004b66b7761c4d34c">検証！Claude Code のサブエージェント並列はお得なのか</a></td><td>Qiita</td><td>curl 3,621 字</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/rakko_inc/articles/2da36c0abe4dbe">【並列開発】isolation: worktree やめました</a></td><td>Zenn</td><td>curl 6,973 字</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/ceres_tech_blog/articles/7163ae482e124e">プロンプトキャッシュを意識して claude code のトークンを節約しよう</a></td><td>Zenn</td><td>curl 5,931 字</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/lambdalisue/articles/introduce-cclens">Claude Code の「無駄」を可視化するツール cclens を作った</a></td><td>Zenn</td><td>curl 8,824 字</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/haru067/articles/0c28638945aa32">【Claude Code】plan モードはもう使っていない</a></td><td>Zenn</td><td>curl 1,974 字</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/kanta_tkd/articles/20f7f41cff8428">【決着】Claude Code と Codex の設定ファイルを同期させる（みんな仲良く）</a></td><td>Zenn</td><td>curl 3,413 字</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/kashiwabaray/articles/796539362435eb">Amazon Bedrock AgentCore Gateway で Codex の利用量と Budget を制御する</a></td><td>Zenn</td><td>curl 12,971 字</td></tr>
+<tr><td>8</td><td><a href="https://zenn.dev/sun_asterisk/articles/f5514175aa0a0a">Claude Code のようなエージェントをゼロから作る</a></td><td>Zenn</td><td>curl 18,827 字</td></tr>
+<tr><td>9</td><td><a href="https://zenn.dev/codatum/articles/80b99faba75704">AI エージェント向けのツールを、MCP ではなく CLI として作った — 設計の 3 原則</a></td><td>Zenn</td><td>curl 13,163 字</td></tr>
+<tr><td>10</td><td><a href="https://engineering.nature.global/entry/2026/07/prove-pure-refactoring-with-ai-and-auto-merge">「純粋リファクタリング」を AI に証明させて自動マージする</a></td><td>Nature Engineering Blog</td><td>curl 5,756 字</td></tr>
+<tr><td>11</td><td><a href="https://zenn.dev/kanaria007/articles/ee3dfd438af4df">コーディングエージェントを安全に使うための実務ガイド v0.2</a></td><td>Zenn</td><td>curl 9,713 字</td></tr>
+<tr><td>12</td><td><a href="https://qiita.com/jqit_suwa/items/ac7d1201bd14e9a4e1ac">40 万件の AI 承認を分析したら、見逃し率が 3 倍違った</a></td><td>Qiita</td><td>curl 4,422 字</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h9">関連</h2>
+<p>解析レポートは <strong>GitHub Pages 配信側（<code>docs/insights/analyses/</code>）</strong>、採用判断カタログと入口 README は<strong>組織スコープ側</strong>（<code>.companies/domain-tech-collection/docs/insights/</code>）にある。</p>
+<ul>
+<li><a href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/insights/catalog.md"><code>catalog.md</code></a> — 採用判断カタログ（本レポートの知見を §5.9〜5.12 として追記。候補 AD〜AN）</li>
+<li><a href="2026-08-digest-ai.html"><code>2026-08-digest-ai.md</code></a> — 8/1〜8/8 の解析（CLAUDE.md 削減 / Skill 弁別性 / 品質保証の分担）</li>
+<li><a href="ai-pr-approval-gate.html"><code>ai-pr-approval-gate.md</code></a> — AI による PR 承認ゲート</li>
+<li><a href="task-management.html"><code>task-management.md</code></a> — Claude Code / Codex のタスク管理</li>
+<li><code>@.claude/rules/web-content-fetch.md</code> — 本レポートの取得方法の根拠</li>
+</ul>
+<blockquote><strong>配置についての注記</strong>: <code>@.claude/rules/artifact-placement.md</code> は業務ドキュメント（MD）の配置先を <code>.companies/{org}/docs/</code> と定めており、<code>analyses/</code> 配下はその原則の例外にあたる。オーナー判断（2026-08-16）で全 7 本を Pages 配信側へ移した。<code>docs/requirements.md</code> や <code>docs/guide/*.md</code> と同じ扱い。<strong>ルールファイル側は未更新</strong>。</blockquote>
+  <p class="updated">生成: 2026-08-16 14:31 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>

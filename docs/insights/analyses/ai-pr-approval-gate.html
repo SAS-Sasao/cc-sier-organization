@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI による PR 承認ゲート — 解析と自組織での実測 | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>AI による PR 承認ゲート — 解析と自組織での実測</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（深堀り・実測検証あり）</span><span class="tag">作成日: 2026-08-09</span><span class="tag">ステータス: 解析完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">0. 結論（先に書く）</a></li><li><a href="#h1">1. 記事の解説</a></li><li><a href="#h2">2. 自組織での実測</a></li><li><a href="#h3">3. 採用候補</a></li><li><a href="#h4">4. 記事から採る運用面の示唆（仕組みではない部分）</a></li><li><a href="#h5">5. 未検証事項</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（深堀り・実測検証あり）</td></tr>
+<tr><td>作成日</td><td>2026-08-09</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>対象記事</td><td><a href="https://zenn.dev/she_techblog/articles/937836550dfdf3">58% の Pull Request を AI が承認するようになった</a>（qsona / SHE 株式会社 開発責任者 / 2026-08-07）</td></tr>
+<tr><td>取得方法</td><td>curl で原文取得（<strong>6,664 字</strong>）。<code>.claude/rules/web-content-fetch.md</code> に準拠</td></tr>
+<tr><td>ステータス</td><td>解析完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">0. 結論（先に書く）</h2>
+<p>記事は「<strong>人間レビューを減らす</strong>」話ですが、本組織にとっては <strong>逆向きに効きます</strong>。</p>
+<p>実測の結果、<strong>本組織の直近 60 件の PR はすべてレビュー 0 件</strong>でした。approve 率でいえば既に 100% です。記事が 1 割から 58% へ引き上げた対象を、本組織は最初から全部通しています。</p>
+<p>したがって採るべきは「AI に承認させる仕組み」ではなく、記事の裏側にある「<strong>人間が見るべき変更の定義</strong>」です。本組織にはこれが存在しません。</p>
+<p>さらに深刻な数字が出ました。</p>
+<blockquote><strong>統制系の変更（hooks / rules / CLAUDE.md / skills）を含む PR は 60 件中 10 件（16.7%）。そのすべてが task-log を持たず、L0/L1/L2 の 3 層レビューを一度も通っていません。</strong></blockquote>
+<p>本組織は<strong>成果物（図・ダイジェスト・シート）には 3 層の審査を敷き、審査の仕組みそのものを変える PR は素通しにしています。</strong> 記事が人間レビュー必須の第 1 項目に挙げる <code>control_plane_change</code> が、最も無防備な場所になっています。</p>
+<hr>
+<h2 id="h1">1. 記事の解説</h2>
+<h3>1.1 出発点は「測ったこと」</h3>
+<p>著者はまず <strong>直近 3 週間に人間レビューへ回った PR 75 件を全数分析</strong>しました。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>実測</th><th>値</th></tr></thead><tbody>
+<tr><td>無言の approve か LGTM のみ</td><td><strong>60%</strong></td></tr>
+<tr><td>実質的な指摘が付いた</td><td><strong>約 1 割</strong></td></tr>
+<tr><td>その指摘の大半の出所</td><td><strong>人間ではなく、以前から稼働している AI レビュアー</strong></td></tr>
+</tbody></table></div>
+<p>著者はこの分析の限界（チャットや口頭での指摘は観測できない）を自分で書き添えたうえで、「人間レビューのプロセスは、リードタイムを長くしているほどの効果は生んでいない」と結論しています。</p>
+<p><strong>主張の前に数字がある</strong>構成です。本レポートが実測を重視するのも同じ理由です。</p>
+<h3>1.2 方針 — 全部やめるのではなく、線を引く</h3>
+<p>数字だけを見て AI に置き換えるのは性急、と著者自身が留保しています。そのうえで、</p>
+<blockquote>「本当に品質担保すべき・オーナーシップを持つべき」場所を定義し、それらを含む変更は必ず人間レビューに回すが、そうでないものは AI レビューで OK にする</blockquote>
+<p>という方針を採ります。</p>
+<p>補足として、PR レビューには「誰かのコードを自分たちのコードにする」という中長期の意味がある、という反論を自分で挙げ、それに同意しつつ「AI コーディングの普及で、一行一行までみんながオーナーシップを持つのは現実的に難しくなった」と応じています。</p>
+<h3>1.3 ワークフロー（4 段階）</h3>
+<pre><code>PR 作成
+  ↓
+① 決定的ゲート判定（特定ファイルの変更 → 人間レビュー必須）
+  ↓
+② AI（LLM）レビュー + 審査 → 判定
+  ↓
+③ ラベルと sticky コメントへの反映
+  ↓
+④ 承認なら bot が GitHub 上で Approve</code></pre>
+<p><strong>マージボタンを押すのは人間のまま</strong>です。自動マージまではしていません。</p>
+<h3>1.4 中核 — 「AI の意見」と「人間が見るべきか」を独立させる</h3>
+<p>この記事で最も応用が効くのがここです。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>軸</th><th>値</th></tr></thead><tbody>
+<tr><td><strong>AI の意見</strong></td><td>approve / pending / need fix（<strong>3 値</strong>）</td></tr>
+<tr><td><strong>人間レビューの要否</strong></td><td>required / optional（<strong>2 値</strong>）</td></tr>
+</tbody></table></div>
+<p><code>ai-review:approved</code> <strong>かつ</strong> <code>human-review:optional</code> のときだけ PR が approved になります。</p>
+<p>2 軸を独立させると「<strong>AI はコードに問題がないと言っている。ただし人間も見てほしい</strong>」という状態が表現できます。1 軸だとこれが潰れます。</p>
+<p>sticky コメントの実例:</p>
+<pre><code>AIの意見   : ✅ Approve — must-fix の指摘はありません
+人間レビュー : 🙋 必要（理由: 不可逆操作）</code></pre>
+<h3>1.5 決定的ゲートに LLM を使わない理由</h3>
+<p>決済・売上に関わるコードは、監査法人との取り決めで人間レビュー必須。この判定は <strong>ファイルパスのマッチングとモデル参照検知</strong>で行い、LLM を使いません。</p>
+<p>理由が明快です。</p>
+<blockquote>監査では「なぜこの PR が人間レビューに回ったのか」を後から説明し、<strong>同じ入力で同じ結果を再現できる</strong>ほうがよく、実行のたびに判断が揺れうる LLM はこの要件を満たさない</blockquote>
+<p><strong>再現性が要るところに LLM を置かない</strong>、という線引きです。本組織の L0（機械レビュー）と同じ思想で、既に持っている考え方でもあります。</p>
+<p>なお、このゲートに該当した PR も <strong>AI コードレビュー自体は実行されます</strong>（人間レビューが必須になるだけ）。</p>
+<h3>1.6 LLM が判定する 8 項目</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>トリガー</th><th>説明</th></tr></thead><tbody>
+<tr><td>統制系変更（control_plane_change）</td><td>レビュー・審査・CI など<strong>統制の仕組みそのもの</strong>に触れる変更</td></tr>
+<tr><td>不可逆操作（irreversible_operation）</td><td>データ削除や外部送信など、実行後に取り消せない操作</td></tr>
+<tr><td>セキュリティ境界（security_boundary_change）</td><td>認証・認可・権限チェックなど守りの境界の変更</td></tr>
+<tr><td>個人情報フロー（personal_data_flow_change）</td><td>個人情報の取得・保存・出力経路の変更</td></tr>
+<tr><td>外部契約（external_contract_change）</td><td>外部 API やスキーマなど外部との取り決めの変更</td></tr>
+<tr><td>新規パターン導入（architectural_precedent）</td><td>コードベースに前例のない実装パターンの持ち込み</td></tr>
+<tr><td>高リスク値計算（high_stakes_calculation）</td><td>金額など誤りの影響が大きい値の計算の変更</td></tr>
+<tr><td>実行時ハザード（runtime_hazard）</td><td>重いクエリやジョブなど実行時に事故を起こしうる変更</td></tr>
+</tbody></table></div>
+<p>著者はこの項目群を Claude Fable 5 に提案させ、ほぼそのまま採用したと明記しています。</p>
+<h3>1.7 最も重要な教訓 — あいまいにすると AI は安全側に倒す</h3>
+<p>この項目を定義する前は「<strong>ロジックの変更があれば人間レビューに回す</strong>」でした。結果、<strong>ほとんどの PR が引っかかり</strong>、人間レビュー必須に回っていました。</p>
+<blockquote>基本的に、<strong>あいまいにしておくと AI は安全側に倒しがち</strong>なので、きちんと条件を決めて、それに当てはまらなければ OK（人間レビュー不要）にする、という形式にしています。</blockquote>
+<p>さらに、これを運用に落とすための一文があります。</p>
+<blockquote>こういう<strong>安全側に倒さない判断は、責任者が良いと言わないとなかなかそうなりづらい</strong>ので、そういう判断・意思決定は開発責任者として意識的にするようにしています。</blockquote>
+<p><strong>「緩める判断は権限を持つ人が明示的に下す」</strong>という指摘です。これは仕組みの話ではなく運用の話で、本組織にそのまま当てはまります。</p>
+<h3>1.8 pending — 承認も却下もしない第三の状態</h3>
+<p><strong>PR の diff の外の事実に、正しさが依存している</strong>場合があります。例として、後方互換性のない変更に対して「古い仕様に依存しているクライアントがないか」の確認が挙げられています。</p>
+<p>人間のレビュアーはこの場面で、承認も却下もせず<strong>質問</strong>します。単に承認したのでは品質担保にならず、diff の外の事実次第では、そのままでよいかもしれないからです。</p>
+<p>この振る舞いを AI にも持たせたのが <code>pending</code> です。審査エージェントが承認を保留して作者に質問し、回答をもとに再審査して承認まで進めます。</p>
+<p>実装上の細かい知見が 2 つ、どちらも実運用でしか出てこない類のものです。</p>
+<ul>
+<li><strong>GitHub は既存コメントの編集では通知が飛ばない</strong>。そのため sticky コメントの更新とは別に、<strong>@メンション付きの新規コメントを 1 件投稿</strong>している</li>
+<li>すべてのコメントでフルレビューを起動するとコストが跳ねるため、<strong>軽量モデル（claude-haiku-4-5）で「このコメントは質問への回答か」をプリフィルタ</strong>している</li>
+</ul>
+<h3>1.9 成果と、著者自身の留保</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>値</th></tr></thead><tbody>
+<tr><td>AI が approve した PR の割合</td><td><strong>58%</strong>（導入前は約 1 割）</td></tr>
+<tr><td>運用期間</td><td>約 2 週間（<strong>速報値</strong>）</td></tr>
+</tbody></table></div>
+<p>著者は「体感としても適正値」「もう少し（70% くらい）高くてもよい」としつつ、<strong>むやみに高くすべきものでもない</strong>と書いています。</p>
+<p>そして重要な留保を残しています。</p>
+<blockquote>本当に approve されるべきものに approve されているか（<strong>偽陽性/偽陰性の率</strong>）は引き続き見ていくべき</blockquote>
+<p><strong>数字が出た後も判定精度の検証を続ける</strong>という姿勢です。本組織の L2 にこの検証材料が残っていないことが、後述の実測で分かりました。</p>
+<hr>
+<h2 id="h2">2. 自組織での実測</h2>
+<p>記事の主張ごとに本組織を測りました。測定日は 2026-08-09、母数は直近 60 件の merged PR です。</p>
+<h3>2.1 人間レビューの実態（記事 §1 に対応）</h3>
+<p>記事は 75 件を全数分析して「60% が無言 approve」でした。本組織を同じ方法で測ります。</p>
+<pre><code>gh pr list --state merged --limit 60 --json number,reviews \
+  --jq '.[] | "\(.number)\t\(.reviews|length)"'</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>SHE 社（記事）</th><th><strong>本組織</strong></th></tr></thead><tbody>
+<tr><td>母数</td><td>75 件</td><td><strong>60 件</strong></td></tr>
+<tr><td>レビューが 1 件でも付いた PR</td><td>100%（人間レビューに回った PR が母数）</td><td><strong>0 件（0%）</strong></td></tr>
+<tr><td>実質的な指摘</td><td>約 1 割</td><td><strong>0 件</strong></td></tr>
+<tr><td>approve 率</td><td>1 割 → 58%</td><td><strong>実質 100%</strong></td></tr>
+</tbody></table></div>
+<p><strong>直近 60 件すべてがレビュー 0 件でマージされています。</strong> author の内訳は SAS-Sasao 35 件 / github-actions 25 件。</p>
+<p>記事の課題（approve 率が低くボトルネック）は本組織に存在しません。<strong>逆に、止まる場所が一つもありません。</strong></p>
+<h3>2.2 統制系変更のレビュー状況（記事 §4 に対応）</h3>
+<p>記事の <code>control_plane_change</code> を本組織にマッピングし、該当する PR を数えました。</p>
+<p>対象パス: <code>.claude/hooks/</code> / <code>.github/workflows/</code> / <code>.claude/rules/</code> / <code>CLAUDE.md</code> / <code>**/skills/</code> / <code>**/agents/</code></p>
+<div class="table-wrap"><table>
+<thead><tr><th>種別</th><th>該当 PR 数</th></tr></thead><tbody>
+<tr><td>hooks</td><td>5</td></tr>
+<tr><td>rules</td><td>4</td></tr>
+<tr><td>CLAUDE.md</td><td>3</td></tr>
+<tr><td>skills</td><td>3</td></tr>
+<tr><td>workflows</td><td>0</td></tr>
+<tr><td>agents</td><td>0</td></tr>
+<tr><td><strong>統制系を含む PR（重複除く）</strong></td><td><strong>10 / 60 = 16.7%</strong></td></tr>
+</tbody></table></div>
+<p>該当した 10 件:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>PR</th><th>触れた統制系</th><th>内容</th></tr></thead><tbody>
+<tr><td>#758</td><td>hooks, rules, skills</td><td>知見カタログの分離</td></tr>
+<tr><td>#757</td><td>skills</td><td><code>/company-digest-insights</code> の新設</td></tr>
+<tr><td>#753</td><td>hooks, CLAUDE.md</td><td>コメント密度の測定ツール追加</td></tr>
+<tr><td>#738</td><td>rules, CLAUDE.md</td><td>web-content-fetch ルールの新設</td></tr>
+<tr><td>#731</td><td>hooks</td><td>小売トラッカーの配信導線</td></tr>
+<tr><td><strong>#723</strong></td><td><strong>hooks</strong></td><td><strong>品質ゲート（審査の仕組み）の修正</strong></td></tr>
+<tr><td>#715</td><td>CLAUDE.md</td><td>nightly 自動更新</td></tr>
+<tr><td><strong>#714</strong></td><td><strong>hooks, skills</strong></td><td><strong>Case Bank（学習の仕組み）の修正</strong></td></tr>
+<tr><td>#690</td><td>rules</td><td>nightly 自動更新</td></tr>
+<tr><td>#670</td><td>rules</td><td>nightly 自動更新</td></tr>
+</tbody></table></div>
+<p><strong>#723 と #714 は、審査と学習の仕組みそのものを変える PR</strong>です。記事の定義そのままの <code>control_plane_change</code> にあたります。</p>
+<p>そして、この 10 件について 3 層レビューの記録を照合しました。</p>
+<pre><code>#758  task-log:なし  l2:なし
+#757  task-log:なし  l2:なし
+#753  task-log:なし  l2:なし
+#738  task-log:なし  l2:なし
+#731  task-log:なし  l2:なし
+#723  task-log:なし  l2:なし
+#715  task-log:なし  l2:なし
+#714  task-log:なし  l2:なし
+#690  task-log:なし  l2:なし
+#670  task-log:なし  l2:なし</code></pre>
+<p><strong>10 件すべてが task-log を持たず、L0/L1/L2 のいずれも通っていません。</strong></p>
+<p>これは規約違反ではなく<strong>設計上そうなっている</strong>点が重要です。3 層レビューは Skill の成果物生成フローに埋め込まれており、hooks や rules を直接編集する作業はそのフローの外にあります。</p>
+<h3>2.3 レビュー層のカバレッジ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>実測</th></tr></thead><tbody>
+<tr><td>Skill 総数</td><td>17</td></tr>
+<tr><td>L2（独立 LLM レビュー）を持つ Skill</td><td><strong>6（35.3%）</strong></td></tr>
+<tr><td>L0/L1 を持つ Skill</td><td><strong>5（29.4%）</strong></td></tr>
+</tbody></table></div>
+<p>L2 を持つのは diagram / diagram-v2 / drawio / sheet / daily-digest / cycle。<strong>残る 11 Skill と、Skill を経由しない直接作業には審査がありません。</strong></p>
+<h3>2.4 AI が自分のルールを書き換えている量</h3>
+<p>nightly workflow が <code>CLAUDE.md</code> と <code>.claude/rules/</code> を自動更新した PR は <strong>全期間で 12 件</strong>（仕組み構築の PR 3 件を除く）。その差分を集計しました。</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>行数</th></tr></thead><tbody>
+<tr><td>追加</td><td><strong>+49</strong></td></tr>
+<tr><td>削除</td><td><strong>-5</strong></td></tr>
+<tr><td>純増</td><td><strong>+44</strong></td></tr>
+</tbody></table></div>
+<p><strong>追記が削除の約 10 倍</strong>です。12 回とも人間のレビューなしでマージされています。</p>
+<p>現在の規模:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>対象</th><th>実測</th></tr></thead><tbody>
+<tr><td><code>CLAUDE.md</code></td><td>9,403 字</td></tr>
+<tr><td><code>CLAUDE.md</code> + <code>.claude/rules/*.md</code></td><td>1,195 行</td></tr>
+<tr><td>注意事項（⚠️ / ❌）の項目数</td><td><strong>28 項目</strong></td></tr>
+</tbody></table></div>
+<p><strong>AI が自分を縛るルールを、一方向に増やし続けています。</strong> 候補 Q（CLAUDE.md / rules の削減）が長く未着手なのは、<strong>増やす仕組みだけがあって減らす判断をする場所がない</strong>からだと、この数字は示しています。</p>
+<p>これは記事 §1.7 の裏返しです。nightly は「気づいたことを追記する」方向にしか動かず、削る判断をしません。<strong>安全側に倒し続けています。</strong></p>
+<h3>2.5 L2 の判定精度は検証できるか（記事 §6 の留保に対応）</h3>
+<p>記事は「偽陽性/偽陰性の率は引き続き見ていくべき」と書いています。本組織で同じ検証ができるか測りました。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>実測</th></tr></thead><tbody>
+<tr><td><code>l2_composite</code> が記録された task-log</td><td>109 件</td></tr>
+<tr><td>平均</td><td>0.963</td></tr>
+<tr><td><strong>最小値</strong></td><td><strong>0.88</strong></td></tr>
+<tr><td><strong>閾値 0.85 を下回るもの</strong></td><td><strong>0 件</strong></td></tr>
+<tr><td>retry 発生率</td><td>L0 4.4% / L1 5.0% / <strong>L2 2.8%（4 件）</strong></td></tr>
+</tbody></table></div>
+<p><strong>L2 の retry が 4 件発生しているのに、記録された composite は 1 件も 0.85 を下回っていません。</strong> つまり task-log には<strong>修正後の最終スコアだけが残り、初回 fail の値が保存されていません</strong>。</p>
+<p>結果として、<strong>L2 が正しく落としたのか、落とすべきものを通したのかを後から検証する材料がありません。</strong></p>
+<p>なお、この数字だけでは「L2 が甘い」とは断定できません。retry で実際に直っている可能性の方が高いです。<strong>言えるのは「検証できない」ことだけ</strong>です。</p>
+<h3>2.6 「あいまいだと AI は安全側に倒す」は本組織で起きているか</h3>
+<p>記事の最重要教訓ですが、<strong>本組織の L2 では起きていません</strong>。</p>
+<p>L2 は 6 軸 + 致命軸 + 必須セクションで条件が具体的に決まっており、retry 率は 2.8% と低い水準です。記事の「ロジック変更があれば人間レビュー」のような広すぎる条件にはなっていません。</p>
+<p>本組織の問題は逆で、<strong>条件が具体的すぎて条件外のリスクを見逃す</strong>ことです。実例が Issue #724 / #728 / #729（L2 pass 後に設計不整合が発覚）で、これは既に候補 S として記録済みです。</p>
+<h3>2.7 個人情報フロー（記事の 8 項目のうち 1 つ）</h3>
+<p>記事の <code>personal_data_flow_change</code> に該当するものが本組織に実在するか確認しました。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>実測</th></tr></thead><tbody>
+<tr><td>リポジトリの公開状態</td><td><strong>PUBLIC</strong></td></tr>
+<tr><td><code>.conversation-log/</code> のファイル数</td><td>15</td></tr>
+<tr><td>サイズ</td><td>4.3 MB</td></tr>
+<tr><td><strong>記録されている人間の発言数</strong></td><td><strong>3,163 件</strong></td></tr>
+<tr><td>マスキング処理</td><td><strong><code>.claude/hooks/capture-conversation.sh</code> に実装あり</strong>（顧客名 → <code>[CLIENT-NN]</code> / 人名 → <code>[PERSON-NN]</code>）</td></tr>
+</tbody></table></div>
+<p><strong>マスキングは実装されていました。</strong> frontmatter に <code>masked: true</code> が付与されます。</p>
+<p>ただし、この仕組みは<strong>マスタから構築した辞書に載っている固有名詞だけを置換</strong>します。辞書にない名前は素通りします。<code>masked: true</code> は「マスキング処理を通した」という意味であって、「機密が残っていない」保証ではありません。</p>
+<p><strong>辞書の網羅性は測っていません</strong>（マスタの顧客名・担当者名の登録件数と、実際にログに現れる固有名詞の照合は未実施）。ここは本レポートの範囲外とします。</p>
+<hr>
+<h2 id="h3">3. 採用候補</h2>
+<h3>候補 X: 「人間が見るべき変更」の定義を作る — 優先度 <strong>高</strong></h3>
+<p><strong>根拠は理論ではなく実測です。</strong> 統制系変更を含む PR が 10/60（16.7%）あり、そのすべてが 3 層レビューも人間レビューも通っていません。うち #723 は品質ゲート、#714 は Case Bank という、<strong>審査と学習の仕組みそのもの</strong>でした。</p>
+<p>記事の 8 項目を本組織にマッピングすると次のようになります。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>記事の項目</th><th>本組織での該当</th><th>実在するか</th></tr></thead><tbody>
+<tr><td>統制系変更</td><td><code>.claude/hooks/</code> <code>.claude/rules/</code> <code>CLAUDE.md</code> <code>**/skills/</code> <code>.github/workflows/</code></td><td><strong>✅ 10/60 件</strong></td></tr>
+<tr><td>不可逆操作</td><td><code>git reset --hard</code> / main 直コミット / ファイル削除</td><td>✅ 実例あり（2026-08-08 に無承認実行、記録済み）</td></tr>
+<tr><td>セキュリティ境界</td><td>workflow の <code>permissions:</code> / PAT / secrets</td><td>未測定</td></tr>
+<tr><td>個人情報フロー</td><td><code>.conversation-log/</code>（public リポジトリに 3,163 発言）</td><td>✅ 実在。マスキングあり、辞書の網羅性は未測定</td></tr>
+<tr><td>外部契約</td><td><code>.mcp.json</code> のバージョンピン / GitHub API</td><td>✅ 実例あり（#569/#570 で PyPI yank）</td></tr>
+<tr><td>新規パターン導入</td><td>新規 Skill / 新規 hook の追加</td><td>✅ #757 が該当</td></tr>
+<tr><td>高リスク値計算</td><td><code>retail-stats-tracker</code> の数値抽出（NFR-05）</td><td>✅ 実例あり（正規表現の 30 倍誤差）</td></tr>
+<tr><td>実行時ハザード</td><td>cron workflow / 巡回処理</td><td>未測定</td></tr>
+</tbody></table></div>
+<p><strong>8 項目中 6 項目が本組織に実在します。</strong> 記事の項目群は流用可能です。</p>
+<p>実装は 2 段構えにします。記事の設計をそのまま踏襲します。</p>
+<ol>
+<li><strong>決定的ゲート（LLM を使わない）</strong> — ファイルパスのマッチだけで判定する。<code>.claude/hooks/</code> <code>.claude/rules/</code> <code>CLAUDE.md</code> <code>.github/workflows/</code> を触る PR は無条件で人間レビュー必須。<strong>再現性が要るので LLM を置かない</strong>（記事 §1.5）</li>
+<li><strong>LLM レイヤー</strong> — 上記に当てはまらない PR について、残り 4〜5 項目を判定する</li>
+</ol>
+<p><strong>まず 1 だけでも意味があります。</strong> パスのマッチは hook かワークフローで書け、判定が揺れません。</p>
+<p><strong>コスト</strong>: 小〜中（決定的ゲートのみなら小）</p>
+<p><strong>判断に必要な追加情報</strong>: 現状 auto-merge は <code>gh pr merge --squash</code> を Skill が直接叩いています。ゲートをどこに置くか（PR 作成時の hook か、GitHub Actions か）は<strong>未検討</strong>です。</p>
+<h3>候補 Y: 判定を 2 軸に分ける（成果物の品質 / 人間レビューの要否）— 優先度 <strong>中</strong></h3>
+<p>本組織は現在 <strong>1 軸</strong>です。<code>l2_composite ≥ 0.85</code> で pass → auto-merge。</p>
+<p>この設計では「<strong>L2 は通ったが人間も見るべき</strong>」を表現できません。実際に、Issue #724 / #728 / #729 は L2 を通過した後に設計不整合が発覚しています。</p>
+<p>記事の 2 軸をそのまま持ち込むと:</p>
+<div class="table-wrap"><table>
+<thead><tr><th>軸</th><th>値</th><th>本組織での意味</th></tr></thead><tbody>
+<tr><td>L2 の判定</td><td>pass / <strong>pending</strong> / fail</td><td>成果物そのものの品質</td></tr>
+<tr><td>人間レビューの要否</td><td>required / optional</td><td>候補 X のゲートが決める</td></tr>
+</tbody></table></div>
+<p>両方が揃ったときだけ auto-merge します。</p>
+<p><strong>候補 S（「緑 ≠ 実用可」の明文化）と候補 B（<code>verification-pending</code> の追加）は、この 2 軸化の一部として実装できます。</strong> 3 つを別々に扱うより整合します。</p>
+<p><strong>コスト</strong>: 中（task-log スキーマと Skill の Phase 7 に手を入れる）</p>
+<h3>候補 Z: <code>pending</code>（承認も却下もしない状態）— 優先度 <strong>中</strong></h3>
+<p>記事の <code>pending</code> は「<strong>diff の外の事実に正しさが依存する</strong>」場合の状態です。</p>
+<p>本組織の L2 は pass / fail の 2 値で、この状態がありません。結果として、<strong>未確認事項があっても pass か fail のどちらかに丸められます</strong>。</p>
+<p>本組織で <code>pending</code> が要る典型:</p>
+<ul>
+<li>設計書が他の設計書と整合しているか（<strong>その文書の外の事実</strong>）— #724/#728/#729 がまさにこれ</li>
+<li>生成した数値が実データで再現するか — NFR-05 の実測</li>
+<li>参照先のファイルが実在するか</li>
+</ul>
+<p><strong>候補 B / S / Y と同じ問題を指しています。</strong> 別々の候補として持つより、<strong>「未確認を未確認のまま扱える状態を作る」</strong>として統合すべきです。</p>
+<p><strong>コスト</strong>: 中</p>
+<p><strong>注意</strong>: 記事の pending は「作者に質問して回答を待つ」対話ループを含みます。本組織は作者も AI なので、そのままは持ち込めません。<strong>保留の状態を持つところまで</strong>が現実的です。</p>
+<h3>候補 AA: nightly の CLAUDE.md 自動更新に人間の承認を入れる — 優先度 <strong>高</strong></h3>
+<p><strong>追記 +49 行 / 削除 -5 行</strong>。12 回とも人間のレビューなしでマージされています。</p>
+<p>これは候補 X の一部ですが、<strong>単独で切り出す価値があります</strong>。理由は 2 つ。</p>
+<ol>
+<li><strong>AI が自分を縛るルールを自分で書き換えている</strong>。記事の <code>control_plane_change</code> の最たるもの</li>
+<li><strong>候補 Q（CLAUDE.md 削減）が進まない原因が、この非対称性で説明できる</strong>。増やす仕組みは自動で回り、減らす判断をする場所がない</li>
+</ol>
+<p>対処は 2 つ考えられます。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>案</th><th>内容</th><th>評価</th></tr></thead><tbody>
+<tr><td>(a) nightly PR を auto-merge させず、人間の approve を必須にする</td><td>ゲートを 1 箇所入れるだけ</td><td><strong>低コスト。ただし溜まると形骸化する</strong></td></tr>
+<tr><td>(b) nightly に「削除の提案」も行わせる</td><td>追記と同時に、陳腐化した項目の削除候補を出させる</td><td>効果は大きいが、<strong>判断が AI に寄る</strong>ので (a) とセットが要る</td></tr>
+</tbody></table></div>
+<p><strong>(a) を先に、(b) は候補 Q の判断材料が揃ってから</strong>が順当です。</p>
+<p><strong>コスト</strong>: 小（(a) のみ）</p>
+<h3>候補 AB: L2 の初回スコアを保存する — 優先度 <strong>中</strong></h3>
+<p>記事は「偽陽性/偽陰性の率は引き続き見ていくべき」と明記しています。本組織にはその材料がありません。</p>
+<p><code>l2_composite</code> の記録 109 件すべてが 0.88 以上で、<strong>fail が 1 件も残っていません</strong>。L2 retry は 4 件発生しているので、<strong>修正後の最終値だけが上書き保存されている</strong>と考えられます。</p>
+<p>対処は task-log スキーマに 1 フィールド足すだけです。</p>
+<pre><code>l2_composite: 0.98        # 最終
+l2_composite_initial: 0.72  # ← 初回（retry 前）
+l2_retries: 1</code></pre>
+<p>これがあれば「L2 が何を落としたか」の分布が取れ、<strong>閾値 0.85 が適正かを後から検証できます</strong>。</p>
+<p><strong>コスト</strong>: 小</p>
+<p><strong>注意</strong>: これは<strong>過去分には遡れません</strong>。今から記録を始めても、判断材料が溜まるのは先です。</p>
+<h3>候補 AC: AI による PR auto-approve の導入 — ❌ <strong>不採用</strong></h3>
+<p>記事の主題そのものですが、<strong>本組織には導入する対象がありません</strong>。</p>
+<p>approve 率は既に実質 100%（直近 60 件すべてレビュー 0 件でマージ）。記事が解決した「approve 率が低くてボトルネックになる」という課題が存在しません。</p>
+<p><strong>同じ記事から、本組織は逆向きの示唆を採るべきです</strong>（候補 X / Y / Z / AA）。仕組みを持ち込むのではなく、記事が前提として持っていた「<strong>人間が見るべき線</strong>」を、本組織はまだ引いていないという点を採ります。</p>
+<hr>
+<h2 id="h4">4. 記事から採る運用面の示唆（仕組みではない部分）</h2>
+<h3>4.1 「緩める判断は責任者が明示的に下す」</h3>
+<blockquote>こういう安全側に倒さない判断は、責任者が良いと言わないとなかなかそうなりづらいので、そういう判断・意思決定は開発責任者として意識的にするようにしています。</blockquote>
+<p>本組織のオーナーは笹尾さん 1 人で、責任者と作業者が同一です。そのぶん<strong>「緩める判断」が記録に残りにくい</strong>構造です。</p>
+<p>候補 X で線を引くとき、<strong>どこを緩めたか（＝人間レビュー不要にしたか）を理由つきで残す</strong>ことが、この指摘の実装にあたります。カタログに「不採用も理由つきで残す」ルールが既にあるので、同じ形式が使えます。</p>
+<h3>4.2 「まず測る」</h3>
+<p>記事は 75 件の全数分析から始まっています。本レポートも 60 件の全数分析から始めました。</p>
+<p><strong>測らずに「レビューが足りない」と言っていたら、統制系 16.7% という数字も、nightly の 49:5 という非対称も出ませんでした。</strong></p>
+<h3>4.3 速報値であることを明示する</h3>
+<p>著者は「リリースしてから 2 週間ほど」「速報値」と繰り返し断り、「偽陽性/偽陰性は引き続き見ていくべき」と留保しています。</p>
+<p><strong>成果を出しながら未確認を明示する</strong>書き方で、本組織の CLAUDE.md にある「不確実さを分量で埋めない」と同じ姿勢です。</p>
+<hr>
+<h2 id="h5">5. 未検証事項</h2>
+<ul>
+<li><strong>セキュリティ境界と実行時ハザードは未測定</strong>。8 項目のうちこの 2 つは本組織での実在を確認していない</li>
+<li><strong>マスキング辞書の網羅性は未測定</strong>。マスタの登録件数と、ログに実際に現れる固有名詞の照合をしていない。<code>masked: true</code> は処理を通した印であって、機密が残っていない保証ではない</li>
+<li><strong>L2 が甘いかどうかは判定できない</strong>。初回スコアが残っていないため、retry 4 件が「正しく落とした」のか「落としすぎた」のかが分からない（候補 AB はこれを将来測れるようにする提案であって、現状の評価ではない）</li>
+<li><strong>ゲートをどこに置くかは未検討</strong>。現状 auto-merge は Skill が <code>gh pr merge</code> を直接叩いており、PR 作成時 hook / GitHub Actions / Skill 内チェックのどれが適切かを比較していない</li>
+<li>記事の実装（sticky コメント / ラベル / pending の対話ループ）は<strong>コードを見ていない</strong>。評価は記事の記述に基づく</li>
+<li>記事の 58% は<strong>2 週間の速報値</strong>であり、著者自身が偽陽性/偽陰性の継続観測を課題として残している</li>
+</ul>
+<hr>
+<p>_情報源: curl による原文取得（6,664 字）/ <code>gh pr list</code> による直近 60 PR の全数分析 / <code>.companies/</code> 配下と <code>.claude/</code> 配下の実測_</p>
+  <p class="updated">生成: 2026-08-16 14:31 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>

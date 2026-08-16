@@ -1579,6 +1579,15 @@ if Path("docs/insights/index.html").exists():
       <div class="org-label">活動インサイト・完了グラフ →</div>
     </a>'''
 
+# 知見解析レポートが存在すれば追加（generate-insights-analyses-html.sh が生成）
+# TodoInsights とは別系統。同じ docs/insights/ 配下だが中身は無関係。
+if Path("docs/insights/analyses/index.html").exists():
+    cards += '''
+    <a href="./insights/analyses/index.html" class="card" style="border:2px solid #a855f7;">
+      <div class="org-name">知見解析レポート</div>
+      <div class="org-label">技術記事の精読・実測・採用判断 →</div>
+    </a>'''
+
 # 小売月次統計トラッカーが存在すれば追加（retail-stats-tracker / 要件 IF-05）
 # **カードの定義はこの生成器に置く。** docs/index.html を直接編集すると
 # /company-dashboard の次回実行で上書きされて消える。

@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-16T14:16:08",
-  "case_count": 229,
+  "updated_at": "2026-08-16T14:24:33",
+  "case_count": 230,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7144,6 +7144,42 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-09T15:42:00"
+      }
+    },
+    {
+      "id": "20260816-141319-ai-week-analysis",
+      "state": {
+        "request_keywords": [
+          "8/9週でAI関連の配信の中で私が使用できそうな物",
+          "claude",
+          "code",
+          "codexや",
+          "AIエージェントの設計関連",
+          "を深堀して解析してほしい",
+          "解析結果はmdファイルでまとめたい"
+        ],
+        "request_head": "8/9週でAI関連の配信の中で私が使用できそうな物（claude code,codexや、AIエージェントの設計関連）を",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 9
+      },
+      "reward": null,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/insights/analyses/",
+          ".companies/{org}/docs/research/digest-{YYYY-MM}-ai-insights.md",
+          ".companies/{org}/docs/",
+          ".companies/domain-tech-collection/docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md",
+          ".companies/domain-tech-collection/docs/insights/catalog.md",
+          ".companies/domain-tech-collection/docs/insights/README.md",
+          ".companies/domain-tech-collection/docs/insights/analyses/{slug}.md",
+          ".companies/domain-tech-collection/docs/secretary/reports/2026-08-08-today.md"
+        ],
+        "started": "2026-08-16T13:52:00"
       }
     }
   ],

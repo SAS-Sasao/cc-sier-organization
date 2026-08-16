@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI が書くコメントの分量 — 解析と自組織での実測 | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>AI が書くコメントの分量 — 解析と自組織での実測</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（実測検証つき）</span><span class="tag">作成日: 2026-08-08</span><span class="tag">ステータス: 解析完了・自組織での実測あり</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">1. 記事の要旨</a></li><li><a href="#h1">2. 自組織での実測</a></li><li><a href="#h2">3. 本組織への示唆</a></li><li><a href="#h3">4. 提案</a></li><li><a href="#h4">5. 未検証事項</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（実測検証つき）</td></tr>
+<tr><td>作成日</td><td>2026-08-08</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>対象記事</td><td><a href="https://zenn.dev/uzu_tech/articles/86a2ef05a7d649">Claude が書く長いコメントは、Claude 自身の役に立っていなかった</a>（@wellPicker / 株式会社Sally / 2026-08-05）</td></tr>
+<tr><td>取得方法</td><td>curl で原文取得（6,212 字）。<code>.claude/rules/web-content-fetch.md</code> に準拠</td></tr>
+<tr><td>ステータス</td><td>解析完了・自組織での実測あり</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">1. 記事の要旨</h2>
+<p>Claude Code が書くコードコメントが冗長になる問題を、著者が <strong>Claude 本人に聞き、ルール化し、効果を測定した</strong>記録。</p>
+<h3>1.1 起点となった観測</h3>
+<p>WebSocket の圧縮設定 <strong>1 行</strong>に対し、コメントが <strong>18 行</strong>付いていた。しかも書かれている内容に嘘はなく、ライブラリ仕様も本番で OOMKill が起きた経緯も事実だった。</p>
+<h3>1.2 Claude 本人の回答（記事の中核）</h3>
+<p>著者が「長いコメントは AI 自身の読解を助けているのか」と尋ねたところ、否定的な回答が返った。要点は 3 つ。</p>
+<ol>
+<li><strong>読解の助けにならない</strong> — 実際に見ているのはコードそのもの。<code>// ユーザー ID を取得する</code> の類は情報量ゼロで、コンテキストを占有して周囲のコードが見えにくくなる</li>
+<li><strong>理解のためではなく出力の癖</strong> — 説明的で丁寧な出力が好まれるよう訓練されている。「ちゃんと考えて書きました」を可視化する方向に流れやすい</li>
+<li><strong>自信がない箇所ほど言葉で埋めて補強しようとする</strong></li>
+</ol>
+<p>著者はこの 3 つ目を最大の収穫としている。</p>
+<blockquote><strong>コメントの分量が、その箇所の不確実さの指標になっている。</strong></blockquote>
+<p>本来なら「この実装で合っているか自信がない」と申告すべき場面で、代わりに長い説明が生えている。<strong>丁寧な説明を「よく理解して書かれたコード」の証と読むのは逆</strong>だった、という指摘。</p>
+<h3>1.3 ルールを入れたが半分しか効かなかった</h3>
+<p>「コードから復元できない情報だけを書く」というルールを追加し、前後の PR 27 件を実測した。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>指標</th><th>変更前</th><th>変更後</th></tr></thead><tbody>
+<tr><td>追加コード</td><td>2,909 行</td><td>6,448 行</td></tr>
+<tr><td>追加コメント</td><td>777 行</td><td>624 行</td></tr>
+<tr><td><strong>コメント比率</strong></td><td>21.1%</td><td><strong>8.8%</strong></td></tr>
+<tr><td><strong>4 行以上の連続ブロック</strong></td><td><strong>52 個</strong></td><td><strong>50 個</strong></td></tr>
+<tr><td>ブロック最大 / 平均</td><td>17 行 / 7.3 行</td><td>18 行 / 6.2 行</td></tr>
+</tbody></table></div>
+<p>比率は半減した一方、<strong>長いブロックはまったく減っていない</strong>。最大に至っては 17 → 18 行に増えている。</p>
+<p>著者は交絡も自ら申告している（コード量が倍以上違うため比率低下には希釈の影響が混ざりうる。ただしブロック数は絶対数比較なのでこの交絡を受けない）。</p>
+<h3>1.4 減らなかった理由 — 有用だから消せない</h3>
+<p>冒頭の 18 行にルールを当てると、<strong>全行が「コードから復元できない情報」に該当</strong>した。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>行</th><th>内容</th><th>判定</th></tr></thead><tbody>
+<tr><td>1〜4</td><td>クライアント側が既に圧縮を advertise している</td><td>該当（クライアント実装を見ないと分からない）</td></tr>
+<tr><td>6〜11</td><td>context takeover は接続ごとに固定メモリを持つ</td><td>該当（ライブラリの内部仕様）</td></tr>
+<tr><td>13〜18</td><td>移行前は gorilla で、移行時に変えたら OOMKill した</td><td>該当（過去の事故の経緯）</td></tr>
+</tbody></table></div>
+<blockquote>AI が書くコメントは、<strong>無意味だから消せるのではなく、有用だから消せない</strong>。</blockquote>
+<h3>1.5 判断軸を「有用か」から「置き場所か」へ</h3>
+<p>著者は基準を変えた。</p>
+<blockquote>その情報が有用かどうかではなく、<strong>そこがその情報の置き場所かどうか</strong>で切る</blockquote>
+<p>18 行のうち後半 6 行は「変更の履歴」であり、置き場所は <strong>git log と PR</strong>。半年後に読む人が必要なのは「なぜ今この設定なのか」であって「何から何に変えたか」ではない。</p>
+<p>同じ観点でタスク ID 参照（<code>(UZU-1234)</code>）も外した。リンク先の issue が閉じられ、内容が要約されずに残るだけの識別子になるため。</p>
+<h3>1.6 ルールの書き方を 3 点変えた</h3>
+<ol>
+<li><strong>禁止リストの形にした</strong> — 「書く/書かない」の表は判断を委ねる形式で、表にない項目の扱いが曖昧になる。<strong>禁止する対象を名指しする方が解釈の幅が小さい</strong></li>
+<li><strong>実際に出てきた違反をそのまま項目として足した</strong> — 抽象的な原則 1 つより、具体的な違反の列挙が効く（という仮説）</li>
+<li><strong>グローバル（<code>~/.claude/CLAUDE.md</code>）に移した</strong> — どのリポジトリでも同じことを求めているため</li>
+</ol>
+<p>著者はこの効果を<strong>まだ判断できていない</strong>と明記し、次に同じ集計を回す予定としている。</p>
+<blockquote>ルールを書いた後は、出力が実際に変わったかを測る。<strong>体感では「効いた/効かない」を取り違える</strong></blockquote>
+<hr>
+<h2 id="h1">2. 自組織での実測</h2>
+<p>記事の教訓（体感で判断せず測る）に従い、本組織の hooks を同じ指標で測定した。</p>
+<h3>2.1 測定結果</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>対象</th><th>ファイル数</th><th>実行行</th><th>コメント</th><th>比率</th><th>4 行以上のブロック</th><th>最大 / 平均</th></tr></thead><tbody>
+<tr><td><code>.claude/hooks/*.sh</code></td><td>16</td><td>5,554</td><td>640</td><td><strong>11.5%</strong></td><td><strong>15 個</strong></td><td><strong>29 行</strong> / 7.6 行</td></tr>
+<tr><td><code>.claude/hooks/*.py</code></td><td>5</td><td>3,142</td><td>202</td><td>6.4%</td><td>2 個</td><td>7 行 / 6.5 行</td></tr>
+</tbody></table></div>
+<p>記事のルール適用後（比率 8.8% / 最大 18 行）と比べると、<strong>shell 側は比率・最大ブロックとも上回っている</strong>。</p>
+<h3>2.2 最長ブロック（29 行）の分類</h3>
+<p><code>.claude/hooks/bootstrap-todo-issues.sh</code> の冒頭 29 行に、記事の基準を当てはめた。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>区分</th><th>内容</th><th>「コードから復元できない情報」か</th></tr></thead><tbody>
+<tr><td>前提</td><td>WBS が拡張スキーマに移行済み / PROJECTS_PAT が設定済み</td><td><strong>該当</strong>（外部の前提条件）</td></tr>
+<tr><td>認証トークンの役割分担</td><td>user-owned Project v2 は fine-grained PAT 非対応（GitHub 既知の制約）</td><td><strong>該当</strong>（外部制約）</td></tr>
+<tr><td>動作 1〜N</td><td>parse-wbs.py で取得 → Issue 検索 → 未作成なら作成</td><td><strong>非該当</strong>（コードを読めば分かる WHAT）</td></tr>
+</tbody></table></div>
+<p>記事とまったく同じ構図だった。<strong>大部分は削る根拠が作れない</strong>一方、「動作」の手順列挙は WHAT に該当する。</p>
+<h3>2.3 「置き場所」基準で見ると重複が見つかった</h3>
+<p>記事の第 2 の基準（そこがその情報の置き場所か）を当てたところ、<strong>同じ知見が CLAUDE.md と hooks コメントの両方に存在</strong>していた。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>知見</th><th>CLAUDE.md</th><th>hooks コメント</th></tr></thead><tbody>
+<tr><td><code>PROJECTS_PAT</code> は Classic PAT 必須（fine-grained は Project v2 非対応）</td><td>1 箇所（L167）</td><td><strong>10 箇所</strong></td></tr>
+<tr><td>fine-grained PAT の制約</td><td>1 箇所</td><td>4 箇所</td></tr>
+<tr><td>Python→bash は <code>\x1f</code> を使う（<code>\t</code> だと column shift）</td><td>1 箇所</td><td>3 箇所</td></tr>
+</tbody></table></div>
+<p>CLAUDE.md はセッション開始時に<strong>常時ロードされる</strong>。hooks のコメントは、そのファイルを読んだときにしか目に入らない。<strong>同じ制約を 2 箇所で保守する状態</strong>になっている。</p>
+<p>これは記事が指摘した「変更履歴は git log が置き場所」と同型の問題であり、<strong>運用知見の置き場所は CLAUDE.md / rules であって、スクリプト内コメントではない</strong>。</p>
+<hr>
+<h2 id="h2">3. 本組織への示唆</h2>
+<h3>3.1 最も重要な指摘 — コメント量は不確実さの指標</h3>
+<p>「自信がない箇所ほど言葉で埋めて補強する」という性質は、<strong>コードコメントに限らない</strong>。本組織の文脈では次に現れうる。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>場面</th><th>現れ方</th></tr></thead><tbody>
+<tr><td>設計書</td><td>判断根拠が薄い節ほど説明が長くなる</td></tr>
+<tr><td>task-log</td><td>検証していない項目ほど作業記録が冗長になる</td></tr>
+<tr><td>完了報告</td><td>未確認事項がある報告ほど「実施しました」の列挙が増える</td></tr>
+<tr><td>L2 レビューの findings</td><td>確信のない指摘ほど文章が長くなる</td></tr>
+</tbody></table></div>
+<p><strong>対策は「短く書け」ではなく「不確実なら不確実と書け」</strong>である。記事の著者も同じ結論に達しており、ルールに「不確実さはコメントの分量ではなく、PR description や回答本文で『ここは未確認』と明示して伝える」と書いている。</p>
+<p>本組織では既に、検証レポートに「未検証事項」章を設ける運用が定着している（<code>analyses/webfetch-summarization.md</code> §7 / <code>catalog.md</code> §8）。ただし<strong>ルール化されておらず、秘書の判断に依存している</strong>。</p>
+<h3>3.2 ルールの書き方 — 表より禁止リスト</h3>
+<p>記事の「表は判断を委ねる形式で、表にない項目の扱いが曖昧になる」という指摘は、本組織のルール記述にも当てはまる。</p>
+<p>現行の <code>.claude/rules/</code> は表形式が多い。ただし <code>CLAUDE.md</code> の注意事項は<strong>禁止リスト形式（⚠️ / ❌ の列挙）</strong>であり、こちらは記事の推奨と一致している。</p>
+<h3>3.3 「効いたか測る」の仕組みがない</h3>
+<p>本組織はルールを追加した後、<strong>それが出力に効いたかを測っていない</strong>。今回の測定が初回である。</p>
+<p>記事の著者は「体感では効いた/効かないを取り違える」と明言している。実際、本組織でも <code>analyses/webfetch-summarization.md</code> で「体感」ではなく実測したことで、想定と異なる結果（記事の主張が全て再現した）が得られた。</p>
+<hr>
+<h2 id="h3">4. 提案</h2>
+<h3>4.1 採用候補 N: 「不確実性の明示」をルール化する — 優先度 <strong>高</strong></h3>
+<p>現在は秘書の判断で「未検証事項」章を設けているが、ルールがない。</p>
+<p>記事の知見（コメント量が不確実さの指標になる）を踏まえると、<strong>分量で埋めるのではなく明示的に申告する</strong>ことをルール化する価値がある。</p>
+<p>適用先: 設計書 / task-log / 完了報告 / L2 findings</p>
+<p><strong>コスト</strong>: 小（ルール 1 項目）</p>
+<h3>4.2 採用候補 O: hooks コメントと CLAUDE.md の重複を解消 — 優先度 <strong>中</strong></h3>
+<p><code>PROJECTS_PAT</code> の制約が 11 箇所（CLAUDE.md 1 + hooks 10）に散在している。置き場所は CLAUDE.md であり、hooks 側は参照に留めるべき。</p>
+<p>ただし<strong>スクリプト単体で読まれる可能性</strong>もあるため、一律削除は危険。「CLAUDE.md 参照」の 1 行に置き換える形が現実的。</p>
+<p><strong>コスト</strong>: 中（16 ファイルの精査が必要） <strong>判断に必要な情報</strong>: hooks が cc-sier 外に配布される可能性があるか（<code>/company-spawn</code> で新リポにコピーされる場合、CLAUDE.md 参照が切れる）</p>
+<h3>4.3 採用候補 P: ルール追加後の効果測定を習慣化 — 優先度 <strong>中</strong></h3>
+<p>本レポートの §2 で使った測定スクリプトを再利用可能な形にし、ルール追加後に同じ指標で測る。</p>
+<p><strong>コスト</strong>: 小〜中</p>
+<hr>
+<h2 id="h4">5. 未検証事項</h2>
+<ul>
+<li>本組織の<strong>設計書・task-log</strong>における冗長性は未測定（今回は hooks のみ）</li>
+<li>記事の「禁止リスト形式の方が効く」は著者自身が<strong>効果を判断できていない</strong>と明記しており、本組織でも未検証</li>
+<li>§4.2 の重複解消が、スクリプト単体での可読性をどれだけ損なうかは未評価</li>
+<li>「コメント量 = 不確実さの指標」が本組織の成果物にも当てはまるかは未測定（仮説の段階）</li>
+</ul>
+<hr>
+<p>_情報源: curl による原文取得（2026-08-08）/ <code>.claude/hooks/</code> の実測 / <code>CLAUDE.md</code>_</p>
+  <p class="updated">生成: 2026-08-16 14:31 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>

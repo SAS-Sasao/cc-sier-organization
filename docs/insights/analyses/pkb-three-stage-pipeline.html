@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Personal Knowledge Base の 3 段導線 — 解析と自組織での実測 | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>Personal Knowledge Base の 3 段導線 — 解析と自組織での実測</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（解説つき・実測検証あり）</span><span class="tag">作成日: 2026-08-08</span><span class="tag">ステータス: 解析完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">0. この記事は何か（解説）</a></li><li><a href="#h1">1. 自組織での実測</a></li><li><a href="#h2">2. 採用候補</a></li><li><a href="#h3">3. この記事から本組織が学べる点（解説）</a></li><li><a href="#h4">4. 未検証事項</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（解説つき・実測検証あり）</td></tr>
+<tr><td>作成日</td><td>2026-08-08</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>対象記事</td><td><a href="https://zenn.dev/mkj/articles/claudian-orchestra-build_20260720">0.5くらいから始めるPersonal Knowledge Base 構築実践</a>（Taisei Ozaki / 松尾研究所 / 2026-07-30）</td></tr>
+<tr><td>取得方法</td><td>curl で原文取得（<strong>15,020 字</strong>）。<code>.claude/rules/web-content-fetch.md</code> に準拠</td></tr>
+<tr><td>ステータス</td><td>解析完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">0. この記事は何か（解説）</h2>
+<h3>0.1 PKB とは</h3>
+<p><strong>PKB（Personal Knowledge Base＝個人の知識ベース）</strong> は、Obsidian の Vault（＝ Markdown ファイルを置くフォルダ）を <strong>人間と AI の共有メモリ</strong>に据える構想です。</p>
+<p>従来「AI に文脈を渡す」といえば、その都度プロンプトに貼り付けるものでした。PKB はそれを<strong>ファイルシステムに永続化</strong>し、人間も AI も同じ場所を読み書きします。</p>
+<p>著者は前提として、AI が読むのは Obsidian そのものではなく<strong>ファイル</strong>だと述べています。つまり Obsidian は人間側の窓であって、本質は「構造化された Markdown 群」です。</p>
+<h3>0.2 中核となる 3 段導線</h3>
+<p>記事の骨格はこの 3 段です。</p>
+<pre><code>外部ソース ──▶ Inbox/ ──▶ Daily/ ──▶ Wiki/ など Main DB
+              Capture     Daily      Distill
+             （自動寄り）（人間の監査盤面）（承認必須）</code></pre>
+<div class="table-wrap"><table>
+<thead><tr><th>段</th><th>役割</th><th>自動化の度合い</th></tr></thead><tbody>
+<tr><td><strong>Capture</strong></td><td>Slack / Gmail / Calendar 等の生データを <code>Inbox/</code> に取り込む</td><td><strong>自動寄り</strong></td></tr>
+<tr><td><strong>Daily</strong></td><td>その日 1 枚のノートに集約する</td><td><strong>人間の監査盤面</strong></td></tr>
+<tr><td><strong>Distill</strong></td><td>永続的な知識だけを <code>Wiki/</code> へ蒸留する</td><td><strong>承認必須</strong></td></tr>
+</tbody></table></div>
+<p>設計の要点は「<strong>人間は Daily 1 枚を見るだけで全体を差配できる</strong>」ことです。取り込みは自動でよいが、永続化には人間の承認を挟む。ここに線を引いています。</p>
+<h3>0.3 「0.5 から始める」の意味</h3>
+<p>著者はゼロから作って「山ほど作って山ほど壊した」経験から、<strong>土台部分をテンプレート化して公開</strong>しました。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>テンプレが持ってくる（＝0.5）</th><th>自分で埋める（＝残りの 0.5）</th></tr></thead><tbody>
+<tr><td>エージェント契約（<code>AGENTS.md</code>）</td><td>モデル選択・自律度の線引きの微調整</td></tr>
+<tr><td>運用ルール（frontmatter スキーマ・タグ・Inbox routing）</td><td>自分の語彙・ドメイン固有の規約</td></tr>
+<tr><td>skill 群（daily-briefing / inbox 集約 / eod-distill 等）</td><td>要らない skill の間引き・自作</td></tr>
+<tr><td>ディレクトリ雛形</td><td>中身（自分の案件・ノート）</td></tr>
+<tr><td>認証の雛形と接続ウィザード</td><td><strong>各サービスのトークン（自分のもの）</strong></td></tr>
+</tbody></table></div>
+<p><strong>自動化しきれない部分を正直に切り分けている</strong>のが特徴です。認証と「毎日回して運用に定着させる」ところは、テンプレートが肩代わりできないと明言しています。</p>
+<h3>0.4 構成要素</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>要素</th><th>役割</th></tr></thead><tbody>
+<tr><td>Obsidian</td><td>PKB の人間側の窓</td></tr>
+<tr><td>Codex CLI</td><td>Vault の整理・蒸留を担うコアエージェント</td></tr>
+<tr><td><strong>Hermes Agent</strong></td><td><strong>外部接続の認証を一手に持つ capture 専任</strong></td></tr>
+<tr><td>Google Drive 等</td><td>複数 PC での Vault 同期</td></tr>
+</tbody></table></div>
+<p><strong>Hermes に認証を集約する設計</strong>が効いています。Slack / Gmail / Calendar のトークンが 1 箇所（<code>.hermes/.env</code>）に集まり、コアエージェントは認証を持ちません。責務が分離されています。</p>
+<h3>0.5 セキュリティ面の設計判断</h3>
+<p>記事には慎重な判断が複数あります。</p>
+<ul>
+<li><strong>Gmail は件名・差出人・スニペットのみ</strong>取り込み、本文や添付は取り込まない（機密性の高いメールでも比較的安心して繋げる）</li>
+<li><strong>Slack は bot トークンではなく User Token</strong> を使う（bot をチャンネルに招待して回る手間が消える）。ただし「権限が自分のアカウントと同じ強さになる」ため取り扱いは bot 以上に慎重に、と警告</li>
+<li><strong>Codex のオプトアウトを確実に行う</strong>（認証情報に触らせるため）</li>
+</ul>
+<h3>0.6 日次ループ</h3>
+<pre><code>朝  daily-briefing  → 今日・明日の予定・タスク・前日からの持ち越しを並べる
+日中 aggregate 系    → Slack・メール・議事録を Daily に集約
+夜  eod-distill     → 未 capture 分を取得し、Wiki へ蒸留（人間が承認）</code></pre>
+<p>実行は<strong>定時 cron ではなく on-demand</strong>。Daily ノートに <code>## 🤖 ジョブリスト</code> があり、チェックリストを見て「これやって」と指示する形です。</p>
+<hr>
+<h2 id="h1">1. 自組織での実測</h2>
+<p>記事の 3 段導線に対応する構造が本組織にあるかを測りました。</p>
+<h3>1.1 3 段導線は既に存在する</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>段</th><th>本組織の該当</th><th>規模</th></tr></thead><tbody>
+<tr><td><strong>Capture</strong></td><td><code>daily-digest/</code>（自動巡回）/ <code>.conversation-log/</code> / <code>.session-summaries/</code></td><td>115 / 15 / 124 ファイル</td></tr>
+<tr><td><strong>Daily</strong></td><td><code>docs/secretary/board.md</code>（12 KB）/ <code>dashboard.html</code>（68 KB）/ <code>reports/</code></td><td>32 レポート</td></tr>
+<tr><td><strong>Distill</strong></td><td><code>insights/catalog.md</code>（350 行）/ <code>analyses/</code>（4 本）/ <code>.task-log/</code></td><td>224 task-log</td></tr>
+</tbody></table></div>
+<p><strong>構造としては既に 3 段が揃っています。</strong> 記事と違うのは Obsidian を使わない点だけで、思想は同じです。</p>
+<h3>1.2 記事の「詰まりどころ」4 件を照合</h3>
+<p>記事は §7 で 4 つの詰まりどころを挙げています。本組織で起きているかを測りました。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事の詰まりどころ</th><th>本組織の状態</th><th>判定</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>Inbox の取り込み過多</strong>（capture が強力なぶん処理が追いつかない）</td><td><strong>daily-digest 115 日分のうち解析済みは 8 日分（7.0%）</strong>。A1+A2 の総記事数 3,192 件</td><td><strong>❗ 起きている</strong></td></tr>
+<tr><td>2</td><td>single-writer の規律（複数 PC で同期競合）</td><td><code>dashboard.html</code> の直近コミッターは全て同一（hook による自動生成で実質単一 writer）</td><td>✅ 問題なし</td></tr>
+<tr><td>3</td><td>どこまで自動化し、どこから人間が承認するか</td><td><code>git-workflow.md</code> に main 直コミット許可を <strong>5 種類</strong>明記。それ以外は PR + 3 層レビュー</td><td>✅ 明文化済み</td></tr>
+<tr><td>4</td><td>正本の所在</td><td><code>todo-management.md</code>（WBS が SSoT）/ <code>catalog.md</code> / <code>task-management.md</code> の 3 箇所で明文化</td><td>✅ 明文化済み</td></tr>
+</tbody></table></div>
+<p><strong>4 件中 3 件は既に対応済みで、1 件だけが実際に起きています。</strong></p>
+<h3>1.3 詰まりどころ①の詳細</h3>
+<pre><code>daily-digest: 2026-03-21 〜 2026-08-08 の 115 日分
+A1+A2 の記事: 3,192 件
+解析済み:     8 日分（8月のみ）= 7.0%
+未解析:       107 日分</code></pre>
+<p>記事の表現を借りれば「<strong>capture が強力なぶん、処理が追いつかないと Inbox が生データで溢れる</strong>」状態です。</p>
+<p>しかも本組織は日次ダイジェストが<strong>毎日自動生成され続ける</strong>ため、対策しなければ差は開く一方になります。</p>
+<p>記事が挙げる予防策は「<strong>§5 の『1 つずつ』を守る</strong>」ことだけです。つまり<strong>取り込みを増やす前に、処理できる量に合わせる</strong>という考え方で、根本的な解決策は示されていません。</p>
+<hr>
+<h2 id="h2">2. 採用候補</h2>
+<h3>候補 U: ダイジェストの未解析分をどう扱うか決める — 優先度 <strong>中</strong></h3>
+<p><strong>問題は「解析していないこと」ではなく、「解析していないことが可視化されていない」ことです。</strong></p>
+<p>現状、115 日分のうち 107 日分が未解析であることは、今回測って初めて分かりました。カタログにも <code>insights/README.md</code> にも「どこまで解析したか」の記録がありません。</p>
+<p>考えられる対処は 3 つ。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>案</th><th>内容</th><th>評価</th></tr></thead><tbody>
+<tr><td>(a) 全件を遡って解析する</td><td>107 日分 × 約 28 件 = 約 3,000 件</td><td><strong>非現実的</strong>。かつ古い記事は陳腐化している</td></tr>
+<tr><td>(b) 解析済み範囲を記録し、未解析であることを明示する</td><td><code>insights/README.md</code> に「解析済み: 2026-08 のみ」と書く</td><td><strong>低コストで効く</strong></td></tr>
+<tr><td>(c) 定期的に直近 N 日を解析する運用にする</td><td>月次で前月分を <code>/company-digest-insights</code> にかける</td><td>継続性はあるが、運用の定着が前提</td></tr>
+</tbody></table></div>
+<p><strong>(b) を推奨</strong>します。記事の教訓は「取り込み過多は起きる」であって「全部処理しろ」ではありません。<strong>処理していない範囲を正直に示す</strong>方が、後から「これは見ていない」と判断できます。</p>
+<p>(c) は (b) の後に検討すべきです。運用を増やす前に、まず現状を可視化する。</p>
+<p><strong>コスト</strong>: 小（README への追記）</p>
+<h3>候補 V: 認証を 1 箇所に集約する設計 — ❌ 不採用</h3>
+<p>記事の Hermes（認証を一手に持つ capture 専任エージェント）は優れた設計ですが、<strong>本組織には該当する課題がありません</strong>。</p>
+<p>本組織の外部接続は GitHub（<code>gh</code> CLI）と MCP サーバー数種のみで、いずれも Claude Code 側で認証が完結しています。Slack / Gmail / Calendar のような多数のトークンを扱っていません。</p>
+<p><strong>課題がないものに構造を導入すると保守対象が増えるだけ</strong>なので採りません。</p>
+<h3>候補 W: on-demand 実行（ジョブリスト方式） — 🔶 部分採用済み</h3>
+<p>記事は「定時 cron ではなく on-demand」で、Daily ノートの <code>## 🤖 ジョブリスト</code> を見て指示する方式を採っています。</p>
+<p>本組織は<strong>両方を併用</strong>しています。</p>
+<div class="table-wrap"><table>
+<thead><tr><th></th><th>本組織</th></tr></thead><tbody>
+<tr><td>定時</td><td>日次ダイジェスト（cron 07:30）/ TodoInsights（05:00）/ 補完サマリー（19:00）</td></tr>
+<tr><td>on-demand</td><td><code>/company-cycle</code> / <code>/company-digest-insights</code> 等の Skill</td></tr>
+</tbody></table></div>
+<p>記事の「ジョブリストをチェックリストとして並べる」に相当するものは <code>board.md</code> にありますが、<strong>cycle 実行時に board を見る運用にはなっていません</strong>。ここは改善余地がありますが、現状で困っていないため優先度は低いです。</p>
+<hr>
+<h2 id="h3">3. この記事から本組織が学べる点（解説）</h2>
+<h3>3.1 「自動化しきれない部分を正直に切り分ける」姿勢</h3>
+<p>テンプレートが持ってくる範囲（0.5）と自分で埋める範囲（0.5）を表で明示し、<strong>認証と運用の定着はテンプレートが肩代わりできない</strong>と明言しています。</p>
+<p>本組織の <code>/company-spawn</code> も同じ構造を持っています（設計書と Subagent はコピーするが、実装は自分でやる）。<code>origin.md</code> に未決事項を独立した節として残す運用は、この思想と一致します。</p>
+<h3>3.2 「毎日回して運用に定着させる」が最も難しい</h3>
+<p>記事の結びは「PKB は作った瞬間に完成するものではなく、毎日回しながら少しずつ自分の形に寄せていくもの」です。</p>
+<p>本組織で <code>/company-cycle</code> を継続実行しているのは、まさにこの「回す」部分にあたります。ただし<strong>ダイジェストの解析だけは追いついていない</strong>ことが今回の実測で分かりました。</p>
+<h3>3.3 承認の線引きを保守的に始める</h3>
+<p>記事は「テンプレートの既定は保守的（削除や配分は承認前提）にしてあるので、慣れてきたら自分で緩める、くらいがちょうどよい」としています。</p>
+<p>本組織も同じ方向です（破壊的操作は事前承認必須、auto-merge は 3 層レビュー通過が条件）。<strong>緩める方向への変更は、実績が溜まってから</strong>という順序が共通しています。</p>
+<hr>
+<h2 id="h4">4. 未検証事項</h2>
+<ul>
+<li>候補 U の (c)（定期的に直近 N 日を解析する運用）が定着するかは<strong>未検証</strong>。運用を増やしても回らなければ意味がない</li>
+<li>記事の Hermes / Claudian / Obsidian は<strong>実際に触っていない</strong>。評価は記事の記述に基づく</li>
+<li>本組織の <code>board.md</code> を cycle 実行時に参照する運用に変えた場合の効果は<strong>未測定</strong></li>
+<li>未解析 107 日分に、本組織に効く知見がどれだけ埋もれているかは<strong>不明</strong>（サンプリングもしていない）</li>
+</ul>
+<hr>
+<p>_情報源: curl による原文取得（15,020 字）/ <code>.companies/domain-tech-collection/</code> 配下の実測 / <code>.claude/rules/</code>_</p>
+  <p class="updated">生成: 2026-08-16 14:31 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>

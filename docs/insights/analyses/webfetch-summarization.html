@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WebFetch の要約バイパス検証レポート | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>WebFetch の要約バイパス検証レポート</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 検証レポート</span><span class="tag">作成日: 2026-08-02</span><span class="tag">ステータス: 検証完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">1. 検証の目的</a></li><li><a href="#h1">2. 検証環境</a></li><li><a href="#h2">3. 検証結果</a></li><li><a href="#h3">4. 検証のまとめ</a></li><li><a href="#h4">5. 本組織への影響</a></li><li><a href="#h5">6. 対策</a></li><li><a href="#h6">7. 未検証事項</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>検証レポート</td></tr>
+<tr><td>作成日</td><td>2026-08-02</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>検証対象</td><td>Claude Code 内蔵 WebFetch ツールの挙動</td></tr>
+<tr><td>契機</td><td><a href="https://zenn.dev/zhizhiarv/articles/claude-code-webfetch-haiku-summary">あなたのClaude CodeのWebFetch、実はWebをちゃんと読んでいない</a></td></tr>
+<tr><td>ステータス</td><td>検証完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">1. 検証の目的</h2>
+<p>参照記事は「Claude Code の WebFetch は、信頼ドメイン外のページについて <strong>Haiku による数百文字の要約</strong>をメインモデルに渡しており、その事実が可視化されていない」と主張している。</p>
+<p>本組織の中核ワークフロー <code>wf-daily-digest</code> は <strong>WebFetch を第一選択</strong>として 8 ソースを巡回している（<code>daily-digest-automation.yml</code> L225「<strong>WebFetch ツールを第一選択</strong>で使用」）。主張が事実なら、毎朝のダイジェストは「要約の要約」になる。</p>
+<p>そこで <strong>curl による原文取得と WebFetch の出力を突き合わせ</strong>、主張を実証・反証する。</p>
+<hr>
+<h2 id="h1">2. 検証環境</h2>
+<ul>
+<li>実行日: 2026-08-02</li>
+<li>実行者: ローカル Claude Code セッション（Opus 5）</li>
+<li>比較手段: <code>curl -sL -H "User-Agent: Mozilla/5.0"</code> で HTML を取得し、<code>script</code>/<code>style</code> 除去 → タグ除去 → 空白圧縮でテキスト化</li>
+</ul>
+<h3>検証対象記事</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>URL</th><th>HTML</th><th>本文テキスト</th></tr></thead><tbody>
+<tr><td>A</td><td><code>zenn.dev/shunsuke_suzuki/articles/make-cli-ai-friendly</code></td><td>126,720 B</td><td><strong>8,167 字</strong></td></tr>
+<tr><td>B</td><td><code>zenn.dev/notahotel/articles/0c28638945aa32</code></td><td>73,101 B</td><td><strong>1,795 字</strong></td></tr>
+<tr><td>C</td><td><code>zenn.dev/u1/articles/claude5-rules-collapse-and-fix</code></td><td>136,476 B</td><td>8,943 字</td></tr>
+<tr><td>D（対照）</td><td><code>docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html</code></td><td>—</td><td>—</td></tr>
+</tbody></table></div>
+<p>A〜C は 2026-08-02 の日次ダイジェストが実際に収録した記事。D は参照記事が「信頼ドメイン」として挙げた <code>docs.aws.amazon.com</code>。</p>
+<hr>
+<h2 id="h2">3. 検証結果</h2>
+<h3>3.1 【実証】全文要求が中間層に拒否される</h3>
+<p>記事 A（8,167 字）に対し「省略や要約を一切せず全文出力」を指示したところ、<strong>記事本文ではなく一人称の断り文</strong>が返った。</p>
+<p>返答の要旨（原文は英語）:</p>
+<ul>
+<li>「全文をそのまま出力せよ」という要求と、「引用は <strong>125 文字以内</strong>」「著作権保護された内容を再現しない」という制約が両立しないため応じられない</li>
+<li>代わりに要点の要約を提供する</li>
+</ul>
+<p><strong>これは中間に別の LLM が介在していることの直接的な証拠</strong>である。WebFetch が単なる HTTP 取得 + Markdown 変換であれば、このような「判断」は発生しない。参照記事が指摘した <strong>125 文字の引用制限</strong>が実在することも裏づけられた。</p>
+<h3>3.2 【実証】信頼ドメインでは生 Markdown が全文通る</h3>
+<p>対照実験として D（<code>docs.aws.amazon.com</code>）に「<strong>H2 と H3 の見出しのみ</strong>を列挙、本文の要約は不要」と指示した。</p>
+<p>返ってきたのは見出し一覧ではなく、<strong>生の Markdown 全文</strong>だった。具体的には以下が含まれていた。</p>
+<ul>
+<li><code>&lt;a name="what-is-bedrock"&gt;&lt;/a&gt;</code> などの HTML アンカー</li>
+<li>Python コードブロック 5 種（Messages API / Responses API / Chat Completions API / Converse API / Invoke API）</li>
+<li>画像の alt テキスト（<code>![Amazon logo with curved arrow from A to Z forming a smile.]</code>）</li>
+<li>Markdown テーブル記法（<code>| --- |--- |</code>）</li>
+</ul>
+<p><strong>要約経路であればこれらは残らない。</strong> 信頼ドメインではバイパスが機能し、原文がそのまま渡ることが実証された。</p>
+<p><strong>副次的な発見</strong>: バイパス経路では <strong>prompt による絞り込みが効かない</strong>。「見出しのみ」と明示したのに全文が返った。要約経路とバイパス経路で、prompt の扱いが非対称になっている。</p>
+<h3>3.3 【実証】ボイラープレートを記事内容と誤認する</h3>
+<p>記事 B（1,795 字）に「登場する固有名詞・ツール名・数値をすべて列挙」と指示したところ、固有名詞として以下が返った。</p>
+<pre><code>Claude Code / Anthropic / NOT A HOTEL / haru067 / Zenn / GitHub / Hatena / X (Twitter) / Publication</code></pre>
+<p>curl 原文と突き合わせた結果、<strong><code>Zenn</code> / <code>GitHub</code> / <code>X (Twitter)</code> / <code>Publication</code> は記事本文ではなくページフッターの要素</strong>だった。原文末尾には次のフッターが含まれる。</p>
+<blockquote>エンジニアのための 情報共有コミュニティ About Zennについて 運営会社 お知らせ・リリース Guides 使い方 法人向けメニュー … X(Twitter) connpass GitHub … 利用規約 プライバシーポリシー 特商法表記</blockquote>
+<p>参照記事が挙げた GitHub Issue <strong>#53297「ページテンプレートが事実と誤認される問題」の実例を再現</strong>したことになる。</p>
+<p>「この記事は GitHub と X (Twitter) に言及している」と受け取れば、事実誤認がそのまま下流に流れる。</p>
+<h3>3.4 【実証】根拠リンクと具体的主張の欠落</h3>
+<p>記事 B の原文には、著者の主張を支える<strong>一次情報へのリンク</strong>が含まれている。</p>
+<pre><code>https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models</code></pre>
+<p>原文はこのリンクとあわせて「Anthropic のブログでも言及されていて、現に opus5 ではシステムプロンプトを削るような調整が入っている」と述べているが、<strong>WebFetch の出力にはリンクも当該主張も含まれなかった</strong>。</p>
+<p>日次ダイジェストは「出典 URL 付きで一次情報に到達できること」を要件としている（<code>/company-diagram</code> 系の FR-17 と同じ思想）。記事内リンクが落ちると、<strong>記事から先の一次情報に到達する経路が失われる</strong>。</p>
+<h3>3.5 【確認】表記の正規化</h3>
+<p>WebFetch はツール名を <code>Opus 5</code> として返したが、原文の表記は <code>opus5</code>（小文字・空白なし）だった。</p>
+<p>軽微だが、<strong>原文検索で照合できない形に変形されている</strong>。<code>grep "Opus 5"</code> では原文にヒットしない。ダイジェストの記述を後から検証する際に、原文との突き合わせが失敗する要因になる。</p>
+<h3>3.6 短い記事では情報量が保たれる</h3>
+<p>記事 B（1,795 字）では見出し 3 件・固有名詞・数値が具体的に返り、<strong>見出しはすべて原文に実在</strong>した（<code>planモードがなぜ必要だったのか</code> / <code>2026/7にやるなら、もっと適当でいい</code> / <code>「案をください」メソッドの利点</code>）。</p>
+<p>一方、記事 A（8,167 字）は全文要求が拒否された。<strong>記事の長さによって挙動が変わる</strong>という参照記事の主張と整合する。</p>
+<hr>
+<h2 id="h3">4. 検証のまとめ</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>参照記事の主張</th><th>本検証の結果</th></tr></thead><tbody>
+<tr><td>1</td><td>信頼ドメイン外では要約が返る</td><td><strong>実証</strong>（3.1）</td></tr>
+<tr><td>2</td><td>125 文字の引用制限が存在する</td><td><strong>実証</strong>（3.1、中間層が明示的に言及）</td></tr>
+<tr><td>3</td><td>信頼ドメインではバイパスされ原文が通る</td><td><strong>実証</strong>（3.2）</td></tr>
+<tr><td>4</td><td>ボイラープレートを事実と誤認する</td><td><strong>実証</strong>（3.3、Issue #53297 の再現）</td></tr>
+<tr><td>5</td><td>サイレントな情報欠落が起きる</td><td><strong>実証</strong>（3.4、根拠リンクの欠落）</td></tr>
+<tr><td>—</td><td>（記事にない発見）バイパス経路では prompt が効かない</td><td><strong>新規発見</strong>（3.2）</td></tr>
+</tbody></table></div>
+<p>参照記事の主張は、本組織の環境でも<strong>再現した</strong>。</p>
+<hr>
+<h2 id="h4">5. 本組織への影響</h2>
+<h3>5.1 日次ダイジェストの全ソースが信頼ドメイン外</h3>
+<p><code>wf-daily-digest</code> が巡回する 8 ソースを、参照記事が挙げた信頼ドメイン群（<code>docs.python.org</code> / <code>developer.mozilla.org</code> / <code>react.dev</code> / <code>kubernetes.io</code> / <code>docs.aws.amazon.com</code> など）と照合した。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>ソース</th><th>信頼ドメイン</th></tr></thead><tbody>
+<tr><td>Zenn</td><td>✗</td></tr>
+<tr><td>Qiita</td><td>✗</td></tr>
+<tr><td>はてなブックマーク</td><td>✗</td></tr>
+<tr><td>DevelopersIO</td><td>✗</td></tr>
+<tr><td>AWS What's New / AWS Blog</td><td>✗（<code>aws.amazon.com</code> であって <code>docs.aws.amazon.com</code> ではない）</td></tr>
+<tr><td>流通ニュース</td><td>✗</td></tr>
+<tr><td>ダイヤモンド・チェーンストア</td><td>✗</td></tr>
+<tr><td>ネットショップ担当者フォーラム</td><td>✗</td></tr>
+</tbody></table></div>
+<p><strong>8/8 が要約経路</strong>にあたる。ダイジェストは次の二重要約になっている。</p>
+<pre><code>記事原文 → [中間 LLM] 数百字に要約 → [Opus] 章立て・1文要約 → MD</code></pre>
+<h3>5.2 L2 レビューはこの欠落を検出できない</h3>
+<p><code>/company-daily-digest</code> の L2 は 6 軸で採点するが、<strong>評価対象は生成された MD であり原文ではない</strong>。「渡された要約を正しく整形できたか」は見ているが、「原文に対して忠実か」は構造的に検証できない。</p>
+<p>composite 0.98 という高スコアは、この経路の健全性を意味しない。</p>
+<h3>5.3 過去の事象との整合</h3>
+<p>2026-07-26 の設計タスクで、L2 レビュアーが「カタログの DCM +17.4% は digest に存在しない」と指摘したが、実際には <code>2026-06-27.md</code> / <code>2026-06-28.md</code> に実在した（流通ニュース s062681）。</p>
+<p>当時は「レビュアーの誤検知」として処理したが、<strong>要約経路による情報欠落が背景にあった可能性</strong>がある。本検証で確認した「根拠リンクの欠落」「表記の正規化」は、いずれも後からの照合を失敗させる方向に働く。</p>
+<hr>
+<h2 id="h5">6. 対策</h2>
+<h3>6.1 curl による原文取得は実際に機能する</h3>
+<p>本検証で A〜C の 3 記事すべてを curl で取得できた（HTTP 200、8,167 / 1,795 / 8,943 字）。Zenn は SSR のため、HTML から本文テキストを抽出できる。</p>
+<p><code>daily-digest-automation.yml</code> には既に curl fallback の記述がある（L174「万一 WebFetch が blocked の場合、Claude に Bash+curl fallback を明示指示」）。ただしこれは <strong>Issue #690「WebFetch 無効化」への対策</strong>であり、<strong>要約経路を回避する目的では位置づけられていない</strong>。</p>
+<p>→ fallback ではなく<strong>第一選択を curl に切り替える</strong>ことを検討する価値がある。</p>
+<h3>6.2 段階的な対応案</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>段階</th><th>内容</th><th>コスト</th></tr></thead><tbody>
+<tr><td>1</td><td>ダイジェストの巡回を curl 主体に変更し、WebFetch は補助に回す</td><td>中（workflow の prompt 改修）</td></tr>
+<tr><td>2</td><td>収集した本文を中間ファイルに保存し、要約の根拠を後から検証可能にする</td><td>中（保存先とサイズ管理の設計が必要）</td></tr>
+<tr><td>3</td><td>L2 に「原文との照合」軸を追加する</td><td>大（原文保存が前提。段階 2 に依存）</td></tr>
+</tbody></table></div>
+<p><strong>段階 1 を推奨</strong>。curl は追加依存がなく、workflow に既に記述がある。</p>
+<h3>6.3 適用範囲の注意</h3>
+<p>本検証は「<strong>要約経路が存在し、情報が落ちる</strong>」ことを示したが、「<strong>ダイジェストの品質が実用に耐えない</strong>」ことは示していない。</p>
+<p>記事 B では見出し 3 件すべてが原文に実在し、要点も正確だった。短い記事では要約でも十分な情報量が保たれる。過剰反応してすべてを curl 化すると、HTML パースの保守コストが発生する。</p>
+<p><strong>判断材料</strong>: 落ちるのは「一次情報へのリンク」「具体的な数値の文脈」「原文の表記」であり、<strong>後から検証・追跡する用途で効いてくる</strong>。日次の読み物としては要約でも成立するが、提案資料の根拠にする用途では原文が要る。</p>
+<hr>
+<h2 id="h6">7. 未検証事項</h2>
+<ul>
+<li>記事 C（8,943 字）は本検証で WebFetch との比較を実施していない（A で拒否挙動が確認できたため）</li>
+<li>信頼ドメインの完全なリスト（参照記事は「80 以上」とするが、本検証で確認したのは <code>docs.aws.amazon.com</code> のみ）</li>
+<li>要約経路に入った際の実際の圧縮率（記事 A で拒否されたため定量化できていない）</li>
+<li>Claude Code のバージョン差による挙動の違い（本検証は単一バージョンでの観測）</li>
+</ul>
+<hr>
+<p>_情報源: curl による原文取得（2026-08-02）/ WebFetch の実応答 / <code>daily-digest-automation.yml</code> / <code>2026-08-02.md</code>_</p>
+  <p class="updated">生成: 2026-08-16 14:31 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>
