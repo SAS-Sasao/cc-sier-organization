@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-16T14:44:08",
-  "case_count": 237,
+  "updated_at": "2026-08-16T15:02:40",
+  "case_count": 238,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7399,6 +7399,41 @@
           ".companies/domain-tech-collection/docs/secretary/reports/2026-08-08-today.md"
         ],
         "started": "2026-08-16T13:52:00"
+      }
+    },
+    {
+      "id": "20260816-152000-insights-cycle",
+      "state": {
+        "request_keywords": [
+          "/company-insights-cycle",
+          "--period",
+          "2026-08-10..2026-08-15",
+          "--append-to",
+          "2026-08-w2-claude-code-codex-agent"
+        ],
+        "request_head": "/company-insights-cycle --period 2026-08-10..2026-08-15 --ap",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-insights-cycle 合成 judge: レポート追補・カタログ追記・HTML 生成の 3 つが完了（completeness 1.00）。原文精読率 8/168 = 4.8% を記録した（accuracy 1.00 は「率を記録したか」の判定であり、率の高さの評価ではない）。Pages 公開成功（clarity 1.00）。詳細な L2 レビューは無い（cycle はオーケストレータのため）",
+        "judged_at": "2026-08-16T16:05:00+09:00"
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/insights/analyses/2026-08-w2-claude-code-codex-agent.md"
+        ],
+        "started": "2026-08-16T15:20:00"
       }
     }
   ],
