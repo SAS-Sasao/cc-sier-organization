@@ -7,6 +7,8 @@
 | 成果物種別 | 配置先 | 理由 |
 |---|---|---|
 | 業務ドキュメント（MD） | `.companies/{org}/docs/{dept}/` | 組織スコープ、Git管理、PR運用 |
+| **知見解析レポート（MD）** | **`docs/insights/analyses/`** | **HTML 化して Pages 配信するため（例外、下記参照）** |
+| 知見カタログ・入口 README | `.companies/{org}/docs/insights/` | 採用判断は組織スコープの意思決定 |
 | タスクログ | `.companies/{org}/.task-log/` | 組織スコープ、docs/と分離 |
 | マスタデータ | `.companies/{org}/masters/` | 組織設定 |
 | 日次ダイジェスト MD | `.companies/{org}/docs/daily-digest/` | 組織固有 |
@@ -44,8 +46,9 @@
 | `docs/drawio/*.html` | `.companies/{org}/.task-log/*.md` |
 | `docs/daily-digest/index.html` | `.companies/{org}/masters/*.md` |
 | `docs/secretary/dashboard.html` | `.companies/{org}/docs/decisions/*.md` |
-| `docs/handover/*.html` | `docs/office/*.xlsx`（DL用、ブラウザ閲覧しない） |
-| | （組織固有の業務ドキュメント全般） |
+| `docs/handover/*.html` | `.companies/{org}/docs/insights/catalog.md` |
+| `docs/insights/index.html`（TodoInsights） | `docs/office/*.xlsx`（DL用、ブラウザ閲覧しない） |
+| `docs/insights/analyses/*.html` | （組織固有の業務ドキュメント全般） |
 
 ## 同一成果物を複数箇所に置くケース
 
@@ -54,6 +57,20 @@
 - **HTML 配信**: `docs/daily-digest/index.html`（main 直コミット・Pages 配信）
 
 両者は `/company-daily-digest` Phase 7 の HTML 再生成工程で自動同期される。
+
+## 知見解析レポートの例外（2026-08-16）
+
+`docs/insights/analyses/` は「業務ドキュメント（MD）は組織スコープ」という原則の**明示的な例外**。オーナー判断で既存 7 本を `.companies/domain-tech-collection/docs/insights/analyses/` から移設した。
+
+| | 配置先 | 理由 |
+|---|---|---|
+| **解析レポート（根拠）** | `docs/insights/analyses/*.md` | ブラウザから読ませたい。`docs/requirements.md` / `docs/guide/*.md` と同じ扱い |
+| **カタログ・README（判断）** | `.companies/{org}/docs/insights/` | 採用可否は組織の意思決定であり、公開対象ではない |
+
+- HTML は `.claude/hooks/generate-insights-analyses-html.sh` が MD から生成する（`analyses/*.html` + `analyses/index.html`）
+- **MD を直接 Pages で読ませない**。本リポジトリに Jekyll 設定はなく、front matter の無い `.md` は生 テキストとして配信されるため
+- 生成元 Skill は `/company-digest-insights`、公開まで通すオーケストレータは `/company-insights-cycle`
+- **なぜ MD ソースも `docs/` 側なのか**: 日次ダイジェストのような 2 箇所配置にしなかったのは、解析レポートが組織横断の技術知見であり、特定部署の業務成果物ではないため。カタログ側に判断が残るので組織スコープの独立性は保たれる
 
 ## 関連
 

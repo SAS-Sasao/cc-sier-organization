@@ -28,7 +28,7 @@
 主要機能:
 
 - **マルチ組織運営**: `.companies/` 配下で複数組織を並列管理（現在 3 組織）
-- **Skill による業務自動化**: 12 種類の `/company-*` コマンド
+- **Skill による業務自動化**: 18 種類の `/company-*` コマンド
 - **Subagent による専門領域**: 19 種類のロール別エージェント
 - **3 層レビュー + auto-merge**: Skill 成果物を機械的・構造的・LLM的に 3 層で品質担保
 - **Case Bank 継続学習**: 過去タスクログを報酬スコア付きで蓄積し次セッションで参照
@@ -70,6 +70,11 @@
 | `/company-report` | 組織活動サマリーレポート（日次/週次/月次） |
 | `/company-evolve` | Case Bank 継続学習・Skill トリガー語拡張 |
 | `/company-quality-setup` | `masters/quality-gates/` チェックリスト配置 |
+| `/company-cycle` | report → evolve → dashboard を直列実行（軽量オーケストレータ・ローカル限定） |
+| `/company-diagram-v2` | AWS 構成図を draw.io XML で直接生成（MCP 非依存・9フェーズ） |
+| `/company-digest-insights` | ダイジェストから知見抽出 → 原文精読 → 実測 → 採用判断カタログ追記 |
+| `/company-insights-cycle` | digest-insights → HTML 生成 → Pages 公開を直列実行（軽量オーケストレータ） |
+| `/company-today` | Projects v2 のオープン TODO から選んで subagent/skill へ委譲 |
 
 ### Git / PR
 
