@@ -67,10 +67,29 @@ l2_retries: 0
 
 ### [2026-04-11 12:22:00] general-purpose-tech
 完了: tech team 73件収集
-
-## reward
-（`skill-evaluator.sh` が追記。**タスク完了後に実行すること** — in-progress のうちに走ると低スコアが固定される）
 ```
+
+### ⚠️ `## reward` 見出しを自分で書かないこと
+
+**テンプレートに `## reward` は含めない。** `skill-evaluator.sh` は
+
+```bash
+grep -q '^## reward' "$task_file" && continue   # すでに reward があればスキップ（べき等）
+```
+
+で判定するため、**見出しだけ先に書くと中身が空でも「評価済み」と見なされ、スコアが永久に付かない**。
+
+実測（2026-08-16）: 旧テンプレートが「（post-merge hook が自動追記）」というプレースホルダを書くよう指示していたため、**31 件の task-log で評価が塞がれ、Case Bank の reward が 38/239 件（15.9%）で null** になっていた。
+
+正しい運用:
+
+1. task-log には `## reward` を**書かない**（本文はエージェント作業ログで終える）
+2. **タスクを `status: completed` にしてから** `evaluate_session {org} {YYYY-MM-DD}` を実行する
+3. evaluator が `## reward` を末尾に追記する
+
+`in-progress` のうちに評価が走ると `completed: false` / `artifacts_exist: false` で低スコアが固定され、**べき等ゆえに完了後も自動では直らない**（実例: `20260816-150510-cycle-today` が 0.2 で固定 → 手で見出しを消して再評価し 1.0 に是正）。
+
+**注**: evaluator は `started` が対象日のものだけを走査するため、通常実行で過去の task-log が再評価されることはない。
 
 ## Issue 自動作成
 
