@@ -137,6 +137,33 @@ sub_skill_results:
 ---
 ```
 
+### 6.1.4 ⚠️ 自分の task-log の reward を再評価する（必須）
+
+**Phase 1.5 の evolve は、cycle 自身の task-log をまだ `in-progress` の状態で評価してしまう。**
+
+```
+Phase 1.5  evolve → evaluate_session          ← ここで自分を評価（in-progress）
+Phase 3    task-log を completed にする        ← 評価はもう終わっている
+```
+
+`skill-evaluator.sh` はべき等（`^## reward` があればスキップ）なので、**一度付いた低スコアは完了後も自動では直らない**。
+
+実測（2026-08-16）: 過去の cycle task-log **10 件が `reward = 0.2` で固定**されていた（`completed: false` / `artifacts_exist: false`）。さらに悪いことに、reward が付かなかった 9 件は `rebuild-case-bank.sh` の judge フォールバックで **0.8** を得ている。**早すぎる 0.2 は、reward が無いより悪い。**
+
+**Phase 3 で必ず次を行う**:
+
+```bash
+# 1. フロントマターを status: completed / completed: {ISO8601} に更新したうえで
+# 2. Phase 1.5 が付けた ## reward セクションを削除し
+# 3. 再評価する
+source .claude/hooks/skill-evaluator.sh
+evaluate_session "{org-slug}" "{date_jst}"
+```
+
+実績: 2026-08-16 の 2 回目サイクルで **0.2 → 0.8** に是正。
+
+**注**: `--report-only` など evolve を通らない実行では Phase 1.5 の評価自体が走らないため、この手順は不要（`## reward` が無い状態で再評価すれば正しく付く）。
+
 ### 6.1.5 `## judge` セクション追記（dashboard 統合のため必須）
 
 cycle 自体には L2 レビューが無いため、**3 つの sub-skill の判定結果から合成 judge** を生成する。これは `rebuild-case-bank.sh` が読み取り、`/company-dashboard` の「judge スコア推移」グラフに反映される。
