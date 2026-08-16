@@ -61,3 +61,14 @@ l2_retries: 0
 - 参考文献 13 本の**原典は読んでいない**
 - **Anthropic 公式ブログの原文を直接読んでいない**（記事経由の引用）
 - 候補 AX は**未実施**。前提の候補 A も未着手
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-08-16T18:37:01"
+```
