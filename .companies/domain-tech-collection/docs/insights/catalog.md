@@ -720,6 +720,56 @@ claudex は非公式構成で、**アカウント停止事例あり**（Anthropi
 
 ---
 
+## 5.17 reward プレースホルダが評価を塞いでいた（自組織の実測のみ・外部記事なし）
+
+**出典**: なし。2026-08-16 の `/company-cycle` 後始末で実測により発見。
+**関連**: 本日の主テーマ「台帳と実体のドリフト」（§5.13 / 候補 AO）と同型の問題。
+
+### 何が起きていたか
+
+`.claude/rules/task-log.md` のテンプレートが `## reward` の下に **「（post-merge hook が自動追記）」というプレースホルダを書くよう指示していた**。しかし:
+
+1. **その post-merge hook は存在しない。** `.git/hooks/` にも `.claude/hooks/` にも無い（`daily-insights-sync.py` が `chore: post-merge` という**コミットメッセージのパターンを除外しているだけ**）
+2. **`skill-evaluator.sh` は `^## reward` の存在でべき等判定している。** プレースホルダだけでもヘッダは存在するため、**評価がスキップされる**
+3. `rebuild-case-bank.sh` は `score:` を探すが見つからず `reward: None`
+4. `judge` セクションがあれば total から自動導出されるが、無ければ null のまま
+
+つまり **テンプレートに従うほど reward が付かなくなる**構造だった。
+
+### 実測
+
+| 項目 | 値 |
+|---|---|
+| プレースホルダで評価が塞がれている task-log | **31 件** |
+| Case Bank の reward null | **38 / 239 件（15.9%）** |
+| 是正した件数 | 2 件（本日分。`ai-week-analysis` と `cycle-today`） |
+| 是正の効果 | `ai-week-analysis` **null → 1.0** / `cycle-today` **0.2 → 1.0** |
+
+`cycle-today` の 0.2 は別の失敗モードで、**タスクが `in-progress` のうちに evolve が評価を走らせた**ため（`completed: false` / `artifacts_exist: false`）。べき等なので完了後も自動では直らなかった。
+
+### 対処済み
+
+- `.claude/rules/task-log.md` の記述を実態へ修正（post-merge hook は未実装であること、in-progress 中に評価すると低スコアが固定されること、対処手順）
+- 本日分 2 件の reward を是正し Case Bank を再構築（reward 付き 200 → **201 件** / 平均 0.814 → **0.815**）
+
+### 採用候補
+
+**(AV) 残り 29 件の reward を復旧する** — ⬜ 優先度 **中**
+
+**一括再評価は危険**。`skill-evaluator.sh` の `artifacts_exist` は**現在のファイル存在**を見るため、パスが変わった成果物を参照する古い task-log は不当に `false` となり、**べき等ゆえに誤った低スコアが恒久固定される**。
+
+実例: 2026-08-16 に解析レポート 7 本を `docs/insights/analyses/` へ移設したため、`20260808-comment-density-analysis` など **4 件**が旧パスを参照している。
+
+**取りうる方針**（未決定）:
+
+1. パス移設の対応表を作ってから個別に再評価する
+2. `artifacts_exist` を「当時の git 履歴でファイルが存在したか」に変える（evaluator の改修）
+3. 復旧せず、null のまま「評価不能」として残す
+
+**未検証**: どの方針でも、当時の `.interaction-log/` が残っていない古いタスクは `no_excessive_edits` / `no_retry` を正しく判定できない。**遡及評価には原理的な限界がある。**
+
+---
+
 ## 6. Claude Code 仕様に関する注意（実測で判明）
 
 **詳細**: `claude-code-spec-reference-errors`（メモリ）
@@ -783,6 +833,7 @@ claudex は非公式構成で、**アカウント停止事例あり**（Anthropi
 | **AS** | 指摘の `count` を強制力に接続する | ⬜ | cc-sier | 中 | 中 — 候補 AA への対処にもなる |
 | **AU** | claudex は見送り、委譲マトリクスの考え方のみ採用 | ⬜ | cc-sier | 小 | 低 — 非公式構成でアカウント停止事例あり |
 | **AT** | Agent Plugins 1.0.0 準拠 | ❌ 不採用 | — | — | Claude Code 自体が標準に非対応。準拠しても得るものがない |
+| **AV** | reward プレースホルダで塞がれた 29 件を復旧 | ⬜ | cc-sier | 中 | 中 — **一括再評価は危険**（`artifacts_exist` が現在のパスを見るため誤スコアが恒久固定される） |
 
 **候補 C と N の関係**: N（不確実性の明示）を CLAUDE.md にルール化したことで、C（task-log の「未検証事項」欄）は N の適用先の 1 つに含まれる。C を独立して実装するか、N の運用で足りるかは、次回以降の task-log を観察して判断する。
 

@@ -1,6 +1,6 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-16T15:07:18",
+  "updated_at": "2026-08-16T15:22:11",
   "case_count": 239,
   "failure_patterns": [
     {
@@ -7389,7 +7389,7 @@
         "mode": "direct",
         "artifact_count": 9
       },
-      "reward": null,
+      "reward": 1.0,
       "judge": null,
       "outcome": {
         "files_written": [
@@ -7422,18 +7422,24 @@
       "action": {
         "subagent": "secretary",
         "mode": "direct",
-        "artifact_count": 0
+        "artifact_count": 1
       },
-      "reward": 0.2,
-      "judge": null,
+      "reward": 1.0,
+      "judge": {
+        "completeness": 1.0,
+        "accuracy": 1.0,
+        "clarity": 1.0,
+        "total": 1.0,
+        "failure_reason": "",
+        "judge_comment": "/company-cycle 合成 judge: report(2026-08-16-today.md) / evolve(case_bank 239件) / dashboard(67.2KB) の 3 sub-skill が完了。evolve の PR 生成は 0 件だが、これは新規パターンが閾値(3件)に達しなかった正常系。詳細な L2 レビューは無い(cycle はオーケストレータのため)",
+        "judged_at": "2026-08-16T15:10:00+09:00"
+      },
       "outcome": {
-        "files_written": [],
+        "files_written": [
+          ".companies/domain-tech-collection/docs/secretary/reports/2026-08-16-today.md"
+        ],
         "started": "2026-08-16T15:05:10"
-      },
-      "conversation_context": [
-        "最後の点は、今回の解析で指摘した「台帳と実体のドリフト」そのものです。ルール側を実態に合わせて更新しておきますか？　更新しておいて。あとこのAI解析をgithubpagesにアップできる？？トップページ（既存の）にカードリンクつけてアップできる形にしてほしい。あと既存のスキルもアップできる所までいき"
-      ],
-      "conversation_enriched": true
+      }
     },
     {
       "id": "20260816-152000-insights-cycle",
