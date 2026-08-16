@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-16T15:32:49",
-  "case_count": 239,
+  "updated_at": "2026-08-16T15:37:51",
+  "case_count": 240,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7481,15 +7481,30 @@
         "```tool_result\nThe file /home/toyoki05/cc-sier-organization/plugins/cc-sier/skills/company-insights-cycle/SKILL.md has been updated successfully. (fil"
       ],
       "conversation_enriched": true
+    },
+    {
+      "id": "20260816-153503-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-16T15:35:03"
+      }
     }
   ],
   "frequent_phrases": [],
-  "intent_patterns": [
-    {
-      "intent": "/docs/insights/analyses　ここに残",
-      "full": "/docs/insights/analyses　ここに残したい",
-      "date": "2026-08-16"
-    }
-  ],
-  "conversation_enriched_at": "2026-08-16T15:07:31"
+  "intent_patterns": [],
+  "conversation_enriched_at": "2026-08-16T15:37:51"
 }
