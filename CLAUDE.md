@@ -163,8 +163,7 @@ cc-sier-organization/
 - ⚠️ 日次ダイジェスト D章ステータスは文字列（`成功`/`失敗`/`0件`）で記載、絵文字（`✅`等）は L2 s6 致命軸 fail。B章は該当記事なしでも B1-B6 全サブセクション記載（4/13・4/19 で L2 retry 発生）
 - ⚠️ AWS Diagram Python コードのラベルに `\n` 改行を含めない（silent error）
 - ⚠️ Subagent 名は task-log に英字で記録（日本語名だと Case Bank 検出不可）
-- ⚠️ `claude-code-action@v1` は `claude_code_oauth_token` / `anthropic_api_key` を **input parameter で渡す**（action.yml が env を input で上書きするため env block だけでは効かない）
-- ⚠️ claude-code-action を挟む workflow では post step にも env が必要なため env は **job レベル** に配置（step-level は post step に伝播しない）
+- ⚠️ `claude-code-action@v1` は `claude_code_oauth_token` / `anthropic_api_key` を **input parameter で渡す**（env block だけでは効かない）。env は **job レベル** に配置（step-level は post step に伝播しない）
 - ⚠️ claude-code-action 実行後の `git push` 前に `git remote set-url origin https://x-access-token:${GH_TOKEN}@...` を再設定（action が remote URL を書き換える可能性）
 - ⚠️ 必須セクションの**順序違反**も `critical_triggered = true` 扱い（欠落と同じく均し込み禁止）
 - ⚠️ nightly 系 workflow で Opus に複数シグナル（PR/task-log/commit 20件以上）を分析させる場合 `max-turns` は **60 以上**（30 だと Claude が全件丁寧に Read してツール呼び出し枯渇で timeout）。prompt 側にも「全件丁寧に読まない、優先順位をつけて効率重視」を明示する
@@ -178,6 +177,7 @@ cc-sier-organization/
 - ⚠️ `.mcp.json` の uvx/npx 系 MCP サーバーは `==バージョン` でピン留め（PyPI yank で再現不能になった実例あり: aws-diagram-mcp-server #569/#570）
 - ⚠️ claude-code-action で Task subagent を spawn する workflow は job-level env に `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"` を追加（CLI 2.1.198+ で subagent がバックグラウンドデフォルト化、headless モードでは完了を待たず終了し成果物未生成のまま success 偽装される: #618）
 - ⚠️ hook/スクリプトでファイル種別フィルタする際はファイル名パターン（`feedback_*.md` 等）でなく frontmatter `metadata.type` で判定し、正規表現は `\s*type:` でインデントを許容する（命名揺れ + YAML ネストで Case Bank failure_patterns が長期間 0 件: #714）
+- ⚠️ `docs/index.html` 等の共有ファイルに複数 hook/生成器が書き込む場合、修正後は**全生成器を模擬実行**して他セクションの巻き添え削除がないか確認（regex 広すぎで解析カードが 6 日間毎晩消失: #805 / 詳細: @.claude/rules/artifact-placement.md）
 - ⚠️ **オーナーから URL を渡されて解析・要約を依頼されたら `curl` で原文を取得する**。`WebFetch` は信頼ドメイン（`docs.aws.amazon.com` 等）**以外**では中間 LLM の要約を返し、一次情報リンク・数値の文脈・原文表記が落ちる。Zenn / Qiita / はてブ / 個人ブログ / ニュースサイトはすべて対象外。curl 不可時のみ WebFetch にフォールバックし、**要約経由である旨を報告に明示**する（実測検証: #726 / 詳細: @.claude/rules/web-content-fetch.md）
 - ⚠️ **不確実さを分量で埋めない。「未確認」と明示的に書く。** 自信のない箇所ほど説明を長くする癖があり、**分量がそのまま不確実さの指標**になっている（丁寧な説明を「よく検証された証」と読むのは逆）。設計書・解析レポートには「未検証事項」章を、task-log には検証していない項目を、完了報告には未実施の確認を**それぞれ独立した項目として明記**する。埋め合わせの説明を足すのではなく、確認していないことを一行で申告する
 
