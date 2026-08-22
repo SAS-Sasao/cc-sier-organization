@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-22T15:50:23",
-  "case_count": 242,
+  "updated_at": "2026-08-22T16:28:59",
+  "case_count": 249,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7559,6 +7559,226 @@
           ".companies/domain-tech-collection/docs/insights/analyses/ddd-modeling-as-code.md"
         ],
         "started": "2026-08-16T15:55:00"
+      }
+    },
+    {
+      "id": "20260817-074258-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.9,
+        "accuracy": 0.98,
+        "clarity": 1.0,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=0.90, accuracy=avg(s2_links,s3_summary)=0.975≈0.98, clarity=avg(s4_cross_domain,s6_violations)=1.00",
+        "judged_at": "2026-08-17T07:59:39+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-17T07:42:58+09:00"
+      }
+    },
+    {
+      "id": "20260818-074620-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-08-18",
+          "(月)",
+          "の自動生成",
+          "GitHub",
+          "Actions",
+          "経由"
+        ],
+        "request_head": "日次ダイジェスト 2026-08-18 (月) の自動生成（GitHub Actions 経由）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.95,
+        "clarity": 0.96,
+        "total": 0.95,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-08-18.md"
+        ],
+        "started": "2026-08-18T07:46:20+09:00"
+      }
+    },
+    {
+      "id": "20260819-074620-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.95,
+        "clarity": 0.975,
+        "total": 0.96,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup)=0.95, accuracy=avg(s2_links,s3_summary)=0.95, clarity=avg(s4_cross_domain,s6_violations)=0.975",
+        "judged_at": "2026-08-19T07:58:00+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-19T07:46:20+09:00"
+      }
+    },
+    {
+      "id": "20260820-074718-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "daily-digest-automation.yml",
+          "cron",
+          "07:30",
+          "JST"
+        ],
+        "request_head": "daily-digest-automation.yml cron 07:30 JST",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.95,
+        "accuracy": 0.975,
+        "clarity": 1.0,
+        "total": 0.98,
+        "failure_reason": "",
+        "judge_comment": "daily-digest-automation.yml による自動生成。L2 l2_scores から 6→3 軸マッピング: completeness=avg(s1_structure,s5_dedup), accuracy=avg(s2_links,s3_summary), clarity=avg(s4_cross_domain,s6_violations)",
+        "judged_at": "2026-08-20T08:07:29+09:00"
+      },
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-20T07:47:18+09:00"
+      }
+    },
+    {
+      "id": "20260821-075104-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-08-21",
+          "自動生成",
+          "GitHub",
+          "Actions",
+          "workflow"
+        ],
+        "request_head": "日次ダイジェスト 2026-08-21 自動生成（GitHub Actions workflow）",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 1
+      },
+      "reward": 0.8,
+      "judge": {
+        "completeness": 0.97,
+        "accuracy": 0.93,
+        "clarity": 1.0,
+        "total": 0.97,
+        "failure_reason": "",
+        "judge_comment": ""
+      },
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/daily-digest/2026-08-21.md"
+        ],
+        "started": "2026-08-21T07:51:04"
+      }
+    },
+    {
+      "id": "20260822-074653-daily-digest-actions",
+      "state": {
+        "request_keywords": [
+          "日次ダイジェスト",
+          "2026-08-22",
+          "生成",
+          "GitHub",
+          "Actions",
+          "daily-digest-automation",
+          "workflow"
+        ],
+        "request_head": "日次ダイジェスト 2026-08-22 生成（GitHub Actions daily-digest-automatio",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "agent-teams",
+        "artifact_count": 0
+      },
+      "reward": 0.8,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-22T07:46:53"
+      }
+    },
+    {
+      "id": "20260822-160839-insights-cycle",
+      "state": {
+        "request_keywords": [
+          "https://www.sbbit.jp/article/cont1/186558",
+          "(page=1..3)",
+          "このページの内容を解析してほしい",
+          "SKILL呼び出して"
+        ],
+        "request_head": "https://www.sbbit.jp/article/cont1/186558 (page=1..3) このページの",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/insights/analyses/loop-engineering-proof-or-stop.md"
+        ],
+        "started": "2026-08-22T16:08:39"
       }
     }
   ],

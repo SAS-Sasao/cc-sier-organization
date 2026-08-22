@@ -104,3 +104,14 @@ findings:
 fix_suggestions:
 1. 次回は tech-agent に個別記事URL必須を強調するか、curl ベースの巡回に切替
 2. サブセクション名は quality-gate テンプレート記載の正式名称に統一
+
+## reward
+```yaml
+score: 0.8
+signals:
+    completed: true
+    artifacts_exist: false
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-08-22T16:28:59"
+```
