@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-22T16:28:59",
-  "case_count": 249,
+  "updated_at": "2026-08-22T16:40:31",
+  "case_count": 250,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7753,7 +7753,11 @@
       "outcome": {
         "files_written": [],
         "started": "2026-08-22T07:46:53"
-      }
+      },
+      "conversation_context": [
+        "```tool_result\n2026-08-09 日\n2026-08-03 月\n=== digest structure (2026-08-09) ===\n# 日次ダイジェスト 2026-08-09\n## 本日のハイライト\n## A. 技術スタック\n### A1. AI駆動開発・エージェント\n##"
+      ],
+      "conversation_enriched": true
     },
     {
       "id": "20260822-160839-insights-cycle",
@@ -7779,10 +7783,62 @@
           ".companies/domain-tech-collection/docs/insights/analyses/loop-engineering-proof-or-stop.md"
         ],
         "started": "2026-08-22T16:08:39"
-      }
+      },
+      "conversation_context": [
+        "https://www.sbbit.jp/article/cont1/186558?page=1 https://www.sbbit.jp/article/cont1/186558?page=2 https://www.sbbit.jp/article/cont1/186558?page=3　このペ"
+      ],
+      "conversation_enriched": true
+    },
+    {
+      "id": "20260822-163730-cycle-today",
+      "state": {
+        "request_keywords": [
+          "/company-cycle"
+        ],
+        "request_head": "/company-cycle",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 0
+      },
+      "reward": 0.2,
+      "judge": null,
+      "outcome": {
+        "files_written": [],
+        "started": "2026-08-22T16:37:30"
+      },
+      "conversation_context": [
+        "最後の点は、今回の解析で指摘した「台帳と実体のドリフト」そのものです。ルール側を実態に合わせて更新しておきますか？　更新しておいて。あとこのAI解析をgithubpagesにアップできる？？トップページ（既存の）にカードリンクつけてアップできる形にしてほしい。あと既存のスキルもアップできる所までいき",
+        "<command-message>company-cycle</command-message>\n<command-name>/company-cycle</command-name>",
+        "Base directory for this skill: /home/toyoki05/cc-sier-organization/.claude/skills/company-cycle\n\n# CC-SIer サイクルオーケストレータ Skill（軽量型）\n\n3 つの skill (`compa"
+      ],
+      "conversation_enriched": true
     }
   ],
-  "frequent_phrases": [],
-  "intent_patterns": [],
-  "conversation_enriched_at": "2026-08-16T15:37:51"
+  "frequent_phrases": [
+    {
+      "phrase": "っぽくコードと関連付けて見れるようにして",
+      "count": 2
+    }
+  ],
+  "intent_patterns": [
+    {
+      "intent": "/docs/insights/analyses　ここに残",
+      "full": "/docs/insights/analyses　ここに残したい",
+      "date": "2026-08-22"
+    },
+    {
+      "intent": "https://zenn.dev/hellorusk/articles/[PHONE]ca9e922 このサイトの解析",
+      "full": "https://zenn.dev/hellorusk/articles/[PHONE]ca9e922 このサイトの解析してほしい。",
+      "date": "2026-08-22"
+    },
+    {
+      "intent": "カタログに候補として追記しますか？ 記載内容を初心者向けに分かりやすく解説",
+      "full": "カタログに候補として追記しますか？ 記載内容を初心者向けに分かりやすく解説してほしい。",
+      "date": "2026-08-22"
+    }
+  ],
+  "conversation_enriched_at": "2026-08-22T16:40:31"
 }
