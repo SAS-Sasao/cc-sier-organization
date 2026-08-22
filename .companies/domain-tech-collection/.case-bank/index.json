@@ -1,7 +1,7 @@
 {
   "org_slug": "domain-tech-collection",
-  "updated_at": "2026-08-16T18:37:01",
-  "case_count": 241,
+  "updated_at": "2026-08-22T15:50:23",
+  "case_count": 242,
   "failure_patterns": [
     {
       "subagent": "general",
@@ -7535,6 +7535,30 @@
           ".companies/domain-tech-collection/docs/insights/analyses/llm-text-watermarking.md"
         ],
         "started": "2026-08-16T15:42:00"
+      }
+    },
+    {
+      "id": "20260816-184545-ddd-modeling",
+      "state": {
+        "request_keywords": [
+          "https://zenn.dev/dress_code/articles/34f18afe1464e8",
+          "ここら辺のDDDについて解説入れてほしい"
+        ],
+        "request_head": "https://zenn.dev/dress_code/articles/34f18afe1464e8 ここら辺のDDD",
+        "org_slug": "domain-tech-collection"
+      },
+      "action": {
+        "subagent": "secretary",
+        "mode": "direct",
+        "artifact_count": 1
+      },
+      "reward": 1.0,
+      "judge": null,
+      "outcome": {
+        "files_written": [
+          ".companies/domain-tech-collection/docs/insights/analyses/ddd-modeling-as-code.md"
+        ],
+        "started": "2026-08-16T15:55:00"
       }
     }
   ],
