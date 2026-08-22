@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ループエンジニアリングと Proof-or-Stop — 「終わりました」は証拠ではない | 知見解析レポート</title>
+<style>
+:root { --bg:#0b1222; --bg2:#131d2f; --bg3:#0f1829; --text:#e2e8f0; --accent:#4361ee;
+        --border:#1e293b; --muted:#94a3b8; --code:#fbbf24; }
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f8fafc; --bg2:#fff; --bg3:#f1f5f9; --text:#0f172a; --accent:#3730a3;
+          --border:#e2e8f0; --muted:#475569; --code:#b45309; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); line-height:1.85;
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif; }
+.wrap { max-width:960px; margin:0 auto; padding:32px 20px 80px; }
+a { color:var(--accent); text-decoration:none; }
+a:hover { text-decoration:underline; }
+.crumb { font-size:13px; color:var(--muted); margin-bottom:20px; }
+h1 { font-size:26px; line-height:1.5; margin:0 0 20px; padding-bottom:14px; border-bottom:2px solid var(--accent); }
+h2 { font-size:20px; margin:44px 0 14px; padding-left:11px; border-left:4px solid var(--accent); scroll-margin-top:20px; }
+h3 { font-size:17px; margin:30px 0 10px; color:var(--text); }
+h4 { font-size:15px; margin:22px 0 8px; color:var(--muted); }
+p { margin:12px 0; }
+hr { border:0; border-top:1px solid var(--border); margin:32px 0; }
+code { background:var(--bg3); color:var(--code); padding:2px 6px; border-radius:4px;
+       font-size:.88em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; }
+pre { background:var(--bg3); border:1px solid var(--border); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; }
+pre code { background:none; color:var(--text); padding:0; font-size:13px; }
+blockquote { margin:16px 0; padding:12px 18px; background:var(--bg2);
+             border-left:4px solid var(--muted); border-radius:0 6px 6px 0; color:var(--muted); }
+blockquote strong { color:var(--text); }
+ul,ol { padding-left:24px; margin:12px 0; }
+li { margin:6px 0; }
+.table-wrap { overflow-x:auto; margin:18px 0; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; font-size:14px; min-width:480px; }
+th,td { border:1px solid var(--border); padding:8px 12px; text-align:left; vertical-align:top; }
+th { background:var(--bg3); font-weight:600; white-space:nowrap; }
+tbody tr:nth-child(even) { background:rgba(148,163,184,.05); }
+.toc { background:var(--bg2); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin:24px 0 36px; }
+.toc-title { font-size:13px; color:var(--muted); margin-bottom:8px; letter-spacing:.04em; }
+.toc ol { margin:0; padding-left:20px; font-size:14px; }
+.metabar { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 24px; }
+.tag { font-size:12px; background:var(--bg3); border:1px solid var(--border);
+       border-radius:999px; padding:3px 12px; color:var(--muted); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; margin-top:24px; }
+.card { display:block; background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent);
+        border-radius:8px; padding:18px 20px; transition:.18s; }
+.card:hover { transform:translateY(-2px); box-shadow:0 6px 22px rgba(0,0,0,.22); text-decoration:none; }
+.card-title { font-size:15px; font-weight:600; color:var(--text); line-height:1.55; margin-bottom:10px; }
+.card-meta { font-size:12px; color:var(--muted); }
+.updated { margin-top:48px; font-size:12px; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../../index.html">トップ</a> › <a href="./index.html">知見解析レポート</a></div>
+  <h1>ループエンジニアリングと Proof-or-Stop — 「終わりました」は証拠ではない</h1>
+  <div class="metabar"><span class="tag">ドキュメント種別: 解析レポート（原文精読 + 自組織実測）</span><span class="tag">作成日: 2026-08-22</span><span class="tag">ステータス: 解析完了</span></div>
+  <nav class="toc"><div class="toc-title">目次</div><ol><li><a href="#h0">0. 方法</a></li><li><a href="#h1">1. 記事の主張</a></li><li><a href="#h2">2. 自組織での実測（2026-08-22）</a></li><li><a href="#h3">3. 採用候補</a></li><li><a href="#h4">4. 未検証事項</a></li><li><a href="#h5">関連</a></li></ol></nav>
+  <div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>内容</th></tr></thead><tbody>
+<tr><td>ドキュメント種別</td><td>解析レポート（原文精読 + 自組織実測）</td></tr>
+<tr><td>作成日</td><td>2026-08-22</td></tr>
+<tr><td>作成者</td><td>技術リサーチ室（秘書室主導）</td></tr>
+<tr><td>対象記事</td><td><a href="https://www.sbbit.jp/article/cont1/186558">「Claude Code×GPT」自律ループが凄すぎ、仕事が"3つ"に減る5ステップ</a>（根岸智幸 / ビジネス+IT、2026-08-21、全 3 ページ）</td></tr>
+<tr><td>取得方法</td><td><code>curl</code> で 3 ページとも原文取得（<strong>21,619 字</strong>・全文読了）</td></tr>
+<tr><td>母数 / 精読</td><td>1 記事 3 ページ / <strong>3 ページすべて精読（100%）</strong></td></tr>
+<tr><td>ステータス</td><td>解析完了</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h0">0. 方法</h2>
+<p>オーナーから URL を直接指定された解析であり、日次ダイジェストからの抽出ではない。したがって本 Skill の通常フロー（Phase 1 クラスタリング）は適用せず、<strong>指定 3 ページを全件精読</strong>した。</p>
+<p>取得は <code>curl</code>（User-Agent 付き）。<code>sbbit.jp</code> は信頼ドメイン外のため <strong>WebFetch は使っていない</strong>（<code>@.claude/rules/web-content-fetch.md</code>）。ページ間で共通のナビゲーション部分は「前へ 1 2 3 次へ」を境界に機械除去し、本文のみを抽出した。</p>
+<hr>
+<h2 id="h1">1. 記事の主張</h2>
+<h3>1.1 ループエンジニアリングとは</h3>
+<p>きっかけは 2026-06-07、OpenClaw 作者 Peter Steinberger 氏の X 投稿。</p>
+<blockquote>もうコーディングエージェントにプロンプトを書くべきではない。<strong>エージェントをプロンプトするループを設計するべきだ</strong>。</blockquote>
+<p>Claude Code を率いる Boris Cherny 氏の「私の仕事はループを書くことだ」も拡散し、<strong>2026 年 6 月末に Anthropic が公式ブログで「ループエンジニアリング」として定義</strong>した。</p>
+<blockquote><strong>停止条件が満たされるまでエージェントが作業サイクルを繰り返すこと</strong></blockquote>
+<p>従来のバイブコーディングでは、「次に何をやるか」を決める<strong>一番外側の輪を人間が手動で回して</strong>いた。ループエンジニアリングは<strong>その外側の輪ごと機械に任せる</strong>。</p>
+<p>AI との関わり方は、段階を追って外側へ移動してきた、というのが記事の整理である。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>段階</th><th>問い</th></tr></thead><tbody>
+<tr><td>プロンプトエンジニアリング</td><td>何と頼むか</td></tr>
+<tr><td>コンテキストエンジニアリング</td><td>何を知らせるか</td></tr>
+<tr><td>ハーネスエンジニアリング</td><td>どんな道具を使わせるか</td></tr>
+<tr><td><strong>ループエンジニアリング</strong></td><td><strong>いつ動かし、どう検証し、いつ止めるか</strong></td></tr>
+</tbody></table></div>
+<blockquote>誤解しないでほしいが、プロンプトが不要になるわけではない。ループの内部では今もプロンプトが働いている。<strong>変わるのは、エンジニアが最も時間をかける場所だ。</strong></blockquote>
+<h3>1.2 著者の環境と「人間の仕事 3 つ」</h3>
+<p>著者は約 1 年運用した結果、自分の仕事が <strong>3 つに絞られた</strong>と書く。</p>
+<ol>
+<li>設計書を斜め読みして、問題に気がついたら指摘する</li>
+<li>長い開発をどこで区切るか決める</li>
+<li>本番反映のタイミングを判断する</li>
+</ol>
+<blockquote>人間は開発の流れに常時付き添う操作員ではなく、<strong>ゴールを決めて例外だけに対応する監督</strong>になった。コードを書かなくなったことよりも、<strong>うまく回っている限り人間が工程から抜けていること</strong>こそが大事だと考えている。</blockquote>
+<p>構成要素は 4 つ。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>要素</th><th>中身</th></tr></thead><tbody>
+<tr><td><code>CLAUDE.md</code></td><td>「最小の実装から始める」「仕様を推測せず、必ず検証する」等、<strong>AI が迷ったときの判断基準</strong></td></tr>
+<tr><td>開発文書</td><td>要件定義書・設計書・実装計画書を必ず作らせ参照させる。これが <strong>AI の外部記憶</strong>。状況が変われば AI 自身が書き換える</td></tr>
+<tr><td>サブエージェント</td><td>設計 / 実装 / レビューを分ける。<strong>レビューは開発元の違う GPT 系モデルに任せ、作った本人に採点させない</strong></td></tr>
+<tr><td><code>/issue-to-merge</code></td><td>課題ファイル → 実装計画 → 複数 AI で実装 → GPT レビュー → テスト → 本番反映 → 本体組み込みまで自動。<strong>このスキル自体も Claude Code に書かせた</strong></td></tr>
+</tbody></table></div>
+<p><strong>重要な但し書き</strong>: 最初からループエンジニアリングを目指したわけではなく、<strong>毎回の面倒な作業を 1 つずつ自動化した結果、振り返るとこの形になっていた</strong>という。</p>
+<h3>1.3 5 ステップ（順番が逆だと事故る）</h3>
+<blockquote>多くの人は最初に「全自動で回るコマンド」を作りたがる。<strong>順番は逆だ。</strong> 判断の原則と検証の仕組みがない状態で自動化すると、<strong>間違った方向へ高速で突き進むシステム</strong>ができあがる。</blockquote>
+<div class="table-wrap"><table>
+<thead><tr><th>Step</th><th>内容</th></tr></thead><tbody>
+<tr><td><strong>1</strong></td><td><strong>判断の原則を書く</strong> — <code>CLAUDE.md</code> に「迷ったときのルール」を 10〜20 個。<strong>自動化の第一歩は AI を動かすことではなく、AI の判断基準を固定すること</strong></td></tr>
+<tr><td><strong>2</strong></td><td><strong>文書を AI の外部記憶にする</strong> — 要件定義書・設計書・実装計画書の 3 点を毎回作る決まりにする</td></tr>
+<tr><td><strong>3</strong></td><td><strong>作る係と評価する係を分ける</strong> — 自分の宿題を自分で採点させない。<strong>AI は自分の作ったものを甘く評価しがちなので、ここが品質を守る生命線</strong></td></tr>
+<tr><td><strong>4</strong></td><td><strong>合格を機械が判定できるようにする</strong> — テスト・文法チェックをコマンド一発に。TDD ならそのテストが<strong>客観的な停止条件</strong>になる</td></tr>
+<tr><td><strong>5</strong></td><td><strong>繰り返す作業を標準手順書にする</strong> — 頻出作業を Skill として登録</td></tr>
+<tr><td>—</td><td><strong>最後に外側のループをつなぐ</strong>。部品がそろっていれば、自動コマンドは AI 自身に書かせられる</td></tr>
+</tbody></table></div>
+<h3>1.4 「終わり」の定義がすべて</h3>
+<p>記事で最も実務的な部分である。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>良し悪し</th><th>ゴールの書き方</th></tr></thead><tbody>
+<tr><td>❌ 悪い</td><td>「ログイン機能を完成させろ」 — 抽象的。<strong>AI が「できました」と言えば終わってしまう</strong></td></tr>
+<tr><td>✅ 良い</td><td>「<strong>テスト 42 件がすべて通り、文法チェックのエラーが 0 件になるまで修正する。5 回試して駄目なら、状況を報告して止まる</strong>」</td></tr>
+</tbody></table></div>
+<p>ただし著者は「そんな指示は人間には面倒すぎる」とも書く。そこでコンテキストエンジニアリングが効いてくる。目的や背景が共有されていれば、<strong>必要十分なゴール条件も AI 自身に設定させ、完了したか自分でチェックさせられる</strong>。</p>
+<blockquote><strong>このゴール判定の精度こそがループエンジニアリングの肝なのだ。</strong></blockquote>
+<p>もう 1 つが <strong>「人間の関与」の設計</strong>。</p>
+<blockquote>完全無人化は目標ではない。筆者も本番反映の直前だけは自分で判断すると決めている。（中略）<strong>人間をどの工程から外し、どこに残すか。それを決めること自体がループエンジニアリングなのだ。</strong></blockquote>
+<p>コストについては、Anthropic が「定型作業には安価なモデル、重要な判断には高性能なモデル」を推奨していると触れている。</p>
+<h3>1.5 冷静な数字 — 成功率 25%</h3>
+<p>2026 年 7 月末に Microsoft らが公開したベンチマーク <strong>LoopsBench</strong>（112 件の長時間開発タスク）。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>条件</th><th>完全解決率</th></tr></thead><tbody>
+<tr><td>Claude Opus 4.7 + Claude Code（当時最強）</td><td><strong>25%</strong></td></tr>
+<tr><td>実際の GitHub 上の複雑な連続タスクに限ると</td><td><strong>3% 台</strong></td></tr>
+</tbody></table></div>
+<blockquote>優秀なモデルを無限に回せばソフトウェアが勝手に完成する、という期待は<strong>現時点では幻想</strong>だ。</blockquote>
+<p>したがってループエンジニアリングの本当の姿は、著者いわくこうなる。</p>
+<blockquote><strong>失敗する AI を前提に、失敗を検出し、修正させ、再試行させ、それでも駄目なら安全に止める。そのための制御の仕組みを作る技術だ。</strong></blockquote>
+<h3>1.6 Proof-or-Stop — 本記事の核心</h3>
+<p>7 月公開の査読前論文「Proof-or-Stop」が示した思想として、次が引かれている。</p>
+<blockquote><strong>AI の「終わりました」は事実ではなく、ただの主張である。テスト結果という証拠がそろうまで、完了として扱ってはならない。</strong></blockquote>
+<h3>1.7 残る人間の仕事</h3>
+<blockquote>コンテキストを整え、ゴール条件を定義し、どこで人間が引き取るか。<strong>AI を安全に自動運転させるための高度な判断と設計</strong>が、人間の仕事になる。 これには経験による勘だけでは対応しきれない。<strong>ソフトウェア工学や組織マネジメント、もしくは人間側の認知心理学</strong>といった基礎知識が必要になってくる。</blockquote>
+<hr>
+<h2 id="h2">2. 自組織での実測（2026-08-22）</h2>
+<h3>2.1 5 ステップの充足度</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>Step</th><th>本組織の状態</th><th>判定</th></tr></thead><tbody>
+<tr><td><strong>1. 判断の原則</strong></td><td><code>CLAUDE.md</code> <strong>200 行 / 注意事項 28 個</strong>、<code>.claude/rules/</code> <strong>9 本 1,034 行</strong></td><td>✅ 記事の推奨（10〜20 個）を<strong>超えている</strong></td></tr>
+<tr><td><strong>2. 外部記憶</strong></td><td><code>.task-log/</code>（<strong>237 件が completed</strong>）/ <code>docs/decisions/</code> / Case Bank 240 件</td><td>✅ 記事の 3 点セットとは形が違うが機能は充足</td></tr>
+<tr><td><strong>3. 作る係と評価する係</strong></td><td>L2 は <strong>fresh general-purpose agent</strong>（5 Skill）。ただし<strong>同じ Claude</strong></td><td>🔶 <strong>分離が記事より弱い</strong></td></tr>
+<tr><td><strong>4. 機械判定の停止条件</strong></td><td>L0 を持つ Skill <strong>5 / 18</strong>。L2 に数値閾値（composite ≥ 0.85）を持つ <strong>5 Skill</strong></td><td>🔶 <strong>13 Skill に機械的な停止条件が無い</strong></td></tr>
+<tr><td><strong>5. 標準手順書</strong></td><td>Skill <strong>18 種</strong></td><td>✅</td></tr>
+<tr><td><strong>外側のループ</strong></td><td><code>/company-cycle</code> <code>/company-insights-cycle</code> の <strong>2 本</strong></td><td>✅ 既に到達している</td></tr>
+</tbody></table></div>
+<p><strong>総じて、本組織は記事の 5 ステップをほぼ踏み終えて「外側のループ」まで到達している。</strong> 既存カタログ §5 に「ループエンジニアリング（実装済み）」として候補 I〜M が採用済みで記録されていることとも一致する。</p>
+<h3>2.2 Step3 の弱さ — 「別ベンダー」ではない</h3>
+<p>記事の要求は <strong>「レビューは開発元の違う GPT 系モデルに任せ、作った本人に採点させない」</strong> である。</p>
+<p>本組織の L2 は「fresh な general-purpose agent」で<strong>執筆者バイアスは避けている</strong>が、<strong>モデルは同じ Claude</strong> である。GPT 系を使う Skill は <strong>1 件</strong>（<code>company-diagram-v2</code> が Codex を言及）にとどまる。</p>
+<blockquote>参考: 2026-08-16 の解析（<a href="2026-08-w2-claude-code-codex-agent.html"><code>2026-08-w2-claude-code-codex-agent.md</code></a> §8.3.1）で読んだ claudex 記事の委譲マトリクスは、<strong>高リスクレビューを cc と Codex の独立並列</strong>にし、互いの結果を見せない設計だった。方向性は同じである。</blockquote>
+<h3>2.3 Proof-or-Stop の当てはまり — 本組織にも、この解析自体にも</h3>
+<p><strong>(a) task-log の実測</strong></p>
+<div class="table-wrap"><table>
+<thead><tr><th>項目</th><th>値</th></tr></thead><tbody>
+<tr><td><code>status: completed</code> の task-log</td><td><strong>237 件</strong></td></tr>
+<tr><td>うち「未検証事項」「確認していないこと」を自認しているもの</td><td><strong>18 件（7.6%）</strong></td></tr>
+</tbody></table></div>
+<p>つまり <strong>92.4% の task-log は「完了」と主張するだけで、何を検証していないかを書いていない</strong>。記事の言う「主張」と「証拠」の区別が、記録上ついていない。</p>
+<blockquote>既存カタログの候補 <strong>B</strong>（<code>verification-pending</code> の追加）・<strong>C</strong>（未検証事項欄）・<strong>S</strong>（緑 ≠ 実用可）・<strong>AL</strong>（L2 を判定から証拠の構造化へ）は、いずれもこの問題を別角度から指している。<strong>Proof-or-Stop は、それらに共通の名前を与えた</strong>と読める。</blockquote>
+<p><strong>(b) このセッション自身が実例</strong></p>
+<p>2026-08-16 のセッションで、<strong>「修正した」と報告して実は直っていなかった事例が 2 回連続で起きた</strong>。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>PR</th><th>報告内容</th><th>実態</th></tr></thead><tbody>
+<tr><td>#786</td><td>「reward が付かない問題を是正した」</td><td>❌ 原因を<strong>記述しただけ</strong>で、テンプレートに <code>## reward</code> 見出しが残っており次回も再発する状態だった</td></tr>
+<tr><td>#787</td><td>「テンプレートを直したので次回から正常値が取れる」</td><td>❌ 通常タスクには効いたが、<strong><code>/company-cycle</code> の経路では直らなかった</strong>（Phase 順序の問題）</td></tr>
+<tr><td>#788</td><td>「Phase 3 に再評価手順を追加した」</td><td>⏳ <strong>次サイクルまで未検証</strong>（本レポート時点でも未確認）</td></tr>
+</tbody></table></div>
+<p>さらに <strong>2026-08-22 の本セッション冒頭</strong>でも、<code>git fetch</code> 前のローカルを見て「8/17 以降のコミットは 0 件 / 日次ダイジェストは 8/16 が最新」と報告し、直後に訂正している（実際は 17 コミット / ダイジェストは 8/22 まで存在）。</p>
+<p><strong>いずれも「テスト結果という証拠」を取る前に完了を主張した結果である。</strong> 記事の指摘がそのまま当てはまる。</p>
+<h3>2.4 「人間の仕事 3 つ」との対比</h3>
+<p>記事の 3 つと、本組織でオーナーが実際にやっていることを並べる。</p>
+<div class="table-wrap"><table>
+<thead><tr><th>記事の 3 つ</th><th>本組織での対応</th></tr></thead><tbody>
+<tr><td>設計書を斜め読みして問題を指摘</td><td>✅ 実施（配置先の判断、対象期間の解釈の訂正など）</td></tr>
+<tr><td>長い開発をどこで区切るか決める</td><td>✅ 実施（「案 A で」「いったんそれでいい」等）</td></tr>
+<tr><td>本番反映のタイミングを判断</td><td>✅ <strong>PR のマージは全件オーナーが手動</strong>（auto-merge していない）</td></tr>
+</tbody></table></div>
+<p><strong>3 つとも既に人間側に残っている。</strong> 記事の到達点と同じ形になっている。</p>
+<hr>
+<h2 id="h3">3. 採用候補</h2>
+<h3>(BC) 停止条件を「主張」から「証拠」へ — Proof-or-Stop の明文化 — ⬜ 優先度 <strong>高</strong></h3>
+<p><strong>根拠</strong>: §2.3。<code>completed</code> 237 件のうち <strong>92.4% が未検証事項を書いていない</strong>。加えて、直近セッションで「修正した」報告が <strong>2 回連続で誤り</strong>だった実例がある。</p>
+<p><strong>やること</strong>（既存候補 B / C / S / AL を <strong>1 本に束ねる</strong>）:</p>
+<p><code>@.claude/rules/task-log.md</code> に次を追加する。</p>
+<blockquote><strong>完了を報告する前に、「何をもって完了としたか」の証拠を 1 行書く。</strong> 証拠が実行結果でない場合（読んだだけ・書いただけ）は、<strong><code>status: completed</code> にしてよいが「未検証事項」に必ず記載する</strong>。</blockquote>
+<p>記事の良いゴールの例（「テスト 42 件が通り、エラー 0 件。5 回試して駄目なら止まる」）を、そのまま雛形として載せる。</p>
+<p><strong>コスト</strong>: 小（rules に 1 節） <strong>判断に必要な情報</strong>: 既存 237 件に遡って書かせるかは<strong>未決定</strong>（遡及は候補 AV / AW と同じ問題を含む）</p>
+<h3>(BD) L2 レビューを別ベンダーにする — ⬜ 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §2.2。記事は「開発元の違う GPT 系に任せる」を<strong>品質を守る生命線</strong>と位置づけている。本組織は fresh agent で執筆者バイアスは避けているが、<strong>モデルは同じ Claude</strong> である。</p>
+<p>Codex CLI は既にインストール済み（2026-08-16 実測: <code>codex-cli 0.144.5</code>、認証済み・現用中）なので、<strong>環境は揃っている</strong>。</p>
+<p><strong>留保</strong>: 8/16 の解析で読んだ claudex 記事は、<strong>高リスクレビューのみ</strong>を独立並列にする設計だった。全 Skill の L2 を差し替えるのは過剰で、<strong>致命軸を持つ Skill に限る</strong>のが現実的。</p>
+<p><strong>未検証</strong>: Codex 側から本リポジトリの成果物を読ませるコストと、レビュー品質の差を<strong>測っていない</strong>。</p>
+<h3>(BE) 停止条件を持たない 13 Skill の扱いを決める — ⬜ 優先度 <strong>中</strong></h3>
+<p><strong>根拠</strong>: §2.1 Step4。L0（機械判定）を持つのは <strong>5 / 18 Skill</strong> のみ。残り 13 は「AI が完了と言えば完了」である。</p>
+<p>ただし<strong>全部に L0 が要るわけではない</strong>。<code>/company</code>（対話）や <code>/company-admin</code>（マスタ CRUD）は性質が違う。<strong>どの Skill に機械的な停止条件が必要かを選別する</strong>のが先。</p>
+<p><strong>未検証</strong>: 13 Skill の内訳を性質別に分類していない。</p>
+<h3>(BF) 「1 つずつ自動化する」順序の記録 — ❌ <strong>不採用（既に達成済み）</strong></h3>
+<p>記事の 5 ステップは「これから始める人」向けであり、<strong>本組織は既に外側のループ 2 本まで到達している</strong>。改めて順序をなぞる意味はない。</p>
+<p>ただし記事の警告——<strong>「判断の原則と検証の仕組みがない状態で自動化すると、間違った方向へ高速で突き進むシステムができあがる」</strong>——は、新しい Skill を作るときのゲートとして既存の<strong>候補 R（Skill 作成ゲート 4 問）</strong>に含まれている。</p>
+<hr>
+<h2 id="h4">4. 未検証事項</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>内容</th></tr></thead><tbody>
+<tr><td>1</td><td><strong>LoopsBench の原典を読んでいない</strong>。「Claude Opus 4.7 + Claude Code で 25% / GitHub 実タスクで 3% 台」は記事の記述に依存</td></tr>
+<tr><td>2</td><td><strong>「Proof-or-Stop」論文の原典を読んでいない</strong>（7 月公開の査読前論文とのみ記載され、著者名・URL が記事に無い）</td></tr>
+<tr><td>3</td><td><strong>Anthropic 公式ブログ（2026 年 6 月末のループエンジニアリング定義）の原文を読んでいない</strong></td></tr>
+<tr><td>4</td><td>記事の著者環境（<code>/issue-to-merge</code> 等）は<strong>追試していない</strong>。評価は記述のみに基づく</td></tr>
+<tr><td>5</td><td>§2.3 の「92.4% が未検証事項を書いていない」は <strong>grep による機械判定</strong>。表現ゆれ（「未確認」等の別表記）を拾えていない可能性がある</td></tr>
+<tr><td>6</td><td>候補 BD の前提となる <strong>Codex レビューの品質差を測っていない</strong></td></tr>
+<tr><td>7</td><td>候補 BE の 13 Skill を<strong>性質別に分類していない</strong></td></tr>
+<tr><td>8</td><td>候補 <strong>BC / BD / BE はいずれも未実施</strong></td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h5">関連</h2>
+<ul>
+<li><a href="https://github.com/SAS-Sasao/cc-sier-organization/blob/main/.companies/domain-tech-collection/docs/insights/catalog.md"><code>catalog.md</code></a> — 採用判断カタログ（§5 ループエンジニアリング / §5.20 本レポート / 候補 BC・BD・BE）</li>
+<li><a href="2026-08-w2-claude-code-codex-agent.html"><code>2026-08-w2-claude-code-codex-agent.md</code></a> — §8.3.1 claudex の委譲マトリクス（候補 BD の参考）</li>
+<li><code>@.claude/rules/web-content-fetch.md</code> — 本レポートの取得方法の根拠</li>
+</ul>
+  <p class="updated">生成: 2026-08-22 16:17 — <a href="../../index.html">トップへ戻る</a></p>
+</div>
+</body>
+</html>

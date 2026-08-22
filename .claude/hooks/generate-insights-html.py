@@ -1187,9 +1187,20 @@ def update_top_index(repo_root: Path) -> None:
 
     html = index_path.read_text(encoding="utf-8")
 
-    # 既存の insights カードを削除
+    # 既存の TodoInsights カードのみを削除
+    #
+    # ⚠️ パスを [^"]* でワイルドカードにしないこと。
+    # ./insights/ 配下には別系統のカードが存在する（知見解析レポート:
+    # ./insights/analyses/index.html）。ワイルドカードにすると、それらも
+    # 巻き添えで削除され、TodoInsights だけが再挿入される。
+    #
+    # 実害（2026-08-22 検出）: 本 hook は daily-insights-sync.yml から毎晩
+    # 実行されるため、知見解析レポートのカードが毎晩消えていた。
+    # generate-dashboard.sh 側にカード定義を持たせていたが、そちらは
+    # どの workflow からも呼ばれない（ローカル /company-dashboard 専用）ため
+    # 復旧されなかった。
     html = re.sub(
-        r'\s*<a href="\./insights/[^"]*"[^>]*class="card"[^>]*>.*?</a>',
+        r'\s*<a href="\./insights/index\.html"[^>]*class="card"[^>]*>.*?</a>',
         "",
         html,
         flags=re.DOTALL,
