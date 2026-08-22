@@ -68,3 +68,14 @@ Claude Design の `DesignSync` ツールで読み取り（`/design consent` 済�
 - **既存成果物（図 44 本等）を再生成するかを決めていない**
 - 1 日 1 段階という見積もりは**楽観的である可能性がある**（対象 28 ファイル前後）
 - **Day 1 以降は一切着手していない**
+
+## reward
+```yaml
+score: 1.0
+signals:
+    completed: true
+    artifacts_exist: true
+    excessive_edits: false
+    retry_detected: false
+evaluated_at: "2026-08-22T20:06:31"
+```
