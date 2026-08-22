@@ -1,0 +1,15 @@
+{
+  "session_id": "9637b4fe-bb63-4823-9a31-c9d72a2a1d9e",
+  "org_slug": "domain-tech-collection",
+  "date": "2026-08-22",
+  "datetime": "2026-08-22 16:42:54",
+  "tool_count": 46,
+  "by_type": {
+    "write": 0,
+    "read": 0,
+    "bash": 45,
+    "other": 1
+  },
+  "files_written": [],
+  "log_file": ".companies/domain-tech-collection/.interaction-log/2026-08-22.md"
+}
