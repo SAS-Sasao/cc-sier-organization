@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全130件 ｜ 最終更新: 2026-08-22 23:03</p>
+<p class="subtitle">domain-tech-collection ｜ 全131件 ｜ 最終更新: 2026-08-23 23:02</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">12861</div>
+    <div class="summary-value blue">12963</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-08-23</div>
+    <div class="summary-value">2026-08-24</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">130</div>
+    <div class="summary-value green">131</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-08-23" onclick="switchTab('2026-08-23')">2026-08-23</button>
+<button class="tab-btn active" data-date="2026-08-24" onclick="switchTab('2026-08-24')">2026-08-24</button>
+<button class="tab-btn" data-date="2026-08-23" onclick="switchTab('2026-08-23')">2026-08-23</button>
 <button class="tab-btn" data-date="2026-08-22" onclick="switchTab('2026-08-22')">2026-08-22</button>
 <button class="tab-btn" data-date="2026-08-21" onclick="switchTab('2026-08-21')">2026-08-21</button>
 <button class="tab-btn" data-date="2026-08-20" onclick="switchTab('2026-08-20')">2026-08-20</button>
@@ -266,7 +267,194 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-08-23" class="digest-panel" style="display:block">
+<div id="digest-2026-08-24" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、10件成功・1件失敗）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 102件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>AWS Glue 6.0 が GA、30%値下げ + Iceberg v3 サポート</strong> — データ基盤のコスト最適化に直結する大型アップデート、DevelopersIO で実機検証も同日公開</li><li><strong>AIコーディングエージェント活用が開発全工程に浸透</strong> — Claude Code/Kiro/Codex 活用事例が Zenn・Qiita で多数出現、QA・PM・設計・ナレッジ管理まで波及</li><li><strong>「人月で稼ぐSIerはあと数年で詰む」の議論が拡散</strong> — 自律AIエージェント台頭でSIerビジネスモデルの根本転換を迫る分析がはてブで注目</li><li><strong>ローソンがトレーラーハウス型店舗を初出店</strong> — 低コスト・短期間で出店可能な新フォーマット、不動産制約を回避する新たな出店戦略</li><li><strong>富士ソフトが「次世代コマース基盤」構想を発表</strong> — AIが自律的に購買を担う時代のEC基盤構想、エージェンティックコマースの国内SIer実装例</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>AWS Glue 6.0 が GA、30%値下げ + Iceberg v3 サポート</strong> — データ基盤のコスト最適化に直結する大型アップデート、DevelopersIO で実機検証も同日公開</li>
+<li><strong>AIコーディングエージェント活用が開発全工程に浸透</strong> — Claude Code/Kiro/Codex 活用事例が Zenn・Qiita で多数出現、QA・PM・設計・ナレッジ管理まで波及</li>
+<li><strong>「人月で稼ぐSIerはあと数年で詰む」の議論が拡散</strong> — 自律AIエージェント台頭でSIerビジネスモデルの根本転換を迫る分析がはてブで注目</li>
+<li><strong>ローソンがトレーラーハウス型店舗を初出店</strong> — 低コスト・短期間で出店可能な新フォーマット、不動産制約を回避する新たな出店戦略</li>
+<li><strong>富士ソフトが「次世代コマース基盤」構想を発表</strong> — AIが自律的に購買を担う時代のEC基盤構想、エージェンティックコマースの国内SIer実装例</li>
+<li><strong>トライアルが西友不動産を流動化し170億円調達</strong> — 小売業の不動産アセット活用による大型資金戦略</li>
+<li><strong>Bedrock に GPT-5.6 Sol 値下げ + Web Search 機能拡充</strong> — マルチモデル基盤としての Amazon Bedrock の充実化が加速</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://qiita.com/tomada/items/42537e0b14b38797d218" target="_blank" rel="noopener">AIコーディングの精度を劇的に向上させる Context7 MCP Server 完全ガイド</a></td><td>Qiita</td><td>Context7 MCP Serverを活用してAIコーディング支援の精度を高める包括的チュートリアル。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/a_sato_JQIT/items/a82fccf6d52c05156384" target="_blank" rel="noopener">QAエンジニアの仕事が変わった——Claude CodeとPlaywrightで、テストからチケット管理まで全部AIに任せてみた話</a></td><td>Qiita</td><td>Claude CodeとPlaywrightによるテスト自動化でQA業務プロセス全体を変革した事例。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/dachi/articles/39972d023f0440" target="_blank" rel="noopener">コーディングエージェントが実装するUIの品質を上げるためにやったこと</a></td><td>Zenn</td><td>コーディングエージェントが生成するUI実装の品質向上に向けた実践的な取り組み。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/ukita/articles/aad5698672aef3" target="_blank" rel="noopener">AI Agentに社内知識をオンボーディングする：SkillsとEvalの設計</a></td><td>Zenn</td><td>AIエージェントへの社内ナレッジ導入手法としてSkillsとEval機構の設計を解説。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/kitadesign/articles/b9993fe1d72b17" target="_blank" rel="noopener">YAML 1枚で開発エージェントチームを動かす — 開発基盤に Docker Agent を採用した話</a></td><td>Zenn</td><td>単一YAMLファイルでDocker Agentベースの開発エージェントチームを構成・運用する設計。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/ibaraki/articles/4a54d0d95446ac" target="_blank" rel="noopener">毎朝 CloudWatch を見回るエージェントを作ってみたら、翌朝さっそく仕事をしてくれた話</a></td><td>Zenn</td><td>CloudWatch監視を自動巡回するAIエージェントを構築し翌朝に異常検知が機能した事例。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/marvelousu/articles/windows-mcp-vs-computer-use" target="_blank" rel="noopener">Claude Code のデスクトップ操作、内蔵の computer-use ではなく Windows-MCP を使っている理由</a></td><td>Zenn</td><td>Claude Codeのデスクトップ操作でWindows-MCPを選択した技術的根拠を解説。</td></tr>
+<tr><td>8</td><td><a href="https://qiita.com/jus1730/items/a4dc88817d1e97ac0bf4" target="_blank" rel="noopener">【Amplify x AgentCore】業務で"本当に"使えるAWS運用アシスタントを作ってみた</a></td><td>Qiita</td><td>AmplifyとBedrock AgentCoreを組み合わせた実用的なAWS運用アシスタントの構築事例。</td></tr>
+<tr><td>9</td><td><a href="https://qiita.com/meccha__eeyan/items/9b21cf93514fc04a53c7" target="_blank" rel="noopener">夏休み自由研究（AI駆動開発によるDecisionFlow改良）</a></td><td>Qiita</td><td>AI駆動開発手法を活用したPowerPlatformワークフロー（DecisionFlow）の改良。</td></tr>
+<tr><td>10</td><td><a href="https://zenn.dev/komatsu_k/articles/claude-code-output-styles-action-first" target="_blank" rel="noopener">Claude Codeの回答を"行動指向"にするOutput Styleは効果があるのか検証してみた</a></td><td>Zenn</td><td>Claude CodeのOutput Style設定が行動指向回答に与える効果の検証結果。</td></tr>
+<tr><td>11</td><td><a href="https://zenn.dev/b1rd0cean/articles/onboarding-external-brain-kb" target="_blank" rel="noopener">配属直後、外付けの脳を作った話。Claude Code と作った個人ナレッジベースの中身</a></td><td>Zenn</td><td>Claude Codeを活用した個人ナレッジベース構築によるオンボーディング効率化。</td></tr>
+<tr><td>12</td><td><a href="https://dev.classmethod.jp/articles/aidlcv2-hook/" target="_blank" rel="noopener">AI-DLC v2 の承認ゲートや監査ログが Kiro のフックでどう実装されているか調べた</a></td><td>DevelopersIO</td><td>AI-DLC v2のKiroフックによる承認ゲート・監査ログ実装の詳細調査。</td></tr>
+<tr><td>13</td><td><a href="https://dev.classmethod.jp/articles/20260822-cc-updates-v2-1-239/" target="_blank" rel="noopener">Claude Code v2.1.238〜v2.1.239 の主要アップデート - Remote Control の集中改善と keybindingFlavor 設定の追加</a></td><td>DevelopersIO</td><td>Claude Code最新版のRemote Control改善とkeybinding設定追加の解説。</td></tr>
+<tr><td>14</td><td><a href="https://zenn.dev/yuki0123/articles/3f8c1a7b5d902e" target="_blank" rel="noopener">Codexを効率よく使う方法（ChatGPT + GitHub）</a></td><td>Zenn</td><td>ChatGPTとGitHub連携によるCodexの効率的活用メソッドの紹介。</td></tr>
+<tr><td>15</td><td><a href="https://zenn.dev/mosayan/articles/harness-engineering-zenn-review" target="_blank" rel="noopener">ハーネスエンジニアリングでZennの記事レビューを自動化してみた</a></td><td>Zenn</td><td>ハーネスエンジニアリング手法を応用したZenn記事レビュー自動化の実装。</td></tr>
+<tr><td>16</td><td><a href="https://qiita.com/ktdatascience/items/53b4a8eba35611db600c" target="_blank" rel="noopener">Googleアカウントに紐づく自分の情報を吐き出してClaude Codeに読ませてみた</a></td><td>Qiita</td><td>Googleアカウントの個人情報をClaude Codeに読み込ませてコンテキスト強化を試す実験。</td></tr>
+<tr><td>17</td><td><a href="https://qiita.com/ntaka329/items/ed0be05099ae142d9e70" target="_blank" rel="noopener">AIレビューがすり抜ける「なんか妥当じゃない」を、数えられる条件に翻訳した話</a></td><td>Qiita</td><td>AIコードレビューの主観的違和感を定量的・機械的に検出可能な条件に変換する手法。</td></tr>
+<tr><td>18</td><td><a href="https://qiita.com/ktdatascience/items/b1e36ac1ba7661bb90ba" target="_blank" rel="noopener">「データを国外に出せない」現場のAI窓口、さくらのAI Engineだけで一晩で作ってみた</a></td><td>Qiita</td><td>データ主権要件下でさくらクラウドAI Engineを使い一晩でオンプレミスAI窓口を構築。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/holy_fox/articles/53b82eed45f956" target="_blank" rel="noopener">RTX 5090でFreeTokenを試してみた。35Bでは不要、120B級MoEでは話が変わる</a></td><td>Zenn</td><td>RTX 5090でのFreeToken推論高速化の効果をモデルサイズ別に実測検証。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/nrs/articles/b920540a64e1a1" target="_blank" rel="noopener">ローカルLLM編成が単独のフロンティアAIを超えた日</a></td><td>Zenn</td><td>複数ローカルLLMの編成が単一フロンティアモデルの性能を超えた検証結果の報告。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/manntera/articles/66a7f64cf0534c" target="_blank" rel="noopener">Claude Opus 5 の effort は「賢さのツマミ」ではなくなった(エンジニア向け)</a></td><td>Zenn</td><td>Claude Opus 5のeffortパラメータが従来の能力調整から異なる意味に変化した解説。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/centerfield77/articles/c1e963064d05fd" target="_blank" rel="noopener">claude のメモリを棚卸しする</a></td><td>Zenn</td><td>Claudeのメモリ機能に蓄積された情報を整理・棚卸しする方法の解説。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/Tks_Yoshinaga/items/21997eab275b57539173" target="_blank" rel="noopener">360° 全天球画像を用いた 3D Gaussian Splatting 入門（360° Gaussian Pro 編）</a></td><td>Qiita</td><td>全天球画像を入力とした3D Gaussian Splatting技術の入門的解説。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/ktdatascience/items/00ee94da149040378c31" target="_blank" rel="noopener">「高台に避難してください」は届いているのか？ 防災情報を「やさしい日本語」にLLMで変換して公的ガイドラインで機械採点してみた</a></td><td>Qiita</td><td>LLMによる防災情報のやさしい日本語変換とガイドライン準拠度の自動評価。</td></tr>
+<tr><td>7</td><td><a href="https://qiita.com/Gotoubun_taiwan/items/cd6dc2ce80e2fafce712" target="_blank" rel="noopener">【因果推論ホラー】予測では1000戦全勝のLightGBM、効果推定では1000戦全敗。なのに、、、</a></td><td>Qiita</td><td>LightGBMの予測精度と因果効果推定の乖離を示す因果推論の落とし穴の解説。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/dgx-spark-switchyard-prefill-router-vs-judge/" target="_blank" rel="noopener">NVIDIA NeMo Switchyard の prefill router の仕組みについて調べてみた</a></td><td>DevelopersIO</td><td>NVIDIA NeMo Switchyardのprefill routerルーティング機構の詳細調査。</td></tr>
+<tr><td>9</td><td><a href="https://dev.classmethod.jp/articles/grok-46-bedrock-runtime-converse/" target="_blank" rel="noopener">Amazon Bedrock RuntimeのGrok 4.6を AWS CLIで試してみた</a></td><td>DevelopersIO</td><td>Amazon Bedrock上のGrok 4.6モデルをAWS CLIから呼び出して検証した記事。</td></tr>
+<tr><td>10</td><td><a href="https://dev.classmethod.jp/articles/bedrock-vlm-visual-inspection-generated-prompt/" target="_blank" rel="noopener">【Amazon Bedrock】検査プロンプトを VLM 自身に書かせて外観検査をしてみました</a></td><td>DevelopersIO</td><td>VLM自身に検査用プロンプトを生成させ外観検査を自動化する手法の実証。</td></tr>
+<tr><td>11</td><td><a href="https://dev.classmethod.jp/articles/bedrock-agentcore-web-search-tool-japanese-query/" target="_blank" rel="noopener">東京リージョンで利用可能になったAmazon Bedrock AgentCore Web Search Toolを日本語クエリで試してみた</a></td><td>DevelopersIO</td><td>Bedrock AgentCore Web Search Toolの東京リージョン提供開始に伴う日本語検索検証。</td></tr>
+<tr><td>12</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/bedrock-openai-gpt-56-sol-reduced-pricing/" target="_blank" rel="noopener">Amazon Bedrock announces reduced pricing for OpenAI GPT-5.6 Sol</a></td><td>AWS</td><td>Amazon BedrockでOpenAI GPT-5.6 Solの料金が値下げされた。</td></tr>
+<tr><td>13</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-bedrock-web-access-web-search/" target="_blank" rel="noopener">Launching External Web Access for Web Search on Amazon Bedrock</a></td><td>AWS</td><td>Amazon BedrockのWeb SearchにExternal Web Access機能が追加された。</td></tr>
+<tr><td>14</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/web-search-amazon-bedrock/" target="_blank" rel="noopener">Web Search in Amazon Bedrock AgentCore adds domain and published date filtering, expands to Europe and Asia Pacific</a></td><td>AWS</td><td>Bedrock AgentCoreのWeb Searchにドメイン・日付フィルタが追加され欧州・APACに拡大。</td></tr>
+<tr><td>15</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/generative-ai-inference-recommendation-for-amazon-sagemaker-now-available-in-the-sagemaker-ai-studio" target="_blank" rel="noopener">Generative AI Inference Recommendation for Amazon SageMaker now available in the SageMaker AI Studio</a></td><td>AWS</td><td>SageMaker AI StudioでGenerative AI推論最適化のレコメンデーション機能が利用可能に。</td></tr>
+<tr><td>16</td><td><a href="https://zenn.dev/jnch/articles/18cf3f1893ee5b" target="_blank" rel="noopener">人月で稼ぐSIerは、あと数年で詰む</a></td><td>はてブ</td><td>自律AIエージェントの台頭により人月ビジネスモデルのSIerが数年で破綻するとの分析。</td></tr>
+<tr><td>17</td><td><a href="https://dev.classmethod.jp/articles/1on1-design-with-ai/" target="_blank" rel="noopener">はじめてのマネジメント：AIと組み立てた1on1</a></td><td>DevelopersIO</td><td>AI支援を活用した初めてのマネージャー向け1on1ミーティング設計手法。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/aws-glue-6-0-price-reduction-iceberg-v3" target="_blank" rel="noopener">AWS Glue 6.0 delivers 30% price reduction and Iceberg v3 support</a></td><td>AWS</td><td>AWS Glue 6.0がGA、30%値下げとApache Iceberg v3を完全サポート。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/20260823-aws-glue-6/" target="_blank" rel="noopener">【アップデート】AWS Glue 6.0 が一般提供開始、30% の価格削減と Apache Iceberg v3 サポートが追加されたので試してみました</a></td><td>DevelopersIO</td><td>AWS Glue 6.0のGA化に伴う30%コスト削減とIceberg v3対応の実機検証。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/terraform-remote-backend-cloudflare-r2/" target="_blank" rel="noopener">Terraform で Cloudflare Workers をデプロイし、tfstate を R2 に配置してみた</a></td><td>DevelopersIO</td><td>TerraformによるCloudflare Workersデプロイとtfstateの R2バックエンド配置の実装。</td></tr>
+<tr><td>4</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-ec2-p6-b300/" target="_blank" rel="noopener">Amazon EC2 P6-B300 instances are now available in the Asia Pacific（Seoul）Region</a></td><td>AWS</td><td>Amazon EC2 P6-B300インスタンスがソウルリージョンで利用可能に。</td></tr>
+<tr><td>5</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-ec2-c8gd-m8gd/" target="_blank" rel="noopener">Amazon EC2 C8gd, M8gd and R8gd instances are now available in additional AWS Regions</a></td><td>AWS</td><td>EC2 C8gd/M8gd/R8gdインスタンスが追加リージョンで提供開始。</td></tr>
+<tr><td>6</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/aws-local-zones-las-vegas-nevada/" target="_blank" rel="noopener">AWS announces the general availability of a new AWS Local Zone in Las Vegas, Nevada</a></td><td>AWS</td><td>ラスベガスのAWS Local ZoneがGA化、EC2 C7i等をサポート。</td></tr>
+<tr><td>7</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-eks-argo-cd-configuration" target="_blank" rel="noopener">Amazon EKS Capability for Argo CD now supports custom configuration</a></td><td>AWS</td><td>Amazon EKSのArgo CD統合がargocd-cm ConfigMapによるカスタム設定に対応。</td></tr>
+<tr><td>8</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-eks-certificate-authority-ca-rotation-automated-lifecycle-management" target="_blank" rel="noopener">Amazon EKS now supports certificate authority（CA）rotation with automated lifecycle management</a></td><td>AWS</td><td>Amazon EKSがCA証明書ローテーションの自動ライフサイクル管理に対応。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-cloudfront-oac-s3-mrap" target="_blank" rel="noopener">Amazon CloudFront now supports Origin Access Control（OAC）for Amazon S3 Multi-Region Access Points</a></td><td>AWS</td><td>CloudFrontがS3 Multi-Region Access PointsへのOACをサポート開始。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/aws-direct-connect-new-prefix-controls" target="_blank" rel="noopener">AWS Direct Connect introduces inbound prefix controls and higher prefix scale</a></td><td>AWS</td><td>AWS Direct Connectにインバウンドプレフィックス制御と高スケール対応が追加。</td></tr>
+<tr><td>11</td><td><a href="https://dev.classmethod.jp/articles/cloudwatch-pipelines-geoip-rds-xml/" target="_blank" rel="noopener">Amazon CloudWatch pipelines の新機能、GeoIP・RDS・XML の3プロセッサを試してみた</a></td><td>DevelopersIO</td><td>CloudWatch Pipelinesに追加されたGeoIP/RDS/XMLプロセッサの動作検証。</td></tr>
+<tr><td>12</td><td><a href="https://dev.classmethod.jp/articles/aws-iot-device-shadow-nodejs/" target="_blank" rel="noopener">Node.jsの仮想デバイスでAWS IoT Device Shadowを試してみた</a></td><td>DevelopersIO</td><td>Node.js仮想デバイスによるAWS IoT Device Shadow機能の実践的検証。</td></tr>
+<tr><td>13</td><td><a href="https://dev.classmethod.jp/articles/aws-parallelcluster-3-16-0-released-pcluster-diag/" target="_blank" rel="noopener">AWS ParallelCluster 3.16.0 がリリースされ、診断ツール pcluster-diag が追加されたので試してみた</a></td><td>DevelopersIO</td><td>ParallelCluster 3.16.0の新診断ツールpcluster-diagの使用方法検証。</td></tr>
+<tr><td>14</td><td><a href="https://qiita.com/Omizu-25/items/41d5edd295915c8b6908" target="_blank" rel="noopener">SSM Parameter Storeの「分け方」と「Standard / Advanced」の決め方</a></td><td>Qiita</td><td>ECS/Lambda制約を踏まえたSSM Parameter Storeのティア選択と分割設計指針。</td></tr>
+<tr><td>15</td><td><a href="https://zenn.dev/e_koma/articles/20260819_fluent_bit_blog" target="_blank" rel="noopener">Fluent Bit のチューニングで CloudWatch Logs のコストを月50万円削減した</a></td><td>Zenn</td><td>Fluent Bitの設定チューニングによりCloudWatch Logsのコストを月額50万円削減。</td></tr>
+<tr><td>16</td><td><a href="https://zenn.dev/unchox/articles/backup-restorability-levels" target="_blank" rel="noopener">バックアップが「戻せる」かを 5 段階で測る</a></td><td>Zenn</td><td>バックアップの復元可能性を5段階で評価するフレームワークの提案。</td></tr>
+<tr><td>17</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/8/aws-partner-central-mcp/" target="_blank" rel="noopener">AWS Partner Central agents MCP Server now supports OAuth with AWS Sign-In</a></td><td>AWS</td><td>AWS Partner Central AgentsのMCPサーバーがOAuth対応しAmazon Quick/Kiroから利用可能に。</td></tr>
+<tr><td>18</td><td><a href="https://zenn.dev/isawa/articles/b9df966aa240b3" target="_blank" rel="noopener">新卒だけど電話サービスの負荷試験基盤を構築できた話</a></td><td>Zenn</td><td>新卒エンジニアが電話サービス向け負荷試験基盤を構築した経験談。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/snowflake-feature-policy-rules-ga/" target="_blank" rel="noopener">【新機能】Feature Policy Rules が一般提供となったので TEMPORARY テーブルとサーバーレスタスクの作成だけをブロックしてみた</a></td><td>DevelopersIO</td><td>Snowflake Feature Policy RulesのGA化に伴い特定操作のブロック設定を検証。</td></tr>
+<tr><td>2</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/redshift-long-term-system-table-retention/" target="_blank" rel="noopener">Amazon Redshift introduces long-term system table retention with Amazon S3 Tables integration</a></td><td>AWS</td><td>Amazon Redshiftがシステムテーブルデータの長期保持をS3 Tables連携で実現。</td></tr>
+<tr><td>3</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/aurora-dsql-cloudwatch-database-insights/" target="_blank" rel="noopener">Amazon Aurora DSQL now supports Amazon CloudWatch Database Insights</a></td><td>AWS</td><td>Aurora DSQLがCloudWatch Database Insightsに対応しパフォーマンス監視が強化。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/hamusack/articles/databricks-autostop-1min-api" target="_blank" rel="noopener">設定1つでDatabricksの課金を半分にした話</a></td><td>Zenn</td><td>Databricksのautostop設定変更だけで課金を半減させたコスト最適化事例。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/tshoji/articles/snowflake_iceberg_open_sharing" target="_blank" rel="noopener">Snowflake Managed Iceberg × Open Data Sharing によるニアゼロメンテナンスなオープン共有</a></td><td>Zenn</td><td>Snowflake Managed IcebergとOpen Data Sharingを組み合わせた低運用コストのデータ共有。</td></tr>
+<tr><td>6</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-timestream-influxdb-cmk/" target="_blank" rel="noopener">Amazon Timestream for InfluxDB now supports customer managed keys</a></td><td>AWS</td><td>Amazon Timestream for InfluxDBがKMSカスタマー管理キーによる暗号化に対応。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/onclimb/articles/ts-to-js-pipeline-onclimb" target="_blank" rel="noopener">TypeScript が JavaScript になるまで</a></td><td>Zenn</td><td>TypeScriptからJavaScriptへのコンパイルパイプラインの内部動作を詳細に解説。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/itome/articles/e087c6d11d0bd2" target="_blank" rel="noopener">Rust製のマルチプラットフォーム開発フレームワーク「Whisker」を作りました</a></td><td>Zenn</td><td>Rustで実装されたマルチプラットフォーム開発フレームワークWhiskerの紹介。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/mako_makok/articles/grpc-connect-http2-for-rest-devs" target="_blank" rel="noopener">gRPC / Connect / HTTP/2 を完全に理解したい</a></td><td>Zenn</td><td>REST開発者向けのgRPC/Connect/HTTP2プロトコルの体系的理解ガイド。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/catatsuy/articles/8e8dbf6afd1196" target="_blank" rel="noopener">Go 1.27のhttptest.NewTestServerをAPIクライアントのテストで使ってみて分かったこと</a></td><td>Zenn</td><td>Go 1.27の新しいhttptest.NewTestServer APIを実際のテストで使用した知見。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/uhyo/articles/react-use-browser-usage" target="_blank" rel="noopener">React 19.3 browser（） APIの使いみち〜FUNSTACK Routerの場合〜</a></td><td>Zenn</td><td>React 19.3のbrowser() APIをFUNSTACK Routerで活用する実装パターン。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/mr0015/articles/76af481ab3816d" target="_blank" rel="noopener">リポジトリにロジックは書くな！</a></td><td>Zenn</td><td>リポジトリ層にビジネスロジックを混入させないクリーンアーキテクチャの実践。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/mov_ish/articles/structured-playwright-e2e" target="_blank" rel="noopener">Structured Playwright —— 継続性から設計するE2Eテストの4層構造とハーネス</a></td><td>Zenn</td><td>E2Eテストの保守性を高める4層構造設計とハーネスパターンの提案。</td></tr>
+<tr><td>8</td><td><a href="https://zenn.dev/thaddeusjiang/articles/ci-e2e-runtime-optimization" target="_blank" rel="noopener">Playwright の E2E CI を4分割し、3時間13分から25分に短縮した</a></td><td>Zenn</td><td>Playwright E2E CIの並列分割により実行時間を3時間超から25分に短縮した事例。</td></tr>
+<tr><td>9</td><td><a href="https://zenn.dev/9wick/articles/6815082ae5f068" target="_blank" rel="noopener">Hono RPCの型が重い・渡せない問題をZeltJSではこう解決した</a></td><td>Zenn</td><td>Hono RPCの型推論負荷問題をZeltJSフレームワークで解決した設計アプローチ。</td></tr>
+<tr><td>10</td><td><a href="https://zenn.dev/yug1224/articles/2b2832d66b883b" target="_blank" rel="noopener">Type-Aware Linting Stable と React Compiler Support を開発フローに載せた</a></td><td>Zenn</td><td>TypeScript型認識リンティングとReact Compilerを開発フローに導入した手順。</td></tr>
+<tr><td>11</td><td><a href="https://k-sasaki.net/entry/2026/08/23/102342" target="_blank" rel="noopener">単体テストはシンプルに書くべき</a></td><td>はてブ</td><td>単体テストの過度な複雑化を避けシンプルさを維持すべき理由の考察。</td></tr>
+<tr><td>12</td><td><a href="https://zenn.dev/waddy/articles/rails-8-1-remote-ip" target="_blank" rel="noopener">Ruby on Rails 8.1から request.remote_ip は Forwarded ヘッダーが優先されるようになった</a></td><td>Zenn</td><td>Rails 8.1でのremote_ip取得におけるForwardedヘッダー優先化の破壊的変更の解説。</td></tr>
+<tr><td>13</td><td><a href="https://zenn.dev/mizchi/articles/quint-application-modeling" target="_blank" rel="noopener">時相論理の形式仕様の Quint を使って、denoland/celld の二重 writer バグを見つけた</a></td><td>Zenn</td><td>形式仕様記述ツールQuintを使用してdenoland/celldの並行性バグを検出した事例。</td></tr>
+<tr><td>14</td><td><a href="https://qiita.com/utah_T/items/833f106807bb8642fa35" target="_blank" rel="noopener">bat・delta導入で「なんとなくコミット」から卒業する、ターミナルの見やすさ改善記</a></td><td>Qiita</td><td>bat/deltaコマンド導入によるターミナル表示改善で意図的なコミットを促進する方法。</td></tr>
+<tr><td>15</td><td><a href="https://qiita.com/songchong/items/836c998ab0a52c128b6e" target="_blank" rel="noopener">【2026年8月調査】OpenAPIって何ができる？日本の業務システム56件の「設計図」公開率を調べてみた</a></td><td>Qiita</td><td>日本の業務システム56件を対象としたOpenAPI仕様公開率の実態調査。</td></tr>
+<tr><td>16</td><td><a href="https://zenn.dev/yshibatasaaan/articles/f95ec27d51176b" target="_blank" rel="noopener">MUI の DatePicker と TextField が100個あるモーダルの初期表示を、遅延マウントで94%短縮した話</a></td><td>Zenn</td><td>大量MUIコンポーネントを含むモーダルの描画を遅延マウントで94%高速化。</td></tr>
+<tr><td>17</td><td><a href="https://zenn.dev/rf_p/articles/9c4a7be1f3d508" target="_blank" rel="noopener">【2026/8/21最新アプデ】Slack の『コードチャンネル』が登場！Claude Tag で PR を出すまで触ってみた</a></td><td>Zenn</td><td>Slackの新機能「コードチャンネル」をClaude Tagと組み合わせてPR作成まで検証。</td></tr>
+<tr><td>18</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-ses-adds-open-click-tracking-override/" target="_blank" rel="noopener">Amazon SES now supports open and click tracking override parameters</a></td><td>AWS</td><td>Amazon SESがメールごとのOpen/Clickトラッキング個別制御パラメータに対応。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://qiita.com/volbe/items/28ed3b683761132aa27e" target="_blank" rel="noopener">【セキュリティ入門】第2回 OAuth 2.0とは？認可の仕組みを図解で理解する</a></td><td>Qiita</td><td>OAuth 2.0の認可フローを図解で初学者向けに解説するセキュリティ入門記事。</td></tr>
+<tr><td>2</td><td><a href="https://piyolog.hatenadiary.jp/entry/2026/08/23/033006" target="_blank" rel="noopener">ビルド時に不正コードが実行されるRustパッケージの改ざん</a></td><td>はてブ</td><td>Rustクレートのビルドスクリプトに不正コードが混入したサプライチェーン攻撃事例。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/s4ichi/articles/0d1e6dd99ec34d" target="_blank" rel="noopener">DMARC 集計レポートを Claude Code で分解して p=reject に到達するまで</a></td><td>Zenn</td><td>Claude CodeでDMARC集計レポートを分析しp=rejectポリシーに到達した運用記録。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/nsd_yst/articles/20260811-secalert-triage" target="_blank" rel="noopener">Claude Tag+Amazon GuardDuty Investigation Agentでセキュリティアラートの一次トリアージを自動化</a></td><td>Zenn</td><td>Claude TagとGuardDuty Investigation Agentの連携によるセキュリティアラート自動トリアージ。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/yukikurage/articles/a139bbdd6a522d" target="_blank" rel="noopener">型でセキュリティレベルを追跡して、安全なプログラミングをしよう！〜純粋関数を添えて〜</a></td><td>Zenn</td><td>型システムでセキュリティレベルをトラッキングし安全なコードを型レベルで保証する手法。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/nisshii0/items/50b9f1533d93a57187de" target="_blank" rel="noopener">チェック1つでランサムウェア対策！使わないのは損！（OCI Compute）</a></td><td>Qiita</td><td>Oracle Cloud Computeの設定変更1つでランサムウェア対策を有効化する方法。</td></tr>
+<tr><td>7</td><td><a href="https://aws.amazon.com/about-aws/whats-new/2026/08/amazon-dynamodb-streams-abac/" target="_blank" rel="noopener">Amazon DynamoDB Streams now supports attribute-based access control</a></td><td>AWS</td><td>DynamoDB StreamsがタグベースのABAC（属性ベースアクセス制御）に対応。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/store/554894/" target="_blank" rel="noopener">角上魚類が埼玉県内に「鶴ヶ島店」をオープン　丸魚・刺身売場を最大規模で展開</a></td><td>DCS</td><td>鮮魚専門店の角上魚類が埼玉県鶴ヶ島市に新店舗をオープンし、丸魚・刺身売場を同社最大規模で展開。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/store/s082148.html" target="_blank" rel="noopener">ヨークベニマル／栃木県小山市に「小山羽川店」オープン、初年度年商見込み16.2億円</a></td><td>流通ニュース</td><td>ヨークベニマルが栃木県小山市に新店を出店し、初年度年商16.2億円を見込む。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/store/s082177.html" target="_blank" rel="noopener">イオンフードスタイル／「フードスタイル東大島店」8月28日オープン、ベーカリー・デリカ強化</a></td><td>流通ニュース</td><td>ダイエーが運営するイオンフードスタイルが東大島に新店を8月28日オープン、ベーカリー・デリカを強化。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/store/s082145.html" target="_blank" rel="noopener">ダイエー／神戸市西区に「フードスタイル神戸学園店」8月28日オープン</a></td><td>流通ニュース</td><td>ダイエーが神戸市西区にフードスタイル業態の新店を8月28日にオープンする。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/store/s082146.html" target="_blank" rel="noopener">ベイシア／岐阜県に「Beisia Foods Park 岐南店」オープン、三心との連携1号店</a></td><td>流通ニュース</td><td>ベイシアが岐阜県に新業態「Foods Park」をオープン、グループ入りした三心との連携1号店。</td></tr>
+<tr><td>6</td><td><a href="https://www.ryutsuu.biz/store/s082144.html" target="_blank" rel="noopener">ローソン／神奈川県にトレーラーハウス型店舗を初出店、低コスト・短期間で出店可能</a></td><td>流通ニュース</td><td>ローソンがトレーラーハウスを活用した新型店舗を神奈川県に初出店、低コスト・短期間で開業可能な新フォーマット。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/strategy/s082149.html" target="_blank" rel="noopener">トライアル／西友の不動産を流動化、170億円の資金調達実施へ</a></td><td>流通ニュース</td><td>トライアルホールディングスが西友から取得した不動産の流動化により170億円規模の資金調達を実施する方針。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/strategy/s082147.html" target="_blank" rel="noopener">ファミマ／社長直轄の「2030プロジェクト室」9月1日新設、南雲克明氏が室長に</a></td><td>流通ニュース</td><td>ファミリーマートが2030年に向けた中長期戦略推進のため社長直轄の新組織を9月1日に設置。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/life-career/550186/" target="_blank" rel="noopener">流通秀書　第43回『扇子商法』</a></td><td>DCS</td><td>流通業界関連の書籍コラム第43回、扇子商法をテーマに流通ビジネスの知見を紹介。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/management/552490/" target="_blank" rel="noopener">過去最高売上更新の「くら寿司」 好調支える独自の商品設計と漁業創生の取り組み</a></td><td>DCS</td><td>くら寿司が過去最高売上を更新、独自の商品設計力と漁業創生への取り組みが好調の原動力。</td></tr>
+<tr><td>2</td><td><a href="https://netshop.impress.co.jp/n/2026/08/24/16599" target="_blank" rel="noopener">コーセーコスメポートの新スキンケアブランド「ウルタンク」に矢田亜希子さんをアンバサダーとして起用</a></td><td>ネッ担</td><td>コーセーコスメポートが新スキンケアブランド「ウルタンク」を立ち上げ、矢田亜希子さんをブランドアンバサダーに起用。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/strategy/s082179.html" target="_blank" rel="noopener">コロワイド／「カフェ・ベローチェ」などカフェ8ブランド、9月1日から順次値上げ</a></td><td>流通ニュース</td><td>コロワイドグループがカフェ・ベローチェなどカフェ8ブランドで9月1日から順次価格改定を実施。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/n/2026/08/24/16597" target="_blank" rel="noopener">「楽天市場」とくら寿司が連携、人気グルメ商品をくら寿司で楽しめるコラボレーション企画</a></td><td>ネッ担</td><td>楽天市場とくら寿司がコラボレーション企画を実施、楽天市場の人気グルメ商品をくら寿司店舗で楽しめる施策を展開。</td></tr>
+<tr><td>2</td><td><a href="https://ecnomikata.com/original_news/50466/" target="_blank" rel="noopener">「思っていたのと違う」を防ぐ　ギフトECの失敗リスクを低減する取り組み</a></td><td>ECのミカタ</td><td>ギフトEC領域で「思っていたのと違う」という購入後のミスマッチを防止するための各社の取り組みを紹介。</td></tr>
+<tr><td>3</td><td><a href="https://ecnomikata.com/original_news/51355/" target="_blank" rel="noopener">AIが購買を担う時代へ　富士ソフトが「次世代コマース基盤」構想を発表</a></td><td>ECのミカタ</td><td>富士ソフトがAIによる自律的な購買行動を実現する「次世代コマース基盤」構想を発表、EC業界の変革を提唱。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/sales/s082172.html" target="_blank" rel="noopener">サミット／7月の売上高315億円、既存店は1.4％増</a></td><td>流通ニュース</td><td>サミットの7月売上高は315億円、既存店売上高が前年同月比1.4%増と堅調に推移。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/sales/s082112.html" target="_blank" rel="noopener">カスミ／7月の総売上高240億円、既存店売上2.3％減</a></td><td>流通ニュース</td><td>カスミの7月総売上高は240億円、既存店売上高は前年同月比2.3%減と前年を下回った。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/sales/s082111.html" target="_blank" rel="noopener">東急ストア／7月の売上高172億円、既存店0.6％増</a></td><td>流通ニュース</td><td>東急ストアの7月売上高は172億円、既存店売上高は前年同月比0.6%増と微増。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<p>該当する記事はありませんでした。</p>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. AIエージェントがSIerのビジネスモデルと小売DXの双方を変革する</h3>
+<p>技術側では「人月で稼ぐSIerはあと数年で詰む」という論考がはてブで拡散され、自律AIエージェントによる開発自動化がSIerの収益構造を根底から揺さぶるとの認識が広がっている。一方の小売側では富士ソフトが「次世代コマース基盤」を発表し、AIが購買行動を自律的に代行する構想が具体化しつつある。SIerにとっては、人月モデルからの転換を自社で実践しながら、小売クライアントへのAIエージェント導入を提案するという二正面の変革が求められる局面である。</p>
+<h3>2. クラウドコスト最適化と小売業の IT 投資効率</h3>
+<p>AWS Glue 6.0の30%値下げ、Databricksのautostop設定による課金半減、Fluent Bitチューニングによる月50万円削減など、技術側ではデータ基盤のコスト最適化手法が充実している。小売業ではトライアルが不動産流動化で170億円を調達するなど、資金効率の最大化が経営課題となっている。SIerとしては、小売クライアントのデータ基盤刷新提案時にGlue 6.0+Iceberg v3やSnowflake Managed Icebergによるコスト削減効果を定量的に示すことで、投資対効果の説得力を高められる。</p>
+<h3>3. 新店舗フォーマットとクラウドネイティブ出店基盤</h3>
+<p>ローソンのトレーラーハウス型店舗やベイシアの「Foods Park」新業態など、小売各社が従来の不動産制約を超える出店戦略を展開している。これらの軽量店舗はクラウドネイティブなPOS・在庫管理基盤との親和性が高く、EKSのArgo CD統合やCloudFrontのMulti-Region OACといった最新のAWSサービスを活用した低コスト・高可用性の店舗システム構築が提案機会となる。</p>
+<h3>4. セキュリティ対策の技術×小売融合</h3>
+<p>技術側ではRustパッケージのサプライチェーン攻撃やDMARC運用の実践事例が注目される一方、小売側ではB6（セキュリティ）の記事が不在であった。しかし、EC基盤やPOSシステムのセキュリティは小売業にとって喫緊の課題であり、DynamoDB StreamsのABAC対応やGuardDuty Investigation Agentによる自動トリアージなど、AWSのセキュリティ機能の進化を小売基盤に適用する提案は差別化要因となる。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>34件</td><td>AI駆動開発・開発プラクティス系が中心</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>16件</td><td>AI活用・セキュリティ入門系</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>3件</td><td>SIer論・サプライチェーン攻撃</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>13件</td><td>AWS Glue 6.0検証・Claude Code更新</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>18件</td><td>Glue 6.0/Bedrock/EKS等の新機能多数</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>11件</td><td>新店オープン・月次売上・経営戦略</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>3件</td><td>角上魚類新店・くら寿司好調分析</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>2件</td><td>楽天×くら寿司コラボ・新ブランド</td></tr>
+<tr><td>9</td><td>ECのミカタ</td><td>成功</td><td>2件</td><td>ギフトEC・次世代コマース基盤</td></tr>
+<tr><td>10</td><td>ITmedia ビジネスオンライン</td><td>失敗</td><td>0件</td><td>小売カテゴリに最新記事なし</td></tr>
+<tr><td>11</td><td>ロジスティクス・トゥデイ</td><td>成功</td><td>0件</td><td>対象日（8/22-24）の記事なし</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術84件 + 小売18件 = 102件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-08-23" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、9件成功・1件一部成功・1件失敗）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 129件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>AIエージェント開発の実践知が急拡大</strong> — テスト握り潰し問題への報酬エンジニアリング、認可疲れの処方箋、社内ナレッジのオンボーディング手法など、エージェント運用の深い課題に踏み込む記事が多数出現。</li><li><strong>ShopifyがAIエージェント効果を数値公開</strong> — AI経由の注文・アクセスが前年比3倍、新規獲得率2倍と報告。EC×AIエージェントの実効性が定量的に示された。</li><li><strong>ローソンがトレーラーハウス型店舗を初出店</strong> — 低コスト・短期間で出店可能な移動型店舗モデルを神奈川県で開始、出店戦略の多様化が進む。</li><li><strong>AWS Glue 6.0がGA化、30%値下げとIceberg v3対応</strong> — データ基盤のコスト効率が大幅に改善し、Apache Iceberg v3のネイティブサポートが追加された。</li><li><strong>ファミマが社長直轄「2030プロジェクト室」を新設</strong> — 2030年に向けた中長期戦略の推進体制を強化、コンビニ各社の構造改革が加速。</li></ol></div>
@@ -24346,11 +24534,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-08-22 23:03 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-08-23 23:02 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
