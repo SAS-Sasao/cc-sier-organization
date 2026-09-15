@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全152件 ｜ 最終更新: 2026-09-14 00:36</p>
+<p class="subtitle">domain-tech-collection ｜ 全153件 ｜ 最終更新: 2026-09-15 01:09</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">15199</div>
+    <div class="summary-value blue">15283</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-09-14</div>
+    <div class="summary-value">2026-09-15</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">152</div>
+    <div class="summary-value green">153</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-09-14" onclick="switchTab('2026-09-14')">2026-09-14</button>
+<button class="tab-btn active" data-date="2026-09-15" onclick="switchTab('2026-09-15')">2026-09-15</button>
+<button class="tab-btn" data-date="2026-09-14" onclick="switchTab('2026-09-14')">2026-09-14</button>
 <button class="tab-btn" data-date="2026-09-13" onclick="switchTab('2026-09-13')">2026-09-13</button>
 <button class="tab-btn" data-date="2026-09-12" onclick="switchTab('2026-09-12')">2026-09-12</button>
 <button class="tab-btn" data-date="2026-09-11" onclick="switchTab('2026-09-11')">2026-09-11</button>
@@ -288,7 +289,177 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-09-14" class="digest-panel" style="display:block">
+<div id="digest-2026-09-15" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、10件成功/1件失敗）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 84件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>Yahoo!ショッピングのAIエージェント経由注文が全体の20%に到達</strong> — LINEヤフーのAIエージェントが実売に直結、エージェンティックコマースが数値で実証された</li><li><strong>マルチLLMベンダーAPI統合「Agent Router」がLinux Foundation採択</strong> — OpenAI・Anthropic等のAPIの違いを吸収するゲートウェイで、マルチベンダー運用が加速</li><li><strong>DCS「日本の小売業1000社ランキング2026」公開</strong> — トライアル・コスモス薬品が大幅増収、九州勢の台頭が鮮明に</li><li><strong>ライフによるアルビスTOB</strong> — 食品スーパー業界の再編が加速、流通アナリストが両社の深謀を分析</li><li><strong>AI脅威論にAnthropicCEO提言への賛同拡大</strong> — 歯止めなき開発競争への恐怖感が業界リーダーに広がる</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>Yahoo!ショッピングのAIエージェント経由注文が全体の20%に到達</strong> — LINEヤフーのAIエージェントが実売に直結、エージェンティックコマースが数値で実証された</li>
+<li><strong>マルチLLMベンダーAPI統合「Agent Router」がLinux Foundation採択</strong> — OpenAI・Anthropic等のAPIの違いを吸収するゲートウェイで、マルチベンダー運用が加速</li>
+<li><strong>DCS「日本の小売業1000社ランキング2026」公開</strong> — トライアル・コスモス薬品が大幅増収、九州勢の台頭が鮮明に</li>
+<li><strong>ライフによるアルビスTOB</strong> — 食品スーパー業界の再編が加速、流通アナリストが両社の深謀を分析</li>
+<li><strong>AI脅威論にAnthropicCEO提言への賛同拡大</strong> — 歯止めなき開発競争への恐怖感が業界リーダーに広がる</li>
+<li><strong>イオンリテールがEC組織を一体化</strong> — ネットスーパー・イオンショップ・イオンスタイルオンラインの統合で攻勢</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.publickey1.jp/blog/26/openaianthropicapiagent_routerlinux_foundation.html" target="_blank" rel="noopener">OpenAIやAnthropicなどAIベンダごとのAPIの違いを吸収し統合する「Agent Router」</a></td><td>はてブ</td><td>Linux Foundationが複数LLMベンダのAPIを統合するゲートウェイ「Agent Router」を採択、マルチベンダ運用を簡素化する。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/inoyu-qiita/items/f02c46fa50a78fe54573" target="_blank" rel="noopener">Claude Code Artifactsとは？ 作ったHTMLをURLで共有できる機能</a></td><td>Qiita</td><td>Claude Codeの成果物共有機能Artifactsの概要と、HTML生成物をURLで即時共有する活用法を解説。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/goat_eat_any/articles/claude-code-desktop-app" target="_blank" rel="noopener">最近のClaude Code Desktop、使いやすさマシマシです！</a></td><td>はてブ</td><td>Claude Code DesktopのUI改善やターミナル統合による開発ワークフロー効率化のレポート。</td></tr>
+<tr><td>4</td><td><a href="https://dev.classmethod.jp/articles/claude-code-auto-mode-default-bedrock/" target="_blank" rel="noopener">Claude Code で auto mode を起動時のデフォルトにしたら、対応モデルと非対応モデルで挙動が分かれた</a></td><td>DevelopersIO</td><td>Claude Codeのautoモードをデフォルト化した際、Bedrock経由の対応・非対応モデルで挙動差異が発生する検証結果。</td></tr>
+<tr><td>5</td><td><a href="https://dev.classmethod.jp/articles/shoma-embed-microsoft-copilot-studio-agent-in-custom-web-app/" target="_blank" rel="noopener">Microsoft Copilot Studio のエージェントを自作の Web アプリに組み込んでみた</a></td><td>DevelopersIO</td><td>Microsoft Copilot Studioで作成したAIエージェントをカスタムWebアプリに統合する実装手順を紹介。</td></tr>
+<tr><td>6</td><td><a href="https://dev.classmethod.jp/articles/cursor-projects-beta-coordinator-agent/" target="_blank" rel="noopener">開発をより効率化するCursorの新機能 Cursor Projectsを試してみた</a></td><td>DevelopersIO</td><td>Cursor IDEの新機能Projectsによるコーディネーターエージェントを活用した開発効率化を検証。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://gigazine.net/news/20260914-why-ai-agents-lying-cheating-coordinating/" target="_blank" rel="noopener">なぜAIエージェントはウソをつき不正行為を行い協調するのか？</a></td><td>はてブ</td><td>チューリング賞受賞者が強化学習メカニズムによるAIの欺瞞・協調行動の発生原因を解説。</td></tr>
+<tr><td>2</td><td><a href="https://www.nikkei.com/article/DGXZQOGN14AF80U6A910C2000000/" target="_blank" rel="noopener">AI脅威論、アンソロピックCEOに賛同広がる 歯止めなき競争に恐怖感</a></td><td>はてブ</td><td>Anthropic CEOの開発減速提言に業界リーダーが賛同を表明、安全性への懸念が拡大。</td></tr>
+<tr><td>3</td><td><a href="https://www.itmedia.co.jp/news/article/2609/14/2000001258/" target="_blank" rel="noopener">「AIで効率化しても仕事が増えるだけ」 月X時間浮かせても報告しない社員たち 広がる"AI版静かな退職"</a></td><td>はてブ</td><td>AI導入で生まれた余裕を報告せず温存する"AI版静かな退職"現象の拡大を報じた記事。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/1amageek/articles/fly-connectome-and-ai" target="_blank" rel="noopener">重みは学習するのか、測るのか。ハエの脳が問い直すAIのつくり方</a></td><td>Zenn</td><td>ハエのコネクトームから着想した、重みの学習手法を生物学的に再考するAI設計論。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/ml_bear/articles/e5cc1047cba176" target="_blank" rel="noopener">LLMのトークン効率化で気をつけたいことまとめ</a></td><td>Zenn</td><td>LLMのトークン消費を最適化する際の注意点を、プロンプト設計から推論パラメータまで包括的にまとめた記事。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/take-yoda/items/e5d9ce6618523af1ffc5" target="_blank" rel="noopener">生成AIが書いたドキュメントを読みたくない</a></td><td>Qiita</td><td>AI生成ドキュメントの課題と、人間が読みやすい設計アプローチについての議論。</td></tr>
+<tr><td>7</td><td><a href="https://engineers.ntt.com/entry/202607-local-llm-maas/entry" target="_blank" rel="noopener">Local LLMを社内に提供！ Local LLM Model as a Serviceとその取り組みについて</a></td><td>はてブ</td><td>NTTドコモがデータ統制とプライバシー維持のため社内LLMインフラをMaaS形式で構築した事例。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/nvidia-nemo-automodel-dgx-spark-first-touch/" target="_blank" rel="noopener">Hugging Face のモデルをそのまま学習できる NeMo AutoModel を DGX Spark で動かしてみた</a></td><td>DevelopersIO</td><td>NVIDIAのNeMo AutoModelフレームワークをDGX Sparkで実行しHugging Faceモデルを学習する実践記事。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/jp/blogs/news/weekly-genai-20260907/" target="_blank" rel="noopener">週刊生成AI with AWS - 2026/9/7週</a></td><td>AWS Blog</td><td>OpenAI GPT-6 AstraのBedrock提供開始や18件のサービスアップデートをまとめた週次ダイジェスト。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/jp/blogs/news/three-challenges-in-machine-based-reasoning/" target="_blank" rel="noopener">自動推論に立ちはだかる 3 つの難題</a></td><td>AWS Blog</td><td>生成AIにおける自動推論の3つの根本課題（自然言語の論理変換、変動ルール下の真偽定義、計算限界）を考察。</td></tr>
+<tr><td>11</td><td><a href="https://aws.amazon.com/jp/blogs/news/calculating-the-roi-of-ai/" target="_blank" rel="noopener">AI の投資収益率 (ROI) を算出する</a></td><td>AWS Blog</td><td>AWSサービスを活用したAI投資の財務リターン測定手法を解説。</td></tr>
+<tr><td>12</td><td><a href="https://zenn.dev/k_motoki/articles/11de0ba46dd1ee" target="_blank" rel="noopener">トークンをケチってレビューをローカルLLMにやらせた話</a></td><td>Zenn</td><td>APIコスト削減のためコードレビューをローカルLLMに委譲した実践報告。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/intercept6/articles/lambda-90-minutes-timeout" target="_blank" rel="noopener">AWS Lambda の90分タイムアウト検証</a></td><td>Zenn</td><td>AWS Lambdaの最大実行時間90分の挙動を実際に検証し、制約と回避策を整理した技術記事。</td></tr>
+<tr><td>2</td><td><a href="https://aws.amazon.com/jp/blogs/news/aws-weekly-20260907/" target="_blank" rel="noopener">週刊AWS - 2026/9/7週</a></td><td>AWS Blog</td><td>S3 Object Lock、EMRサポート拡張、API Gateway改善、Lambda Managed Instancesアップデート等の週次まとめ。</td></tr>
+<tr><td>3</td><td><a href="https://aws.amazon.com/jp/blogs/news/pythonoperator-and-bashoperator-now-available-on-amazon-managed-workflows-for-apache-airflow-amazon-mwaa-serverless/" target="_blank" rel="noopener">Amazon MWAA Serverless で PythonOperator と BashOperator が利用可能に</a></td><td>AWS Blog</td><td>サーバーレスMWAA環境でPython関数とシェルスクリプトの直接実行が可能になった新機能。</td></tr>
+<tr><td>4</td><td><a href="https://dev.classmethod.jp/articles/lightsail-privatebucket-distribution/" target="_blank" rel="noopener">Amazon Lightsail のディストリビューションでプライベートバケットをオリジンにできるようになりました</a></td><td>DevelopersIO</td><td>Amazon Lightsailディストリビューションでプライベートなs3バケットをオリジンとして設定可能になった新機能。</td></tr>
+<tr><td>5</td><td><a href="https://dev.classmethod.jp/articles/cdk-loggroup-rename-removal-policy/" target="_blank" rel="noopener">CDKでCloudWatch Logsのロググループ名を変えると既存ログがどうなるのか検証してみた</a></td><td>DevelopersIO</td><td>AWS CDKでCloudWatch Logsロググループ名を変更した際の既存ログの挙動をRemovalPolicy別に検証。</td></tr>
+<tr><td>6</td><td><a href="https://dev.classmethod.jp/articles/kiro-activity-report-otel-promql/" target="_blank" rel="noopener">Kiro のアクティビティレポートを OpenTelemetry でエクスポートして PromQL で集計してみた</a></td><td>DevelopersIO</td><td>AWS KiroのアクティビティレポートをOpenTelemetryでエクスポートしPrometheusで集計する実装ガイド。</td></tr>
+<tr><td>7</td><td><a href="https://forest.watch.impress.co.jp/docs/news/2140863.html" target="_blank" rel="noopener">Apple、「iOS 27」「iPadOS 27」の一般提供を開始</a></td><td>はてブ</td><td>iOS 27がSiri AI機能と126件のセキュリティパッチを含みリリース。</td></tr>
+<tr><td>8</td><td><a href="https://internet.watch.impress.co.jp/docs/news/2140781.html" target="_blank" rel="noopener">NTT、ミリ波・サブテラヘルツ帯で世界最高速となる2Tbpsの無線伝送に成功</a></td><td>はてブ</td><td>NTTがミリ波技術を使い世界最高速の2Tbps無線伝送を実現。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/snowflake-external-secret-providers-aws-secrets-manager-pupr/" target="_blank" rel="noopener">Snowflake から AWS Secrets Manager などのシークレットを直接参照できるようになりました</a></td><td>DevelopersIO</td><td>SnowflakeがAWS Secrets Manager等からのシークレット直接参照に対応し、認証情報管理を改善。</td></tr>
+<tr><td>2</td><td><a href="https://aws.amazon.com/jp/blogs/news/event-driven-pipeline-orchestration-with-amazon-mwaa-and-airflow-3-0/" target="_blank" rel="noopener">Amazon MWAA と Airflow 3.0 によるイベント駆動のパイプラインオーケストレーション</a></td><td>AWS Blog</td><td>Asset WatcherとSQS統合によるイベント駆動型オーケストレーションでパイプライン遅延を秒単位に短縮。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/mconfjp/articles/cartesian-product-doctrine-orm" target="_blank" rel="noopener">デカルト積問題って知っとるか？ 気軽にJOINでメモリ爆発するアレのヤバさ実測すぞ！</a></td><td>Zenn</td><td>ORMでの不用意なJOINによるデカルト積爆発をメモリ消費量の実測で検証。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/kasugai/articles/f6aac70530691d" target="_blank" rel="noopener">Datadog DBM、動いてはいたが正しく動いてはいなかった サイドカー構成からスタンドアロン Agent へ</a></td><td>Zenn</td><td>Datadog DBMのサイドカー構成の誤動作を発見し、スタンドアロンAgentへ移行して解決した事例。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/nkzn/articles/cross-platform-development-costs-2026" target="_blank" rel="noopener">クロスプラットフォーム開発が解決するコスト、解決しないコスト</a></td><td>Zenn</td><td>クロスプラットフォーム開発で実際に削減できるコストと残存するコストを分類・整理した考察。</td></tr>
+<tr><td>2</td><td><a href="https://qiita.com/megmogmog1965/items/334ced1537fcdf0fe21a" target="_blank" rel="noopener">エラー対応設計: 例外と障害を区別しよう</a></td><td>Qiita</td><td>ソフトウェア設計における例外と障害の区別とそれぞれの対応パターンを解説。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/anizozina/articles/5dd5de5020d9ef" target="_blank" rel="noopener">単体テストの実行時間を6割程度削減してみた</a></td><td>Zenn</td><td>テスト実行時間を60%削減した最適化手法の実践報告。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/hyunnnn98/articles/2f58be1f62bcf8" target="_blank" rel="noopener">React Compiler を Babel なしで入れて、useMemo を書くか迷うのをやめた</a></td><td>Zenn</td><td>React CompilerをBabel不要で導入し、useMemoの手動最適化を不要にした実装事例。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/uhyo/articles/react-fragment-refs-hack" target="_blank" rel="noopener">Fragment Refsのずるい使い方</a></td><td>Zenn</td><td>React Fragment Refsの非自明な活用テクニックを解説した技術記事。</td></tr>
+<tr><td>6</td><td><a href="https://gr1m0h.hatenablog.com/entry/2026/09/13/233325" target="_blank" rel="noopener">mise の dotfiles 機能で chezmoi を代替できるか試した</a></td><td>はてブ</td><td>開発環境管理ツールmiseのdotfiles機能でchezmoiを置き換えられるか検証した記事。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/7kaji/articles/11abdf42c756e8" target="_blank" rel="noopener">private な GitHub Pages に独自ドメインを当てるときに気をつけること</a></td><td>Zenn</td><td>プライベートGitHub Pagesにカスタムドメインを設定する際の注意点と落とし穴をまとめた記事。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/akira1984/articles/4d6e13b853109e" target="_blank" rel="noopener">AWS SSM Agent の脆弱性(CVE-2026-89049) の被害があったかどうかを CloudTrail で確認する方法</a></td><td>Zenn</td><td>AWS SSM Agentの脆弱性CVE-2026-89049の影響有無をCloudTrailログから確認する手順を解説。</td></tr>
+<tr><td>2</td><td><a href="https://www.itmedia.co.jp/enterprise/articles/2609/15/news019.html" target="_blank" rel="noopener">EDR、入れただけじゃダメ？ IPAのランサム教訓集が経営者に刺さる理由</a></td><td>はてブ</td><td>IPAのランサムウェア被害報告からEDR導入だけでは不十分で基本的防御施策の徹底が必要と指摘。</td></tr>
+<tr><td>3</td><td><a href="https://aws.amazon.com/jp/blogs/news/the-state-of-ai-for-security-measuring-what-matters-most-for-building-trust/" target="_blank" rel="noopener">セキュリティにおける AI の現在地</a></td><td>AWS Blog</td><td>AIモデルの信頼性をセキュリティ領域で測定するDeception Benchmarkを紹介、12モデルの偽陽性・偽陰性率を評価。</td></tr>
+<tr><td>4</td><td><a href="https://aws.amazon.com/jp/blogs/news/the-aws-ai-security-framework-securing-ai-with-the-right-controls-at-the-right-layers-at-the-right-phases/" target="_blank" rel="noopener">AWS AI セキュリティフレームワーク</a></td><td>AWS Blog</td><td>インフラ・ID/データ・AIアプリ層に跨がるセキュリティ統制を基礎から上級まで段階的に整理したフレームワーク。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/ktdatascience/items/a2fd3841be5159641745" target="_blank" rel="noopener">北朝鮮系アクターの攻撃経路を4つに整理してみた</a></td><td>Qiita</td><td>北朝鮮系サイバー攻撃者の攻撃経路を4パターンに分類・整理したセキュリティ分析。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/songchong/items/e630bf05f4adf0c16ce5" target="_blank" rel="noopener">AI製品36件の規約とプライバシーポリシーを形式別に調べてみた</a></td><td>Qiita</td><td>36件のAI製品のプライバシーポリシーを形式別に調査し、データ取り扱いの実態を分析。</td></tr>
+<tr><td>7</td><td><a href="https://dev.classmethod.jp/articles/opsmethod3-cloudtrail-kaidan/" target="_blank" rel="noopener">夏の怪談、CloudTrailに知らない人が というタイトルで登壇しました</a></td><td>DevelopersIO</td><td>CloudTrailでの不審なアクセス痕跡の調査方法についての登壇レポート。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/report/s091474.html" target="_blank" rel="noopener">自由が丘駅正面口 新ランドマーク「自由が丘ミューズスクエア」9月17日オープン</a></td><td>流通ニュース</td><td>ヒューリックと再開発組合が自由が丘駅北側に新商業施設をオープン予定。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/store/newstorereport/554833/" target="_blank" rel="noopener">さいたま市の超激戦区でファミリー需要に徹底対応！「ヤオコーロッテスクエア武蔵浦和店」を解剖</a></td><td>DCS</td><td>ヤオコーが競争激化地域でファミリー層向け売場を重点強化した新店舗を出店。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/store/556882/" target="_blank" rel="noopener">イケアが約5年ぶりに都内に出店 コンパクトな都市型店舗「IKEA豊洲」の全容とは</a></td><td>DCS</td><td>IKEAが都市部向け小型フォーマットで出店戦略を転換。</td></tr>
+<tr><td>4</td><td><a href="https://diamond-rm.net/store/557058/" target="_blank" rel="noopener">クックマート、ブルーゾーン入り後初の新店！「上西店」の売場をレポート</a></td><td>DCS</td><td>成長企業クックマートが経営統合後の初新店舗で戦略を具体化。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/store/newstorereport/556799/" target="_blank" rel="noopener">イオンリテール、スウェーデン発インテリア雑貨ブランド「GRANIT」展開開始のねらい</a></td><td>DCS</td><td>イオンリテールが海外発ブランドの国内展開によりインテリア領域での競争力強化を図る。</td></tr>
+<tr><td>6</td><td><a href="https://www.ryutsuu.biz/store/s0914011.html" target="_blank" rel="noopener">コスモス薬品／栃木県・大阪府に「ドラッグコスモス」計2店舗、27年4月新設</a></td><td>流通ニュース</td><td>複数地域でのドラッグストア新規出店計画を発表。</td></tr>
+<tr><td>7</td><td><a href="https://www.ryutsuu.biz/store/s091446.html" target="_blank" rel="noopener">まいばすけっと／「高幡不動駅北口店」「東淵野辺3丁目店」9月18日同時オープン</a></td><td>流通ニュース</td><td>イオン系小型食品スーパーが複数拠点を同時展開。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/management/557773/" target="_blank" rel="noopener">ライフのアルビスTOBで何がどう変わる？両社の深謀を流通アナリストが解説</a></td><td>DCS</td><td>ライフによるアルビスへのTOBの戦略的意味と両社への影響を流通アナリストが分析。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/management/businessplan/557512/" target="_blank" rel="noopener">ユニクロ報道と不買運動、実は「同じ台本」で動いていた</a></td><td>DCS</td><td>ユニクロに関する報道と消費者反応の背後にある構造的な動きを解説。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/strategy/s091414.html" target="_blank" rel="noopener">中川政七商店／初のM＆A、兵庫県のかばんメーカー「バッグワークス」取得</a></td><td>流通ニュース</td><td>工芸品SPA大手が初のM&A戦略により商品ラインの拡充を図る。</td></tr>
+<tr><td>4</td><td><a href="https://diamond-rm.net/management/557813/" target="_blank" rel="noopener">ファミリーマート、ストアスタッフの採用体制を強化</a></td><td>DCS</td><td>ファミリーマートがコンビニ業界の人手不足対策として採用体制の大幅強化を実施。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/management/businessplan/557626/" target="_blank" rel="noopener">セブン-イレブン、アンドエスティHDと協業しアパレル参入のねらい</a></td><td>DCS</td><td>セブン-イレブンが専門企業との協業によりコンビニ業態の収益多角化を推進。</td></tr>
+<tr><td>6</td><td><a href="https://netshop.impress.co.jp/n/2026/09/15/16741" target="_blank" rel="noopener">HUMAN MADE、ファッションブランド「UNDERCOVER」のアンダーカバーを5.5億円で買収へ</a></td><td>ネッ担</td><td>NIGO氏創業のHUMAN MADEがUNDERCOVERを大型買収。</td></tr>
+<tr><td>7</td><td><a href="https://www.ryutsuu.biz/strategy/s091415.html" target="_blank" rel="noopener">生団連調査／消費減税で流通企業の対応コスト増、2度のシステム改修に懸念</a></td><td>流通ニュース</td><td>消費税率変更時のシステム対応コストが流通企業の重大課題に。</td></tr>
+<tr><td>8</td><td><a href="https://netshop.impress.co.jp/n/2026/09/15/16739" target="_blank" rel="noopener">イオンリテールがEC事業拡大のために組織改革。ネットスーパー、イオンショップ、イオンスタイルオンラインの運営組織を一体化</a></td><td>ネッ担</td><td>イオンリテールがEC部門統合による事業強化戦略を推進。</td></tr>
+<tr><td>9</td><td><a href="https://www.logi-today.com/1000161" target="_blank" rel="noopener">日通NECロジ、「NX ELESOL」に商号変更</a></td><td>ロジ・トゥデイ</td><td>物流企業の経営統合によるブランド刷新。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/sales-promotion/item-trend/556502/" target="_blank" rel="noopener">ドレッシング市場、「汎用調味料化」が進む 各社が新たな食シーンを提案</a></td><td>DCS</td><td>ドレッシングがサラダ用途を超え「調味料」化する市場トレンドと各メーカーの戦略。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/sales-promotion/newitem/556501/" target="_blank" rel="noopener">食品のプロが注目する今期新商品をピックアップ</a></td><td>DCS</td><td>業界専門家が選定した今期注目の新商品ラインアップ。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/commodity/s091447.html" target="_blank" rel="noopener">ファミマ／「おにぎりorパン＋飲料」で税込250円、朝限定「コンビ割」9月15日開始</a></td><td>流通ニュース</td><td>ファミリーマートが朝食時間帯向けの割引セット商品を開始。</td></tr>
+<tr><td>4</td><td><a href="https://netshop.impress.co.jp/n/2026/09/14/16727" target="_blank" rel="noopener">ユナイテッドアローズ、パーソナルスタイリングサービスを強化。対象ブランドを6ブランドへ拡大</a></td><td>ネッ担</td><td>パーソナルスタイリングサービスの対象ブランドを拡大。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/e/2026/09/15/16670" target="_blank" rel="noopener">AIで"売れる"は本当だった！ 進化するLINEヤフー「Yahoo!ショッピング」のAIエージェント、AI経由の注文は20%に</a></td><td>ネッ担</td><td>Yahoo!ショッピングのAIエージェント経由注文が全体の20%に到達した成果報告。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/technology/557559/" target="_blank" rel="noopener">リテールメディアの最前線に迫る「リテールメディアサミット2026」11月11・12日に開催</a></td><td>DCS</td><td>業界最大級のリテールメディアイベントが11月に最新トレンドと課題を扱う。</td></tr>
+<tr><td>3</td><td><a href="https://netshop.impress.co.jp/n/2026/09/15/16737" target="_blank" rel="noopener">ZETA、「Shopify App Store」でハッシュタグ活用エンジン「ZETA HASHTAG」アプリの提供を開始</a></td><td>ネッ担</td><td>Shopify向けハッシュタグ活用ツール提供開始。</td></tr>
+<tr><td>4</td><td><a href="https://netshop.impress.co.jp/e/2026/09/14/16676" target="_blank" rel="noopener">「楽天市場」「Amazon」「Yahoo!ショッピング」「Qoo10」出店者は必見！「透明化法」は出店者がモールと対等に渡り合うための最強の武器である</a></td><td>ネッ担</td><td>プラットフォーム透明化法が出店者にもたらす交渉力について解説。</td></tr>
+<tr><td>5</td><td><a href="https://netshop.impress.co.jp/n/2026/09/14/16729" target="_blank" rel="noopener">アマゾンの「Amazon Ads」、「Prime Video」広告で新フォーマット。ロケーションベースのインタラクティブ動画広告を展開</a></td><td>ネッ担</td><td>AmazonがPrime Videoにインタラクティブ動画広告の新フォーマットを導入。</td></tr>
+<tr><td>6</td><td><a href="https://ecnomikata.com/ecnews/51594/" target="_blank" rel="noopener">「コンテンツ制作の内製化」2023年以降に増加、生成AIの普及が要因</a></td><td>ECのミカタ</td><td>生成AIの普及がコンテンツ制作内製化を促進しているとナイル調査が報告。</td></tr>
+<tr><td>7</td><td><a href="https://ecnomikata.com/ecnews/51593/" target="_blank" rel="noopener">GMOメイクショップ、「makeshop byGMO」にて「食品EC向けパッケージ」提供開始</a></td><td>ECのミカタ</td><td>GMOメイクショップが食品EC向け専用パッケージを提供開始。</td></tr>
+<tr><td>8</td><td><a href="https://netshop.impress.co.jp/n/2026/09/15/16726" target="_blank" rel="noopener">はるやま商事が法人向け請求書発行業務の作業時間を7割削減したデジタル化施策とは</a></td><td>ネッ担</td><td>アパレル企業が請求書業務のデジタル化で作業時間7割削減を達成。</td></tr>
+<tr><td>9</td><td><a href="https://netshop.impress.co.jp/n/2026/09/14/16725" target="_blank" rel="noopener">靴下のタビオ、法人向け「BtoB事業」へ本格参入</a></td><td>ネッ担</td><td>タビオが直営店・EC中心の事業基盤を活かしBtoB事業を開始。</td></tr>
+<tr><td>10</td><td><a href="https://netshop.impress.co.jp/e/2026/09/14/16461" target="_blank" rel="noopener">AI時代、D2Cの組織はどう変わる？ ユーグレナ、ジェイフロンティア、ベルタが語る「売り上げを伸ばす組織論」</a></td><td>ネッ担</td><td>AI時代のD2C組織戦略に関する複数経営者の見解。</td></tr>
+<tr><td>11</td><td><a href="https://www.logi-today.com/999799" target="_blank" rel="noopener">JPIC、物流データ「翻訳」を生成AIで実証へ</a></td><td>ロジ・トゥデイ</td><td>企業間データ形式の差異をAIで自動変換する実証実験を開始。</td></tr>
+<tr><td>12</td><td><a href="https://www.logi-today.com/1000190" target="_blank" rel="noopener">NTTロジスコ、AIとAGVで返却機器99%自動処理</a></td><td>ロジ・トゥデイ</td><td>自動搬送ロボットとAIの組み合わせで機器返却業務の99%自動化を実現。</td></tr>
+<tr><td>13</td><td><a href="https://netshop.impress.co.jp/n/2026/09/14/16728" target="_blank" rel="noopener">ペットフード・ペット用品の総合卸商社ラブリー・ペット商事がBtoC-ECに参入</a></td><td>ネッ担</td><td>ペット用品卸会社が消費者向けEC事業を開始。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/market/accounting/557609/" target="_blank" rel="noopener">【DCS最新号】9月15日号は「日本の小売業1000社ランキング2026」</a></td><td>DCS</td><td>ダイヤモンド・チェーンストア誌最新号で日本の主要小売企業1000社のランキングを公開。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/market/accounting/556497/" target="_blank" rel="noopener">九州・沖縄小売ランキング2026 トライアル、コスモス薬品が大幅増収</a></td><td>DCS</td><td>九州発の有力チェーンであるトライアルとコスモス薬品が高成長を記録。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/accounts/s091416.html" target="_blank" rel="noopener">アインHD 決算／5〜7月増収増益、リテール事業は客単価が上昇</a></td><td>流通ニュース</td><td>医療関連企業のリテール事業で客単価向上により好調な経営成績。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/sales/s091471.html" target="_blank" rel="noopener">DCM／8月の既存店売上高0.2%減、客数2.2%減</a></td><td>流通ニュース</td><td>ホームセンター大手の月次売上が微減傾向。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/pos/s091442.html" target="_blank" rel="noopener">アイスクリーム 売上ランキング／8月はハーゲンダッツ「和のスイーツアソート」が1位</a></td><td>流通ニュース</td><td>POS分析による季節商品の売上トレンドでハーゲンダッツが首位。</td></tr>
+<tr><td>6</td><td><a href="https://ecnomikata.com/ecnews/51585/" target="_blank" rel="noopener">2026年第2四半期、クレカの不正利用被害額 前期比5.2%減少</a></td><td>ECのミカタ</td><td>クレジットカード不正利用被害が前期比5.2%減少と日本クレジット協会が発表。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.logi-today.com/1000206" target="_blank" rel="noopener">日本企業へのサイバー攻撃35%増、週1907件</a></td><td>ロジ・トゥデイ</td><td>日本企業へのサイバー攻撃件数が前年比35%増加し週平均1907件に達した。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. エージェンティックコマースが数値実証のフェーズへ</h3>
+<p>技術側ではLinux Foundationが「Agent Router」を採択しマルチLLMベンダーのAPI統合基盤が整備されつつある。小売側ではYahoo!ショッピングのAIエージェント経由注文が全体の20%に到達し、エージェンティックコマースが「構想」から「実績」のフェーズに移行した。SIerとしては、AIエージェントとEC基盤の統合案件が具体化する局面であり、Agent Router等のマルチベンダー対応技術と小売EC基盤の接続設計が差別化ポイントになる。</p>
+<h3>2. 小売業の再編・M&A加速とシステム統合需要</h3>
+<p>ライフによるアルビスTOB、HUMAN MADEのUNDERCOVER買収、中川政七商店の初M&Aと、業態を問わず再編・M&Aが加速している。DCS「日本の小売業1000社ランキング2026」では九州勢（トライアル・コスモス薬品）の大幅増収が鮮明で、地方発チェーンの全国展開に伴うシステム統合・基幹系更新の需要拡大が見込まれる。SIerにとってはPMI（統合後の経営統合）におけるデータ基盤統合やPOS/MDシステム移行が大型案件化する好機である。</p>
+<h3>3. AI導入の「見えない壁」と組織変革</h3>
+<p>技術側では「AIで効率化しても仕事が増えるだけ」という"AI版静かな退職"現象が報じられ、AI導入の組織的課題が顕在化している。小売側ではイオンリテールがEC組織を一体化し、ファミリーマートが採用体制を強化するなど、デジタル対応に向けた組織改革が進行中。D2C企業の経営者もAI時代の組織論を議論しており、SIerが提供すべき価値は技術導入だけでなく、業務プロセス変革と組織設計を含む包括的なDXコンサルティングへと拡張している。</p>
+<h3>4. サプライチェーンのAI・自動化と物流セキュリティ</h3>
+<p>JPICが物流データの「翻訳」を生成AIで実証し、NTTロジスコがAIとAGVで返却機器の99%自動処理を実現するなど、物流領域のAI活用が実装段階に入った。一方で日本企業へのサイバー攻撃は35%増加し週1907件に達しており、EDR導入だけでは不十分というIPAの指摘も出ている。物流DXを推進する際には、セキュリティ設計を初期段階から組み込む「Security by Design」アプローチがSIer提案の必須要素となる。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>12件</td><td>AI駆動開発・インフラ・設計系が中心</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>5件</td><td>LLM・セキュリティ・設計パターン</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>10件</td><td>AI脅威論・iOS 27・セキュリティが注目</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>9件</td><td>AWS・Claude Code・Snowflake系</td></tr>
+<tr><td>5</td><td>AWS Blog（What's New代替）</td><td>成功</td><td>8件</td><td>週次まとめ・AI/セキュリティフレームワーク</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>9件</td><td>新店・決算・商品戦略</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>13件</td><td>1000社ランキング特集・TOB分析</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>11件</td><td>AIエージェントEC・透明化法・組織改革</td></tr>
+<tr><td>9</td><td>ECのミカタ</td><td>成功</td><td>3件</td><td>内製化・食品EC・クレカ不正利用</td></tr>
+<tr><td>10</td><td>ITmedia ビジネス（流通・小売）</td><td>失敗</td><td>0件</td><td>小売カテゴリページが正常に配信されず取得不可</td></tr>
+<tr><td>11</td><td>ロジスティクス・トゥデイ</td><td>成功</td><td>4件</td><td>物流AI・サイバー攻撃・経営統合</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術44件 + 小売40件 = 84件</p>
+<hr>
+<p>_このダイジェストは daily-digest-automation.yml（Agent Teams Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-09-14" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: agent-teams-actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 102件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>AI開発「減速」提案が波紋</strong> — Anthropic CEOがAI開発ペース調整を呼びかけ、OpenAI・xAI経営者が賛同する一方でトランプ政権AI政策責任者は「規制がなければできないふりをやめろ」と反論</li><li><strong>TailwindがShopifyに買収、AI人員削減の余波</strong> — AI導入でエンジニアの75%を解雇したTailwind LabsがShopifyによる買収を発表、AI時代の開発組織のあり方に一石</li><li><strong>MicrosoftがRustをTier 1言語に昇格</strong> — C++・C#・TypeScriptに並ぶ社内主力言語としてRustを位置づけ、Windows開発環境との統合を推進</li><li><strong>セブン-イレブンがアパレル参入、コンビニ衣料品競争が本格化</strong> — ファミマ「コンビニエンスウェア」売上200億円突破の中、セブンが「niko and ...」と協業し9月25日から展開開始</li><li><strong>ライフがアルビスを263億円で買収</strong> — スーパーマーケット業界の再編加速、店舗網とネットスーパー事業を拡大</li></ol></div>
@@ -28566,11 +28737,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-09-14 00:36 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-09-15 01:09 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
