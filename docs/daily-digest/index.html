@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全160件 ｜ 最終更新: 2026-09-22 01:19</p>
+<p class="subtitle">domain-tech-collection ｜ 全161件 ｜ 最終更新: 2026-09-23 01:06</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">15970</div>
+    <div class="summary-value blue">16048</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-09-22</div>
+    <div class="summary-value">2026-09-23</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">160</div>
+    <div class="summary-value green">161</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-09-22" onclick="switchTab('2026-09-22')">2026-09-22</button>
+<button class="tab-btn active" data-date="2026-09-23" onclick="switchTab('2026-09-23')">2026-09-23</button>
+<button class="tab-btn" data-date="2026-09-22" onclick="switchTab('2026-09-22')">2026-09-22</button>
 <button class="tab-btn" data-date="2026-09-21" onclick="switchTab('2026-09-21')">2026-09-21</button>
 <button class="tab-btn" data-date="2026-09-20" onclick="switchTab('2026-09-20')">2026-09-20</button>
 <button class="tab-btn" data-date="2026-09-19" onclick="switchTab('2026-09-19')">2026-09-19</button>
@@ -296,7 +297,166 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-09-22" class="digest-panel" style="display:block">
+<div id="digest-2026-09-23" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 78件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>TypeSafe「Jev」が技術コミュニティを席巻</strong> — 判断特化型AI「Jev」の検証記事がZenn・Qiita・DevelopersIOで10件超出現、RAG高速化からOCR分類まで多方面で実用性検証が一斉に進む</li><li><strong>Claude Opus 5.5リリース、40%コスト削減</strong> — Fable 5.1並みの性能をOpus 5比40%安価で提供開始、Claude Code v2.1.280でデフォルトモデルに変更</li><li><strong>Amazon Bedrockマルチプロバイダー拡充</strong> — GPT-6 Sol/Luna・Grok 4.6・Kimi K3が相次いでBedrock対応、マルチモデル戦略が一気に加速</li><li><strong>AI駆動開発が実運用フェーズに到達</strong> — CIボトルネック対策・MCP×Playwright自動化・Claude Code Plugins活用など、PoC段階を超えた実務知見が蓄積</li><li><strong>秋分の日で小売ニュースは閑散</strong> — イオン「トップバリュ」年間売上高2兆円戦略と新生ダイエー「フードスタイル」4カ月レポートが目立つ程度の祝日相場</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>TypeSafe「Jev」が技術コミュニティを席巻</strong> — 判断特化型AI「Jev」の検証記事がZenn・Qiita・DevelopersIOで10件超出現、RAG高速化からOCR分類まで多方面で実用性検証が一斉に進む</li>
+<li><strong>Claude Opus 5.5リリース、40%コスト削減</strong> — Fable 5.1並みの性能をOpus 5比40%安価で提供開始、Claude Code v2.1.280でデフォルトモデルに変更</li>
+<li><strong>Amazon Bedrockマルチプロバイダー拡充</strong> — GPT-6 Sol/Luna・Grok 4.6・Kimi K3が相次いでBedrock対応、マルチモデル戦略が一気に加速</li>
+<li><strong>AI駆動開発が実運用フェーズに到達</strong> — CIボトルネック対策・MCP×Playwright自動化・Claude Code Plugins活用など、PoC段階を超えた実務知見が蓄積</li>
+<li><strong>秋分の日で小売ニュースは閑散</strong> — イオン「トップバリュ」年間売上高2兆円戦略と新生ダイエー「フードスタイル」4カ月レポートが目立つ程度の祝日相場</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/20260923-cc-updates-v2-1-280/" target="_blank" rel="noopener">Claude Code v2.1.280 の主要アップデート - Fable 5.1 と GPT-6 Astra 超えの最新モデル Opus 5.5 の登場</a></td><td>DevelopersIO</td><td>Claude Code v2.1.280がリリースされ、Opus 5.5が既定モデルに変更、料金20%削減と複数の破壊的変更を含む。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/claude-code-memory-at-import-project-index/" target="_blank" rel="noopener">Claude Codeのメモリーを公式ドキュメントと実測で整理して、プロジェクトの記憶を初期読み込みさせる仕組みを構築してみた</a></td><td>DevelopersIO</td><td>CLAUDE.md・@取り込み・自動メモリの3経路と、大規模プロジェクトの記憶を効率的に読ませる設計パターンを紹介。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/claude-code-attribution-setting/" target="_blank" rel="noopener">Claude Codeのコミット・プルリクエストの帰属表示（attribution）を非表示にしてみた</a></td><td>DevelopersIO</td><td>Claude Codeが自動付与する帰属表示のattribution設定について、3つのサブキーの役割と設定方法を解説。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/nogu66/articles/claude-code-function-hooks-claude-mods" target="_blank" rel="noopener">Claude Mods 入門：Claude Codeを自由にカスタマイズする</a></td><td>Zenn</td><td>Claude Codeのフック機能を活用したカスタマイズ手法「Claude Mods」の入門ガイド。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/hikariclaude01/items/681ad21c35a17d8e44c6" target="_blank" rel="noopener">Claude Codeの権限モデル（Read/Write/Edit/Bash）を全パターン検証した</a></td><td>Qiita</td><td>Claude Codeの権限モデルの全パターンを検証し、セキュリティ上の挙動を整理した。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/hirata_infosys/articles/598068e56ae342" target="_blank" rel="noopener">MCP × Claude Code × BedrockでPlaywrightの自動化フローを構築</a></td><td>Zenn</td><td>MCPとClaude Code、Bedrockを組み合わせてPlaywrightによるブラウザ自動化フローを構築した実践記録。</td></tr>
+<tr><td>7</td><td><a href="https://syu-m-5151.hatenablog.com/entry/2026/09/22/124945" target="_blank" rel="noopener">Claude Codeの Plugins は設定したほうがいい</a></td><td>はてブ</td><td>Claude Codeのプラグイン機構が集中的なSkill管理・配布を可能にし、手動コピーよりも優れていることを解説。</td></tr>
+<tr><td>8</td><td><a href="https://linear.app/now/ci-bottleneck-reworked" target="_blank" rel="noopener">AI coding has made CI a bottleneck, so we reworked ours</a></td><td>はてブ</td><td>AIによるコード生成がCIをボトルネックに変えたため、パイプラインを再設計して対応した事例。</td></tr>
+<tr><td>9</td><td><a href="https://dev.classmethod.jp/articles/aws-devops-agent-Illustration/" target="_blank" rel="noopener">AWS DevOps Agentの全体構造と設定箇所を図解してみた</a></td><td>DevelopersIO</td><td>AWS DevOps AgentのCapability Providers・Agent Space・Web Appの3階層アーキテクチャを図解で整理。</td></tr>
+<tr><td>10</td><td><a href="https://dev.classmethod.jp/articles/sliding-with-claude-cowork-and-slack/" target="_blank" rel="noopener">Slack MCPとClaude Coworkで提案書作成を半自動化してみた</a></td><td>DevelopersIO</td><td>SlackスレッドをClaude Coworkに読ませて提案書作成を3〜5時間から35分に短縮した運用方法を紹介。</td></tr>
+<tr><td>11</td><td><a href="https://zenn.dev/sprix_it/articles/db685b8fd6bffe" target="_blank" rel="noopener">1年半かけて育ててきたAI開発フロー</a></td><td>Zenn</td><td>1年半かけて試行錯誤しながら構築してきたAI駆動開発フローの全体像と知見を共有。</td></tr>
+<tr><td>12</td><td><a href="https://zenn.dev/chot/articles/268804cd6694ab" target="_blank" rel="noopener">WebMCPを試してみた感想。フロントエンドの必須技術になりそうな予感。</a></td><td>Zenn</td><td>WebMCPを実際に試用し、フロントエンド開発における必須技術になる可能性を考察。</td></tr>
+<tr><td>13</td><td><a href="https://qiita.com/miruky/items/4a8a7f456e68e9965a12" target="_blank" rel="noopener">AI駆動系のエンジニアリングが多いので、ここらで一旦整理しましょう</a></td><td>Qiita</td><td>AI駆動開発関連の各種エンジニアリング概念を分類・整理した解説記事。</td></tr>
+<tr><td>14</td><td><a href="https://zenn.dev/nrs/articles/9ba91aea587bf5" target="_blank" rel="noopener">バイブコーディングで GUI が壊れていく理由とその対策プロンプト</a></td><td>Zenn</td><td>Vibe Codingで生じるGUI崩壊の原因を分析し、それを防ぐ対策プロンプトを提案。</td></tr>
+<tr><td>15</td><td><a href="https://qiita.com/minorun365/items/ed4c760f616cf3c0a958" target="_blank" rel="noopener">みのるん式 登壇資料の作成ノウハウをスキルとして公開しました</a></td><td>Qiita</td><td>MarpとAIツールを組み合わせたプレゼン資料作成スキルを公開。</td></tr>
+<tr><td>16</td><td><a href="https://qiita.com/yukihirop/items/e0d8ffb121c1a753075a" target="_blank" rel="noopener">あらゆるCLIを「jev化」するツール jany を作った</a></td><td>Qiita</td><td>任意のCLIにJevの判断能力を統合するツール「jany」の開発記。</td></tr>
+<tr><td>17</td><td><a href="https://dev.classmethod.jp/articles/kiro-university-challenge-lessons-1-4/" target="_blank" rel="noopener">Kiro University Challenge の Lessons 1〜4をクリアしてみた</a></td><td>DevelopersIO</td><td>AWS Kiroの主要機能であるSpec、Steering、Hooks、PBTをLessons 1〜4で実践した記録。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.watch.impress.co.jp/docs/news/2142619.html" target="_blank" rel="noopener">Claude Opus 5.5登場　Fable 5.1並みの性能をOpus 5より40%安価に</a></td><td>はてブ</td><td>AnthropicがClaude Opus 5.5をリリース、Fable 5.1並み性能をOpus 5比40%安価で提供。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/bedrock-openai-gpt6-sol-luna/" target="_blank" rel="noopener">Amazon Bedrock で利用可能になった GPT-6 Sol/Luna を試してみた</a></td><td>DevelopersIO</td><td>BedrockでOpenAI GPT-6 Sol/Lunaを呼び出し、Converse・Responses・Chat Completions APIの3通りの呼び出し方と料金変化を検証。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/bedrock-claude-opus-5-5/" target="_blank" rel="noopener">Amazon Bedrock で利用可能になった Claude Opus 5.5 を試してみた</a></td><td>DevelopersIO</td><td>BedrockのConverse APIでClaude Opus 5.5を呼び出し、JP/Globalプロファイルやeffortレベル別の挙動を検証。</td></tr>
+<tr><td>4</td><td><a href="https://dev.classmethod.jp/articles/grok-4-6-bedrock-guardrails/" target="_blank" rel="noopener">Grok 4.6 on Amazon Bedrock で Guardrails を試してみた</a></td><td>DevelopersIO</td><td>Amazon BedrockのGrok 4.6にGuardrailsを適用し、PII EMAILブロックの動作を入出力両面で確認。</td></tr>
+<tr><td>5</td><td><a href="https://dev.classmethod.jp/articles/moonshot-ai-kimi-k3-bedrock/" target="_blank" rel="noopener">Amazon Bedrock で一般提供になった Moonshot AI の Kimi K3 を試してみた</a></td><td>DevelopersIO</td><td>Moonshot AIのKimi K3がBedrock GA、Converse・OpenAI互換API・プロンプトキャッシュ等を検証。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/nwn/articles/824026c76116e0" target="_blank" rel="noopener">TypeSafeのJevを正しく驚く、それってLLMでできませんか？</a></td><td>Zenn</td><td>TypeSafeのJevとLLMの使い分けを、用途と性能の観点で比較・考察。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/watany/articles/36e11a20ce3743" target="_blank" rel="noopener">Jevでハーネスエンジニアリング</a></td><td>Zenn</td><td>Jevを活用したハーネスエンジニアリング手法の実践記録。</td></tr>
+<tr><td>8</td><td><a href="https://zenn.dev/mizchi/articles/jev-is-gpu-for-llms" target="_blank" rel="noopener">既存の LLM が CPU なら、 Jev はその GPU 版みたいなやつ</a></td><td>Zenn</td><td>JevをLLMの高速判断特化版として位置づけ、CPU対GPUのアナロジーで性能差を解説。</td></tr>
+<tr><td>9</td><td><a href="https://zenn.dev/jackojacko05/articles/08df79d47f4219" target="_blank" rel="noopener">最近話題のJevはBigQueryのAI関数を安くできるのか？</a></td><td>Zenn</td><td>BigQueryのAI関数コスト削減にJevが有効かどうかを検証した実測レポート。</td></tr>
+<tr><td>10</td><td><a href="https://qiita.com/kikuziro/items/2be9091b328d8b844640" target="_blank" rel="noopener">JevでRAG検索の爆速化＆コスト削減は実現できるのか検証してみた</a></td><td>Qiita</td><td>TypeSafe AIのJevによるRAG検索の高速化とコスト削減効果を実測で検証。</td></tr>
+<tr><td>11</td><td><a href="https://qiita.com/nasuvitz/items/4d27833640ff36b5d8c5" target="_blank" rel="noopener">AWSの最軽量LLM「Amazon Nova Micro」がJevの代わりとなるか検証してみた</a></td><td>Qiita</td><td>Amazon Nova MicroをJevの代替として利用可能か比較検証した結果。</td></tr>
+<tr><td>12</td><td><a href="https://qiita.com/Sicut_study/items/b2ef2f7a6ee0dbbf0001" target="_blank" rel="noopener">エンジニア不要論の真実！AIの進化と具体抽象から完全解説</a></td><td>Qiita</td><td>AIの進化がもたらすエンジニア不要論を具体と抽象の観点から包括的に検証。</td></tr>
+<tr><td>13</td><td><a href="https://qiita.com/cvusk/items/97ede7da8bfca772237a" target="_blank" rel="noopener">AIエージェント評価で見落とされがちな手法</a></td><td>Qiita</td><td>AIエージェントの評価において見落とされやすい手法を体系的に整理。</td></tr>
+<tr><td>14</td><td><a href="https://zenn.dev/scien/articles/llm-auto-prompt-optimization" target="_blank" rel="noopener">プロンプトエンジニアリング、人間がやらなくてよくない？LLMに自分のプロンプトを直させてみた</a></td><td>Zenn</td><td>LLM自身にプロンプトを最適化させる自動プロンプトエンジニアリングの実験結果。</td></tr>
+<tr><td>15</td><td><a href="https://qiita.com/mi-ta/items/cf3559dba904cdac2398" target="_blank" rel="noopener">生成しないAI「Jev」とは？ IBM BobでJavaアプリの検索リランキングに組み込んでみた</a></td><td>Qiita</td><td>非生成型AI「Jev」をIBM BobのJavaアプリケーションの検索リランキングに統合した実装例。</td></tr>
+<tr><td>16</td><td><a href="https://dev.classmethod.jp/articles/typesafe-jev-doc-type-classification/" target="_blank" rel="noopener">【TypeSafe】Jev で OCR 済みの書類をページごとに種別判定できるか試してみた</a></td><td>DevelopersIO</td><td>JevでOCR済み貿易書類をテキスト分類し、20ページ中20ページ正解を達成。</td></tr>
+<tr><td>17</td><td><a href="https://dev.classmethod.jp/articles/jev-vs-gemini-flash-cross-match/" target="_blank" rel="noopener">【TypeSafe】出力を絞ればLLMも速くなる？ Gemini 3.8 Flash と Jev で同じ107ケースの速度・コストを比較してみた</a></td><td>DevelopersIO</td><td>Jev対Gemini 3.8 Flashの107ケース比較で、出力を極限まで絞っても速度・コスト差が大きいことを実証。</td></tr>
+<tr><td>18</td><td><a href="https://dev.classmethod.jp/articles/jev-guide-with-examples/" target="_blank" rel="noopener">判断特化型AI「Jev」を簡単な具体例でわかりやすく解説！実際に試してみた</a></td><td>DevelopersIO</td><td>テキスト非生成型の判断特化AI「Jev」の特徴を具体例で解説し、アカウント作成からPlaygroundまで紹介。</td></tr>
+<tr><td>19</td><td><a href="https://zenn.dev/okame_rara/articles/bonsai_2_27b_m1" target="_blank" rel="noopener">Ternary Bonsai 2 27BをM1Pro・16GBで動かす</a></td><td>Zenn</td><td>Ternary Bonsai 2 27Bモデルを16GBメモリのM1 Proで実行する手順と性能の検証。</td></tr>
+<tr><td>20</td><td><a href="https://konifar-zatsu.hatenadiary.jp/entry/2026/09/22/112134" target="_blank" rel="noopener">思考の外注割合を増やし、理解は外注しない</a></td><td>はてブ</td><td>AIへの思考の外注と理解の保持のバランスについて考察したエッセイ。</td></tr>
+<tr><td>21</td><td><a href="https://www.itmedia.co.jp/pcuser/articles/2609/22/news024.html" target="_blank" rel="noopener">新型「Mac mini」「Mac Studio」徹底レビュー！ ローカルAIはついに"実用域"へ</a></td><td>はてブ</td><td>新型Apple SiliconハードウェアでのローカルAI実行がついに実用域に到達したことを検証。</td></tr>
+<tr><td>22</td><td><a href="https://www.itmedia.co.jp/news/article/2609/22/2000001671/" target="_blank" rel="noopener">OpenAI、数学者の独立諮問グループと連携</a></td><td>はてブ</td><td>OpenAIの内部モデルが8月のトレーニング以降100件以上の未解決数学問題を解決したとの報告。</td></tr>
+<tr><td>23</td><td><a href="https://dev.classmethod.jp/articles/Illust-bedrock-agentcore/" target="_blank" rel="noopener">イラストで理解するAmazon Bedrock AgentCore</a></td><td>DevelopersIO</td><td>Amazon Bedrock AgentCoreの概要をイラストで図解した入門記事。</td></tr>
+<tr><td>24</td><td><a href="https://zenn.dev/canly/articles/7ac8cea14c20e8" target="_blank" rel="noopener">【2026/9/17最新アプデ】Claude Docs が登場！Slides・Design と合わせて触ってみた</a></td><td>Zenn</td><td>Claude Docsの登場でSlides・Designと合わせたClaude製品群の活用方法を検証。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/ecs-console-deployment-tab-canary-linear-blue-green/" target="_blank" rel="noopener">Canary / Linear / Blue-Green に対応した Amazon ECS コンソールの「デプロイ」タブを試してみた</a></td><td>DevelopersIO</td><td>Fargateでのcanaryデプロイの10%/90%トラフィックシフト、ロールバック、Amazon Qによる原因調査を検証。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/bedrock-managed-kb-confluence-user-managed-setup-3lo/" target="_blank" rel="noopener">【アップデート】Bedrock Managed Knowledge BaseのユーザーマネージドセットアップでConfluenceをつないでみた</a></td><td>DevelopersIO</td><td>Bedrock Managed Knowledge BaseのConfluence向け3LOユーザーマネージドセットアップの新機能を検証。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/aws_japan/articles/agentcore-runtime-v2-platform-version" target="_blank" rel="noopener">新しい Amazon Bedrock AgentCore Runtime が利用可能に!!</a></td><td>Zenn</td><td>Amazon Bedrock AgentCore Runtimeの新バージョンの機能と利用方法を紹介。</td></tr>
+<tr><td>4</td><td><a href="https://blog.cloudflare.com/python-workers-ga/" target="_blank" rel="noopener">Python Workers are now generally available</a></td><td>はてブ</td><td>CloudflareがWorkers上でのPythonアプリケーション実行をGA化し、エコシステム互換性を確保。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/har1101/items/2822a4e3837f0be0729f" target="_blank" rel="noopener">Lambda MicroVMのヘルスチェックポートは結構自由に決められる</a></td><td>Qiita</td><td>AWS Lambda MicroVMのヘルスチェックポート設定が柔軟に変更可能であることを検証。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/otakakot/articles/14d162ea65f67d" target="_blank" rel="noopener">Re: Vercel に Go サーバーを無料でデプロイできるんです！</a></td><td>Zenn</td><td>VercelへのGoサーバーの無料デプロイ方法について解説・検証した記事。</td></tr>
+<tr><td>7</td><td><a href="https://dev.classmethod.jp/articles/amazon-mwaa-serverless-pythonoperator-ssm-multi-parameters/" target="_blank" rel="noopener">Amazon MWAA ServerlessのPythonOperatorで複数のSSMパラメーターを1タスクで取得してみた</a></td><td>DevelopersIO</td><td>MWAA ServerlessのPythonOperatorでSSMパラメーター一括取得とXCom連携の構成を検証。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/shoma-run-renovate-on-codecommit-to-auto-create-dependency-update-pr/" target="_blank" rel="noopener">CodeCommit で Renovate を動かして依存関係の更新 PR を自動作成してみた</a></td><td>DevelopersIO</td><td>CodeCommitでRenovateをセルフホスト実行し、CodeBuildで依存関係の自動更新PRを作成する手順。</td></tr>
+<tr><td>9</td><td><a href="https://dev.classmethod.jp/articles/shoma-aws-transform-custom-lambda-runtime-upgrade-python-3-10-to-3-13/" target="_blank" rel="noopener">AWS Transform custom で Lambda のランタイムを Python 3.10 から 3.13 にアップグレードしてみた</a></td><td>DevelopersIO</td><td>AWS Transform customのAIエージェントが自動的にPython 3.10から3.13のランタイム変換を実行。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/20260922-duckdb-v20-alpha-quack/" target="_blank" rel="noopener">【Welcome to AWS 企画】DuckDB v2.0 alpha のクライアント/サーバー構成（quack + CONNECT）で Amazon S3 Tables を試してみた</a></td><td>DevelopersIO</td><td>DuckDB v2.0プレビューの新構成quack+CONNECTとAmazon S3 Tablesの組み合わせを検証。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/20260921-aws-glue-zero-etl-ownership-conflicts/" target="_blank" rel="noopener">【アップデート】AWS Glue zero-ETL integration で同じテーブルへの二重書き込みが ConflictException で止まるようになったので試してみた</a></td><td>DevelopersIO</td><td>AWS Glueのzero-ETLでターゲットテーブル所有権記録と二重書き込みの自動検出・拒否を確認。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/pksha/articles/5a1dc6470019d6" target="_blank" rel="noopener">AI ネイティブなデータ分析基盤を作った話</a></td><td>Zenn</td><td>AIネイティブなデータ分析基盤の設計と構築の実践事例を共有。</td></tr>
+<tr><td>4</td><td><a href="https://gigazine.net/news/20260922-openai-storage-habitat/" target="_blank" rel="noopener">OpenAIが10億人以上・40ペタバイト超えのユーザーデータを扱う自社製ストレージシステム「Habitat」について解説</a></td><td>はてブ</td><td>OpenAIの自社製ストレージシステムHabitatが10億人超・40PBのデータを管理する仕組みを解説。</td></tr>
+<tr><td>5</td><td><a href="https://dev.classmethod.jp/articles/bs1149-app-runtime-cortex-sdk-swttokyo26/" target="_blank" rel="noopener">【レポート】データの隣で AI アプリを爆速デプロイ - App Runtime & Cortex SDK ご紹介 #SWTTokyo26</a></td><td>DevelopersIO</td><td>Snowflake World Tour Tokyo 2026で紹介されたApp RuntimeとCoCo Agent SDKの機能と運用ポイント。</td></tr>
+<tr><td>6</td><td><a href="https://techblog.whitehealthcare.co.jp/entry/2025/06/24/144726" target="_blank" rel="noopener">dbtでレセプトデータをモデリングしてみたら、定石が全然通用しなかった</a></td><td>はてブ</td><td>医療レセプトデータのdbtモデリングで標準的手法が通用しなかった事例と対処法。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/tanakh/articles/c-code-in-rust" target="_blank" rel="noopener">C言語のコードをRustの中に書けるライブラリを作った</a></td><td>Zenn</td><td>ライブラリcinrsでRustマクロ内にCコードを直接埋め込み、core::ffi型に安全にマッピングする手法。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/jisou/articles/b7e19c4a2d80f6" target="_blank" rel="noopener">ドメインの変換はHandlerとUseCaseのどちらでやるべきか</a></td><td>Zenn</td><td>Clean ArchitectureにおけるHandler層とUseCase層でのドメイン変換の責務配置を考察。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/innovation/articles/e84f8ccca8e6da" target="_blank" rel="noopener">PRのCI稼働時間を7割削減した話</a></td><td>Zenn</td><td>PRごとのCI稼働時間を70%削減した最適化の具体的手法と効果を共有。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/643866/articles/48eae6e7b845f8" target="_blank" rel="noopener">Next.js vs TanStack Start の違いを10項目で検証してみた</a></td><td>Zenn</td><td>Next.jsとTanStack Startを10項目で比較し、それぞれの強みと弱みを検証。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/astrologian/articles/562fe3f749d985" target="_blank" rel="noopener">React Router の新しい useRouterState で Pending UI を考える</a></td><td>Zenn</td><td>React Routerの新フックuseRouterStateを使ったPending UI実装パターンを解説。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/imkohenauser/articles/vscode-cursor-parallel-development" target="_blank" rel="noopener">分離できていない？並列開発で感じた VS Code と Cursor の違い</a></td><td>Zenn</td><td>並列開発環境でのVS CodeとCursorの実際の挙動差を体験ベースで比較。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/rescuenow/articles/5aa26aebd7ae78" target="_blank" rel="noopener">LLMにWikiを書かせて半年、一番役に立った画面はLLMの文章を使っていなかった</a></td><td>Zenn</td><td>LLM生成Wikiの半年間の運用で、最も有用だったのはLLM非依存の画面だったという逆説的知見。</td></tr>
+<tr><td>8</td><td><a href="https://qiita.com/taihong/items/e8cf442b5ace978e22b5" target="_blank" rel="noopener">「なぜか読まれない文章」の正体をSudachiPyで解析したら「漢字率」のゴールデンルールが見えてきた話</a></td><td>Qiita</td><td>形態素解析で文章の漢字率を分析し、読みやすさのゴールデンルールを発見。</td></tr>
+<tr><td>9</td><td><a href="https://qiita.com/shu15511551/items/4f037551f841d786c17d" target="_blank" rel="noopener">言葉で頼んで AI 0 回・約 1 秒、手順書をマクロに焼いたら日々の業務から AI が消えた話</a></td><td>Qiita</td><td>AI依存をマクロベースの決定論的自動化に置き換え、速度とコストを大幅改善した実例。</td></tr>
+<tr><td>10</td><td><a href="https://zenn.dev/jtcc/articles/7e74fef42580a1" target="_blank" rel="noopener">全社に OpenCode + LiteLLM を導入してコストを抑えつつ AI 活用を進めている話</a></td><td>Zenn</td><td>OpenCode+LiteLLMの全社導入でAI活用のコストを抑制しながらスケールした事例。</td></tr>
+<tr><td>11</td><td><a href="https://zenn.dev/d_date/articles/b1a7baa74b77da" target="_blank" rel="noopener">Xcodeのプロジェクト設定をJSONにする</a></td><td>Zenn</td><td>Xcodeのプロジェクト設定をJSON形式で管理する手法の紹介。</td></tr>
+<tr><td>12</td><td><a href="https://qiita.com/mylifewithviolin/items/5736ac540c052b409e7a" target="_blank" rel="noopener">日本語プログラミング言語Mind9でAI仕様駆動開発を行ってみた（ステップ1）</a></td><td>Qiita</td><td>日本語プログラミング言語Mind9を使ったAI仕様駆動開発の第一段階の記録。</td></tr>
+<tr><td>13</td><td><a href="https://dev.classmethod.jp/articles/xcode-27-safeareabar-soft-to-hard/" target="_blank" rel="noopener">iOS 27 で safeAreaBar のエフェクトが .soft から .hard に変わっていたので検証・修正してみた</a></td><td>DevelopersIO</td><td>iOS 27/Xcode 27でのsafeAreaBarエフェクト変更（.softから.hard）を検証し修正方法を提示。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/amazon-quick-dlp-purview/" target="_blank" rel="noopener">Amazon Quick のデータ損失防止（DLP）機能を使ってみた</a></td><td>DevelopersIO</td><td>Microsoft Purview連携によるAmazon QuickのDLP機能を検証し、実用性を評価。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/slug-securityhub-fsbp-remediation-networkfirewall-6/" target="_blank" rel="noopener">【Security Hub修復手順】【NetworkFirewall.6】ステートレス Network Firewall のルールグループを空にしないでください</a></td><td>DevelopersIO</td><td>AWS Security Hubの基礎セキュリティベストプラクティスコントロールの修復手順を解説。</td></tr>
+<tr><td>3</td><td><a href="https://www.gizmodo.jp/article/smart-glasses-privacy-zuckoff/" target="_blank" rel="noopener">スマートグラスの盗撮防止アプリ、約1カ月で利用者5,000人到達</a></td><td>はてブ</td><td>カメラ搭載スマートグラスを検知するプライバシー保護アプリZuckOffが1カ月で5,000ユーザー達成。</td></tr>
+<tr><td>4</td><td><a href="https://dev.classmethod.jp/articles/m365-e5-sandbox-purview/" target="_blank" rel="noopener">Microsoft 365 E5 サンドボックスで Microsoft Purview の秘密度ラベルを使ってみた</a></td><td>DevelopersIO</td><td>M365 E5サンドボックス環境でMicrosoft Purviewの秘密度ラベル機能を検証した記録。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/store/storevisit/557139/" target="_blank" rel="noopener">フードスタイル1号店「あびこ駅前店」 開店から4カ月の現状を徹底レポート</a></td><td>DCS</td><td>新生ダイエーが展開する新フォーマット「フードスタイル」1号店の開店4カ月後の営業状況と売場戦略を店長インタビューを交えて詳報。</td></tr>
+<tr><td>2</td><td><a href="https://www.itmedia.co.jp/business/articles/2609/23/news018.html" target="_blank" rel="noopener">おにぎりブームが落ち着く中、なぜ売れる？「おにまる」と「おにどん」のちょっと意外な仕掛け</a></td><td>ITmedia</td><td>おにぎりブームが一巡する中、専門店「おにまる」と「おにどん」が売上を伸ばし続ける独自の商品・店舗戦略を分析。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<p>該当する記事はありませんでした。</p>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/sales-promotion/product-strategy/558267/" target="_blank" rel="noopener">イオンのPB「トップバリュ」、年間売上高2兆円への道筋とは</a></td><td>DCS</td><td>イオンのPB「トップバリュ」が年間売上高2兆円達成に向けた商品開発・販売展開の戦略を解説。</td></tr>
+<tr><td>2</td><td><a href="https://www.itmedia.co.jp/business/articles/2609/23/news009.html" target="_blank" rel="noopener">国道にも「レア度」がある？ ゼンリンのトレカ、初回限定版は約10分で完売</a></td><td>ITmedia</td><td>ゼンリンが地図データを活用したトレーディングカード「Map Design GALLERY CARD」を発売、初回限定版が約10分で完売した新規事業戦略を紹介。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://ecnomikata.com/blog/51714/" target="_blank" rel="noopener">LINE公式アカウントはスマホだけで運用できる？費用も解説</a></td><td>ECのミカタ</td><td>LINE公式アカウントをスマートフォンのみで運用する方法と関連費用について実務視点で解説。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<p>該当する記事はありませんでした。</p>
+<h3>B6. セキュリティ</h3>
+<p>該当する記事はありませんでした。</p>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. Jev（判断特化型AI）が小売データ分析の新たな武器になる可能性</h3>
+<p>TypeSafe社のJev（判断特化型AI）がRAG高速化・OCR分類・BigQuery最適化など多方面で検証されており、生成ではなく「判断」に特化したアーキテクチャが注目を集めている。小売業においてはPOSデータの異常検知、商品分類の高速判定、棚割りの妥当性チェックなど、大量の判断タスクが存在する。SIerとしては、既存のLLMベース分析基盤にJevを「判断層」として組み込むことで、コスト削減と応答速度改善を同時に実現するハイブリッドアーキテクチャの提案が差別化要因となりうる。</p>
+<h3>2. Bedrockマルチプロバイダー化と小売向けAI基盤の選択肢拡大</h3>
+<p>Amazon BedrockにGPT-6 Sol/Luna・Grok 4.6・Kimi K3が加わり、Claude Opus 5.5も対応した。小売業のAI活用において、モデルの使い分け（コスト重視の定型処理はKimi K3、高精度な商品分析はOpus 5.5、多言語対応はGPT-6）が現実的になってきた。SIerとしては単一モデル依存ではなく、用途別モデルルーティング基盤の設計・構築が新たな提案テーマとなる。</p>
+<h3>3. AI駆動開発の成熟がSIerの受託開発モデルを変える</h3>
+<p>CIがAIコード生成のボトルネックになるという課題が報告され、MCP×Playwright自動化やClaude Code Plugins活用が実運用フェーズに入っている。小売業向けの基幹システム開発においても、AI駆動のコード生成・レビュー・テスト自動化を前提とした開発プロセス設計が求められつつある。SIerの工数見積もりモデルや品質保証体制にもAI前提の再設計が必要になる局面が近い。</p>
+<h3>4. イオン「トップバリュ」2兆円構想とPBデータ基盤</h3>
+<p>イオンのPB「トップバリュ」が年間売上高2兆円を目指す中、商品開発・販売チャネル最適化にはデータ基盤の高度化が不可欠となる。DuckDB v2.0のclient/server構成やAWS Glue zero-ETLの二重書き込み防止など、データパイプラインの信頼性向上技術が進化している。PB戦略の成否を左右するデータ基盤提案は、SIerにとって小売案件の中核テーマである。</p>
+<h3>5. 祝日の情報空白がリアルタイム分析の設計課題を浮き彫りに</h3>
+<p>秋分の日で主要小売ニュースソースの更新が停止し、6ソース中4ソースが0件という結果になった。SIerが小売向けリアルタイムダッシュボードや市場モニタリングシステムを設計する際、祝日・年末年始の情報空白期間に備えた代替ソースの確保やSNSデータの補完取り込みなど、BCP観点での情報取得設計が求められる。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>24件</td><td>Jev検証記事・Claude Code活用事例が多数</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>13件</td><td>Jev・AI駆動開発・セキュリティ</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>10件</td><td>Claude Opus 5.5・ローカルAI・データ基盤</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>26件</td><td>Bedrock新モデル対応・Jev検証・AWS各種サービス</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>0件</td><td>本日分の発表は確認できず（クライアントサイドレンダリングのため取得困難）</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>0件</td><td>秋分の日のため更新なし</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>2件</td><td>フードスタイル特集・トップバリュ戦略</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>0件</td><td>秋分の日のため更新なし</td></tr>
+<tr><td>9</td><td>ECのミカタ</td><td>成功</td><td>1件</td><td>LINE公式アカウント運用</td></tr>
+<tr><td>10</td><td>ITmedia ビジネスオンライン</td><td>成功</td><td>2件</td><td>おにぎり専門店・ゼンリントレカ</td></tr>
+<tr><td>11</td><td>ロジスティクス・トゥデイ</td><td>成功</td><td>0件</td><td>秋分の日のため更新なし</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術73件 + 小売5件 = 78件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-09-22" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 121件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>判断特化型AI「Jev」が技術コミュニティで爆発的注目</strong> — TypeSafe社のテキスト非生成型AI「Jev」がZenn・Qiita・DevelopersIOで20件超の記事を集め、RAG高速化・BigQueryコスト削減・分類性能比較など実用検証が一気に加速</li><li><strong>AWSインフラ刷新が加速</strong> — PrivateLinkトンネルエンドポイント新機能、EC2 T8iの一般提供、ECS Express ModeのARM64対応、AgentCore Runtime GAと主要サービスの大型アップデートが集中</li><li><strong>ダイエー×光洋の統合シナジー戦略が始動</strong> — 鮮魚・惣菜部門で光洋の品質力とダイエーの価格対応力を融合する新販売戦略の全容が明らかに</li><li><strong>ニトリのマーケットプレイス拡大とEC総合化</strong> — 食品・アウトドア・生花カテゴリ追加とMirakl・CROSS MALL連携でプラットフォーム型ECを推進</li><li><strong>しまむらの機能性PB戦略が好調</strong> — 「ファイバーヒート」2000万枚目標の発表会を初開催、リカバリーウェアは発売5日で5万枚突破と機能性衣料への需要が旺盛</li></ol></div>
@@ -30022,11 +30182,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-09-22 01:19 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-09-23 01:06 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-09-22", "2026-09-21", "2026-09-20", "2026-09-19", "2026-09-18", "2026-09-17", "2026-09-16", "2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-09-23", "2026-09-22", "2026-09-21", "2026-09-20", "2026-09-19", "2026-09-18", "2026-09-17", "2026-09-16", "2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
