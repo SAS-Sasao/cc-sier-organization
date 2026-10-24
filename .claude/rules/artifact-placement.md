@@ -72,6 +72,27 @@
 - 生成元 Skill は `/company-digest-insights`、公開まで通すオーケストレータは `/company-insights-cycle`
 - **なぜ MD ソースも `docs/` 側なのか**: 日次ダイジェストのような 2 箇所配置にしなかったのは、解析レポートが組織横断の技術知見であり、特定部署の業務成果物ではないため。カタログ側に判断が残るので組織スコープの独立性は保たれる
 
+## `docs/index.html` への複数生成器の書き込み（2026-08-22）
+
+`docs/index.html` は **4 つの hook/生成器** が書き込む共有ファイルであり、各生成器の正規表現が他の生成器が挿入したセクションを巻き添え削除するリスクがある。
+
+| 生成器 | 起動元 | 頻度 |
+|---|---|---|
+| `generate-insights-html.py` | `daily-insights-sync` workflow | **毎晩** |
+| `generate-daily-digest-html.sh` | `daily-digest-automation` workflow | **毎晩** |
+| `generate-insights-analyses-html.sh` | ローカル `/company-insights-cycle` | 手動 |
+| `generate-dashboard.sh` | ローカル `/company-dashboard` | 手動 |
+
+### 事故実例（#805）
+
+`generate-insights-html.py` の削除正規表現 `\./insights/[^"]*` が `./insights/analyses/index.html` にもマッチし、解析レポートカードが **6 日間毎晩削除** され続けた（8/16 公開 → 8/22 検知）。
+
+### 防止ルール
+
+- ❌ 共有ファイルの正規表現に `[^"]*` 等のワイルドカードを使う場合、他セクションの href パターンと照合してから投入
+- ✅ hook/生成器を修正した後は、同じファイルに書き込む **全生成器を模擬実行** し、全セクション（カード等）が生存することを実測確認
+- ✅ 新たに `docs/index.html` に書き込む生成器を追加する場合は上記テーブルを更新
+
 ## 関連
 
 - @.claude/rules/multi-org.md — 組織独立性の原則
