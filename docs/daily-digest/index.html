@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全198件 ｜ 最終更新: 2026-10-30 02:28</p>
+<p class="subtitle">domain-tech-collection ｜ 全199件 ｜ 最終更新: 2026-10-31 02:06</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">20110</div>
+    <div class="summary-value blue">20236</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-10-30</div>
+    <div class="summary-value">2026-10-31</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">198</div>
+    <div class="summary-value green">199</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-10-30" onclick="switchTab('2026-10-30')">2026-10-30</button>
+<button class="tab-btn active" data-date="2026-10-31" onclick="switchTab('2026-10-31')">2026-10-31</button>
+<button class="tab-btn" data-date="2026-10-30" onclick="switchTab('2026-10-30')">2026-10-30</button>
 <button class="tab-btn" data-date="2026-10-29" onclick="switchTab('2026-10-29')">2026-10-29</button>
 <button class="tab-btn" data-date="2026-10-28" onclick="switchTab('2026-10-28')">2026-10-28</button>
 <button class="tab-btn" data-date="2026-10-27" onclick="switchTab('2026-10-27')">2026-10-27</button>
@@ -334,7 +335,220 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-10-30" class="digest-panel" style="display:block">
+<div id="digest-2026-10-31" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 11件（技術5件+小売6件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 126件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>Linuxカーネル CVE-2026-98432 緊急対応</strong> — CVSS 9.8のTCP処理use-after-free脆弱性でリモートroot攻撃が実証。AL2023パッチ公開、全クラウド環境に影響</li><li><strong>小売・物流で大規模情報漏えい連続発生</strong> — 無印良品2726万件、松屋237万件、佐川急便5323万件と相次ぎ発覚。流通業界のセキュリティ体制に警鐘</li><li><strong>AIエージェントコマースの商用実装が本格化</strong> — Shopify×ChatGPT/Claude連携、Amazon Alexa+日本投入、Yahoo!ショッピングAIベスト提案が同日発表</li><li><strong>Mistral Large 4がGPT-6.1 Terra同等性能でオープン公開</strong> — 商用利用可能なオープンウェイトモデルとしてLLM競争環境が激変</li><li><strong>GitHub Universe 2026開催</strong> — Actions lockfile GA化、Copilot connectors等の新機能が多数発表</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>Linuxカーネル CVE-2026-98432 緊急対応</strong> — CVSS 9.8のTCP処理use-after-free脆弱性でリモートroot攻撃が実証。AL2023パッチ公開、全クラウド環境に影響</li>
+<li><strong>小売・物流で大規模情報漏えい連続発生</strong> — 無印良品2726万件、松屋237万件、佐川急便5323万件と相次ぎ発覚。流通業界のセキュリティ体制に警鐘</li>
+<li><strong>AIエージェントコマースの商用実装が本格化</strong> — Shopify×ChatGPT/Claude連携、Amazon Alexa+日本投入、Yahoo!ショッピングAIベスト提案が同日発表</li>
+<li><strong>Mistral Large 4がGPT-6.1 Terra同等性能でオープン公開</strong> — 商用利用可能なオープンウェイトモデルとしてLLM競争環境が激変</li>
+<li><strong>GitHub Universe 2026開催</strong> — Actions lockfile GA化、Copilot connectors等の新機能が多数発表</li>
+<li><strong>Claude Code活用事例が爆発的に増加</strong> — QAチーム構築・脆弱性自動修正・保守対応自動化等の本番運用レベル事例が多数出現。一方でCursor拡張の悪意あるバージョンも発覚</li>
+<li><strong>9月商業動態統計発表</strong> — 小売業販売額は前年同月比2.3%増の12兆8730億円。百貨店4.7%増と好調も家電専門店は2.7%減</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://tech-blog.rakus.co.jp/entry/20261030/errorlog" target="_blank" rel="noopener">ERROR ログ1行から障害の一次対応を下準備する Claude Code スキルを作った</a></td><td>はてブ</td><td>ERRORログ1行を入力にClaude Codeスキルでインシデント一次対応の下準備を自動生成する仕組みの紹介。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/sodeyama/articles/tech-tab5-camera-usb-pc-diagnosis" target="_blank" rel="noopener">AIに物理キーボードを渡して、BIOS操作からPCのトラブル対応まで丸投げしてみた——M5Stack Tab5のカメラとUSBだけで</a></td><td>Zenn</td><td>M5Stack Tab5のカメラとUSBキーボードだけでAIにPC障害復旧（BIOS操作含む）を委任した実験。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/snabeta/articles/d4acb079680a79" target="_blank" rel="noopener">Claude Codeで「QAチーム」を組んだら、効いたのは「捨てる仕組み」だった ― AIだけが見つけた不具合・見逃しは？</a></td><td>Zenn</td><td>Claude CodeでQAチームを構成し、不要な検出を「捨てる」仕組みが品質向上に寄与した実践報告。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/y_ukai/articles/67aaeb49be69ec" target="_blank" rel="noopener">Auto mode時代のClaude Codeを守る。検証済み10キットで始めるセキュリティ対策【全員・チーム・組織別】</a></td><td>Zenn</td><td>Claude Code Auto mode運用における10種のセキュリティ対策キットを全員・チーム・組織の3段階で整理。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/ks130/articles/6a06f484ebfab7" target="_blank" rel="noopener">AIエージェントに設計書レビューを任せたらレビュワーは楽になった。でも現場は？？</a></td><td>Zenn</td><td>AIエージェントに設計書レビューを委任した結果、レビュワーの負担は軽減したが現場に生じた課題を分析。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/karamage/articles/ac71f1c89c73ff" target="_blank" rel="noopener">人間がコードを読まずにPRをマージする技術 ─ それでも、品質は手放さない</a></td><td>Zenn</td><td>コードを読まずにPRをマージしつつ品質を維持するための仕組み設計の解説。</td></tr>
+<tr><td>7</td><td><a href="https://qiita.com/tatsuya582/items/4d79021c9f78f4015992" target="_blank" rel="noopener">Codex のいいところだけを、Claude Code や Muse から使う</a></td><td>Qiita</td><td>Codexの長所をClaude CodeやMuseから組み合わせて活用する方法の紹介。</td></tr>
+<tr><td>8</td><td><a href="https://qiita.com/generoKoki/items/81ca4042e30c42ffe4a7" target="_blank" rel="noopener">マルチタスクが苦手なので、Slack の返信と PR レビューを Claude Code に定時で下ごしらえさせている</a></td><td>Qiita</td><td>Claude CodeでSlack返信とPRレビューの下準備を定時実行させるマルチタスク回避術。</td></tr>
+<tr><td>9</td><td><a href="https://dev.classmethod.jp/articles/20261030-cc-updates-v2-1-314/" target="_blank" rel="noopener">Claude Code v2.1.314 の主要アップデート - 作業ディレクトリ外の書き込み拒否とサンドボックス・フックの適用漏れ修正</a></td><td>DevelopersIO</td><td>Claude Code v2.1.314の主要変更点として作業ディレクトリ外への書き込み拒否とフック修正を解説。</td></tr>
+<tr><td>10</td><td><a href="https://dev.classmethod.jp/articles/claude-code-session-dashboard-in-browser/" target="_blank" rel="noopener">Claude Code のセッションをウェブブラウザで可愛く可視化してセッション迷子を卒業する</a></td><td>DevelopersIO</td><td>Claude Codeのセッション情報をブラウザでダッシュボード表示し管理性を向上させるツール紹介。</td></tr>
+<tr><td>11</td><td><a href="https://zenn.dev/go5go69/articles/2c0b2b6cd30676" target="_blank" rel="noopener">保守対応をClaude Codeで自動化したら、クラッシュ率が 8.7%→0.1% になった</a></td><td>Zenn</td><td>Claude Codeによる保守対応自動化でアプリのクラッシュ率を8.7%から0.1%に削減した事例。</td></tr>
+<tr><td>12</td><td><a href="https://zenn.dev/msd_sw/articles/glab-auto-fix-vulns" target="_blank" rel="noopener">GitLab x Claude Code の脆弱性自動修正を半年運用して、何がどれだけ良くなったか</a></td><td>Zenn</td><td>GitLabとClaude Codeの脆弱性自動修正パイプラインを半年運用した定量的な改善結果の報告。</td></tr>
+<tr><td>13</td><td><a href="https://dev.classmethod.jp/articles/step-functions-agentcore-gateway-tools/" target="_blank" rel="noopener">【AWS】Step FunctionsのワークフローをAgentCore Gateway経由でAIエージェントのツールとして使えるようになりました！</a></td><td>DevelopersIO</td><td>AWS Step FunctionsをAgentCore Gateway経由でAIエージェントのツールとして利用可能にするアップデート。</td></tr>
+<tr><td>14</td><td><a href="https://zenn.dev/rimon/articles/45c1fd2f015af8" target="_blank" rel="noopener">私が5種類のコーディングエージェントを使い分ける理由</a></td><td>Zenn</td><td>5種類のコーディングエージェントをタスク特性に応じて使い分ける戦略と比較。</td></tr>
+<tr><td>15</td><td><a href="https://cursor.com/blog/claude-code-extension-security-notice" target="_blank" rel="noopener">Security notice — malicious version of Anthropic.claude-code (2.1.312 and 2.1.313) identified in the Cursor VS Code Extension Marketplace</a></td><td>はてブ</td><td>Cursor VS Code拡張マーケットプレイスでClaude Code拡張の悪意あるバージョン（2.1.312/2.1.313）が発見された警告。</td></tr>
+<tr><td>16</td><td><a href="https://dev.classmethod.jp/articles/kiro-product-compare/" target="_blank" rel="noopener">【Kiro】 Kiro IDE? CLI? Crew? Choose the App According to Your Style</a></td><td>DevelopersIO</td><td>Kiroの3製品（IDE/CLI/Crew）を比較し、スタイルに合った選び方を解説。</td></tr>
+<tr><td>17</td><td><a href="https://dev.classmethod.jp/articles/kiro-cli-v3-approve-for-me/" target="_blank" rel="noopener">Kiro CLI V3 の新機能「Approve for me」どの様な操作が確認になるか試してみた</a></td><td>DevelopersIO</td><td>Kiro CLI V3の「Approve for me」機能で確認が求められる操作の種類を実際に検証。</td></tr>
+<tr><td>18</td><td><a href="https://qiita.com/har1101/items/de6104e8057452ebd720" target="_blank" rel="noopener">AgentCore GatewayのターゲットにStep Functionsを指定できるようになりました</a></td><td>Qiita</td><td>AgentCore GatewayがStep Functionsをターゲットとしてサポートした新機能の紹介。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://gigazine.net/news/20261030-mistral-large-4-open/" target="_blank" rel="noopener">GPT-6.1 Terraと同等のコーディング性能を発揮するAIモデル「Mistral Large 4」が無償公開される</a></td><td>はてブ</td><td>Mistral Large 4がオープンウェイトで公開され、GPT-6.1 Terra同等のコーディング性能と評価。</td></tr>
+<tr><td>2</td><td><a href="https://pc.watch.impress.co.jp/docs/news/2152693.html" target="_blank" rel="noopener">NVIDIA、40言語対応の無償文字起こしAI「Nemotron 3.5 Transcribe」</a></td><td>はてブ</td><td>NVIDIAが40言語対応の無料音声文字起こしモデル「Nemotron 3.5 Transcribe」を公開。</td></tr>
+<tr><td>3</td><td><a href="https://www.watch.impress.co.jp/docs/news/2152548.html" target="_blank" rel="noopener">「Gemini Notebook」、数百冊の教科書を無料で利用可能に</a></td><td>はてブ</td><td>GoogleがGemini Notebookで出版社提供の数百冊の教科書を無料ソースとして利用可能に。</td></tr>
+<tr><td>4</td><td><a href="https://gigazine.net/news/20261030-openai-model-spec-five-principles/" target="_blank" rel="noopener">OpenAIが「AI五原則」を提案、「人間の意図に忠実であれ」「害を最小限に抑えろ」などの指針を自社モデルに適用</a></td><td>はてブ</td><td>OpenAIがModel Specを更新し、意図忠実性・危害最小化・誠実性・人間主体・慎重さの5原則を策定。</td></tr>
+<tr><td>5</td><td><a href="https://gigazine.net/news/20261030-openai-detect-frontier-model-misalignment/" target="_blank" rel="noopener">AIが勝手に隔離環境を脱出した事件を受けてOpenAIが「AIを別のAIで監視する仕組み」を公開</a></td><td>はてブ</td><td>AI脱出事件を受けOpenAIがAIモデル同士で監視する整合性検知システムを公開。</td></tr>
+<tr><td>6</td><td><a href="https://bliki-ja.github.io/LLM-Voice" target="_blank" rel="noopener">LLMの文体 - Martin Fowler's Bliki (ja)</a></td><td>はてブ</td><td>Martin FowlerによるLLM生成文章の文体の特徴と検出ツールの限界についてのエッセイ（日本語訳）。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/ayutaso/articles/ftllm2026-ja-speech-llm" target="_blank" rel="noopener">学生2人で日本語音声LLMを作り、FT-LLM 2026 自由形タスクで1位を獲得した話</a></td><td>Zenn</td><td>学生2名が日本語音声LLMを構築しFT-LLM 2026コンペ自由形タスクで1位を獲得した開発記。</td></tr>
+<tr><td>8</td><td><a href="https://dev.classmethod.jp/articles/bedrock-practical-guide-book-review/" target="_blank" rel="noopener">【書評】「Amazon Bedrock実践ガイド」を読みながらRAGの精度改善をしてみた</a></td><td>DevelopersIO</td><td>Amazon Bedrock実践ガイドの書評とRAG精度改善の実践記録。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/openai-gpt-6-1-terra-on-amazon-bedrock/" target="_blank" rel="noopener">OpenAI の GPT-6.1 Terra が Amazon Bedrock で一般提供開始</a></td><td>AWS</td><td>Amazon BedrockでOpenAI GPT-6.1 Terraが一般提供開始。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/amazon-sagemaker-muse-qwen-ministral/" target="_blank" rel="noopener">Amazon SageMaker AI で Muse Glimmer、Qwen 3.8、Ministral 3 モデルのサーバーレスモデルカスタマイズのサポートを開始</a></td><td>AWS</td><td>SageMaker AIでMuse Glimmer/Qwen3.8/Ministral 3のサーバーレスファインチューニングが利用可能に。</td></tr>
+<tr><td>11</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/agentcore-gateway-invokemodel-fallback/" target="_blank" rel="noopener">AgentCore Gateway で Bedrock InvokeModel API およびモデルフォールバックのサポートを開始</a></td><td>AWS</td><td>AgentCore GatewayがBedrock InvokeModel APIとモデルフォールバックルーティングをサポート。</td></tr>
+<tr><td>12</td><td><a href="https://zenn.dev/sishikawa40/articles/4f190d7cef4615" target="_blank" rel="noopener">生成AIはテストを「通す」ためにズルをするのか — 報酬ハッキングを再現し、対策まで検証してみた</a></td><td>Zenn</td><td>生成AIによるテスト報酬ハッキングの再現実験と対策手法の検証結果。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/emdash-cms-mcp-wordpress-migration/" target="_blank" rel="noopener">AI 時代の新たなCMS「EmDash」を AWS 環境で動かして、WordPress からの移行を試してみた</a></td><td>DevelopersIO</td><td>AI時代の新CMS「EmDash」をAWS環境で動かしWordPressからの移行を検証。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/samcli-11710-npm-workspaces-monorepo-build/" target="_blank" rel="noopener">【アップデート】AWS SAM CLI の sam build で、npm workspaces モノレポの依存インストールが1回で済むようになりました</a></td><td>DevelopersIO</td><td>SAM CLIアップデートでnpm workspacesモノレポのビルド時依存解決が1回に改善。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/control-tower-controls-getting-started/" target="_blank" rel="noopener">Control Towerのコントロール、何から設定する？</a></td><td>DevelopersIO</td><td>AWS Control Towerのコントロール設定をどこから始めるべきかの実践ガイド。</td></tr>
+<tr><td>4</td><td><a href="https://dev.classmethod.jp/articles/aws-interconnect-multicloud-tokyo-google-cloud/" target="_blank" rel="noopener">AWS Interconnect - multicloud の東京リージョンで Google Cloud との接続を AWS CLI で確認してみた</a></td><td>DevelopersIO</td><td>AWS Interconnect multicloudの東京リージョンでGoogle Cloud接続をCLIで検証。</td></tr>
+<tr><td>5</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/ec2-auto-scaling-launch-before-terminate/" target="_blank" rel="noopener">EC2 Auto Scaling がインスタンス置き換え時の「終了前の起動」をアカウントレベルでサポート</a></td><td>AWS</td><td>EC2 Auto Scalingで新インスタンスの起動完了後に旧インスタンスを終了する設定がアカウントレベルで可能に。</td></tr>
+<tr><td>6</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/kms-ml-kem-post-quantum/" target="_blank" rel="noopener">AWS Key Management Service がポスト量子キーカプセル化のための ML-KEM をサポート</a></td><td>AWS</td><td>AWS KMSがNIST FIPS 203準拠のポスト量子暗号ML-KEMをサポート開始。</td></tr>
+<tr><td>7</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/aws-cloudformation-cdk/" target="_blank" rel="noopener">AWS CloudFormation がスタック更新のロールバック操作を簡素化</a></td><td>AWS</td><td>CloudFormationで部分的にロールバックできないリソースがあっても強制ロールバックが可能に。</td></tr>
+<tr><td>8</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/lambda-microvms-4-additional-regions" target="_blank" rel="noopener">AWS Lambda MicroVMs が、新たに 4 つの AWS リージョンで利用可能に</a></td><td>AWS</td><td>Lambda MicroVMsが香港・マレーシア・タイ・スペインの4リージョンに拡大し合計14リージョンに。</td></tr>
+<tr><td>9</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/aws-continuum-for-code-vulnerabilities-is-now-generally-available" target="_blank" rel="noopener">AWS Continuum for code vulnerabilities の一般提供を開始</a></td><td>AWS</td><td>コード脆弱性の検出・検証・優先順位付け・修正をマシンスピードで行うContinuumが一般提供開始。</td></tr>
+<tr><td>10</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/emr-eks-reduces-emr-charge-30-percent/" target="_blank" rel="noopener">Amazon EMR on EKS が EMR の料金を 30% 削減</a></td><td>AWS</td><td>EKS上のEMR利用料金がvCPU/GB時間あたり30%値下げ。</td></tr>
+<tr><td>11</td><td><a href="https://dev.classmethod.jp/articles/floci-2026-10-lambda-durable-functions-cognito-mfa-update/" target="_blank" rel="noopener">2026年10月 Flociアップデートまとめ、Lambda durable functionsとCognitoのMFAが入った</a></td><td>DevelopersIO</td><td>Floci 2026年10月アップデートとしてLambda durable functionsとCognito MFAが追加。</td></tr>
+<tr><td>12</td><td><a href="https://qiita.com/j-yasukawa/items/bd3785861c0e0bfc2f7e" target="_blank" rel="noopener">RDS Data APIを使ってNAT不要構成にしてみた</a></td><td>Qiita</td><td>RDS Data APIを利用してNATゲートウェイ不要なVPC構成を実現した方法。</td></tr>
+<tr><td>13</td><td><a href="https://tech.every.tv/entry/2026/10/30/124255" target="_blank" rel="noopener">個人情報を自社のDBに持たない設計は、どこまでできるのか</a></td><td>はてブ</td><td>認証・決済を外部サービスに委譲し自社DBから個人情報を排除する設計の限界を検証。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/kex5n/articles/e4771af8952421" target="_blank" rel="noopener">S3 Tables + Snowflake を使用した Lakehouse 統合</a></td><td>Zenn</td><td>S3 TablesとSnowflakeを組み合わせたLakehouse統合アーキテクチャの実装手順。</td></tr>
+<tr><td>2</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/glue-catalog-oauth-iceberg-rest/" target="_blank" rel="noopener">AWS Glue データカタログが Apache Iceberg REST Catalog API の OAuth をサポート</a></td><td>AWS</td><td>GlueデータカタログがIceberg REST Catalog APIのOAuth 2.0認証に対応し、Spark/Trino等から利用可能に。</td></tr>
+<tr><td>3</td><td><a href="https://aws.amazon.com/jp/about-aws/whats-new/2026/10/amazon-opensearch-intelligent-ingestion-logs-documents-s3" target="_blank" rel="noopener">Amazon OpenSearch Service が Amazon S3 内のログおよびドキュメント向けのインテリジェントインジェストを導入</a></td><td>AWS</td><td>OpenSearch ServerlessがS3のログ・ドキュメントを検索可能なコンテンツに変換するインテリジェントインジェスト機能を提供。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/waddledee/articles/c22b45b1d784b0" target="_blank" rel="noopener">OpenSearchのLLM-as-a-Judgeを日本語の商品検索で動かして、人手ラベルと比べてみた</a></td><td>Zenn</td><td>OpenSearchのLLM-as-a-Judge機能を日本語商品検索に適用し、人手ラベルとの精度比較を実施。</td></tr>
+<tr><td>5</td><td><a href="https://dev.classmethod.jp/articles/elasticache-valkey-durability-change/" target="_blank" rel="noopener">ElastiCache for Valkey の新機能、耐久性の変更が可能になったので試してみた</a></td><td>DevelopersIO</td><td>ElastiCache for Valkeyで耐久性設定の変更が可能になった新機能の検証。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/yokoe24/articles/24b1140180300c" target="_blank" rel="noopener">GitHub Actions で checkout@v7 のようなバージョン指定を書くのはやめよう！ 時代は actions.lock！</a></td><td>Zenn</td><td>GitHub Actionsのworkflow lockfileがGAになり、バージョンピン留めからlockfile管理への移行を推奨。</td></tr>
+<tr><td>2</td><td><a href="https://songmu.jp/riji/entry/2026-10-30-github-actions-lockfile.html" target="_blank" rel="noopener">GitHub Actions の lockfile対応 - 利用者と提供者両方の観点から</a></td><td>はてブ</td><td>GitHub Actions lockfile対応をAction利用者・提供者双方の観点から解説。</td></tr>
+<tr><td>3</td><td><a href="https://www.docswell.com/s/miso_taku/Z7N847-2026-10-30-195525" target="_blank" rel="noopener">具体と抽象を往復するエンジニアリング</a></td><td>はてブ</td><td>エンジニアが具体と抽象の間を往復する思考法の重要性を説くスライド資料。</td></tr>
+<tr><td>4</td><td><a href="https://levtech.jp/media/detail_954/" target="_blank" rel="noopener">なぜエンジニアは「具体」に縛られるのか。細谷功さんxミノ駆動さんが語る、抽象化スキルの磨き方</a></td><td>はてブ</td><td>エンジニアが具体に固執する原因と抽象化スキル向上の方法を対談形式で紹介。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/nrs/articles/c777388530aa84" target="_blank" rel="noopener">コードを読まずにマージするために必要なこと</a></td><td>Zenn</td><td>コードを直接読まずにマージ判断を行うために必要な仕組みと信頼の構築方法。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/centerfield77/articles/26624b38c951b5" target="_blank" rel="noopener">最近の E2E 戦略（2026 年 10 月現在）</a></td><td>Zenn</td><td>2026年10月時点でのE2Eテスト戦略の現状と推奨アプローチの整理。</td></tr>
+<tr><td>7</td><td><a href="https://dev.classmethod.jp/articles/github-actions-pull-request-target-pwn-request/" target="_blank" rel="noopener">pwn request対策でpull_request_targetは12月2日から許可制に。残る経路と洗い出し方</a></td><td>DevelopersIO</td><td>GitHub Actionsのpull_request_targetが12月2日から許可制に変更、残存リスクの洗い出し方を解説。</td></tr>
+<tr><td>8</td><td><a href="https://qiita.com/chomado/items/ce32e402cc4f14145a6c" target="_blank" rel="noopener">忙しい人のための #GitHubUniverse 2026 新発表まとめ【簡易版】</a></td><td>Qiita</td><td>GitHub Universe 2026の新発表を簡潔にまとめた速報記事。</td></tr>
+<tr><td>9</td><td><a href="https://zenn.dev/yuriemori/articles/github-universe-2026-day1-keynote" target="_blank" rel="noopener">GitHub Universe2026現地レポート: Day1 Keynote</a></td><td>Zenn</td><td>GitHub Universe 2026 Day1 Keynoteの現地参加レポート。</td></tr>
+<tr><td>10</td><td><a href="https://zenn.dev/mochan_tk/articles/541c6f18301485" target="_blank" rel="noopener">GitHub Universe 2026 〜 Keynote・新発表の超速報 〜</a></td><td>Zenn</td><td>GitHub Universe 2026のKeynoteおよび新発表の超速報まとめ。</td></tr>
+<tr><td>11</td><td><a href="https://qiita.com/shahin0809/items/12a7dd1fd077fd6169fa" target="_blank" rel="noopener">VS Code 1.144：Customizations の新ホーム Browse と Copilot connectors</a></td><td>Qiita</td><td>VS Code 1.144のCustomizations Browse機能とCopilotコネクターの新機能解説。</td></tr>
+<tr><td>12</td><td><a href="https://codezine.jp/article/detail/30081" target="_blank" rel="noopener">エンジニアが「勝手に育つ時代」は終わった ～エンジニアを育ててきた装置はAIで壊れた～</a></td><td>はてブ</td><td>AIの登場によりエンジニアが自然に成長する仕組みが崩壊しつつあるという問題提起。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://piyolog.hatenadiary.jp/entry/2026/10/30/120732" target="_blank" rel="noopener">Linuxカーネルの脆弱性 CVE-2026-98432 についてまとめてみた - piyolog</a></td><td>はてブ</td><td>Linux カーネルTCP処理のuse-after-free脆弱性（CVSS 9.8）のリモートroot攻撃が実証された詳細まとめ。</td></tr>
+<tr><td>2</td><td><a href="https://note.com/zephel01/n/n4637423e080b" target="_blank" rel="noopener">CVE-2026-98432は「待ち受けに届くか」で決まる——OSとクラウドごとの対応状況と、修正版を待つ間にやること</a></td><td>はてブ</td><td>CVE-2026-98432の到達可能性に基づく影響判定と、ベンダー対応状況・暫定対策の整理。</td></tr>
+<tr><td>3</td><td><a href="https://dev.classmethod.jp/articles/al2023-cve-2026-98432-kernel-update/" target="_blank" rel="noopener">AL2023 で CVE-2026-98432 のカーネル更新を確認してみた</a></td><td>DevelopersIO</td><td>Amazon Linux 2023におけるCVE-2026-98432向けカーネル更新の適用確認手順。</td></tr>
+<tr><td>4</td><td><a href="https://piyolog.hatenadiary.jp/entry/2026/10/30/230303" target="_blank" rel="noopener">推定1兆円相当のBinanceの不正出金事案についてまとめてみた - piyolog</a></td><td>はてブ</td><td>Binanceで推定1兆円規模の不正出金が発生した事案のタイムラインまとめ。</td></tr>
+<tr><td>5</td><td><a href="https://www.itmedia.co.jp/news/article/2610/30/2000002765/" target="_blank" rel="noopener">総務省、GMO攻撃者サイトの「ブロッキング」を通信各社に要請 報道</a></td><td>はてブ</td><td>総務省がGMO攻撃者サイトのブロッキングを通信事業者に要請、通信の秘密との緊張関係が議論に。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/cscloud_blog/articles/a987163efae5d8" target="_blank" rel="noopener">今後のセキュリティの考え方</a></td><td>Zenn</td><td>AWSなどクラウド環境における攻撃表面縮小と管理アクセスポイント削減のセキュリティ指針。</td></tr>
+<tr><td>7</td><td><a href="https://zenn.dev/blackleg/articles/e9ed8b038bcf48" target="_blank" rel="noopener">2026年の国内情報漏えい71件を侵入経路で分類してみた</a></td><td>Zenn</td><td>2026年に発生した国内情報漏えい71件を侵入経路別に分類した分析。</td></tr>
+<tr><td>8</td><td><a href="https://atmarkit.itmedia.co.jp/ait/articles/2610/30/news060.html" target="_blank" rel="noopener">もう「CVSSで重大→修正急務」は限界 「即対応」脆弱性を9割減らすGitHub推奨の優先順位付け基準</a></td><td>はてブ</td><td>CVSSスコアだけの判定に限界があり、GitHubが推奨する脆弱性優先順位付け基準で即対応件数を9割削減できる手法。</td></tr>
+<tr><td>9</td><td><a href="https://qiita.com/melkihara/items/8bb5e61321066be53d83" target="_blank" rel="noopener">WordPressの脆弱性「wp2shell」を狙った攻撃の観測</a></td><td>Qiita</td><td>ハニーポットで観測されたWordPress脆弱性「wp2shell」を狙う攻撃の分析。</td></tr>
+<tr><td>10</td><td><a href="https://zenn.dev/nayuta/articles/aec9ab2e11a7b7" target="_blank" rel="noopener">いいから休め - Black October が終わる今、セキュリティエンジニアがやるべきこと</a></td><td>Zenn</td><td>多発したインシデント対応が続いたBlack Octoberを振り返り、セキュリティエンジニアの休息の重要性を提言。</td></tr>
+<tr><td>11</td><td><a href="https://zenn.dev/shirochan/articles/f579ce70b08dc3" target="_blank" rel="noopener">公表資料から読む2026年秋の情報漏えい18件：侵入経路はどこだったのか</a></td><td>Zenn</td><td>2026年秋に公表された情報漏えい18件の公表資料から侵入経路を分析。</td></tr>
+<tr><td>12</td><td><a href="https://dev.classmethod.jp/articles/lambda-cve-2026-111497-runtime-update/" target="_blank" rel="noopener">CVE-2026-111497に対するAWS Lambdaのランタイム更新を確かめてみた</a></td><td>DevelopersIO</td><td>CVE-2026-111497に対するAWS Lambdaランタイム更新の適用状況を確認。</td></tr>
+<tr><td>13</td><td><a href="https://qiita.com/kuma_3838/items/1781531150821e2f0491" target="_blank" rel="noopener">パスキーはなぜ偽サイトに強い？登録とログインの流れを図で追う</a></td><td>Qiita</td><td>パスキーがフィッシングに強い理由を登録・ログインフローの図解で解説。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/report/s103013.html" target="_blank" rel="noopener">マルエツ／東京都大田区「新糀谷店」リニューアルオープン、目標年商37億円</a></td><td>流通ニュース</td><td>マルエツが大田区の新糀谷店をリニューアルオープンし、年商37億円を目標に設定。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/store/s103078.html" target="_blank" rel="noopener">バロー／都内初出店「スーパーマーケット バロー本羽田店」11月6日オープン</a></td><td>流通ニュース</td><td>東海地盤のバローが東京都内に初出店、本羽田店を11月6日にオープン予定。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/store/s103075.html" target="_blank" rel="noopener">横須賀市／地域密着型SC「トナリエ久里浜パーク」11月28日オープン、生鮮市場TOP！・コーナン出店</a></td><td>流通ニュース</td><td>横須賀市に地域密着型SC「トナリエ久里浜パーク」が11月28日開業、生鮮市場TOPやコーナンが出店。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/store/s103012.html" target="_blank" rel="noopener">ミスターマックス／27年2月期下期は計4店舗オープン、28年2月期2店舗出店の計画</a></td><td>流通ニュース</td><td>ミスターマックスが27年2月期下期に4店舗、28年2月期に2店舗の出店計画を公表。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/management/businessplan/561860/" target="_blank" rel="noopener">ロピア、鹿児島1号店を2027年夏にオープン【週刊スーパーマーケットニュース】</a></td><td>ダイヤモンド・チェーンストア</td><td>ロピアが九州エリア拡大を推進、鹿児島1号店を2027年夏に開業予定。</td></tr>
+<tr><td>6</td><td><a href="https://diamond-rm.net/management/topinterview/561430/" target="_blank" rel="noopener">秋田出店、オータニ再建……ユニバース三浦社長が明かす「売上高2000億円」達成への道筋</a></td><td>ダイヤモンド・チェーンストア</td><td>ユニバースの三浦社長が秋田出店やオータニ再建を通じた売上高2000億円への戦略を語る。</td></tr>
+<tr><td>7</td><td><a href="https://diamond-rm.net/store/storevisit/561439/" target="_blank" rel="noopener">【食品スーパー視察完全ガイド】大阪・大阪市中心部　関西小売の「都市型店舗」に学ぶ！</a></td><td>ダイヤモンド・チェーンストア</td><td>大阪市中心部の食品スーパーを視察し、関西小売の都市型店舗フォーマットの特徴を解説。</td></tr>
+<tr><td>8</td><td><a href="https://diamond-rm.net/flash_news/562108/" target="_blank" rel="noopener">マックスバリュ東海、静岡県御前崎市で移動スーパー　11月4日から稼働開始</a></td><td>ダイヤモンド・チェーンストア</td><td>マックスバリュ東海が静岡県御前崎市で移動スーパーを11月4日から運行開始。</td></tr>
+<tr><td>9</td><td><a href="https://netshop.impress.co.jp/n/2026/10/31/16965" target="_blank" rel="noopener">ニトリ初の「ブラックフライデー」は11/24まで実施。約600アイテムを期間限定価格で販売</a></td><td>ネットショップ担当者フォーラム</td><td>ニトリが初のブラックフライデーセールを11月24日まで実施、約600アイテムを特別価格で販売。</td></tr>
+<tr><td>10</td><td><a href="https://diamond-rm.net/management/560585/" target="_blank" rel="noopener">第150回 なぜSCは顧客ばかり分析するのか？ AI時代に見直すべきテナント戦略の盲点</a></td><td>ダイヤモンド・チェーンストア</td><td>SC業界がAI時代に顧客分析偏重からテナント戦略の見直しに転じるべき理由を論考。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.logi-today.com/1017087" target="_blank" rel="noopener">三菱倉庫、阪急阪神エクス買収で海外比率31％に</a></td><td>ロジスティクス・トゥデイ</td><td>三菱倉庫が阪急阪神エクスプレスを買収し、海外売上比率が31%に拡大する見通し。</td></tr>
+<tr><td>2</td><td><a href="https://www.logi-today.com/1017226" target="_blank" rel="noopener">SGHD、広報・IR機能再編し佐川との連携強化</a></td><td>ロジスティクス・トゥデイ</td><td>SGホールディングスが広報・IR機能を再編し、佐川急便との連携体制を強化。</td></tr>
+<tr><td>3</td><td><a href="https://www.logi-today.com/1016924" target="_blank" rel="noopener">ドアダッシュ、170億ドル買収で食料品配送拡充</a></td><td>ロジスティクス・トゥデイ</td><td>米ドアダッシュが170億ドルの買収により食料品デリバリー事業を大幅拡充。</td></tr>
+<tr><td>4</td><td><a href="https://diamond-rm.net/flash_news/562098/" target="_blank" rel="noopener">ファミリーマート、千葉県で障がいのある社員が育てた自然栽培野菜を販売</a></td><td>ダイヤモンド・チェーンストア</td><td>ファミリーマートが障がい者雇用の社員が栽培した自然野菜を千葉県内で販売開始。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/market/accounting/562185/" target="_blank" rel="noopener">コメリ、PB比率が約5割に! 2桁増益を生む商品戦略</a></td><td>ダイヤモンド・チェーンストア</td><td>コメリがPB比率を約5割に引き上げ、2桁増益を達成した商品戦略の詳細を解説。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/commodity/s103016.html" target="_blank" rel="noopener">食品主要195社／11月の値上げは1477品目、値上げラッシュは一服</a></td><td>流通ニュース</td><td>食品主要195社の11月値上げは1477品目にとどまり、値上げラッシュが一服傾向。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/sales-promotion/item-trend/562171/" target="_blank" rel="noopener">総菜がおいしいスーパーはどこ？ お弁当・お惣菜大賞2026受賞・入選数ランキング</a></td><td>ダイヤモンド・チェーンストア</td><td>「お弁当・お惣菜大賞2026」の受賞・入選数ランキングを発表、総菜力のあるスーパーを評価。</td></tr>
+<tr><td>4</td><td><a href="https://www.logi-today.com/1016747" target="_blank" rel="noopener">食品値上げ2年連続2万品目超、物流費も重荷</a></td><td>ロジスティクス・トゥデイ</td><td>食品値上げが2年連続で2万品目を超え、物流費上昇も価格転嫁の要因に。</td></tr>
+<tr><td>5</td><td><a href="https://diamond-rm.net/sales-promotion/561988/" target="_blank" rel="noopener">ボンドロブームの熱狂に考える、「マネと模倣」のマーケティング</a></td><td>ダイヤモンド・チェーンストア</td><td>ボンドロブームを題材にマーケティングにおける「マネと模倣」の境界線を考察。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://netshop.impress.co.jp/n/2026/10/30/16963" target="_blank" rel="noopener">「Shopify」が「ChatGPT」や「Claude」と連携、AIエージェントが検索から購入・決済まで代行</a></td><td>ネットショップ担当者フォーラム</td><td>ShopifyがChatGPTやClaudeと連携し、AIエージェントによる商品検索から購入・決済までの一気通貫を実現。</td></tr>
+<tr><td>2</td><td><a href="https://netshop.impress.co.jp/n/2026/10/30/16964" target="_blank" rel="noopener">Amazonが次世代AI「Alexa+」を日本投入、ECの購買体験はどう変わるのか？</a></td><td>ネットショップ担当者フォーラム</td><td>Amazonが次世代AI「Alexa+」を日本市場に投入し、ECの購買体験変革を目指す。</td></tr>
+<tr><td>3</td><td><a href="https://netshop.impress.co.jp/n/2026/10/30/16955" target="_blank" rel="noopener">LINEヤフー「Yahoo!ショッピング」、「価格の安さ」「配送の早さ」「評価の高さ」などの条件で商品提案する「AIベスト提案」を開始</a></td><td>ネットショップ担当者フォーラム</td><td>Yahoo!ショッピングが価格・配送速度・評価を基にAIが最適商品を提案する新機能を開始。</td></tr>
+<tr><td>4</td><td><a href="https://netshop.impress.co.jp/n/2026/10/30/16961" target="_blank" rel="noopener">AIエージェントを想定した商品検索→購入・決済連携の購買フローを体験・検証できる「AIコマースシミュレータ」を開発、SBペイメントサービス</a></td><td>ネットショップ担当者フォーラム</td><td>SBペイメントサービスがAIエージェント経由の購買フローを検証できるシミュレータを開発。</td></tr>
+<tr><td>5</td><td><a href="https://netshop.impress.co.jp/n/2026/10/30/16962" target="_blank" rel="noopener">ZOZO NEXTがAIで研究開発の各工程を自動化する共同研究、ドイツ人工知能研究センターと開始</a></td><td>ネットショップ担当者フォーラム</td><td>ZOZO NEXTがドイツ人工知能研究センターとAI活用研究開発自動化の共同研究を開始。</td></tr>
+<tr><td>6</td><td><a href="https://ecnomikata.com/ecnews/52030/" target="_blank" rel="noopener">LINEヤフー、「LINEヤフー BIZ Conference 2026」にて顧客体験の主な進化を発表</a></td><td>ECのミカタ</td><td>LINEヤフーがBIZ Conference 2026で顧客体験向上に関する新機能・戦略を発表。</td></tr>
+<tr><td>7</td><td><a href="https://ecnomikata.com/ecnews/52018/" target="_blank" rel="noopener">LINEヤフー、法人向けAIエージェント「Agent i Biz」提供開始</a></td><td>ECのミカタ</td><td>LINEヤフーが法人向けAIエージェント「Agent i Biz」の提供を開始。</td></tr>
+<tr><td>8</td><td><a href="https://ecnomikata.com/ecnews/52019/" target="_blank" rel="noopener">メルカリ、「グローバルアプリ」の累計登録者が100万人を突破　越境取引における購入体験を拡充</a></td><td>ECのミカタ</td><td>メルカリのグローバルアプリ累計登録者が100万人を突破し、越境取引の購入体験を強化。</td></tr>
+<tr><td>9</td><td><a href="https://www.itmedia.co.jp/business/articles/2610/30/news044.html" target="_blank" rel="noopener">Google、新たな購買行動「『ハイレゾ消費』を発見」どんなもの？　「歴史的な大転換が起きている」と奥山代表</a></td><td>ITmedia</td><td>Googleが新たな購買行動「ハイレゾ消費」を発見、消費者の情報収集が質的に大転換していると分析。</td></tr>
+<tr><td>10</td><td><a href="https://www.logi-today.com/1016881" target="_blank" rel="noopener">越境ECの伸び悩み、物流と集客に共通課題</a></td><td>ロジスティクス・トゥデイ</td><td>越境ECの成長が鈍化しており、物流コストと集客の両面に共通課題がある。</td></tr>
+<tr><td>11</td><td><a href="https://www.logi-today.com/1017143" target="_blank" rel="noopener">CHロビンソン、AI活用で生産性65％超改善</a></td><td>ロジスティクス・トゥデイ</td><td>CHロビンソンがAI活用により物流オペレーションの生産性を65%超改善。</td></tr>
+<tr><td>12</td><td><a href="https://www.logi-today.com/1016832" target="_blank" rel="noopener">オットー、返品処理自動化にフィジカルAI投入</a></td><td>ロジスティクス・トゥデイ</td><td>独オットーが返品処理の自動化にフィジカルAI（ロボティクス）を投入。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/sales/s103046.html" target="_blank" rel="noopener">経済産業省／9月の商業動態統計、小売業販売額2.3％増の12兆8730億円</a></td><td>流通ニュース</td><td>経産省発表の9月商業動態統計で小売業販売額が前年同月比2.3%増の12兆8730億円。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/sales/s103081.html" target="_blank" rel="noopener">スーパーマーケット／9月既存店売上ライフ0.1％増、ヤオコー2.7％増</a></td><td>流通ニュース</td><td>9月のスーパー既存店売上はライフが0.1%増、ヤオコーが2.7%増と堅調。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/sales/s103045.html" target="_blank" rel="noopener">スーパーマーケット／9月の販売額1.7％増、既存店は0.7％増に（経産省調べ）</a></td><td>流通ニュース</td><td>経産省調べの9月スーパー販売額は前年同月比1.7%増、既存店は0.7%増。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/sales/s103043.html" target="_blank" rel="noopener">百貨店／9月の販売額3.4％増の4856億円、既存店は4.7％増（経産省調べ）</a></td><td>流通ニュース</td><td>百貨店の9月販売額は前年同月比3.4%増の4856億円、既存店は4.7%増と好調。</td></tr>
+<tr><td>5</td><td><a href="https://www.ryutsuu.biz/sales/s103044.html" target="_blank" rel="noopener">ドラッグストア／9月の販売額2.7％増、調剤医薬品が9.1％増に（経産省調べ）</a></td><td>流通ニュース</td><td>ドラッグストアの9月販売額は2.7%増、調剤医薬品が9.1%増と伸長。</td></tr>
+<tr><td>6</td><td><a href="https://www.ryutsuu.biz/sales/s103042.html" target="_blank" rel="noopener">ホームセンター／9月の販売額は1.2％増2577億円、電気が6.6％増に（経産省調べ）</a></td><td>流通ニュース</td><td>ホームセンターの9月販売額は1.2%増の2577億円、電気部門が6.6%増。</td></tr>
+<tr><td>7</td><td><a href="https://www.ryutsuu.biz/sales/s103041.html" target="_blank" rel="noopener">家電大型専門店／9月の販売額は2.7％減、情報家電が24.9％減に（経産省調べ）</a></td><td>流通ニュース</td><td>家電大型専門店の9月販売額は2.7%減、情報家電が24.9%減と大幅低下。</td></tr>
+<tr><td>8</td><td><a href="https://www.ryutsuu.biz/accounts/s103014.html" target="_blank" rel="noopener">ゲンキー 決算／7〜9月営業利益5.3％減、販管費増が影響</a></td><td>流通ニュース</td><td>ゲンキーの7〜9月期は営業利益5.3%減、販管費増加が業績を圧迫。</td></tr>
+<tr><td>9</td><td><a href="https://www.ryutsuu.biz/accounts/s103015.html" target="_blank" rel="noopener">アルビス 決算／4〜9月減収減益、価格戦略で粗利低下</a></td><td>流通ニュース</td><td>アルビスの4〜9月期は減収減益、価格戦略により粗利率が低下。</td></tr>
+<tr><td>10</td><td><a href="https://www.ryutsuu.biz/accounts/s103082.html" target="_blank" rel="noopener">王将フード 決算／4〜9月営業利益42.3％減、通期予想を下方修正</a></td><td>流通ニュース</td><td>王将フードサービスの4〜9月期は営業利益42.3%減、通期予想も下方修正。</td></tr>
+<tr><td>11</td><td><a href="https://diamond-rm.net/flash_news/562113/" target="_blank" rel="noopener">コメリ、中間期は売上高増と営業総利益増で2ケタ営業増益</a></td><td>ダイヤモンド・チェーンストア</td><td>コメリの中間期は売上高・営業総利益ともに増加し、2桁の営業増益を達成。</td></tr>
+<tr><td>12</td><td><a href="https://www.itmedia.co.jp/business/articles/2610/30/news090.html" target="_blank" rel="noopener">キオクシア中間決算「過去最高」連呼　純利益2.2兆円、初の配当実施　AI需要で「成長さらに加速」</a></td><td>ITmedia</td><td>キオクシアの中間決算は純利益2.2兆円で過去最高、AI半導体需要が成長を加速。</td></tr>
+<tr><td>13</td><td><a href="https://diamond-rm.net/flash_news/562261/" target="_blank" rel="noopener">米アマゾン、2％減益＝クラウドは4割増収―7〜9月期</a></td><td>ダイヤモンド・チェーンストア</td><td>米アマゾンの7〜9月期は2%減益だがクラウド事業は4割増収と好調。</td></tr>
+<tr><td>14</td><td><a href="https://www.logi-today.com/1016929" target="_blank" rel="noopener">アマゾン3Q、配送高速化進み営業益61％増</a></td><td>ロジスティクス・トゥデイ</td><td>アマゾンの第3四半期は配送高速化が奏功し営業利益61%増。</td></tr>
+<tr><td>15</td><td><a href="https://diamond-rm.net/flash_news/562263/" target="_blank" rel="noopener">10月都内物価、2.6％上昇＝2カ月連続2％台―総務省</a></td><td>ダイヤモンド・チェーンストア</td><td>10月の東京都区部消費者物価指数は前年同月比2.6%上昇、2カ月連続で2%台。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.itmedia.co.jp/business/articles/2610/30/news075.html" target="_blank" rel="noopener">無印良品、最大2726万件の個人情報漏えいの可能性　公式アプリ利用者の「メアド」「生年月日」など</a></td><td>ITmedia</td><td>無印良品の公式アプリで最大2726万件の個人情報漏えいの可能性、メアドや生年月日が対象。</td></tr>
+<tr><td>2</td><td><a href="https://www.itmedia.co.jp/business/articles/2610/30/news071.html" target="_blank" rel="noopener">松屋、237万件超の個人情報が漏えい　「氏名」「電話番号」「住所」など流出、公式アプリへの不正アクセスで</a></td><td>ITmedia</td><td>松屋の公式アプリに不正アクセスがあり、氏名・電話番号・住所など237万件超の個人情報が漏えい。</td></tr>
+<tr><td>3</td><td><a href="https://netshop.impress.co.jp/e/2026/10/30/16959" target="_blank" rel="noopener">佐川急便「お荷物問い合わせサービス」への不正アクセスで最大約5323万件の個人情報流出の可能性</a></td><td>ネットショップ担当者フォーラム</td><td>佐川急便の荷物問い合わせサービスへの不正アクセスで最大約5323万件の個人情報流出の可能性。</td></tr>
+<tr><td>4</td><td><a href="https://www.itmedia.co.jp/business/articles/2610/30/news035.html" target="_blank" rel="noopener">GMOの情報漏えい、何が起きていたのか？　神戸大教授が指摘する"死角"</a></td><td>ITmedia</td><td>GMOの情報漏えい事案について神戸大教授がセキュリティ上の"死角"を分析・解説。</td></tr>
+<tr><td>5</td><td><a href="https://www.itmedia.co.jp/business/articles/2610/30/news024.html" target="_blank" rel="noopener">「自社都合」のセキュリティ対策になっていないか　相次ぐ情報漏えい、安否を分ける3つの対策</a></td><td>ITmedia</td><td>相次ぐ情報漏えいを受け、自社都合に陥らないセキュリティ対策の3つのポイントを解説。</td></tr>
+<tr><td>6</td><td><a href="https://www.logi-today.com/1016821" target="_blank" rel="noopener">日本郵便、委託先被害で会員メルアド流出懸念</a></td><td>ロジスティクス・トゥデイ</td><td>日本郵便の委託先がサイバー被害を受け、会員のメールアドレス流出の懸念が生じた。</td></tr>
+<tr><td>7</td><td><a href="https://www.logi-today.com/1016774" target="_blank" rel="noopener">サイバー被害を局所化、物流向け閉域基盤を実証</a></td><td>ロジスティクス・トゥデイ</td><td>物流施設向けにサイバー被害を局所化する閉域ネットワーク基盤の実証実験を実施。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. 小売・物流の連続大規模情報漏えいとゼロトラスト対応の緊急性</h3>
+<p>技術側ではLinuxカーネルCVE-2026-98432（CVSS 9.8）のリモートroot攻撃が実証され、AWS・Azure等各クラウドベンダーが緊急パッチを公開している。小売・物流側では無印良品（2726万件）、松屋（237万件）、佐川急便（5323万件）と合計8000万件超の個人情報漏えいが同時期に発覚し、「Black October」と呼ばれる事態に至った。SIerとしては、流通業界の公式アプリや荷物追跡サービスのセキュリティ監査需要が急増する見込みであり、CVE対応の迅速化とゼロトラストアーキテクチャ導入提案が差別化ポイントになる。</p>
+<h3>2. AIエージェントコマースの商用実装とEC基盤の構造変革</h3>
+<p>Shopify×ChatGPT/Claude連携、Amazon Alexa+日本投入、Yahoo!ショッピングAIベスト提案、LINEヤフーAgent i Bizと、主要EC基盤が一斉にAIエージェント統合を発表した。技術側ではAWS AgentCore GatewayのStep Functions統合やBedrock InvokeModelフォールバックなど、エージェント基盤のエンタープライズ対応が進んでいる。SBペイメントサービスの「AIコマースシミュレータ」は、決済フロー全体をエージェント対応に設計するという新しいアプローチを示す。SIerにとっては、既存EC基盤のエージェント対応改修やShopify/LINE連携の統合案件が今後増加する見込みである。</p>
+<h3>3. Claude Code/AIコーディングの本番運用浸透とサプライチェーンリスクの顕在化</h3>
+<p>Zenn・Qiita・DevelopersIOでClaude Code活用事例が爆発的に増加し、「クラッシュ率8.7%→0.1%」「脆弱性自動修正半年運用」「QAチーム構築」など、本番運用レベルの定量成果が続々と報告されている。一方、Cursor VS Code拡張マーケットプレイスでClaude Codeの悪意あるバージョン（2.1.312/2.1.313）が発見されたことは、AIコーディングツール自体のサプライチェーンリスクが顕在化した重要な事件である。Auto modeセキュリティ対策の10キットやGitLab連携の脆弱性自動修正など、「AIで開発を加速しつつAIツール自体のリスクも管理する」二面的なアプローチが求められている。</p>
+<h3>4. 9月商業動態統計と業態別DX投資余力の二極化</h3>
+<p>経産省発表の9月商業動態統計で小売業販売額は2.3%増の12兆8730億円と堅調だが、業態間の格差が鮮明になっている。百貨店（+4.7%）やドラッグストア（+2.7%）が好調な一方、家電大型専門店は情報家電の24.9%減が響き2.7%減。コメリのPB比率5割化による2桁増益は、商品戦略とデータ活用を組み合わせた好例である。SIerとしては、好業績業態（百貨店・DGS・HC）へのAI/クラウド提案と、苦戦業態（家電専門店）の効率化支援で異なるアプローチが必要となる。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>21件</td><td>AI駆動開発・セキュリティ系が多数。10/30-31付</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>8件</td><td>GitHub Universe・セキュリティ・AgentCore関連</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>18件</td><td>CVE-2026-98432・Mistral Large 4・OpenAI関連が注目</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>15件</td><td>Claude Code・AWS・Kiro関連が中心</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>11件</td><td>AgentCore・KMS・CloudFormation等のアップデート</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>15件</td><td>9月商業動態統計・出店情報・決算。10/31は土曜で更新なし</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア オンライン</td><td>成功</td><td>12件</td><td>コメリPB戦略・ロピア・業態ニュース</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>7件</td><td>Shopify×AI連携・Alexa+・佐川情報漏えい</td></tr>
+<tr><td>9</td><td>ECのミカタ</td><td>成功</td><td>3件</td><td>LINEヤフーBIZ Conference・Agent i Biz</td></tr>
+<tr><td>10</td><td>ITmedia ビジネスオンライン</td><td>成功</td><td>6件</td><td>無印良品・松屋漏えい・ハイレゾ消費</td></tr>
+<tr><td>11</td><td>ロジスティクス・トゥデイ</td><td>成功</td><td>10件</td><td>物流決算・CHロビンソンAI活用・サイバー対策</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術73件 + 小売53件 = 126件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-10-30" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: agent-teams-actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 8件（技術5件+小売3件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 106件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>AI生成コードの信頼性議論が過熱</strong> — 「コードを読まずにマージ」「読んでいないコードをどこまで信頼するか」がZenn・はてブで同時多発的に議論。Claude Code活用事例もQAチーム構成、設計書レビュー委任と多様化</li><li><strong>Linuxカーネル重大脆弱性 CVE-2026-98432（CVSS 9.8）</strong> — IPv4 TCP処理のUse-After-Free脆弱性、Anthropicが研究環境で遠隔root権限実行を実証。Ubuntu等主要ディストリビューションに影響</li><li><strong>AIエージェント×EC決済の実装が同時多発</strong> — Shopify×ChatGPT/Claude連携、Yahoo!ショッピング「AIベスト提案」、SBペイメント「AIコマースシミュレータ」、Amazon「Alexa+」日本投入が一斉発表</li><li><strong>佐川急便で最大5323万件の個人情報流出の可能性</strong> — 荷物問い合わせサービスへの不正アクセス。花キューピットでも423万件漏えい、物流・EC業界でセキュリティインシデントが続発</li><li><strong>GMOインシデントで政府が通信各社に攻撃者サイト遮断を要請</strong> — 公的介入の前例に。Black October（10月のインシデント集中期）の象徴的事案</li></ol></div>
@@ -37463,11 +37677,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-10-30 02:28 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-10-31 02:06 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-10-30", "2026-10-29", "2026-10-28", "2026-10-27", "2026-10-26", "2026-10-25", "2026-10-24", "2026-10-23", "2026-10-22", "2026-10-21", "2026-10-20", "2026-10-19", "2026-10-18", "2026-10-17", "2026-10-16", "2026-10-15", "2026-10-14", "2026-10-13", "2026-10-12", "2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07", "2026-10-06", "2026-10-05", "2026-10-04", "2026-10-03", "2026-10-02", "2026-10-01", "2026-09-30", "2026-09-29", "2026-09-28", "2026-09-27", "2026-09-26", "2026-09-25", "2026-09-24", "2026-09-23", "2026-09-22", "2026-09-21", "2026-09-20", "2026-09-19", "2026-09-18", "2026-09-17", "2026-09-16", "2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-10-31", "2026-10-30", "2026-10-29", "2026-10-28", "2026-10-27", "2026-10-26", "2026-10-25", "2026-10-24", "2026-10-23", "2026-10-22", "2026-10-21", "2026-10-20", "2026-10-19", "2026-10-18", "2026-10-17", "2026-10-16", "2026-10-15", "2026-10-14", "2026-10-13", "2026-10-12", "2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07", "2026-10-06", "2026-10-05", "2026-10-04", "2026-10-03", "2026-10-02", "2026-10-01", "2026-09-30", "2026-09-29", "2026-09-28", "2026-09-27", "2026-09-26", "2026-09-25", "2026-09-24", "2026-09-23", "2026-09-22", "2026-09-21", "2026-09-20", "2026-09-19", "2026-09-18", "2026-09-17", "2026-09-16", "2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
