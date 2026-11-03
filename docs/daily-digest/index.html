@@ -112,20 +112,20 @@ strong { font-weight: 600; }
 </div>
 
 <h1>日次ダイジェスト</h1>
-<p class="subtitle">domain-tech-collection ｜ 全201件 ｜ 最終更新: 2026-11-02 02:01</p>
+<p class="subtitle">domain-tech-collection ｜ 全202件 ｜ 最終更新: 2026-11-03 03:54</p>
 
 <div class="summary-grid">
   <div class="summary-card">
     <div class="summary-label">総記事数</div>
-    <div class="summary-value blue">20505</div>
+    <div class="summary-value blue">20561</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">最新日付</div>
-    <div class="summary-value">2026-11-02</div>
+    <div class="summary-value">2026-11-03</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">ダイジェスト数</div>
-    <div class="summary-value green">201</div>
+    <div class="summary-value green">202</div>
   </div>
   <div class="summary-card">
     <div class="summary-label">平均記事数/日</div>
@@ -134,7 +134,8 @@ strong { font-weight: 600; }
 </div>
 
 <div class="tab-bar">
-<button class="tab-btn active" data-date="2026-11-02" onclick="switchTab('2026-11-02')">2026-11-02</button>
+<button class="tab-btn active" data-date="2026-11-03" onclick="switchTab('2026-11-03')">2026-11-03</button>
+<button class="tab-btn" data-date="2026-11-02" onclick="switchTab('2026-11-02')">2026-11-02</button>
 <button class="tab-btn" data-date="2026-11-01" onclick="switchTab('2026-11-01')">2026-11-01</button>
 <button class="tab-btn" data-date="2026-10-31" onclick="switchTab('2026-10-31')">2026-10-31</button>
 <button class="tab-btn" data-date="2026-10-30" onclick="switchTab('2026-10-30')">2026-10-30</button>
@@ -337,7 +338,146 @@ strong { font-weight: 600; }
 <button class="tab-btn" data-date="2026-03-21" onclick="switchTab('2026-03-21')">2026-03-21</button>
 </div>
 
-<div id="digest-2026-11-02" class="digest-panel" style="display:block">
+<div id="digest-2026-11-03" class="digest-panel" style="display:block">
+<div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams — Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 8件（技術5件+小売3件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
+<div class="meta-line"><strong>記事数:</strong> 56件</div></div>
+<div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>小売セキュリティインシデント連鎖</strong> — ノジマ700万人・アットコスメ300万人の大規模情報漏洩に加え、ライフ公式アプリ不正アクセス、欧州スーパーの冷凍庫サイバー攻撃と小売業界でセキュリティ事案が集中発生</li><li><strong>PPIH国内外1000店舗突破</strong> — トイザらス154店舗取得とOlympic3店舗のディスカウント業態転換を同日発表、多業態グループ展開が加速</li><li><strong>Anthropic売上13倍もAI開発投資140兆円超</strong> — IPO書類改訂版でAnthropicの急成長が判明する一方、AI開発コストの持続性が焦点に</li><li><strong>AIエージェント開発の実務知見が深化</strong> — Claude Code Skill設計、ISUCON2026優勝記、ADRガイドライン策定など具体的な実践ノウハウが蓄積</li><li><strong>Cursor公式マーケットプレイスにSSHバックドア</strong> — Claude Code拡張の改ざんが発覚、開発ツールのサプライチェーン攻撃リスクが現実に</li></ol></div>
+<div class="digest-section"><h2>本日のハイライト</h2><ul>
+<li><strong>小売セキュリティインシデント連鎖</strong> — ノジマ700万人・アットコスメ300万人の大規模情報漏洩に加え、ライフ公式アプリ不正アクセス、欧州スーパーの冷凍庫サイバー攻撃と小売業界でセキュリティ事案が集中発生</li>
+<li><strong>PPIH国内外1000店舗突破</strong> — トイザらス154店舗取得とOlympic3店舗のディスカウント業態転換を同日発表、多業態グループ展開が加速</li>
+<li><strong>Anthropic売上13倍もAI開発投資140兆円超</strong> — IPO書類改訂版でAnthropicの急成長が判明する一方、AI開発コストの持続性が焦点に</li>
+<li><strong>AIエージェント開発の実務知見が深化</strong> — Claude Code Skill設計、ISUCON2026優勝記、ADRガイドライン策定など具体的な実践ノウハウが蓄積</li>
+<li><strong>Cursor公式マーケットプレイスにSSHバックドア</strong> — Claude Code拡張の改ざんが発覚、開発ツールのサプライチェーン攻撃リスクが現実に</li>
+<li><strong>エージェンティックコマース実装段階へ</strong> — Shopify EditionsでAIエージェント活用方針を発表、FrancfrancがGoogle検索・マップに店舗在庫連携しOMO強化</li>
+</ul>
+<hr></div><div class="digest-section"><h2>A. 技術スタック</h2><h3>A1. AI駆動開発・エージェント</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/claude-code-data-platform-overview-skill/" target="_blank" rel="noopener">Claude Codeで要件シートからデータ基盤の全体像を作るSkillを作ってみた</a></td><td>DevelopersIO</td><td>要件シートを入力にデータ基盤の全体像を生成するClaude Code用Skillの設計と試作過程を紹介。</td></tr>
+<tr><td>2</td><td><a href="https://zenn.dev/luvtechno/articles/isucon2026-competition-day" target="_blank" rel="noopener">ISUCON2026 で優勝しました（当日編）</a></td><td>Zenn</td><td>ISUCON2026優勝チームがエージェント活用を含む当日の進行を時系列で振り返った記録。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/tokium_dev/articles/adr-authoring-guideline" target="_blank" rel="noopener">AIが書く「読みづらいADR」に発狂しかけたので、ADRのガイドラインを作った</a></td><td>Zenn</td><td>AIが生成するADRの可読性問題に対処するため、チーム内で執筆ガイドラインを策定した事例。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/numa_san/articles/casone_playwright_for_claude" target="_blank" rel="noopener">弊社がAIでPlaywrightテストコードを生成するために調整したこと</a></td><td>Zenn</td><td>Claude CodeでPlaywrightのE2Eテストコードを実用レベルで自動生成するための調整ノウハウを公開。</td></tr>
+<tr><td>5</td><td><a href="https://zenn.dev/yusukebe/articles/3d3dc6605ca1b1" target="_blank" rel="noopener">Agent DX 〜 AI時代にフレームワークHonoは必要か</a></td><td>Zenn</td><td>AIエージェントがコードを書く時代にWebフレームワークHonoが果たす役割を作者自身が考察。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/sai029/items/57b38881f03f7ff0638c" target="_blank" rel="noopener">ClaudeCodeで自律的に調査させてみたら大失敗した</a></td><td>Qiita</td><td>Claude Codeに自律的な調査を委ねた際に発生した失敗パターンと、得られた教訓をまとめた体験談。</td></tr>
+<tr><td>7</td><td><a href="https://qiita.com/suwa_nobu/items/6037f16f524d82638f1c" target="_blank" rel="noopener">AI に書かせた PR の説明や README は「AI っぽい」のか？ 3つのツールの108本を Wikipedia の見分け方で数えた</a></td><td>Qiita</td><td>AI生成のPR説明文やREADMEをWikipediaのAI判定手法で108本分析し、特徴的な言い回しを定量評価。</td></tr>
+<tr><td>8</td><td><a href="https://ai-data-base.com/archives/139789" target="_blank" rel="noopener">Claude CodeやCodexが書いたコードを全部は読まずに自分で説明できるようにする4つの手順</a></td><td>はてブ</td><td>AI生成コードを全文精読せずに理解し自分の言葉で説明するための4段階の確認手順を提案。</td></tr>
+<tr><td>9</td><td><a href="https://architecture.md/" target="_blank" rel="noopener">ARCHITECTURE.md</a></td><td>はてブ</td><td>AIエージェントがリポジトリの構造を素早く把握するためのアーキテクチャ文書テンプレートを公開。</td></tr>
+<tr><td>10</td><td><a href="https://www.keyence.co.jp/news-events/20261102-kv-intelligence.jsp" target="_blank" rel="noopener">キーエンス、PLC専用AIエージェント「KV Intelligence」を発売</a></td><td>はてブ</td><td>PLCのラダープログラムのデバッグや作成を支援するAIエージェントを11月16日に発売予定。</td></tr>
+</tbody></table></div>
+<h3>A2. AI・ML・LLM</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://news.web.nhk.or.jp/newsweb/na/nd-20261103de69869" target="_blank" rel="noopener">米アンソロピック 売り上げ13倍もAI開発への支出は140兆円余に</a></td><td>はてブ</td><td>IPO書類の改訂版でAnthropic売上が前年同期比13倍と判明、一方でAI開発支出は140兆円超に達する見通し。</td></tr>
+<tr><td>2</td><td><a href="https://rikiyat.github.io/blog/weight-space-programming/" target="_blank" rel="noopener">Sparks of Weight-Space Programming: LLMs can natively read & write neural network weights</a></td><td>はてブ</td><td>LLMがニューラルネットワークの重みを直接読み書きできるかを実験的に検証した研究報告。</td></tr>
+<tr><td>3</td><td><a href="https://pc.watch.impress.co.jp/docs/news/2153055.html" target="_blank" rel="noopener">写真1枚から"裏側まで"3D化するAI「Idol」無償公開、VRAM10GBでも動く</a></td><td>はてブ</td><td>写真1枚から3Dモデルを生成するAI「Idol」が無償公開され、VRAM10GBでも動作可能。</td></tr>
+<tr><td>4</td><td><a href="https://zenn.dev/akira0g/articles/05f34316118943" target="_blank" rel="noopener">ローカルLLMはどんな業務で使えるのか？ DGX Spark + DeepSeek V4-FlashのSlackチャットボットを評価した</a></td><td>Zenn</td><td>DGX Spark上のDeepSeek V4-FlashでSlackボットを構築し、ローカルLLMの業務適用範囲を実測評価。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/kikuziro/items/cc82e6e4e4c215eac99f" target="_blank" rel="noopener">新しいRAG「Decision RAG」は速い！安い！上手い！</a></td><td>Qiita</td><td>Decision RAGという新しいRAG手法の速度、コスト効率、精度の3観点での優位性を解説。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/ryo33/items/3a1a9d1ba2b289b23244" target="_blank" rel="noopener">AIに証明を書かせてセキュアに開発できる言語 Tauto をリリースしました！</a></td><td>Qiita</td><td>AIに型の証明を書かせることでセキュアな開発を支援する新言語Tautoの設計思想と機能を紹介。</td></tr>
+<tr><td>7</td><td><a href="https://qiita.com/takeda_h/items/1819f00de8f2b93034c0" target="_blank" rel="noopener">Amazon Bedrock ガードレールでマイナンバーをどこまで検出できるか試してみた</a></td><td>Qiita</td><td>Amazon Bedrockのガードレール機能でマイナンバーの検出精度を様々なパターンで検証。</td></tr>
+<tr><td>8</td><td><a href="https://gihyo.jp/article/2026/11/robots-txt-ai-training-controls" target="_blank" rel="noopener">OpenAI・Google・Microsoft、robots.txtでAI学習の許可・拒否を一括指定する新たな仕組みに対応へ</a></td><td>はてブ</td><td>robots.txtにAI学習の可否を一括指定する新識別子が策定され、主要3社が対応を表明。</td></tr>
+<tr><td>9</td><td><a href="https://qiita.com/Sicut_study/items/b9e38c0584d4aa720d31" target="_blank" rel="noopener">AIでエンジニア格差を生み出す質とスピードの考え方</a></td><td>Qiita</td><td>AI活用の巧拙がエンジニア間の生産性格差を広げる構造を、質とスピードの2軸で解説。</td></tr>
+</tbody></table></div>
+<h3>A3. クラウド・インフラ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/kinesis-enhanced-fan-out-vs-shared-throughput-latency/" target="_blank" rel="noopener">Amazon Kinesis Data Streams の拡張ファンアウトと共有スループットでレコードの遅延を比べてみた</a></td><td>DevelopersIO</td><td>Kinesis Data Streamsの拡張ファンアウトと共有スループットの2方式でレコード遅延を実測比較。</td></tr>
+<tr><td>2</td><td><a href="https://ymotongpoo.hatenablog.com/entry/2026/11/02/093500" target="_blank" rel="noopener">クラウドが状態を把握してもIaCがなくならない理由</a></td><td>はてブ</td><td>「IaCは不要になる」という主張に対し、クラウドが状態把握しても宣言的管理が必要な理由を論証。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/AyaKunisawa/items/5af0d4f3c61e7dc4d27d" target="_blank" rel="noopener">EC2が起動できない！？原因は「AZ」だった話</a></td><td>Qiita</td><td>EC2インスタンスが起動しなかった原因がアベイラビリティゾーンの制約にあった事例を紹介。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/pengin_r/items/d3f3fbe1b4ba1e648ed7" target="_blank" rel="noopener">S3への画像アップロード、署名付きPUTとPOSTはどう使い分ける？</a></td><td>Qiita</td><td>S3への画像アップロードにおける署名付きPUTとPOSTの特性差と適切な使い分け方を解説。</td></tr>
+<tr><td>5</td><td><a href="https://www.cloudflare.com/ja-jp/press/press-releases/2026/cloudflare-announces-public-certificate-authority-for-the-post-quantum-web/" target="_blank" rel="noopener">Cloudflare、耐量子時代のウェブに向けたパブリック認証局の設立を発表</a></td><td>はてブ</td><td>Cloudflareがポスト量子暗号時代に対応するパブリック認証局の設立を正式発表。</td></tr>
+<tr><td>6</td><td><a href="https://zenn.dev/take5553/articles/build-linux-kernel-on-ubuntu" target="_blank" rel="noopener">UbuntuでLinuxカーネルを自分でビルドしてみた（CVE-2026-98432の対応）</a></td><td>Zenn</td><td>CVE-2026-98432への対処としてUbuntu上でLinuxカーネルを自前ビルドした手順と注意点を記録。</td></tr>
+</tbody></table></div>
+<h3>A4. データ基盤・DWH</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://zenn.dev/indigo13love/articles/d907c02698d748" target="_blank" rel="noopener">Snowflake: Optima Clustering による 1KB クラスタリングキーでの日本語フィルタの改善</a></td><td>Zenn</td><td>Snowflakeの新機能Optima Clusteringで1KBクラスタリングキーを用いた日本語フィルタ性能の改善を検証。</td></tr>
+</tbody></table></div>
+<h3>A5. 開発プラクティス・設計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://dev.classmethod.jp/articles/github-actions-lockfile-ga-operations/" target="_blank" rel="noopener">GitHub Actionsのworkflow lockfileがGA。更新漏れとオンボードし忘れを、CI・Dependabot・ポリシーでどう止めるか試す</a></td><td>DevelopersIO</td><td>GitHub Actionsのworkflow lockfileがGA化、更新漏れや導入漏れをCI・Dependabot・ポリシーで防ぐ方法を検証。</td></tr>
+<tr><td>2</td><td><a href="https://dev.classmethod.jp/articles/oss-small-fix-proof-openjd/" target="_blank" rel="noopener">小さな修正こそ不具合の証明に責任を持つべきだと OpenJD で実感した話</a></td><td>DevelopersIO</td><td>OpenJDへの小さなOSSコントリビュートを通じて、不具合の再現証明にも修正者が責任を持つ必要性を体感。</td></tr>
+<tr><td>3</td><td><a href="https://zenn.dev/koheiwada/articles/houritsu-japanese-laws-as-git" target="_blank" rel="noopener">日本の全法令を git の履歴にしてみた</a></td><td>Zenn</td><td>e-Gov法令APIから日本の全法令を取得し、改正ごとに1コミットとしてgit履歴で管理する試み。</td></tr>
+<tr><td>4</td><td><a href="https://isucon.net/archives/isucon2026-languages.html" target="_blank" rel="noopener">ISUCON2026 利用言語比率と言語別TOP10チーム</a></td><td>はてブ</td><td>ISUCON2026参加チームの利用言語比率を集計、Goが最多で言語別上位チームのスコアも公開。</td></tr>
+<tr><td>5</td><td><a href="https://qiita.com/pengin_r/items/a13f3020137816bc532a" target="_blank" rel="noopener">Figma Motionで作ったUIアニメーションをCSSで再現してみた</a></td><td>Qiita</td><td>Figma Motionで作成したUIアニメーションをCSSのみで忠実に再現する手順を解説。</td></tr>
+<tr><td>6</td><td><a href="https://qiita.com/ktgr/items/3ae615bfc45c7d615d44" target="_blank" rel="noopener">AMA Developer ToolsでLiberty / Java 25 / Jakarta EE 10 へ移行してみた</a></td><td>Qiita</td><td>AMA Developer Toolsを使ったLibertyのJava 25およびJakarta EE 10への移行手順と所感を共有。</td></tr>
+</tbody></table></div>
+<h3>A6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.nikkei.com/article/DGXZQOGN02B1R0S6A101C2000000/" target="_blank" rel="noopener">冷凍庫にサイバー攻撃、食品溶け大量廃棄　欧州各地のスーパー</a></td><td>はてブ</td><td>ベルギーなど欧州のスーパーで冷蔵設備がサイバー攻撃を受け、温度上昇により食品が大量廃棄された事件。</td></tr>
+<tr><td>2</td><td><a href="https://gigazine.net/news/20261102-official-claude-code-extension-compromise/" target="_blank" rel="noopener">Cursor公式マーケットプレイスの「Claude Code」にSSHバックドアが発見される</a></td><td>はてブ</td><td>Cursorの公式マーケットプレイスに掲載されていたClaude Code拡張の一部バージョンにSSHバックドアが混入。</td></tr>
+<tr><td>3</td><td><a href="https://qiita.com/suwa_nobu/items/3cd02fa0f1cec7ea979c" target="_blank" rel="noopener">Cursor で Claude Code 拡張 2.1.312・2.1.313 が改ざんされていた件、Windows で自分の PC を確かめた</a></td><td>Qiita</td><td>Claude Code拡張の改ざん問題について、Windows環境での影響有無を確認する具体的な手順を紹介。</td></tr>
+<tr><td>4</td><td><a href="https://qiita.com/Tukirukiki/items/beec6fedd37f63e1c231" target="_blank" rel="noopener">PHPの脆弱性「php2shell」が来たので、Amazonの公式パッケージを待たずにPHPを自分でビルドして本番に入れた話</a></td><td>Qiita</td><td>PHP脆弱性「php2shell」に対し、公式パッケージ提供前に自前ビルドで本番環境を緊急対応した経緯。</td></tr>
+<tr><td>5</td><td><a href="https://news.yahoo.co.jp/articles/743e16ce8d8b3f48908d0248d48f4d15c913b90e" target="_blank" rel="noopener">ノジマオンラインにて約700万人分の情報流出</a></td><td>はてブ</td><td>ノジマオンラインへの不正アクセスにより、氏名・住所・電話番号・ログイン情報など約700万人分が漏えい。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>B. 小売ドメイン</h2><h3>B1. 業態変革・新店</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/store/s110216.html" target="_blank" rel="noopener">PPIH／ドンキなど国内外でグループ1000店舗突破、トイザらス154店舗を取得</a></td><td>流通ニュース</td><td>PPIHがトイザらス154店舗取得を含めグループ1000店舗を達成し、国内外での多業態展開が加速。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/store/s110248.html" target="_blank" rel="noopener">PPIH／27年2月に「Olympic」3店舗を業態転換、ロビン・フッドとMEGAドンキに</a></td><td>流通ニュース</td><td>PPIHがOlympic3店舗をディスカウント業態へ転換し、ロビン・フッドとMEGAドンキホーテとして27年2月に再オープン予定。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/store/s110273.html" target="_blank" rel="noopener">イオン北海道／「イオンモール旭川西」11月6日リニューアル、フードコートを拡大</a></td><td>流通ニュース</td><td>イオン北海道が旭川西店をリニューアルし、フードコート拡大や専門店刷新で集客力を強化。</td></tr>
+<tr><td>4</td><td><a href="https://www.ryutsuu.biz/store/s110243.html" target="_blank" rel="noopener">カスミ／茨城県水戸市に「元吉田店」オープン「セイブ食彩館元吉田店」を業態転換</a></td><td>流通ニュース</td><td>カスミがセイブ食彩館を自社ブランドに業態転換し、水戸市に新たなカスミ元吉田店として出店。</td></tr>
+</tbody></table></div>
+<h3>B2. 経営・人事戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/store/s110215.html" target="_blank" rel="noopener">はるやま商事／「ほっとひと息ステーション」FC募集を開始、遊休スペースを収益化</a></td><td>流通ニュース</td><td>はるやま商事が店舗内遊休スペースを活用した休憩・充電拠点のFC展開を開始し、新たな収益源を模索。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/strategy/s110214.html" target="_blank" rel="noopener">DCM／初のハンドメイド作品の展示・即売イベント、27年5月名古屋で開催</a></td><td>流通ニュース</td><td>DCMが初のハンドメイド展示即売イベントを27年5月に名古屋で開催し、DIYコミュニティとの接点を拡大。</td></tr>
+</tbody></table></div>
+<h3>B3. PB・商品戦略</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/management/562313/" target="_blank" rel="noopener">ローソン×無印良品、初の共同開発ミスト発売！人気の香りを商品化【週刊コンビニニュース】</a></td><td>DCS</td><td>ローソンと無印良品が初の共同開発商品としてミストを発売し、無印良品の人気フレグランスをコンビニ向けに商品化。</td></tr>
+<tr><td>2</td><td><a href="https://diamond-rm.net/sales-promotion/item-trend/561441/" target="_blank" rel="noopener">卸オリジナル商品市場、独自性のある付加価値型商品を強化　健康・簡便ニーズに対応</a></td><td>DCS</td><td>食品卸各社がオリジナル商品で健康志向・簡便ニーズに対応した付加価値型商品を強化し、差別化を推進。</td></tr>
+<tr><td>3</td><td><a href="https://diamond-rm.net/sales-promotion/product-strategy/561420/" target="_blank" rel="noopener">コンビニスイーツに今何を学ぶべきか？専門家が大手3社のコンビニスイーツを徹底比較＆考察</a></td><td>DCS</td><td>スイーツ専門家が大手コンビニ3社のスイーツ戦略を徹底比較し、各社の差別化ポイントと商品開発の方向性を考察。</td></tr>
+</tbody></table></div>
+<h3>B4. EC・デジタル</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/technology/562382/" target="_blank" rel="noopener">#14 サントリー、最新CES、NRFの衝撃から切り開くメーカー戦略</a></td><td>DCS</td><td>サントリーがCES・NRFで得た最新テクノロジーの知見をメーカー戦略に活かし、リテールテック活用の方向性を提示。</td></tr>
+<tr><td>2</td><td><a href="https://netshop.impress.co.jp/n/2026/11/03/16981" target="_blank" rel="noopener">映画「ゴジラ-0.0」の公開にあわせてWOWOWが公式ECサイト「WOWOW百貨店」で歴代ゴジラグッズを特集</a></td><td>ネッ担</td><td>WOWOWが映画公開に合わせ公式ECサイトで歴代ゴジラグッズを特集販売し、IP活用のEC販促を展開。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/it/s110211.html" target="_blank" rel="noopener">JINS／Adyenの決済プラットフォームを採用、年内100店超で会計時間削減へ</a></td><td>流通ニュース</td><td>JINSがAdyenの統合決済プラットフォームを年内100店舗超に導入し、会計時間の大幅短縮を目指す。</td></tr>
+<tr><td>4</td><td><a href="https://netshop.impress.co.jp/n/2026/11/02/16970" target="_blank" rel="noopener">エージェンティックコマース、AIエージェント、グローバル決済プロセスの強化など「Shopify Editions」で公表された方針とは</a></td><td>ネッ担</td><td>Shopify Editionsで発表されたAIエージェント活用やグローバル決済強化など、次世代EC基盤の方針を解説。</td></tr>
+<tr><td>5</td><td><a href="https://netshop.impress.co.jp/n/2026/11/02/16969" target="_blank" rel="noopener">「Francfranc」がOMO強化、Googleの検索やマップ、ショッピング上に店舗在庫を表示</a></td><td>ネッ担</td><td>FrancfrancがGoogle検索・マップ・ショッピング上に店舗在庫情報を表示し、OMO戦略を強化。</td></tr>
+</tbody></table></div>
+<h3>B5. 決算・統計</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://diamond-rm.net/market/562355/" target="_blank" rel="noopener">東京のホームセンター売上高ランキング！カインズを抑えた1位は？</a></td><td>DCS</td><td>東京都内のホームセンター売上高ランキングでカインズを上回る1位企業を分析し、首都圏HC市場の勢力図を解説。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/accounts/s110249-2.html" target="_blank" rel="noopener">ジョイフル本田 決算／6〜9月、補修・防災需要取り込み6.9％増収</a></td><td>流通ニュース</td><td>ジョイフル本田が第2四半期決算で補修・防災関連需要を取り込み、前年同期比6.9%の増収を達成。</td></tr>
+<tr><td>3</td><td><a href="https://www.ryutsuu.biz/sales/s110271.html" target="_blank" rel="noopener">オークワ／10月の売上192億円、既存店1.7％減</a></td><td>流通ニュース</td><td>オークワの10月度月次売上が192億円となり、既存店売上高は前年同月比1.7%減で推移。</td></tr>
+</tbody></table></div>
+<h3>B6. セキュリティ</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>#</th><th>記事</th><th>ソース</th><th>要約</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="https://www.ryutsuu.biz/strategy/s110249.html" target="_blank" rel="noopener">ライフ／第三者による不正アクセス、公式アプリ298件の情報が閲覧された可能性</a></td><td>流通ニュース</td><td>ライフの公式アプリに対する第三者の不正アクセスにより、298件の会員情報が閲覧された可能性が判明。</td></tr>
+<tr><td>2</td><td><a href="https://www.ryutsuu.biz/it/s110217.html" target="_blank" rel="noopener">アイスタイル／アットコスメから300万人の会員情報漏えい</a></td><td>流通ニュース</td><td>アイスタイルが運営する「アットコスメ」で約300万人分の会員情報漏えいが発覚し、大規模な個人情報流出事案に発展。</td></tr>
+</tbody></table></div>
+<hr></div><div class="digest-section"><h2>C. クロスドメイン分析</h2><h3>1. 小売セキュリティ危機とサプライチェーン攻撃の共鳴</h3>
+<p>ノジマ700万人・アットコスメ300万人・ライフ298件と、日本の小売・EC企業でセキュリティインシデントが同時多発的に発生している。欧州ではスーパーの冷凍庫がサイバー攻撃を受け食品が大量廃棄される事態も起きた。技術側ではCursor公式マーケットプレイスのClaude Code拡張にSSHバックドアが混入し、開発ツール自体がサプライチェーン攻撃の標的となるリスクが現実化している。SIerとしては小売業のOTセキュリティ（冷蔵設備等の産業機器制御系）とITセキュリティ（EC・会員基盤）の両面から包括的な診断・対策を提案する需要が急速に高まっており、開発ツールチェーンのセキュリティ監査も含めた三位一体のセキュリティ体制構築が差別化ポイントになる。</p>
+<h3>2. PPIH多業態展開がもたらすシステム統合需要</h3>
+<p>PPIHがトイザらス154店舗取得を含むグループ1000店舗突破を達成し、Olympic3店舗のディスカウント業態転換も同時に発表した。ドン・キホーテ、MEGAドンキ、ロビン・フッド、トイザらスと多業態を統合管理するPOS・在庫・物流基盤の統一ニーズが急増する。技術側ではGitHub Actions workflow lockfileのGA化やIaCの必要性に関する議論が活発化しており、大規模マルチ業態チェーンの基盤統合ではIaCとCI/CDの標準化が不可欠。SIerとしてはPPIHのような多業態グループに対し、Kinesis等のストリーミングデータ連携と標準化されたデプロイパイプラインのパッケージ提案を行える好機といえる。</p>
+<h3>3. AIエージェント技術の実務成熟とエージェンティックコマースの接続</h3>
+<p>Claude Code Skill設計やISUCON2026優勝におけるエージェント活用、AIが書くADRの品質改善ガイドラインなど、AIエージェント技術は「概念実証」から「実務品質の運用」フェーズに移行しつつある。小売側ではShopify EditionsがAIエージェント活用方針を正式発表し、FrancfrancのGoogle在庫連携OMOのようにデータ連携の高度化も進む。SIerとしてはAIエージェント開発の実務知見（Skill設計、テスト自動生成、コードレビュー自動化）と小売EC基盤構築を組み合わせた「エージェンティックコマース構築支援」が新規提案テーマとなる。</p>
+<h3>4. ローソン×無印のPB協業に見る異業種連携とデータ基盤の必要性</h3>
+<p>ローソンと無印良品の初の共同開発商品（ミスト）発売は、コンビニと生活雑貨ブランドの異業種PB協業が本格化する兆候である。技術側ではSnowflakeのOptima Clusteringによる日本語データ処理の改善や、Decision RAGのような効率的なデータ検索手法が登場している。異業種間の商品開発には購買データ・消費者インサイトの共有が不可欠であり、SIerはセキュアなデータクリーンルーム構築やリアルタイム在庫・販売データ連携基盤の提案で、こうした異業種コラボレーションのIT基盤を支える役割を果たせる。</p>
+<hr></div><div class="digest-section"><h2>D. 巡回メタデータ</h2><div class="table-wrap"><table>
+<thead><tr><th>#</th><th>ソース</th><th>ステータス</th><th>取得記事数</th><th>備考</th></tr></thead><tbody>
+<tr><td>1</td><td>Zenn</td><td>成功</td><td>8件</td><td>11/3公開記事なし、11/01-11/02のトレンド記事を収集</td></tr>
+<tr><td>2</td><td>Qiita</td><td>成功</td><td>12件</td><td>11/3公開記事なし、11/01-11/02のトレンド記事を収集</td></tr>
+<tr><td>3</td><td>はてなブックマーク テクノロジー</td><td>成功</td><td>13件</td><td>11/03の注目エントリー含む</td></tr>
+<tr><td>4</td><td>DevelopersIO</td><td>成功</td><td>4件</td><td>11/03公開記事4件を全件収集</td></tr>
+<tr><td>5</td><td>AWS What's New</td><td>成功</td><td>0件</td><td>直近の発表は10/26が最新、11/01-11/03の新規アップデートなし</td></tr>
+<tr><td>6</td><td>流通ニュース</td><td>成功</td><td>11件</td><td>11/03は文化の日（祝日）のため記事更新なし、11/02注目記事を収集</td></tr>
+<tr><td>7</td><td>ダイヤモンド・チェーンストア</td><td>成功</td><td>5件</td><td>11/03公開5件を全件収集</td></tr>
+<tr><td>8</td><td>ネットショップ担当者フォーラム</td><td>成功</td><td>3件</td><td>11/03公開1件、11/02注目記事2件を補完収集</td></tr>
+</tbody></table></div>
+<p><strong>総記事数</strong>: 技術37件 + 小売19件 = 56件</p>
+<hr>
+<p>_このダイジェストは wf-daily-digest ワークフロー（Agent Teams — Actions）により自動生成されました_</p></div>
+</div>
+<div id="digest-2026-11-02" class="digest-panel" style="display:none">
 <div class="digest-meta card"><div class="meta-line"><strong>組織</strong>: ドメイン知識や技術スタック収集PJT (<code>domain-tech-collection</code>)</div><div class="meta-line"><strong>生成方式</strong>: Agent Teams Actions（wf-daily-digest）</div><div class="meta-line"><strong>巡回ソース数</strong>: 8件（技術5件+小売3件、全件成功）</div><div class="meta-line"><strong>オペレーター</strong>: github-actions-bot</div>
 <div class="meta-line"><strong>記事数:</strong> 118件</div></div>
 <div class="highlights-card card"><h3>ハイライト</h3><ol><li><strong>GitHub Copilot Fusion正式リリース</strong> — タスクごとに最適AIモデルを自動選択する新方式が正式発表され、AI開発ツールの統合と効率化が次の段階へ進展</li><li><strong>PHP2Shell脆弱性が業界全体に波及</strong> — PHP公式がセキュリティリリースを発出、AWS WAFによる緩和策も同日公開され、国内企業の緊急対応が続く</li><li><strong>ISUCON2026でAI×人間チームが上位入賞</strong> — 人間1人＋AIエージェント軍団で19.6万点、Claude Code×Slack連携3人チームで20万点超と、AI協働モデルが実力を証明</li><li><strong>ドン・キホーテが売上2兆円超、流通再編の主役に</strong> — 「泥棒市場」から業界最大級の成長軌道を描くPPIHの躍進を総括</li><li><strong>ShopifyとZOZOがエージェンティックコマースを推進</strong> — AIエージェントが購買プロセスを代替する「エージェンティックコマース」が小売EC領域で加速</li></ol></div>
@@ -38119,11 +38259,11 @@ strong { font-weight: 600; }
 </div>
 
 <div class="footer">
-  Generated by cc-sier wf-daily-digest ｜ 2026-11-02 02:01 ｜ ← → キーで日付切替
+  Generated by cc-sier wf-daily-digest ｜ 2026-11-03 03:54 ｜ ← → キーで日付切替
 </div>
 
 <script>
-const dates = ["2026-11-02", "2026-11-01", "2026-10-31", "2026-10-30", "2026-10-29", "2026-10-28", "2026-10-27", "2026-10-26", "2026-10-25", "2026-10-24", "2026-10-23", "2026-10-22", "2026-10-21", "2026-10-20", "2026-10-19", "2026-10-18", "2026-10-17", "2026-10-16", "2026-10-15", "2026-10-14", "2026-10-13", "2026-10-12", "2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07", "2026-10-06", "2026-10-05", "2026-10-04", "2026-10-03", "2026-10-02", "2026-10-01", "2026-09-30", "2026-09-29", "2026-09-28", "2026-09-27", "2026-09-26", "2026-09-25", "2026-09-24", "2026-09-23", "2026-09-22", "2026-09-21", "2026-09-20", "2026-09-19", "2026-09-18", "2026-09-17", "2026-09-16", "2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
+const dates = ["2026-11-03", "2026-11-02", "2026-11-01", "2026-10-31", "2026-10-30", "2026-10-29", "2026-10-28", "2026-10-27", "2026-10-26", "2026-10-25", "2026-10-24", "2026-10-23", "2026-10-22", "2026-10-21", "2026-10-20", "2026-10-19", "2026-10-18", "2026-10-17", "2026-10-16", "2026-10-15", "2026-10-14", "2026-10-13", "2026-10-12", "2026-10-11", "2026-10-10", "2026-10-09", "2026-10-08", "2026-10-07", "2026-10-06", "2026-10-05", "2026-10-04", "2026-10-03", "2026-10-02", "2026-10-01", "2026-09-30", "2026-09-29", "2026-09-28", "2026-09-27", "2026-09-26", "2026-09-25", "2026-09-24", "2026-09-23", "2026-09-22", "2026-09-21", "2026-09-20", "2026-09-19", "2026-09-18", "2026-09-17", "2026-09-16", "2026-09-15", "2026-09-14", "2026-09-13", "2026-09-12", "2026-09-11", "2026-09-10", "2026-09-09", "2026-09-08", "2026-09-07", "2026-09-06", "2026-09-05", "2026-09-04", "2026-09-03", "2026-09-02", "2026-09-01", "2026-08-31", "2026-08-30", "2026-08-29", "2026-08-28", "2026-08-27", "2026-08-26", "2026-08-25", "2026-08-24", "2026-08-23", "2026-08-22", "2026-08-21", "2026-08-20", "2026-08-19", "2026-08-18", "2026-08-17", "2026-08-16", "2026-08-15", "2026-08-14", "2026-08-13", "2026-08-12", "2026-08-11", "2026-08-10", "2026-08-09", "2026-08-08", "2026-08-07", "2026-08-06", "2026-08-05", "2026-08-04", "2026-08-03", "2026-08-02", "2026-08-01", "2026-07-31", "2026-07-30", "2026-07-29", "2026-07-28", "2026-07-27", "2026-07-26", "2026-07-25", "2026-07-24", "2026-07-23", "2026-07-22", "2026-07-21", "2026-07-20", "2026-07-19", "2026-07-18", "2026-07-17", "2026-07-16", "2026-07-15", "2026-07-14", "2026-07-13", "2026-07-12", "2026-07-11", "2026-07-01", "2026-06-30", "2026-06-28", "2026-06-27", "2026-06-26", "2026-06-25", "2026-06-23", "2026-06-22", "2026-06-21", "2026-06-20", "2026-06-19", "2026-06-18", "2026-06-16", "2026-06-15", "2026-06-14", "2026-06-13", "2026-05-30", "2026-05-29", "2026-05-28", "2026-05-27", "2026-05-26", "2026-05-25", "2026-05-24", "2026-05-23", "2026-05-22", "2026-05-21", "2026-05-20", "2026-05-19", "2026-05-18", "2026-05-17", "2026-05-16", "2026-05-15", "2026-05-14", "2026-05-13", "2026-05-12", "2026-05-11", "2026-05-10", "2026-05-09", "2026-05-08", "2026-05-07", "2026-05-06", "2026-05-05", "2026-05-04", "2026-05-03", "2026-05-02", "2026-05-01", "2026-04-30", "2026-04-29", "2026-04-28", "2026-04-27", "2026-04-26", "2026-04-25", "2026-04-24", "2026-04-23", "2026-04-22", "2026-04-21", "2026-04-20", "2026-04-19", "2026-04-18", "2026-04-17", "2026-04-16", "2026-04-15", "2026-04-14", "2026-04-13", "2026-04-12", "2026-04-11", "2026-04-10", "2026-04-09", "2026-04-08", "2026-04-07", "2026-04-06", "2026-04-05", "2026-04-04", "2026-04-03", "2026-04-02", "2026-04-01", "2026-03-31", "2026-03-30", "2026-03-29", "2026-03-28", "2026-03-27", "2026-03-26", "2026-03-25", "2026-03-24", "2026-03-23", "2026-03-21"];
 
 function switchTab(date) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
